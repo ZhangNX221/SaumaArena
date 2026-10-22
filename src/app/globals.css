@@ -1,0 +1,302 @@
+@import "tailwindcss";
+
+/*
+ * Sauma Arena — Dual Athletic Sports Theme
+ * Dark Mode: Emas Royal & Biru Gelap (Sporty, Royal, Challenging, Kompetitif)
+ * Light Mode: Putih-Biru (Sporty, Fresh, Semangat, Ringan)
+ */
+
+@theme {
+  --color-arena-primary: var(--arena-primary);
+  --color-arena-primary-hover: var(--arena-primary-hover);
+  --color-arena-primary-light: var(--arena-primary-light);
+
+  --color-arena-blue: var(--arena-primary);
+  --color-arena-blue-hover: var(--arena-primary-hover);
+  --color-arena-blue-light: var(--arena-primary-light);
+
+  --color-arena-green: var(--arena-primary);
+  --color-arena-green-hover: var(--arena-primary-hover);
+  --color-arena-green-light: var(--arena-primary-light);
+  
+  --color-arena-dark: var(--arena-dark);
+  --color-arena-dark-surface: var(--arena-dark-surface);
+  --color-arena-dark-border: var(--arena-dark-border);
+  
+  --color-arena-accent: var(--arena-accent);
+  --color-arena-accent-hover: var(--arena-accent-hover);
+  --color-arena-accent-light: var(--arena-accent-light);
+
+  --color-arena-gold: var(--arena-gold);
+  --color-arena-gold-glow: var(--arena-gold-glow);
+
+  --color-sport-blue: var(--arena-primary);
+  --color-sport-gold: var(--arena-accent);
+  --color-sport-red: #ef4444;
+
+  --color-status-verified: var(--arena-primary);
+  --color-status-pending: var(--arena-accent);
+  --color-status-rejected: #ef4444;
+  --color-status-used: #64748b;
+
+  --font-display: var(--font-display), "Plus Jakarta Sans", -apple-system, sans-serif;
+  --font-sans: var(--font-sans), "Inter", -apple-system, sans-serif;
+  --font-mono: var(--font-mono), "JetBrains Mono", monospace;
+
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
+  --radius-full: 9999px;
+}
+
+:root {
+  /* LIGHT MODE (Putih Biru Sporty, Fresh, Semangat, Ringan) */
+  --arena-primary: #1d63b8;         /* Energetic Sporty Royal Blue */
+  --arena-primary-hover: #154d92;
+  --arena-primary-light: #ebf3fc;   /* Soft fresh blue tint */
+
+  --arena-accent: #f59e0b;          /* Warm golden trophy glow */
+  --arena-accent-hover: #d97706;
+  --arena-accent-light: #fef3c7;
+
+  --arena-gold: #f59e0b;
+  --arena-gold-glow: rgba(245, 158, 11, 0.2);
+
+  --arena-dark: #0c2340;            /* Deep athletic navy for icons/accents */
+  --arena-dark-surface: #142e4d;
+  --arena-dark-border: #d4e4f3;
+
+  --bg-page: #f4f8fd;               /* Putih kebiruan sangat sejuk & ringan */
+  --bg-surface: #ffffff;            /* Putih bersih kristal */
+  --bg-surface-elevated: #ffffff;
+  --bg-muted: #e8f1fa;              /* Pill & tombol sekunder segar */
+  --bg-input: #ffffff;
+
+  --text-main: #0c2340;             /* Navy atletik pekat (kontras tinggi, outdoor-ready) */
+  --text-muted: #436382;            /* Slate-blue segar */
+  --text-faint: #4e7399;            /* Kontras tajam WCAG AA (>4.5:1) di latar terang */
+
+  --border-subtle: #d2e3f2;          /* Garis batas biru muda bersih & ringan */
+  --border-field: rgba(29, 99, 184, 0.25);
+
+  --shadow-card: 0 1px 4px rgba(12, 35, 64, 0.05);
+  --shadow-elevated: 0 4px 16px rgba(12, 35, 64, 0.09);
+
+  color-scheme: light;
+}
+
+html.dark {
+  /* DARK MODE (Emas Royal & Biru Gelap: Sporty, Royal, Challenging, Kompetitif) */
+  --arena-primary: #2563eb;         /* Biru Elektrik Royal (Sporty & Tajam) */
+  --arena-primary-hover: #1d4ed8;
+  --arena-primary-light: #12273d;
+
+  --arena-accent: #f6ae2d;          /* Emas Royal Murni (Championship Gold) */
+  --arena-accent-hover: #e59a16;
+  --arena-accent-light: #2c2211;
+
+  --arena-gold: #f6ae2d;
+  --arena-gold-glow: rgba(246, 174, 45, 0.35);
+
+  --arena-dark: #07131f;            /* Midnight Stadium Arena Navy */
+  --arena-dark-surface: #0d1e30;    /* Pitch Carbon Navy */
+  --arena-dark-border: #1c3b5b;
+
+  --bg-page: #07131f;               /* Biru Gelap Stadion Malam (Sporty, Maskulin) */
+  --bg-surface: #0d1e30;            /* Permukaan Kartu Biru Gelap */
+  --bg-surface-elevated: #13273d;   /* Elemen Bertingkat Biru Gelap */
+  --bg-muted: #1a334e;              /* Pill & Inset Biru Stadion */
+  --bg-input: #091624;
+
+  --text-main: #f8fafc;             /* Chalk White Tajam */
+  --text-muted: #9ab3cc;            /* Metallic Stadium Blue-Gray */
+  --text-faint: #63819f;
+
+  --border-subtle: #1c3b5b;         /* Garis batas biru malam kokoh */
+  --border-field: rgba(246, 174, 45, 0.4); /* Garis aksen emas royal */
+
+  --shadow-card: 0 2px 6px rgba(0, 0, 0, 0.5);
+  --shadow-elevated: 0 8px 24px rgba(0, 0, 0, 0.7);
+
+  color-scheme: dark;
+}
+
+/* Base resets & typography */
+body {
+  background-color: var(--bg-page);
+  color: var(--text-main);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Tabular numerals for scoreboard, clocks, and tables */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}
+
+/* Field Line Motif (Authentic Stadium Midfield Double Lines) */
+.midfield-line {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.midfield-line::before,
+.midfield-line::after {
+  content: "";
+  display: block;
+  height: 2px;
+  background-color: var(--color-arena-primary);
+  border-radius: 9999px;
+}
+
+html.dark .midfield-line::before,
+html.dark .midfield-line::after {
+  background-color: var(--color-arena-accent);
+}
+
+.midfield-line::before {
+  width: 28px;
+}
+
+.midfield-line::after {
+  width: 14px;
+  opacity: 0.7;
+}
+
+/* High-contrast Stadium Scoreboard Badge (Lampiran 2 Rubrik) */
+.stadium-badge-positive {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-weight: 800;
+  border-radius: 6px;
+  background-color: var(--color-arena-primary);
+  color: #ffffff;
+  padding: 4px 10px;
+  letter-spacing: -0.02em;
+  transition: transform 120ms ease-out;
+}
+
+.stadium-badge-positive:hover {
+  transform: scale(1.04);
+}
+
+html.dark .stadium-badge-positive {
+  background-color: #1a334e;
+  color: var(--color-arena-accent);
+  border: 1px solid rgba(246, 174, 45, 0.4);
+}
+
+.stadium-badge-penalty {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-weight: 800;
+  border-radius: 6px;
+  background-color: #dc2626;
+  color: #ffffff;
+  padding: 4px 10px;
+  letter-spacing: -0.02em;
+  transition: transform 120ms ease-out;
+}
+
+.stadium-badge-penalty:hover {
+  transform: scale(1.04);
+}
+
+html.dark .stadium-badge-penalty {
+  background-color: #991b1b;
+  color: #fca5a5;
+}
+
+/* Tactile micro-interaction utility for buttons */
+.btn-tactile {
+  transition: all 150ms ease-out;
+}
+
+.btn-tactile:active {
+  transform: scale(0.97);
+}
+
+/* Smooth Entrance Keyframes */
+@keyframes fadeInSlide {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes modalScaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeInSlide 200ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-modalEnter {
+  animation: modalScaleIn 220ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Accessible focus rings */
+:focus-visible {
+  outline: 2px solid var(--color-arena-primary);
+  outline-offset: 2px;
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #cfdde8;
+  border-radius: 4px;
+}
+html.dark ::-webkit-scrollbar-thumb {
+  background: #1f374f;
+}
+
+/* Hide scrollbar utilities */
+.no-scrollbar,
+.scrollbar-none {
+  -ms-overflow-style: none !important;
+  scrollbar-width: none !important;
+}
+.no-scrollbar::-webkit-scrollbar,
+.scrollbar-none::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
