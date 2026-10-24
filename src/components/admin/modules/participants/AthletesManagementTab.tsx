@@ -116,10 +116,10 @@ export const AthletesManagementTab: React.FC<AthletesManagementTabProps> = ({ se
       <div className="p-6 sm:p-7 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] shadow-xs space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[var(--border-subtle)]">
           <div>
-            <h3 className="font-black text-lg text-[var(--text-main)] font-[var(--font-display)] tracking-tight">
+            <h3 className="font-bebas text-xl sm:text-2xl uppercase tracking-wide text-[var(--text-main)]">
               Database Kartu Atlet Resmi &amp; ID Pass QR
             </h3>
-            <p className="text-xs text-[var(--text-muted)] font-[var(--font-sans)] mt-1">
+            <p className="text-xs text-[var(--text-muted)] mt-1">
               Penerbitan kartu identitas resmi atlet, validasi QR gate tanding, dan cetak massal.
             </p>
           </div>
@@ -127,7 +127,7 @@ export const AthletesManagementTab: React.FC<AthletesManagementTabProps> = ({ se
             <button
               type="button"
               onClick={handleOpenAdd}
-              className="btn-tactile px-4 py-2.5 rounded-xl bg-[var(--color-arena-primary)] hover:bg-[var(--color-arena-primary-hover)] text-white text-xs font-bold font-[var(--font-display)] flex items-center gap-2 shadow-xs shrink-0"
+              className="btn-tactile px-4 py-2.5 rounded-xl bg-[var(--color-arena-primary)] hover:bg-[var(--color-arena-primary-hover)] text-white text-xs font-barlow font-bold uppercase tracking-wider flex items-center gap-2 shadow-xs shrink-0"
             >
               <Plus className="w-4 h-4" />
               <span>Tambah Atlet</span>
@@ -135,7 +135,7 @@ export const AthletesManagementTab: React.FC<AthletesManagementTabProps> = ({ se
             <button
               type="button"
               onClick={() => alert('Mencetak seluruh ID Card atlet ber-QR massal (A4 Sheet)...')}
-              className="btn-tactile px-4 py-2.5 rounded-xl border border-[var(--border-subtle)] hover:bg-[var(--bg-muted)] text-[var(--text-main)] text-xs font-bold font-[var(--font-display)] flex items-center gap-2 shrink-0"
+              className="btn-tactile px-4 py-2.5 rounded-xl border border-[var(--border-subtle)] hover:bg-[var(--bg-muted)] text-[var(--text-main)] text-xs font-barlow font-bold uppercase tracking-wider flex items-center gap-2 shrink-0"
             >
               <Printer className="w-4 h-4" />
               <span className="hidden sm:inline">Cetak Massal</span>
@@ -150,7 +150,7 @@ export const AthletesManagementTab: React.FC<AthletesManagementTabProps> = ({ se
             placeholder="Cari nama atlet, kontingen, atau nomor QR..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 text-xs rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] text-[var(--text-main)] focus:outline-none focus:border-[var(--color-arena-primary)] font-[var(--font-sans)]"
+            className="w-full pl-10 pr-4 py-2 text-xs rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] text-[var(--text-main)] focus:outline-none focus:border-[var(--color-arena-primary)]"
           />
         </div>
       </div>
@@ -164,11 +164,11 @@ export const AthletesManagementTab: React.FC<AthletesManagementTabProps> = ({ se
           >
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <span className="text-[10px] font-[var(--font-mono)] px-2.5 py-1 rounded-lg bg-[var(--color-arena-primary)]/10 text-[var(--color-arena-primary)] font-bold">
+                <span className="text-[10px] font-barlow font-bold uppercase tracking-wider px-2.5 py-1 rounded-lg bg-[var(--color-arena-primary)]/10 text-[var(--color-arena-primary)]">
                   {athlete.sport}
                 </span>
                 <div className="flex items-center gap-1.5">
-                  <span className="flex items-center gap-1.5 text-[11px] text-emerald-600 dark:text-emerald-400 font-bold font-[var(--font-display)]">
+                  <span className="flex items-center gap-1.5 text-[11px] text-emerald-600 dark:text-emerald-400 font-barlow font-bold uppercase tracking-wider">
                     <ShieldCheck className="w-4 h-4" />
                     <span>Lolos Berkas</span>
                   </span>
@@ -192,23 +192,23 @@ export const AthletesManagementTab: React.FC<AthletesManagementTabProps> = ({ se
               </div>
 
               <div className="flex items-center gap-3.5">
-                <div className="w-12 h-12 rounded-2xl bg-slate-800 text-white flex items-center justify-center font-bold font-[var(--font-display)] text-base shrink-0 shadow-2xs">
+                <div className="w-12 h-12 rounded-2xl bg-slate-800 text-white flex items-center justify-center font-bebas text-xl shrink-0 shadow-2xs">
                   {athlete.name.charAt(0)}
                 </div>
                 <div className="min-w-0">
-                  <h4 className="font-extrabold text-base text-[var(--text-main)] font-[var(--font-display)] truncate tracking-tight">{athlete.name}</h4>
-                  <p className="text-xs text-[var(--text-muted)] font-medium font-[var(--font-sans)] truncate">{athlete.contingent}</p>
+                  <h4 className="font-bold text-base text-[var(--text-main)] truncate">{athlete.name}</h4>
+                  <p className="text-xs text-[var(--text-muted)] font-medium truncate">{athlete.contingent}</p>
                   <span className="text-[11px] text-[var(--text-faint)] font-medium">{athlete.category}</span>
                 </div>
               </div>
             </div>
 
             <div className="pt-3 border-t border-[var(--border-subtle)] flex items-center justify-between">
-              <span className="font-[var(--font-mono)] text-xs text-[var(--text-faint)] tabular-nums">{athlete.qrCode}</span>
+              <span className="font-mono text-xs text-[var(--text-faint)] tabular-nums">{athlete.qrCode}</span>
               <button
                 type="button"
                 onClick={() => setSelectedIdCard(athlete)}
-                className="btn-tactile px-3.5 py-1.5 rounded-xl border border-[var(--border-subtle)] hover:border-[var(--color-arena-primary)] text-xs font-bold font-[var(--font-display)] flex items-center gap-2 transition-colors"
+                className="btn-tactile px-3.5 py-1.5 rounded-xl border border-[var(--border-subtle)] hover:border-[var(--color-arena-primary)] text-xs font-barlow font-bold uppercase tracking-wider flex items-center gap-2 transition-colors"
               >
                 <QrCode className="w-4 h-4 text-[var(--color-arena-primary)]" />
                 <span>Lihat ID Card</span>
@@ -222,19 +222,19 @@ export const AthletesManagementTab: React.FC<AthletesManagementTabProps> = ({ se
       {selectedIdCard && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fadeIn">
           <div className="bg-white text-slate-900 border border-slate-300 rounded-2xl max-w-sm w-full p-6 shadow-2xl space-y-4 text-center">
-            <div className="flex items-center justify-between text-[11px] font-black tracking-widest text-[var(--color-arena-primary)] pb-2 border-b border-slate-200 font-[var(--font-display)]">
+            <div className="flex items-center justify-between text-xs font-barlow font-bold uppercase tracking-widest text-[var(--color-arena-primary)] pb-2 border-b border-slate-200">
               <span>OFFICIAL ATHLETE PASS</span>
               <span>MMFC I MATSANEGA 2026</span>
             </div>
 
-            <div className="w-20 h-20 rounded-2xl bg-slate-800 text-white flex items-center justify-center font-black text-2xl mx-auto shadow-sm font-[var(--font-display)]">
+            <div className="w-20 h-20 rounded-2xl bg-slate-800 text-white flex items-center justify-center font-bebas text-3xl mx-auto shadow-sm">
               {selectedIdCard.name.charAt(0)}
             </div>
 
             <div>
-              <h3 className="font-black text-lg font-[var(--font-display)] text-slate-900">{selectedIdCard.name}</h3>
-              <div className="text-xs font-bold text-slate-600 font-[var(--font-display)]">{selectedIdCard.contingent}</div>
-              <div className="text-[11px] text-slate-500 font-medium font-[var(--font-sans)] mt-0.5">
+              <h3 className="font-bebas text-2xl uppercase tracking-wide text-slate-900">{selectedIdCard.name}</h3>
+              <div className="text-xs font-barlow font-bold uppercase tracking-wider text-slate-600">{selectedIdCard.contingent}</div>
+              <div className="text-[11px] text-slate-500 font-medium mt-0.5">
                 {selectedIdCard.sport} &bull; {selectedIdCard.category}
               </div>
             </div>
@@ -243,7 +243,7 @@ export const AthletesManagementTab: React.FC<AthletesManagementTabProps> = ({ se
               <div className="w-28 h-28 bg-[var(--arena-dark)] rounded-xl flex items-center justify-center text-white">
                 <QrCode className="w-20 h-20 text-white" />
               </div>
-              <span className="font-[var(--font-mono)] text-xs font-bold mt-2 text-slate-800 tabular-nums">
+              <span className="font-mono text-xs font-bold mt-2 text-slate-800 tabular-nums">
                 {selectedIdCard.qrCode}
               </span>
             </div>
@@ -255,7 +255,7 @@ export const AthletesManagementTab: React.FC<AthletesManagementTabProps> = ({ se
                   alert(`ID Card ${selectedIdCard.name} berhasil diunduh.`);
                   setSelectedIdCard(null);
                 }}
-                className="btn-tactile flex-1 py-2.5 rounded-xl bg-[var(--color-arena-primary)] text-white font-bold text-xs font-[var(--font-display)] flex items-center justify-center gap-2"
+                className="btn-tactile flex-1 py-2.5 rounded-xl bg-[var(--color-arena-primary)] text-white font-barlow font-bold uppercase tracking-wider text-xs flex items-center justify-center gap-2"
               >
                 <Download className="w-4 h-4" />
                 <span>Unduh PDF</span>
@@ -263,7 +263,7 @@ export const AthletesManagementTab: React.FC<AthletesManagementTabProps> = ({ se
               <button
                 type="button"
                 onClick={() => setSelectedIdCard(null)}
-                className="btn-tactile px-4 py-2.5 rounded-xl bg-slate-100 text-slate-700 font-semibold text-xs font-[var(--font-display)]"
+                className="btn-tactile px-4 py-2.5 rounded-xl bg-slate-100 text-slate-700 font-barlow font-bold uppercase tracking-wider text-xs"
               >
                 Tutup
               </button>
@@ -277,7 +277,7 @@ export const AthletesManagementTab: React.FC<AthletesManagementTabProps> = ({ se
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fadeIn">
           <div className="bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
             <div className="flex items-center justify-between pb-2 border-b border-[var(--border-subtle)]">
-              <h3 className="font-black text-base text-[var(--text-main)]">
+              <h3 className="font-bebas text-xl uppercase tracking-wide text-[var(--text-main)]">
                 {editingAthlete ? 'Edit Data Atlet' : 'Tambah Atlet Baru'}
               </h3>
               <button
@@ -291,7 +291,7 @@ export const AthletesManagementTab: React.FC<AthletesManagementTabProps> = ({ se
 
             <form onSubmit={handleSubmit} className="space-y-3 text-xs">
               <div>
-                <label className="font-bold text-[var(--text-main)] block mb-1">Nama Lengkap Atlet</label>
+                <label className="font-barlow font-bold uppercase tracking-wider text-[11px] text-[var(--text-main)] block mb-1">Nama Lengkap Atlet</label>
                 <input
                   type="text"
                   required
@@ -303,7 +303,7 @@ export const AthletesManagementTab: React.FC<AthletesManagementTabProps> = ({ se
               </div>
 
               <div>
-                <label className="font-bold text-[var(--text-main)] block mb-1">Asal Sekolah / Kontingen</label>
+                <label className="font-barlow font-bold uppercase tracking-wider text-[11px] text-[var(--text-main)] block mb-1">Asal Sekolah / Kontingen</label>
                 <input
                   type="text"
                   required
@@ -316,7 +316,7 @@ export const AthletesManagementTab: React.FC<AthletesManagementTabProps> = ({ se
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="font-bold text-[var(--text-main)] block mb-1">Cabor</label>
+                  <label className="font-barlow font-bold uppercase tracking-wider text-[11px] text-[var(--text-main)] block mb-1">Cabor</label>
                   <input
                     type="text"
                     required
@@ -326,7 +326,7 @@ export const AthletesManagementTab: React.FC<AthletesManagementTabProps> = ({ se
                   />
                 </div>
                 <div>
-                  <label className="font-bold text-[var(--text-main)] block mb-1">Nomor / Kategori</label>
+                  <label className="font-barlow font-bold uppercase tracking-wider text-[11px] text-[var(--text-main)] block mb-1">Nomor / Kategori</label>
                   <input
                     type="text"
                     required
@@ -338,7 +338,7 @@ export const AthletesManagementTab: React.FC<AthletesManagementTabProps> = ({ se
               </div>
 
               <div>
-                <label className="font-bold text-[var(--text-main)] block mb-1">Nomor Induk Siswa Nasional (NISN)</label>
+                <label className="font-barlow font-bold uppercase tracking-wider text-[11px] text-[var(--text-main)] block mb-1">Nomor Induk Siswa Nasional (NISN)</label>
                 <input
                   type="text"
                   required
@@ -351,14 +351,14 @@ export const AthletesManagementTab: React.FC<AthletesManagementTabProps> = ({ se
               <div className="flex gap-2 pt-3">
                 <button
                   type="submit"
-                  className="btn-tactile flex-1 py-2.5 rounded-xl bg-[var(--color-arena-primary)] text-white font-bold text-xs"
+                  className="btn-tactile flex-1 py-2.5 rounded-xl bg-[var(--color-arena-primary)] text-white font-barlow font-bold uppercase tracking-wider text-xs"
                 >
                   {editingAthlete ? 'Simpan Perubahan' : 'Terbitkan Kartu Atlet'}
                 </button>
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="btn-tactile px-4 py-2.5 rounded-xl border border-[var(--border-subtle)] text-xs font-semibold"
+                  className="btn-tactile px-4 py-2.5 rounded-xl border border-[var(--border-subtle)] text-xs font-barlow font-bold uppercase tracking-wider"
                 >
                   Batal
                 </button>

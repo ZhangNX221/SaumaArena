@@ -7,6 +7,8 @@ import { AppUser, SportCode, PublicHeaderConfig } from '@/types';
 import { DEFAULT_HEADER_CONFIG } from '@/mocks/headerConfig';
 import { AdminBannerConfig } from './AdminBannerConfig';
 import { ConfirmModal } from '@/components/admin/common/ConfirmModal';
+import { UserFormModal, UserFormData } from './system/UserFormModal';
+import { PublicPartnersTab } from './system/PublicPartnersTab';
 
 interface AdminSystemModuleProps {
   subTab: 'referee_staff_accounts' | 'event_settings';
@@ -30,32 +32,18 @@ export const AdminSystemModule: React.FC<AdminSystemModuleProps> = ({
   const [isAddUserModalOpen, setIsAddUserModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<AppUser | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
-  const [newUserName, setNewUserName] = useState('');
-  const [newUserEmail, setNewUserEmail] = useState('');
-  const [newUserRole, setNewUserRole] = useState<'ADMIN' | 'REFEREE'>('REFEREE');
-  const [newUserSport, setNewUserSport] = useState<SportCode>('FUTSAL');
-  const [newUserLicense, setNewUserLicense] = useState('Lisensi Daerah Level 2');
 
   const [broadcastMessage, setBroadcastMessage] = useState('Pemberitahuan: Seluruh juri cabor Futsal harap berkumpul di Meja Pengawas pukul 14:00 WIB untuk briefing babak gugur.');
   const [isBroadcastSaved, setIsBroadcastSaved] = useState(false);
+  const [publicSection, setPublicSection] = useState<'partners' | 'banners' | 'broadcast'>('partners');
 
   const handleOpenAddUser = () => {
     setEditingUser(null);
-    setNewUserName('');
-    setNewUserEmail('');
-    setNewUserRole('REFEREE');
-    setNewUserSport('FUTSAL');
-    setNewUserLicense('Lisensi Daerah Level 2');
     setIsAddUserModalOpen(true);
   };
 
   const handleOpenEditUser = (u: AppUser) => {
     setEditingUser(u);
-    setNewUserName(u.name);
-    setNewUserEmail(u.email);
-    setNewUserRole(u.role);
-    setNewUserSport((u.specialization as SportCode) || 'FUTSAL');
-    setNewUserLicense(u.licenseLevel || 'Lisensi Daerah Level 2');
     setIsAddUserModalOpen(true);
   };
 
@@ -70,23 +58,20 @@ export const AdminSystemModule: React.FC<AdminSystemModuleProps> = ({
     }
   };
 
-  const handleSaveUser = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newUserName.trim() || !newUserEmail.trim()) return;
-
+  const handleSaveUser = (data: UserFormData) => {
     if (editingUser) {
       setUsers((prev) =>
         prev.map((u) =>
           u.id === editingUser.id
             ? {
                 ...u,
-                name: newUserName,
-                email: newUserEmail,
-                role: newUserRole,
-                roleLabel: newUserRole === 'ADMIN' ? 'Panitia Pertandingan' : `Juri Resmi ${newUserSport}`,
-                specialization: newUserSport,
-                licenseLevel: newUserLicense,
-                avatarText: newUserName.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase(),
+                name: data.name,
+                email: data.email,
+                role: data.role,
+                roleLabel: data.role === 'ADMIN' ? 'Panitia Pertandingan' : `Juri Resmi ${data.specialization}`,
+                specialization: data.specialization,
+                licenseLevel: data.licenseLevel,
+                avatarText: data.name.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase(),
               }
             : u
         )
@@ -94,13 +79,13 @@ export const AdminSystemModule: React.FC<AdminSystemModuleProps> = ({
     } else {
       const created: AppUser = {
         id: `usr-${Date.now()}`,
-        name: newUserName,
-        email: newUserEmail,
-        role: newUserRole,
-        roleLabel: newUserRole === 'ADMIN' ? 'Panitia Pertandingan' : `Juri Resmi ${newUserSport}`,
-        specialization: newUserSport,
-        licenseLevel: newUserLicense,
-        avatarText: newUserName.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase(),
+        name: data.name,
+        email: data.email,
+        role: data.role,
+        roleLabel: data.role === 'ADMIN' ? 'Panitia Pertandingan' : `Juri Resmi ${data.specialization}`,
+        specialization: data.specialization,
+        licenseLevel: data.licenseLevel,
+        avatarText: data.name.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase(),
         isAvailable: true,
       };
       setUsers((prev) => [...prev, created]);
@@ -117,18 +102,26 @@ export const AdminSystemModule: React.FC<AdminSystemModuleProps> = ({
 
   return (
     <div className="space-y-8 animate-fadeIn">
-      {/* Module Header & Sub-tab Pill Navigation */}
+      {/* Module Sub-Tab Navigation & Description */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-xl sm:text-2xl font-black text-[var(--text-main)] font-[var(--font-display)] tracking-tight">
-            Sistem, Akun &amp; Pengaturan
-          </h2>
-          <p className="text-xs text-[var(--text-muted)] font-[var(--font-sans)] mt-1">
-            Kelola hak akses juri wasit, siaran pengumuman darurat, dan kustomisasi publik Sauma Arena.
+          <p className="text-xs sm:text-sm text-[var(--text-muted)]">
+            Kustomisasi identitas publik turnamen, banner carousel, serta siaran pengumuman ke meja lapangan.
           </p>
         </div>
 
-        <div className="flex items-center gap-1 p-1.5 rounded-2xl bg-[var(--bg-muted)]/80 border border-[var(--border-subtle)] text-xs font-bold font-[var(--font-display)] w-fit">
+        <div className="flex items-center gap-1 p-1.5 rounded-2xl bg-[var(--bg-muted)]/80 border border-[var(--border-subtle)] text-xs font-barlow font-bold uppercase tracking-wider w-fit">
+          <button
+            type="button"
+            onClick={() => onSelectSubTab('event_settings')}
+            className={`btn-tactile px-4 py-2 rounded-xl transition-all ${
+              subTab === 'event_settings'
+                ? 'bg-[var(--color-arena-primary)] text-white shadow-xs'
+                : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'
+            }`}
+          >
+            Pengaturan Publik
+          </button>
           <button
             type="button"
             onClick={() => onSelectSubTab('referee_staff_accounts')}
@@ -140,17 +133,6 @@ export const AdminSystemModule: React.FC<AdminSystemModuleProps> = ({
           >
             Akun Juri &amp; Panitia ({users.length})
           </button>
-          <button
-            type="button"
-            onClick={() => onSelectSubTab('event_settings')}
-            className={`btn-tactile px-4 py-2 rounded-xl transition-all ${
-              subTab === 'event_settings'
-                ? 'bg-[var(--color-arena-primary)] text-white shadow-xs'
-                : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'
-            }`}
-          >
-            Pengaturan Event &amp; Broadcast
-          </button>
         </div>
       </div>
 
@@ -159,7 +141,9 @@ export const AdminSystemModule: React.FC<AdminSystemModuleProps> = ({
         <div className="space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
-              <h3 className="text-sm font-bold text-[var(--text-main)]">Daftar Akun Juri &amp; Panitia Terdaftar</h3>
+              <h3 className="text-sm font-barlow font-bold uppercase tracking-wide text-[var(--text-main)]">
+                Daftar Akun Juri &amp; Panitia Terdaftar
+              </h3>
               <p className="text-xs text-[var(--text-muted)]">Juri hanya dapat melihat jadwal dan menginput skor pada cabor yang ditugaskan.</p>
             </div>
             <div className="flex items-center gap-2">
@@ -173,7 +157,7 @@ export const AdminSystemModule: React.FC<AdminSystemModuleProps> = ({
               <button
                 type="button"
                 onClick={handleOpenAddUser}
-                className="btn-tactile flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[var(--color-arena-primary)] text-white text-xs font-bold shadow-xs hover:bg-[var(--color-arena-primary-hover)] shrink-0"
+                className="btn-tactile flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[var(--color-arena-primary)] text-white text-xs font-barlow font-bold uppercase tracking-wider shadow-xs hover:bg-[var(--color-arena-primary-hover)] shrink-0"
               >
                 <Plus className="w-3.5 h-3.5" />
                 <span>Tambah Juri</span>
@@ -196,16 +180,16 @@ export const AdminSystemModule: React.FC<AdminSystemModuleProps> = ({
               >
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-[var(--color-arena-dark)] text-[var(--color-arena-accent)] flex items-center justify-center font-black text-sm">
+                    <div className="w-10 h-10 rounded-xl bg-[var(--color-arena-dark)] text-[var(--color-arena-accent)] flex items-center justify-center font-bebas text-base">
                       {u.avatarText}
                     </div>
                     <div>
-                      <div className="font-bold text-xs text-[var(--text-main)]">{u.name}</div>
+                      <div className="font-barlow font-bold text-xs text-[var(--text-main)] tracking-wide">{u.name}</div>
                       <div className="text-[10px] text-[var(--text-muted)]">{u.email}</div>
                     </div>
                   </div>
                   <span
-                    className={`text-[9px] font-bold px-2 py-0.5 rounded ${
+                    className={`text-[9px] font-barlow font-bold uppercase tracking-wider px-2 py-0.5 rounded ${
                       u.role === 'ADMIN'
                         ? 'bg-purple-500/15 text-purple-700 dark:text-purple-400'
                         : 'bg-[var(--color-arena-primary-light)] text-[var(--color-arena-primary)] dark:bg-sky-950/40 dark:text-sky-300'
@@ -267,125 +251,112 @@ export const AdminSystemModule: React.FC<AdminSystemModuleProps> = ({
           </div>
 
           {/* Modal Tambah / Edit Juri */}
-          {isAddUserModalOpen && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fadeIn">
-              <div className="bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-2xl max-w-md w-full p-6 shadow-xl space-y-4">
-                <h3 className="font-black text-base text-[var(--text-main)] font-[var(--font-display)]">
-                  {editingUser ? 'Edit Akun Juri / Petugas' : 'Tambah Akun Juri / Petugas'}
-                </h3>
-                <form onSubmit={handleSaveUser} className="space-y-3 text-xs">
-                  <div>
-                    <label className="font-bold text-[var(--text-main)] block mb-1">Nama Lengkap &amp; Gelar</label>
-                    <input
-                      type="text"
-                      required
-                      value={newUserName}
-                      onChange={(e) => setNewUserName(e.target.value)}
-                      placeholder="Contoh: Juri M. Irfan, S.Pd (Wasit Futsal FFI)"
-                      className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)]"
-                    />
-                  </div>
-                  <div>
-                    <label className="font-bold text-[var(--text-main)] block mb-1">Email Kredensial Juri</label>
-                    <input
-                      type="email"
-                      required
-                      value={newUserEmail}
-                      onChange={(e) => setNewUserEmail(e.target.value)}
-                      placeholder="juri@sauma.arena"
-                      className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)]"
-                    />
-                  </div>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="font-bold text-[var(--text-main)] block mb-1">Spesialisasi Cabor</label>
-                      <select
-                        value={newUserSport}
-                        onChange={(e) => setNewUserSport(e.target.value as SportCode)}
-                        className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)]"
-                      >
-                        <option value="FUTSAL">Futsal</option>
-                        <option value="BADMINTON">Badminton</option>
-                        <option value="BASKET">Bola Basket</option>
-                        <option value="ESPORT">E-Sport</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label className="font-bold text-[var(--text-main)] block mb-1">Tingkat Lisensi</label>
-                      <input
-                        type="text"
-                        value={newUserLicense}
-                        onChange={(e) => setNewUserLicense(e.target.value)}
-                        placeholder="FFI Level 1 / PBSI"
-                        className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)]"
-                      />
-                    </div>
-                  </div>
-                  <div className="pt-2 flex items-center justify-end gap-2">
-                    <button
-                      type="button"
-                      onClick={() => setIsAddUserModalOpen(false)}
-                      className="btn-tactile px-3 py-2 rounded-xl border border-[var(--border-subtle)] text-[var(--text-muted)]"
-                    >
-                      Batal
-                    </button>
-                    <button
-                      type="submit"
-                      className="btn-tactile px-4 py-2 rounded-xl bg-[var(--color-arena-primary)] text-white font-bold"
-                    >
-                      {editingUser ? 'Simpan Perubahan' : 'Simpan Akun Juri'}
-                    </button>
-                  </div>
-                </form>
-              </div>
-            </div>
-          )}
+          <UserFormModal
+            isOpen={isAddUserModalOpen}
+            onClose={() => {
+              setIsAddUserModalOpen(false);
+              setEditingUser(null);
+            }}
+            onSave={handleSaveUser}
+            editingUser={editingUser}
+          />
         </div>
       )}
 
-      {/* Sub-tab 2: Event Settings & Broadcast */}
+      {/* Sub-tab 2: Event Settings & Public Configurations */}
       {subTab === 'event_settings' && (
         <div className="space-y-6">
-          <AdminBannerConfig
-            banners={banners}
-            onSaveBanners={onSaveBanners}
-            config={headerConfig || DEFAULT_HEADER_CONFIG}
-            onSaveConfig={onSaveHeaderConfig || (() => {})}
-          />
+          {/* Public Sub-Navigation Tabs */}
+          <div className="flex items-center gap-2 border-b border-[var(--border-subtle)] pb-3 overflow-x-auto">
+            <button
+              type="button"
+              onClick={() => setPublicSection('partners')}
+              className={`btn-tactile flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-barlow font-bold uppercase tracking-wider transition-all shrink-0 ${
+                publicSection === 'partners'
+                  ? 'bg-[var(--color-arena-primary)] text-white shadow-xs'
+                  : 'bg-[var(--bg-surface)] text-[var(--text-muted)] hover:text-[var(--text-main)] border border-[var(--border-subtle)]'
+              }`}
+            >
+              <Award className="w-3.5 h-3.5" />
+              <span>Mitra &amp; Penyelenggara Resmi</span>
+            </button>
 
-          <div className="p-5 rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] shadow-xs space-y-4">
-            <h3 className="text-sm font-bold text-[var(--text-main)] flex items-center gap-2">
-              <Megaphone className="w-4 h-4 text-[var(--color-arena-accent)]" />
-              <span>Pesan Broadcast ke Seluruh Meja Lapangan &amp; Juri</span>
-            </h3>
-            <div className="space-y-2 text-xs">
-              <textarea
-                rows={3}
-                value={broadcastMessage}
-                onChange={(e) => setBroadcastMessage(e.target.value)}
-                className="w-full p-3 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)] leading-relaxed"
-              />
-              <div className="flex items-center justify-between">
-                <span className="text-[11px] text-[var(--text-muted)]">
-                  Notifikasi ini akan langsung muncul di panel atas tablet/smartphone juri.
-                </span>
-                <button
-                  type="button"
-                  onClick={handleSaveBroadcast}
-                  className="btn-tactile flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[var(--color-arena-primary)] text-white font-bold text-xs shadow-xs"
-                >
-                  <Save className="w-3.5 h-3.5" />
-                  <span>Kirim Pengumuman Juri</span>
-                </button>
-              </div>
-              {isBroadcastSaved && (
-                <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 font-bold text-xs flex items-center gap-1.5">
-                  <CheckCircle2 className="w-4 h-4" />
-                  <span>Pengumuman berhasil disiarkan ke semua juri aktif.</span>
-                </div>
-              )}
-            </div>
+            <button
+              type="button"
+              onClick={() => setPublicSection('banners')}
+              className={`btn-tactile flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-barlow font-bold uppercase tracking-wider transition-all shrink-0 ${
+                publicSection === 'banners'
+                  ? 'bg-[var(--color-arena-primary)] text-white shadow-xs'
+                  : 'bg-[var(--bg-surface)] text-[var(--text-muted)] hover:text-[var(--text-main)] border border-[var(--border-subtle)]'
+              }`}
+            >
+              <Globe className="w-3.5 h-3.5" />
+              <span>Banner &amp; Header Turnamen</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setPublicSection('broadcast')}
+              className={`btn-tactile flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-barlow font-bold uppercase tracking-wider transition-all shrink-0 ${
+                publicSection === 'broadcast'
+                  ? 'bg-[var(--color-arena-primary)] text-white shadow-xs'
+                  : 'bg-[var(--bg-surface)] text-[var(--text-muted)] hover:text-[var(--text-main)] border border-[var(--border-subtle)]'
+              }`}
+            >
+              <Megaphone className="w-3.5 h-3.5" />
+              <span>Siaran Pengumuman Meja</span>
+            </button>
           </div>
+
+          {/* 1. Mitra & Sponsor Turnamen */}
+          {publicSection === 'partners' && <PublicPartnersTab />}
+
+          {/* 2. Banner & Header Cabor */}
+          {publicSection === 'banners' && (
+            <AdminBannerConfig
+              banners={banners}
+              onSaveBanners={onSaveBanners}
+              config={headerConfig || DEFAULT_HEADER_CONFIG}
+              onSaveConfig={onSaveHeaderConfig || (() => {})}
+            />
+          )}
+
+          {/* 3. Pesan Broadcast Meja */}
+          {publicSection === 'broadcast' && (
+            <div className="p-5 rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] shadow-xs space-y-4">
+              <h3 className="text-sm font-bold text-[var(--text-main)] flex items-center gap-2">
+                <Megaphone className="w-4 h-4 text-[var(--color-arena-accent)]" />
+                <span>Pesan Broadcast ke Seluruh Meja Lapangan &amp; Juri</span>
+              </h3>
+              <div className="space-y-2 text-xs">
+                <textarea
+                  rows={3}
+                  value={broadcastMessage}
+                  onChange={(e) => setBroadcastMessage(e.target.value)}
+                  className="w-full p-3 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)] leading-relaxed"
+                />
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] text-[var(--text-muted)]">
+                    Notifikasi ini akan langsung muncul di panel atas tablet/smartphone juri.
+                  </span>
+                  <button
+                    type="button"
+                    onClick={handleSaveBroadcast}
+                    className="btn-tactile flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[var(--color-arena-primary)] text-white font-bold text-xs shadow-xs"
+                  >
+                    <Save className="w-3.5 h-3.5" />
+                    <span>Kirim Pengumuman Juri</span>
+                  </button>
+                </div>
+                {isBroadcastSaved && (
+                  <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 font-bold text-xs flex items-center gap-1.5">
+                    <CheckCircle2 className="w-4 h-4" />
+                    <span>Pengumuman berhasil disiarkan ke semua juri aktif.</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
         </div>
       )}
 

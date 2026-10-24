@@ -116,17 +116,17 @@ export const TicketManagementTab: React.FC = () => {
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 sm:p-7 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] shadow-xs">
         <div>
-          <h3 className="font-black text-lg text-[var(--text-main)] font-[var(--font-display)] tracking-tight">
+          <h3 className="font-bebas text-xl sm:text-2xl uppercase tracking-wide text-[var(--text-main)]">
             Manajemen Kuota &amp; Kategori Tiket
           </h3>
-          <p className="text-xs text-[var(--text-muted)] font-[var(--font-sans)] mt-1">
+          <p className="text-xs text-[var(--text-muted)] mt-1">
             Atur kuota penjualan tiket, tarif presale/reguler, sesi tribun, dan batas penjualan.
           </p>
         </div>
         <button
           type="button"
           onClick={handleOpenAdd}
-          className="btn-tactile px-4 py-2.5 rounded-xl bg-[var(--color-arena-primary)] hover:bg-[var(--color-arena-primary-hover)] text-white text-xs font-bold font-[var(--font-display)] flex items-center gap-2 shadow-xs shrink-0"
+          className="btn-tactile px-4 py-2.5 rounded-xl bg-[var(--color-arena-primary)] hover:bg-[var(--color-arena-primary-hover)] text-white text-xs font-barlow font-bold uppercase tracking-wider flex items-center gap-2 shadow-xs shrink-0"
         >
           <Plus className="w-4 h-4" />
           <span>Tambah Kategori Tiket</span>
@@ -144,16 +144,16 @@ export const TicketManagementTab: React.FC = () => {
             >
               <div className="flex items-start justify-between gap-2">
                 <div>
-                  <span className="text-sm font-black text-[var(--text-main)] font-[var(--font-display)] block tracking-tight">
+                  <span className="text-base font-barlow font-bold uppercase tracking-wider text-[var(--text-main)] block">
                     {cat.name}
                   </span>
-                  <span className="text-[11px] text-[var(--text-muted)] font-medium font-[var(--font-sans)] block mt-0.5">
+                  <span className="text-[11px] text-[var(--text-muted)] font-medium block mt-0.5">
                     {cat.session}
                   </span>
                 </div>
                 <div className="flex items-center gap-1.5 shrink-0">
                   <span
-                    className={`text-[10px] font-bold font-[var(--font-display)] px-2.5 py-1 rounded-lg ${
+                    className={`text-[10px] font-barlow font-bold uppercase tracking-wider px-2.5 py-1 rounded-lg ${
                       cat.status === 'SOLDOUT'
                         ? 'bg-red-500/15 text-red-700 dark:text-red-400'
                         : 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400'
@@ -173,12 +173,14 @@ export const TicketManagementTab: React.FC = () => {
               </div>
 
               <div>
-                <div className="text-xl sm:text-2xl font-black font-[var(--font-mono)] tabular-nums text-[var(--color-arena-primary)] tracking-tight">
+                <div className="text-2xl sm:text-3xl font-teko font-bold tabular-nums text-[var(--color-arena-primary)] tracking-wide leading-none">
                   Rp {cat.price.toLocaleString('id-ID')}
                 </div>
                 <div className="flex items-center justify-between text-xs text-[var(--text-muted)] font-medium mt-3">
-                  <span>Kuota: <strong className="font-[var(--font-mono)] tabular-nums text-[var(--text-main)]">{cat.sold}</strong> / {cat.quota}</span>
-                  <span className="font-bold font-[var(--font-mono)] tabular-nums text-[var(--color-arena-primary)]">{pct}%</span>
+                  <span className="font-barlow uppercase text-[11px] tracking-wide">
+                    Kuota: <strong className="font-teko font-bold text-base text-[var(--text-main)] tabular-nums">{cat.sold}</strong> / {cat.quota}
+                  </span>
+                  <span className="font-teko font-bold text-base text-[var(--color-arena-primary)] tabular-nums">{pct}%</span>
                 </div>
                 <div className="w-full h-2 rounded-full bg-[var(--bg-muted)] overflow-hidden mt-1.5">
                   <div
@@ -191,7 +193,7 @@ export const TicketManagementTab: React.FC = () => {
               <button
                 type="button"
                 onClick={() => handleOpenEdit(cat)}
-                className="btn-tactile w-full py-2 rounded-xl border border-[var(--border-subtle)] hover:bg-[var(--bg-muted)] text-xs font-bold font-[var(--font-display)] text-[var(--text-main)] flex items-center justify-center gap-2 transition-colors"
+                className="btn-tactile w-full py-2 rounded-xl border border-[var(--border-subtle)] hover:bg-[var(--bg-muted)] text-xs font-barlow font-bold uppercase tracking-wider text-[var(--text-main)] flex items-center justify-center gap-2 transition-colors"
               >
                 <Edit2 className="w-3.5 h-3.5 text-[var(--color-arena-primary)]" />
                 <span>Edit Sesi &amp; Kuota</span>
@@ -206,7 +208,7 @@ export const TicketManagementTab: React.FC = () => {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fadeIn">
           <div className="bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
             <div className="flex items-center justify-between pb-2 border-b border-[var(--border-subtle)]">
-              <h3 className="font-black text-base text-[var(--text-main)]">
+              <h3 className="font-bebas text-xl uppercase tracking-wide text-[var(--text-main)]">
                 {editingCategory ? 'Edit Kategori Tiket' : 'Tambah Kategori Tiket Baru'}
               </h3>
               <button
@@ -220,7 +222,7 @@ export const TicketManagementTab: React.FC = () => {
 
             <form onSubmit={handleSubmit} className="space-y-3 text-xs">
               <div>
-                <label className="font-bold text-[var(--text-main)] block mb-1">Nama Kategori Tiket</label>
+                <label className="font-barlow font-bold uppercase tracking-wider text-[var(--text-main)] block mb-1">Nama Kategori Tiket</label>
                 <input
                   type="text"
                   required
@@ -233,7 +235,7 @@ export const TicketManagementTab: React.FC = () => {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="font-bold text-[var(--text-main)] block mb-1">Harga Tiket (Rp)</label>
+                  <label className="font-barlow font-bold uppercase tracking-wider text-[var(--text-main)] block mb-1">Harga Tiket (Rp)</label>
                   <input
                     type="number"
                     min="0"
@@ -241,39 +243,39 @@ export const TicketManagementTab: React.FC = () => {
                     required
                     value={formData.price}
                     onChange={(e) => setFormData({ ...formData, price: Number(e.target.value) })}
-                    className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)] font-mono font-bold"
+                    className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)] font-teko text-base font-bold"
                   />
                 </div>
                 <div>
-                  <label className="font-bold text-[var(--text-main)] block mb-1">Total Kuota Seat</label>
+                  <label className="font-barlow font-bold uppercase tracking-wider text-[var(--text-main)] block mb-1">Total Kuota Seat</label>
                   <input
                     type="number"
                     min="1"
                     required
                     value={formData.quota}
                     onChange={(e) => setFormData({ ...formData, quota: Number(e.target.value) })}
-                    className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)] font-mono font-bold"
+                    className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)] font-teko text-base font-bold"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="font-bold text-[var(--text-main)] block mb-1">Tiket Terjual</label>
+                  <label className="font-barlow font-bold uppercase tracking-wider text-[var(--text-main)] block mb-1">Tiket Terjual</label>
                   <input
                     type="number"
                     min="0"
                     value={formData.sold}
                     onChange={(e) => setFormData({ ...formData, sold: Number(e.target.value) })}
-                    className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)] font-mono"
+                    className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)] font-teko text-base font-bold"
                   />
                 </div>
                 <div>
-                  <label className="font-bold text-[var(--text-main)] block mb-1">Status Penjualan</label>
+                  <label className="font-barlow font-bold uppercase tracking-wider text-[var(--text-main)] block mb-1">Status Penjualan</label>
                   <select
                     value={formData.status}
                     onChange={(e) => setFormData({ ...formData, status: e.target.value as 'ACTIVE' | 'SOLDOUT' })}
-                    className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)] font-semibold"
+                    className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)] font-barlow font-bold uppercase text-xs"
                   >
                     <option value="ACTIVE">TERSEDIA (Buka)</option>
                     <option value="SOLDOUT">HABIS (Tutup)</option>
@@ -282,7 +284,7 @@ export const TicketManagementTab: React.FC = () => {
               </div>
 
               <div>
-                <label className="font-bold text-[var(--text-main)] block mb-1">Sesi / Keterangan Masuk</label>
+                <label className="font-barlow font-bold uppercase tracking-wider text-[var(--text-main)] block mb-1">Sesi / Keterangan Masuk</label>
                 <input
                   type="text"
                   required
@@ -296,14 +298,14 @@ export const TicketManagementTab: React.FC = () => {
               <div className="flex gap-2 pt-3">
                 <button
                   type="submit"
-                  className="btn-tactile flex-1 py-2.5 rounded-xl bg-[var(--color-arena-primary)] text-white font-bold text-xs"
+                  className="btn-tactile flex-1 py-2.5 rounded-xl bg-[var(--color-arena-primary)] text-white font-barlow font-bold uppercase tracking-wider text-xs"
                 >
                   {editingCategory ? 'Simpan Perubahan' : 'Tambahkan Tiket'}
                 </button>
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="btn-tactile px-4 py-2.5 rounded-xl border border-[var(--border-subtle)] text-xs font-semibold"
+                  className="btn-tactile px-4 py-2.5 rounded-xl border border-[var(--border-subtle)] text-xs font-barlow font-bold uppercase tracking-wider"
                 >
                   Batal
                 </button>

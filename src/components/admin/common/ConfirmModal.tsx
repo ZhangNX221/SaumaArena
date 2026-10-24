@@ -70,7 +70,7 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
           </div>
 
           <div className="flex-1 pr-2">
-            <h3 id="confirm-modal-title" className="text-base font-bold text-[var(--text-main)]">
+            <h3 id="confirm-modal-title" className="text-base font-barlow font-bold uppercase tracking-wide text-[var(--text-main)]">
               {title}
             </h3>
             <p id="confirm-modal-description" className="mt-1.5 text-xs text-[var(--text-muted)] leading-relaxed">
@@ -83,7 +83,7 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
           <button
             type="button"
             onClick={onCancel}
-            className="px-4 py-2 rounded-xl text-xs font-semibold text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-muted)] border border-[var(--border-subtle)] transition-colors"
+            className="px-4 py-2 rounded-xl text-xs font-barlow font-bold uppercase tracking-wider text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-muted)] border border-[var(--border-subtle)] transition-colors"
           >
             {cancelLabel}
           </button>
@@ -92,7 +92,7 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
             onClick={() => {
               onConfirm();
             }}
-            className={`px-4 py-2 rounded-xl text-xs font-bold text-white shadow-sm transition-all active:scale-95 ${
+            className={`px-4 py-2 rounded-xl text-xs font-barlow font-bold uppercase tracking-wider text-white shadow-sm transition-all active:scale-95 ${
               isDanger
                 ? 'bg-red-600 hover:bg-red-700'
                 : 'bg-amber-600 hover:bg-amber-700'

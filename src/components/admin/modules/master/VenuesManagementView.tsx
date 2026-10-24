@@ -101,17 +101,17 @@ export const VenuesManagementView: React.FC<VenuesManagementViewProps> = ({ venu
       <div className="p-5 sm:p-6 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] shadow-xs space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[var(--border-subtle)]">
           <div>
-            <h3 className="font-black text-base text-[var(--text-main)] font-[var(--font-display)]">
+            <h3 className="font-bebas text-xl sm:text-2xl uppercase tracking-wide text-[var(--text-main)]">
               Manajemen Venue &amp; Titik Lapangan Arena
             </h3>
             <p className="text-xs text-[var(--text-muted)] mt-0.5">
-              Pusat lokasi gelanggang olahraga, pembagian titik lapangan, dan pemetaan nomor tanding.
+              Pusat lokasi gelanggang olahraga, pembagian titik lapangan, dan pemetaan kategori &amp; kelas.
             </p>
           </div>
           <button
             type="button"
             onClick={handleOpenAdd}
-            className="btn-tactile px-3.5 py-2 rounded-xl bg-[var(--color-arena-primary)] hover:bg-[var(--color-arena-primary-hover)] text-white text-xs font-bold flex items-center gap-1.5 shadow-xs shrink-0"
+            className="btn-tactile px-3.5 py-2 rounded-xl bg-[var(--color-arena-primary)] hover:bg-[var(--color-arena-primary-hover)] text-white text-xs font-barlow font-bold uppercase tracking-wider flex items-center gap-1.5 shadow-xs shrink-0"
           >
             <Plus className="w-4 h-4" />
             <span>Tambah Venue Baru</span>
@@ -140,7 +140,7 @@ export const VenuesManagementView: React.FC<VenuesManagementViewProps> = ({ venu
           >
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <span className="flex items-center gap-1 text-[11px] text-[var(--color-arena-primary)] font-bold">
+                <span className="flex items-center gap-1 text-[11px] font-mono text-[var(--color-arena-primary)] font-bold">
                   <MapPin className="w-3.5 h-3.5" />
                   <span>{venue.id}</span>
                 </span>
@@ -165,14 +165,14 @@ export const VenuesManagementView: React.FC<VenuesManagementViewProps> = ({ venu
               </div>
 
               <div>
-                <h4 className="font-extrabold text-base text-[var(--text-main)] font-[var(--font-display)]">
+                <h4 className="font-barlow font-bold text-base uppercase tracking-wide text-[var(--text-main)]">
                   {venue.name}
                 </h4>
                 <p className="text-xs text-[var(--text-muted)] mt-0.5">{venue.location}</p>
               </div>
 
               <div className="pt-2 border-t border-[var(--border-subtle)] space-y-1.5">
-                <span className="text-[10px] font-black uppercase tracking-wider text-[var(--text-faint)] block">
+                <span className="text-[10px] font-barlow font-bold uppercase tracking-wider text-[var(--text-muted)] block">
                   Titik Tanding ({venue.courts.length} Lapangan Aktif):
                 </span>
                 <div className="space-y-1 text-xs">
@@ -191,7 +191,7 @@ export const VenuesManagementView: React.FC<VenuesManagementViewProps> = ({ venu
 
             <div className="pt-2 border-t border-[var(--border-subtle)] flex items-center justify-between text-[11px] text-[var(--text-muted)]">
               <span>Status: <strong className="text-emerald-600 font-bold">Tersertifikasi</strong></span>
-              <span className="font-mono text-[10px]">{venue.courts.length} Titik</span>
+              <span className="font-barlow font-bold uppercase text-[11px]">{venue.courts.length} Titik</span>
             </div>
           </div>
         ))}
@@ -202,7 +202,7 @@ export const VenuesManagementView: React.FC<VenuesManagementViewProps> = ({ venu
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fadeIn">
           <div className="bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
             <div className="flex items-center justify-between pb-2 border-b border-[var(--border-subtle)]">
-              <h3 className="font-black text-base text-[var(--text-main)]">
+              <h3 className="font-bebas text-xl uppercase tracking-wide text-[var(--text-main)]">
                 {editingVenue ? 'Edit Data Venue' : 'Tambah Venue / Lapangan Baru'}
               </h3>
               <button
@@ -216,7 +216,7 @@ export const VenuesManagementView: React.FC<VenuesManagementViewProps> = ({ venu
 
             <form onSubmit={handleSubmit} className="space-y-3 text-xs">
               <div>
-                <label className="font-bold text-[var(--text-main)] block mb-1">Kode / ID Venue</label>
+                <label className="font-barlow font-bold uppercase tracking-wider text-[11px] text-[var(--text-main)] block mb-1">Kode / ID Venue</label>
                 <input
                   type="text"
                   required
@@ -229,7 +229,7 @@ export const VenuesManagementView: React.FC<VenuesManagementViewProps> = ({ venu
               </div>
 
               <div>
-                <label className="font-bold text-[var(--text-main)] block mb-1">Nama Gedung / Arena</label>
+                <label className="font-barlow font-bold uppercase tracking-wider text-[11px] text-[var(--text-main)] block mb-1">Nama Gedung / Arena</label>
                 <input
                   type="text"
                   required
@@ -241,7 +241,7 @@ export const VenuesManagementView: React.FC<VenuesManagementViewProps> = ({ venu
               </div>
 
               <div>
-                <label className="font-bold text-[var(--text-main)] block mb-1">Alamat / Lokasi Lengkap</label>
+                <label className="font-barlow font-bold uppercase tracking-wider text-[11px] text-[var(--text-main)] block mb-1">Alamat / Lokasi Lengkap</label>
                 <input
                   type="text"
                   required
@@ -253,7 +253,7 @@ export const VenuesManagementView: React.FC<VenuesManagementViewProps> = ({ venu
               </div>
 
               <div>
-                <label className="font-bold text-[var(--text-main)] block mb-1">
+                <label className="font-barlow font-bold uppercase tracking-wider text-[11px] text-[var(--text-main)] block mb-1">
                   Daftar Titik Lapangan (Pisahkan dengan koma)
                 </label>
                 <input
@@ -272,14 +272,14 @@ export const VenuesManagementView: React.FC<VenuesManagementViewProps> = ({ venu
               <div className="flex gap-2 pt-3">
                 <button
                   type="submit"
-                  className="btn-tactile flex-1 py-2.5 rounded-xl bg-[var(--color-arena-primary)] text-white font-bold text-xs"
+                  className="btn-tactile flex-1 py-2.5 rounded-xl bg-[var(--color-arena-primary)] text-white font-barlow font-bold uppercase tracking-wider text-xs"
                 >
                   {editingVenue ? 'Simpan Perubahan' : 'Tambahkan Venue'}
                 </button>
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="btn-tactile px-4 py-2.5 rounded-xl border border-[var(--border-subtle)] text-xs font-semibold"
+                  className="btn-tactile px-4 py-2.5 rounded-xl border border-[var(--border-subtle)] text-xs font-barlow font-bold uppercase tracking-wider"
                 >
                   Batal
                 </button>

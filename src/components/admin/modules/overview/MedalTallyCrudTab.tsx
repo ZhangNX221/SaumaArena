@@ -1,49 +1,77 @@
 'use client';
 
-import React, { useState } from 'react';
-import { Plus, Search, Edit2, Trash2, X, Medal, Trophy } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Plus, Search, Edit2, Trash2, Medal, Minus } from 'lucide-react';
 import { MEDAL_TALLY } from '@/mocks/multiSportData';
 import { MedalTallyRow, SportCode } from '@/types';
 import { ConfirmModal } from '@/components/admin/common/ConfirmModal';
+import { MedalTallyModal, MedalFormData } from './MedalTallyModal';
 
 interface MedalTallyCrudTabProps {
   selectedSport?: SportCode;
 }
 
+const STORAGE_KEY = 'sauma_arena_medal_tally';
+
 export const MedalTallyCrudTab: React.FC<MedalTallyCrudTabProps> = ({ selectedSport = 'ALL' }) => {
-  const [tally, setTally] = useState<MedalTallyRow[]>(MEDAL_TALLY);
+  const [tally, setTally] = useState<MedalTallyRow[]>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const cached = localStorage.getItem(STORAGE_KEY);
+        if (cached) return JSON.parse(cached);
+      } catch {
+        // Fallback to default
+      }
+    }
+    return MEDAL_TALLY;
+  });
+
   const [search, setSearch] = useState('');
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingRow, setEditingRow] = useState<MedalTallyRow | null>(null);
-  const [formData, setFormData] = useState({
-    contingentName: '',
-    gold: 0,
-    silver: 0,
-    bronze: 0,
-  });
+
+  // Sync to localStorage
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(tally));
+    } catch {
+      // Storage quota or private mode fallback
+    }
+  }, [tally]);
+
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 2200);
+  };
+
+  // 1-Tap Fast Inline Medal Stepper (Under 1 second click)
+  const handleQuickMedal = (contingentName: string, type: 'gold' | 'silver' | 'bronze', delta: number) => {
+    setTally((prev) =>
+      prev.map((r) => {
+        if (r.contingentName !== contingentName) return r;
+        const currentVal = r[type];
+        const nextVal = Math.max(0, currentVal + delta);
+        const updated = { ...r, [type]: nextVal };
+        updated.total = updated.gold + updated.silver + updated.bronze;
+        return updated;
+      })
+    );
+
+    const typeLabel = type === 'gold' ? 'Emas' : type === 'silver' ? 'Perak' : 'Perunggu';
+    showToast(`${delta > 0 ? '+1' : '-1'} Medali ${typeLabel} (${contingentName})`);
+  };
 
   const handleOpenAdd = () => {
     setEditingRow(null);
-    setFormData({
-      contingentName: '',
-      gold: 0,
-      silver: 0,
-      bronze: 0,
-    });
     setIsModalOpen(true);
   };
 
   const handleOpenEdit = (row: MedalTallyRow) => {
     setEditingRow(row);
-    setFormData({
-      contingentName: row.contingentName,
-      gold: row.gold,
-      silver: row.silver,
-      bronze: row.bronze,
-    });
     setIsModalOpen(true);
   };
 
@@ -54,14 +82,12 @@ export const MedalTallyCrudTab: React.FC<MedalTallyCrudTabProps> = ({ selectedSp
   const confirmDelete = () => {
     if (deleteTarget) {
       setTally((prev) => prev.filter((r) => r.contingentName !== deleteTarget));
+      showToast(`Kontingen ${deleteTarget} dihapus.`);
       setDeleteTarget(null);
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!formData.contingentName.trim()) return;
-
+  const handleSubmit = (formData: MedalFormData) => {
     const gold = Number(formData.gold) || 0;
     const silver = Number(formData.silver) || 0;
     const bronze = Number(formData.bronze) || 0;
@@ -75,6 +101,7 @@ export const MedalTallyCrudTab: React.FC<MedalTallyCrudTabProps> = ({ selectedSp
             : r
         )
       );
+      showToast(`Data medali ${formData.contingentName} diperbarui`);
     } else {
       const newRow: MedalTallyRow = {
         rank: tally.length + 1,
@@ -85,6 +112,7 @@ export const MedalTallyCrudTab: React.FC<MedalTallyCrudTabProps> = ({ selectedSp
         total,
       };
       setTally((prev) => [...prev, newRow]);
+      showToast(`Kontingen ${formData.contingentName} ditambahkan`);
     }
 
     setIsModalOpen(false);
@@ -101,25 +129,33 @@ export const MedalTallyCrudTab: React.FC<MedalTallyCrudTabProps> = ({ selectedSp
     });
 
   return (
-    <div className="p-5 sm:p-6 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] shadow-xs space-y-4">
+    <div className="p-4 sm:p-6 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] shadow-xs space-y-4">
+      {/* Toast Feedback */}
+      {toastMessage && (
+        <div className="p-3 bg-emerald-500/15 border border-emerald-500/30 text-emerald-800 dark:text-emerald-300 rounded-xl text-xs font-medium flex items-center justify-between animate-fadeIn">
+          <span>{toastMessage}</span>
+          <span className="text-[10px] uppercase font-bold text-emerald-700 dark:text-emerald-400 font-barlow tracking-wider">Tersimpan Cache</span>
+        </div>
+      )}
+
       {/* Header & Add Button */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[var(--border-subtle)]">
         <div>
-          <h3 className="font-black text-base text-[var(--text-main)] font-[var(--font-display)] flex items-center gap-2">
+          <h3 className="font-bebas text-xl sm:text-2xl uppercase tracking-wide text-[var(--text-main)] flex items-center gap-2">
             <Medal className="w-5 h-5 text-amber-500" />
-            <span>Klasemen Perolehan Medali Kontingen (Medal Tally Resmi)</span>
+            <span>Klasemen Perolehan Medali Kontingen</span>
           </h3>
           <p className="text-xs text-[var(--text-muted)] mt-0.5">
-            Rekap medali emas, perak, dan perunggu kontingen sekolah berdasarkan BAP kejuaraan.
+            Gunakan tombol steper cepat [ + ] / [ - ] untuk mencatat medali podium tanpa perlu membuka modal.
           </p>
         </div>
         <button
           type="button"
           onClick={handleOpenAdd}
-          className="btn-tactile px-3.5 py-2 rounded-xl bg-[var(--color-arena-primary)] hover:bg-[var(--color-arena-primary-hover)] text-white text-xs font-bold flex items-center gap-1.5 shadow-xs shrink-0"
+          className="btn-tactile px-3.5 py-2.5 rounded-xl bg-[var(--color-arena-primary)] hover:bg-[var(--color-arena-primary-hover)] text-white text-xs font-barlow font-bold uppercase tracking-wider flex items-center justify-center gap-1.5 shadow-xs shrink-0"
         >
           <Plus className="w-4 h-4" />
-          <span>Tambah Kontingen Medali</span>
+          <span>Tambah Kontingen</span>
         </button>
       </div>
 
@@ -135,57 +171,127 @@ export const MedalTallyCrudTab: React.FC<MedalTallyCrudTabProps> = ({ selectedSp
             className="w-full pl-9 pr-3 py-1.5 text-xs rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] text-[var(--text-main)] focus:outline-none focus:border-[var(--color-arena-primary)]"
           />
         </div>
-        <span className="px-3 py-1 rounded-lg text-xs font-bold bg-[var(--color-arena-primary)]/10 text-[var(--color-arena-primary)] shrink-0">
-          Filter Cabor: {selectedSport === 'ALL' ? 'Semua Cabor' : selectedSport}
+        <span className="px-3 py-1 rounded-lg text-xs font-barlow font-bold uppercase tracking-wider bg-[var(--color-arena-primary)]/10 text-[var(--color-arena-primary)] shrink-0">
+          Cabor: {selectedSport === 'ALL' ? 'Semua Cabor' : selectedSport}
         </span>
       </div>
 
-      {/* Table CRUD */}
+      {/* Table CRUD with 1-Tap Steppers */}
       <div className="overflow-x-auto rounded-xl border border-[var(--border-subtle)]">
         <table className="w-full text-xs text-left">
-          <thead className="bg-[var(--bg-muted)] text-[10px] font-black uppercase tracking-wider text-[var(--text-muted)] border-b border-[var(--border-subtle)]">
+          <thead className="bg-[var(--bg-muted)] text-[11px] font-barlow font-bold uppercase tracking-wider text-[var(--text-muted)] border-b border-[var(--border-subtle)]">
             <tr>
               <th className="py-2.5 px-3 text-center">Rank</th>
               <th className="py-2.5 px-3">Kontingen Sekolah / Klub</th>
-              <th className="py-2.5 px-3 text-center text-amber-500 font-extrabold">Emas</th>
-              <th className="py-2.5 px-3 text-center text-slate-400 font-extrabold">Perak</th>
-              <th className="py-2.5 px-3 text-center text-amber-700 font-extrabold">Perunggu</th>
-              <th className="py-2.5 px-3 text-center font-black">Total</th>
+              <th className="py-2.5 px-3 text-center text-amber-500 font-bold">Emas (1-Tap)</th>
+              <th className="py-2.5 px-3 text-center text-slate-400 font-bold">Perak (1-Tap)</th>
+              <th className="py-2.5 px-3 text-center text-amber-700 font-bold">Perunggu (1-Tap)</th>
+              <th className="py-2.5 px-3 text-center font-bold">Total</th>
               <th className="py-2.5 px-3 text-right">Aksi</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-[var(--border-subtle)] font-medium">
             {sorted.map((row, idx) => (
               <tr key={row.contingentName} className="hover:bg-[var(--bg-muted)]/40 transition-colors">
-                <td className="py-3 px-3 text-center font-mono font-bold">
+                <td className="py-3 px-3 text-center font-barlow font-bold">
                   {idx === 0 ? (
-                    <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-amber-500 text-slate-950 font-black text-xs">
+                    <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-amber-500 text-slate-950 font-teko font-bold text-sm shadow-xs">
                       1
                     </span>
                   ) : (
-                    <span>{idx + 1}</span>
+                    <span className="font-mono text-xs">{idx + 1}</span>
                   )}
                 </td>
                 <td className="py-3 px-3 font-bold text-[var(--text-main)]">
                   {row.contingentName}
                 </td>
-                <td className="py-3 px-3 text-center tabular-nums font-mono font-black text-amber-500 text-sm">
-                  {row.gold}
+
+                {/* Emas Stepper */}
+                <td className="py-3 px-3 text-center">
+                  <div className="inline-flex items-center gap-1 bg-amber-500/10 px-2 py-1 rounded-lg border border-amber-500/20">
+                    <button
+                      type="button"
+                      onClick={() => handleQuickMedal(row.contingentName, 'gold', -1)}
+                      title="Kurang 1 Emas"
+                      className="w-5 h-5 rounded flex items-center justify-center hover:bg-amber-500/20 text-amber-700 dark:text-amber-400 text-xs"
+                    >
+                      <Minus className="w-3 h-3" />
+                    </button>
+                    <span className="font-teko font-bold text-amber-500 text-lg w-6 text-center tabular-nums">
+                      {row.gold}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => handleQuickMedal(row.contingentName, 'gold', 1)}
+                      title="Tambah 1 Emas"
+                      className="w-5 h-5 rounded flex items-center justify-center hover:bg-amber-500/20 text-amber-700 dark:text-amber-400 text-xs font-bold"
+                    >
+                      <Plus className="w-3 h-3" />
+                    </button>
+                  </div>
                 </td>
-                <td className="py-3 px-3 text-center tabular-nums font-mono font-bold text-slate-500 dark:text-slate-400 text-sm">
-                  {row.silver}
+
+                {/* Perak Stepper */}
+                <td className="py-3 px-3 text-center">
+                  <div className="inline-flex items-center gap-1 bg-slate-500/10 px-2 py-1 rounded-lg border border-slate-500/20">
+                    <button
+                      type="button"
+                      onClick={() => handleQuickMedal(row.contingentName, 'silver', -1)}
+                      title="Kurang 1 Perak"
+                      className="w-5 h-5 rounded flex items-center justify-center hover:bg-slate-500/20 text-slate-600 dark:text-slate-300 text-xs"
+                    >
+                      <Minus className="w-3 h-3" />
+                    </button>
+                    <span className="font-teko font-bold text-slate-600 dark:text-slate-300 text-lg w-6 text-center tabular-nums">
+                      {row.silver}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => handleQuickMedal(row.contingentName, 'silver', 1)}
+                      title="Tambah 1 Perak"
+                      className="w-5 h-5 rounded flex items-center justify-center hover:bg-slate-500/20 text-slate-600 dark:text-slate-300 text-xs font-bold"
+                    >
+                      <Plus className="w-3 h-3" />
+                    </button>
+                  </div>
                 </td>
-                <td className="py-3 px-3 text-center tabular-nums font-mono font-bold text-amber-700 dark:text-amber-600 text-sm">
-                  {row.bronze}
+
+                {/* Perunggu Stepper */}
+                <td className="py-3 px-3 text-center">
+                  <div className="inline-flex items-center gap-1 bg-amber-800/10 px-2 py-1 rounded-lg border border-amber-800/20">
+                    <button
+                      type="button"
+                      onClick={() => handleQuickMedal(row.contingentName, 'bronze', -1)}
+                      title="Kurang 1 Perunggu"
+                      className="w-5 h-5 rounded flex items-center justify-center hover:bg-amber-800/20 text-amber-800 dark:text-amber-500 text-xs"
+                    >
+                      <Minus className="w-3 h-3" />
+                    </button>
+                    <span className="font-teko font-bold text-amber-800 dark:text-amber-500 text-lg w-6 text-center tabular-nums">
+                      {row.bronze}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => handleQuickMedal(row.contingentName, 'bronze', 1)}
+                      title="Tambah 1 Perunggu"
+                      className="w-5 h-5 rounded flex items-center justify-center hover:bg-amber-800/20 text-amber-800 dark:text-amber-500 text-xs font-bold"
+                    >
+                      <Plus className="w-3 h-3" />
+                    </button>
+                  </div>
                 </td>
-                <td className="py-3 px-3 text-center tabular-nums font-mono font-black text-sm text-[var(--color-arena-primary)]">
+
+                {/* Total */}
+                <td className="py-3 px-3 text-center tabular-nums font-teko font-bold text-xl text-[var(--color-arena-primary)]">
                   {row.total}
                 </td>
+
+                {/* Aksi */}
                 <td className="py-3 px-3 text-right space-x-1">
                   <button
                     type="button"
                     onClick={() => handleOpenEdit(row)}
-                    title="Edit Medali"
+                    title="Edit Nama / Manual"
                     className="p-1.5 rounded-lg border border-[var(--border-subtle)] hover:bg-[var(--bg-muted)] text-[var(--text-muted)] hover:text-[var(--text-main)]"
                   >
                     <Edit2 className="w-3.5 h-3.5" />
@@ -205,98 +311,16 @@ export const MedalTallyCrudTab: React.FC<MedalTallyCrudTabProps> = ({ selectedSp
         </table>
       </div>
 
-      {/* Modal CRUD (Create & Update) */}
-      {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fadeIn">
-          <div className="bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
-            <div className="flex items-center justify-between pb-2 border-b border-[var(--border-subtle)]">
-              <h3 className="font-black text-base text-[var(--text-main)]">
-                {editingRow ? `Edit Medali: ${editingRow.contingentName}` : 'Tambah Kontingen ke Klasemen Medali'}
-              </h3>
-              <button
-                type="button"
-                onClick={() => setIsModalOpen(false)}
-                className="p-1 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-main)]"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            <form onSubmit={handleSubmit} className="space-y-3 text-xs">
-              <div>
-                <label className="font-bold text-[var(--text-main)] block mb-1">Nama Kontingen Sekolah</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="Contoh: MIN 1 Kota Malang"
-                  value={formData.contingentName}
-                  onChange={(e) => setFormData({ ...formData, contingentName: e.target.value })}
-                  className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)]"
-                />
-              </div>
-
-              <div className="grid grid-cols-3 gap-3">
-                <div>
-                  <label className="font-bold text-amber-500 block mb-1">Emas (Gold)</label>
-                  <input
-                    type="number"
-                    min="0"
-                    required
-                    value={formData.gold}
-                    onChange={(e) => setFormData({ ...formData, gold: Number(e.target.value) })}
-                    className="w-full px-2 py-1.5 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)] font-mono text-center font-black"
-                  />
-                </div>
-                <div>
-                  <label className="font-bold text-slate-400 block mb-1">Perak (Silver)</label>
-                  <input
-                    type="number"
-                    min="0"
-                    required
-                    value={formData.silver}
-                    onChange={(e) => setFormData({ ...formData, silver: Number(e.target.value) })}
-                    className="w-full px-2 py-1.5 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)] font-mono text-center font-bold"
-                  />
-                </div>
-                <div>
-                  <label className="font-bold text-amber-700 block mb-1">Perunggu</label>
-                  <input
-                    type="number"
-                    min="0"
-                    required
-                    value={formData.bronze}
-                    onChange={(e) => setFormData({ ...formData, bronze: Number(e.target.value) })}
-                    className="w-full px-2 py-1.5 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)] font-mono text-center font-bold"
-                  />
-                </div>
-              </div>
-
-              <div className="p-3 rounded-xl bg-[var(--bg-muted)] text-xs flex justify-between items-center">
-                <span className="text-[var(--text-muted)]">Total Medali Dihitung:</span>
-                <span className="font-black text-sm font-mono text-[var(--color-arena-primary)]">
-                  {(Number(formData.gold) || 0) + (Number(formData.silver) || 0) + (Number(formData.bronze) || 0)} Medali
-                </span>
-              </div>
-
-              <div className="flex gap-2 pt-3">
-                <button
-                  type="submit"
-                  className="btn-tactile flex-1 py-2.5 rounded-xl bg-[var(--color-arena-primary)] text-white font-bold text-xs"
-                >
-                  {editingRow ? 'Simpan Perubahan' : 'Tambahkan ke Klasemen'}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setIsModalOpen(false)}
-                  className="btn-tactile px-4 py-2.5 rounded-xl border border-[var(--border-subtle)] text-xs font-semibold"
-                >
-                  Batal
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      {/* Decoupled Modal Component */}
+      <MedalTallyModal
+        isOpen={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false);
+          setEditingRow(null);
+        }}
+        onSubmit={handleSubmit}
+        editingRow={editingRow}
+      />
 
       {/* Reusable Confirm Delete Modal */}
       <ConfirmModal

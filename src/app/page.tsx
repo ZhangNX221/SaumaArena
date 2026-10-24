@@ -19,9 +19,10 @@ import { RefereeDashboard } from '@/components/referee/RefereeDashboard';
 import { AppUser, PublicHeaderConfig } from '@/types';
 import { PRESET_USERS } from '@/mocks/multiSportData';
 import { DEFAULT_HEADER_CONFIG, DEFAULT_CABOR_BANNERS } from '@/mocks/headerConfig';
-import { SaumaArenaLogo } from '@/components/brand/SaumaArenaLogo';
 import { TeamRegistrationModal } from '@/components/public/registration/TeamRegistrationModal';
+import { PublicFooter } from '@/components/public/layout/PublicFooter';
 import { Trophy, X } from 'lucide-react';
+import { FEATURES } from '@/config/features';
 
 export default function Home() {
   const [currentView, setCurrentView] = useState<'public' | 'admin' | 'referee'>('public');
@@ -190,7 +191,7 @@ export default function Home() {
       </main>
 
       <TicketModal
-        isOpen={isTicketModalOpen}
+        isOpen={FEATURES.ticketing && isTicketModalOpen}
         onClose={() => setIsTicketModalOpen(false)}
         onTicketGenerated={(code, school) => {
           console.log(`Tiket berhasil dibuat: ${code} untuk ${school}`);
@@ -205,44 +206,12 @@ export default function Home() {
         }}
       />
 
-      <footer className="mt-auto border-t border-[var(--border-subtle)] bg-[var(--bg-surface)] text-[var(--text-muted)] py-8 px-4 sm:px-6 lg:px-8 text-xs transition-colors">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-5 text-center md:text-left">
-          {/* Identitas Brand & Turnamen */}
-          <div className="flex items-center gap-3">
-            <SaumaArenaLogo size="sm" />
-            <div>
-              <div className="flex items-center gap-2 justify-center md:justify-start">
-                <span className="font-extrabold text-[var(--text-main)] font-[var(--font-display)] text-sm tracking-tight">
-                  Sauma Arena
-                </span>
-                <span className="text-[10px] font-mono font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-[var(--color-arena-primary-light)] text-[var(--color-arena-primary)] border border-[var(--border-subtle)]">
-                  MMFC I
-                </span>
-              </div>
-              <p className="text-[11px] text-[var(--text-muted)] font-medium mt-0.5">
-                Portal informasi resmi turnamen Milad Matsanega I
-              </p>
-            </div>
-          </div>
-
-          {/* Lokasi & Tanggal Pelaksanaan Turnamen */}
-          <div className="flex flex-col sm:flex-row items-center gap-1.5 sm:gap-3 text-xs text-[var(--text-muted)]">
-            <span className="font-semibold text-[var(--text-main)]">
-              Matsanega Futsal Court
-            </span>
-            <span className="hidden sm:inline text-[var(--border-subtle)]">&bull;</span>
-            <span>Kampus MTsN 1 Kota Malang</span>
-            <span className="hidden sm:inline text-[var(--border-subtle)]">&bull;</span>
-            <span>24 - 28 Oktober 2026</span>
-          </div>
-
-          {/* Penyelenggara & Atribusi */}
-          <div className="text-[11px] text-[var(--text-muted)] font-medium text-center md:text-right">
-            <div>Panitia Milad Matsanega &amp; Ekstrakurikuler Futsal</div>
-            <div className="text-[var(--text-faint)] mt-0.5">&copy; 2026 Sauma Arena</div>
-          </div>
-        </div>
-      </footer>
+      <PublicFooter
+        onOpenTicketModal={() => setIsTicketModalOpen(true)}
+        onOpenRegModal={() => setIsRegModalOpen(true)}
+        onTabChange={(tab) => setActiveTab(tab as PublicTabKey)}
+        sportCode={activeSportCode}
+      />
     </div>
   );
 }

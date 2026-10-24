@@ -19,6 +19,7 @@ import {
 import { PublicTabKey } from './PublicTabBar';
 import { SportCode } from '@/types';
 import { SaumaArenaLogo } from '@/components/brand/SaumaArenaLogo';
+import { FEATURES } from '@/config/features';
 
 interface MobilePublicNavProps {
   activeTab: PublicTabKey;
@@ -39,12 +40,12 @@ interface MenuItem {
 
 const ALL_MENU_ITEMS: MenuItem[] = [
   { key: 'info', label: 'Informasi', desc: 'Aturan, durasi & venue', icon: Info },
-  { key: 'teams', label: 'Tim', desc: 'Daftar kontingen & skuad', icon: Users },
-  { key: 'schedule', label: 'Jadwal', desc: 'Live score & hasil laga', icon: Calendar, badge: 'LIVE' },
-  { key: 'standings', label: 'Klasemen', desc: 'Peringkat Grup A & B', icon: ListOrdered },
-  { key: 'bracket', label: 'Bagan', desc: 'Tangga juara eliminasi', icon: GitBranch },
+  { key: 'schedule', label: 'Jadwal & Hasil', desc: 'Skor langsung & hasil pertandingan', icon: Calendar, badge: 'LIVE' },
+  { key: 'standings', label: 'Klasemen', desc: 'Peringkat grup & klasemen', icon: ListOrdered },
+  { key: 'bracket', label: 'Bagan', desc: 'Bagan turnamen eliminasi', icon: GitBranch },
+  { key: 'teams', label: 'Tim & Pemain', desc: 'Daftar kontingen & susunan pemain', icon: Users },
   { key: 'stats', label: 'Statistik', desc: 'Top scorer, assist & kartu', icon: Activity },
-  { key: 'supporter', label: 'Suporter', desc: 'Voting suporter madrasah', icon: Megaphone, badge: 'HOT', isHot: true },
+  { key: 'supporter', label: 'Suporter', desc: 'Voting suporter turnamen', icon: Megaphone, badge: 'HOT', isHot: true },
 ];
 
 export const MobilePublicNav: React.FC<MobilePublicNavProps> = ({
@@ -86,7 +87,7 @@ export const MobilePublicNav: React.FC<MobilePublicNavProps> = ({
             )}
           </button>
 
-          {/* 2. Menu Jadwal */}
+          {/* 2. Menu Jadwal & Hasil */}
           <button
             type="button"
             onClick={() => onTabChange('schedule')}
@@ -128,17 +129,19 @@ export const MobilePublicNav: React.FC<MobilePublicNavProps> = ({
             <span className="text-[10px] leading-tight font-bold mt-0.5">Menu</span>
           </button>
 
-          {/* 4. Menu Tiket */}
-          <button
-            type="button"
-            onClick={onOpenTicketModal}
-            className="btn-tactile flex-1 flex flex-col items-center justify-center py-1.5 px-1 rounded-xl text-[var(--text-muted)] hover:text-[var(--text-main)] transition-all duration-150 min-h-[48px]"
-          >
-            <Ticket className="w-5 h-5 mb-0.5 text-blue-600 dark:text-sky-400" />
-            <span className="text-[10px] leading-tight font-medium">Tiket</span>
-          </button>
+          {/* 4. Menu Tiket (Hanya jika FEATURES.ticketing = true) */}
+          {FEATURES.ticketing && (
+            <button
+              type="button"
+              onClick={onOpenTicketModal}
+              className="btn-tactile flex-1 flex flex-col items-center justify-center py-1.5 px-1 rounded-xl text-[var(--text-muted)] hover:text-[var(--text-main)] transition-all duration-150 min-h-[48px]"
+            >
+              <Ticket className="w-5 h-5 mb-0.5 text-blue-600 dark:text-sky-400" />
+              <span className="text-[10px] leading-tight font-medium">Tiket</span>
+            </button>
+          )}
 
-          {/* 5. Menu Daftar */}
+          {/* 5. Menu Pendaftaran Tim */}
           <button
             type="button"
             onClick={onOpenRegModal}
@@ -173,7 +176,7 @@ export const MobilePublicNav: React.FC<MobilePublicNavProps> = ({
                       Semua Menu Turnamen
                     </h3>
                     <p className="text-[11px] text-[var(--text-muted)] font-mono">
-                      Cabor Aktif: <strong className="text-[var(--color-arena-primary)]">{sportCode}</strong>
+                      Cabang Olahraga: <strong className="text-[var(--color-arena-primary)]">{sportCode}</strong>
                     </p>
                   </div>
                 </div>
@@ -192,7 +195,7 @@ export const MobilePublicNav: React.FC<MobilePublicNavProps> = ({
             {/* List of Navigation Tabs */}
             <div className="space-y-1.5">
               <span className="text-[10px] font-mono font-black uppercase tracking-wider text-[var(--text-muted)] block px-1">
-                Kategori Tab &amp; Laga
+                Menu Tab &amp; Pertandingan
               </span>
               {ALL_MENU_ITEMS.map((item) => {
                 const Icon = item.icon;
@@ -254,20 +257,22 @@ export const MobilePublicNav: React.FC<MobilePublicNavProps> = ({
             {/* Quick Action Buttons inside Drawer */}
             <div className="pt-2 border-t border-[var(--border-subtle)] space-y-2">
               <span className="text-[10px] font-black uppercase tracking-wider text-[var(--text-muted)] block px-1">
-                Aksi Tiket &amp; Kontingen
+                Pendaftaran &amp; Partisipasi Tim
               </span>
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsDrawerOpen(false);
-                    onOpenTicketModal();
-                  }}
-                  className="btn-tactile flex items-center justify-center gap-2 p-3 rounded-xl bg-[var(--color-arena-primary)] text-white font-bold text-xs shadow-xs"
-                >
-                  <Ticket className="w-4 h-4" />
-                  <span>Beli Tiket</span>
-                </button>
+              <div className={`grid gap-2 ${FEATURES.ticketing ? 'grid-cols-2' : 'grid-cols-1'}`}>
+                {FEATURES.ticketing && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsDrawerOpen(false);
+                      onOpenTicketModal();
+                    }}
+                    className="btn-tactile flex items-center justify-center gap-2 p-3 rounded-xl bg-[var(--color-arena-primary)] text-white font-bold text-xs shadow-xs"
+                  >
+                    <Ticket className="w-4 h-4" />
+                    <span>Beli Tiket</span>
+                  </button>
+                )}
 
                 <button
                   type="button"
@@ -278,7 +283,7 @@ export const MobilePublicNav: React.FC<MobilePublicNavProps> = ({
                   className="btn-tactile flex items-center justify-center gap-2 p-3 rounded-xl bg-[var(--color-arena-accent)] text-slate-950 font-black text-xs shadow-xs"
                 >
                   <UserPlus className="w-4 h-4" />
-                  <span>Daftar Tim</span>
+                  <span>Pendaftaran Tim</span>
                 </button>
               </div>
             </div>

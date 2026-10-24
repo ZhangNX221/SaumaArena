@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Users, ShieldCheck, Search, X } from 'lucide-react';
 import { initialTeams } from '@/mocks/tournamentData';
 import { CABOR_TEAMS_DATA } from '@/mocks/caborContentData';
@@ -19,6 +19,15 @@ export const TeamsTab: React.FC<TeamsTabProps> = ({ sportCode = 'FUTSAL' }) => {
   const [selectedTeam, setSelectedTeam] = useState<Team | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedGroup, setSelectedGroup] = useState<'ALL' | 'A' | 'B'>('ALL');
+
+  useEffect(() => {
+    if (!selectedTeam) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setSelectedTeam(null);
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [selectedTeam]);
 
   // Filtered list based on active sport
   const filteredFutsalTeams = teams.filter((team) => {
@@ -49,7 +58,7 @@ export const TeamsTab: React.FC<TeamsTabProps> = ({ sportCode = 'FUTSAL' }) => {
             KONTINGEN SEKOLAH &bull; {sportCode}
           </span>
         </div>
-        <h2 className="text-2xl sm:text-3xl font-black text-[var(--text-main)] font-[var(--font-display)] tracking-tight">
+        <h2 className="text-2xl sm:text-3xl font-bebas text-[var(--text-main)] tracking-wide">
           Daftar Tim &amp; Skuad Atlet
         </h2>
         <p className="text-xs sm:text-sm text-[var(--text-muted)] max-w-2xl leading-relaxed">
@@ -127,7 +136,7 @@ export const TeamsTab: React.FC<TeamsTabProps> = ({ sportCode = 'FUTSAL' }) => {
                 </div>
 
                 <div>
-                  <h3 className="font-extrabold text-base text-[var(--text-main)] tracking-tight font-[var(--font-display)] truncate">
+                  <h3 className="font-barlow font-bold text-lg text-[var(--text-main)] tracking-wide truncate">
                     {ct.name}
                   </h3>
                   <p className="text-xs text-[var(--text-muted)] font-medium truncate mt-0.5">{ct.schoolName}</p>
@@ -177,7 +186,7 @@ export const TeamsTab: React.FC<TeamsTabProps> = ({ sportCode = 'FUTSAL' }) => {
                 </div>
 
                 <div>
-                  <h3 className="font-extrabold text-base text-[var(--text-main)] tracking-tight font-[var(--font-display)] truncate">
+                  <h3 className="font-barlow font-bold text-lg text-[var(--text-main)] tracking-wide truncate">
                     {team.name}
                   </h3>
                   <p className="text-xs text-[var(--text-muted)] font-medium truncate mt-0.5">{team.schoolName}</p>

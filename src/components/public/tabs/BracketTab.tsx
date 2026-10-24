@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Trophy, ShieldCheck, Crown, Medal, Check, Sparkles, GitBranch } from 'lucide-react';
+import { Trophy, ShieldCheck, Crown, Medal, Check, GitBranch } from 'lucide-react';
 import { getTeamLogoUrl } from '@/mocks/teamLogos';
 import {
   BracketMatch,
@@ -62,12 +62,12 @@ export const BracketTab: React.FC<BracketTabProps> = ({ sportCode = 'FUTSAL' }) 
               className="w-4 h-4 rounded-sm object-contain shrink-0"
               loading="lazy"
             />
-            <span className="truncate">{m.teamA.name}</span>
+            <span className="truncate font-barlow font-bold text-sm tracking-wide">{m.teamA.name}</span>
             {m.teamA.isWinner && <Check className="w-3 h-3 text-emerald-600 shrink-0" />}
           </div>
           <span
-            className={`font-mono tabular-nums text-xs ${
-              m.teamA.isWinner ? 'text-emerald-600 dark:text-emerald-400 font-black' : ''
+            className={`font-teko font-bold text-base tabular-nums leading-none ${
+              m.teamA.isWinner ? 'text-emerald-600 dark:text-emerald-400 font-bold' : ''
             }`}
           >
             {m.teamA.score}
@@ -88,12 +88,12 @@ export const BracketTab: React.FC<BracketTabProps> = ({ sportCode = 'FUTSAL' }) 
               className="w-4 h-4 rounded-sm object-contain shrink-0"
               loading="lazy"
             />
-            <span className="truncate">{m.teamB.name}</span>
+            <span className="truncate font-barlow font-bold text-sm tracking-wide">{m.teamB.name}</span>
             {m.teamB.isWinner && <Check className="w-3 h-3 text-emerald-600 shrink-0" />}
           </div>
           <span
-            className={`font-mono tabular-nums text-xs ${
-              m.teamB.isWinner ? 'text-emerald-600 dark:text-emerald-400 font-black' : ''
+            className={`font-teko font-bold text-base tabular-nums leading-none ${
+              m.teamB.isWinner ? 'text-emerald-600 dark:text-emerald-400 font-bold' : ''
             }`}
           >
             {m.teamB.score}
@@ -113,7 +113,7 @@ export const BracketTab: React.FC<BracketTabProps> = ({ sportCode = 'FUTSAL' }) 
             FASE GUGUR &bull; {caborLabel.toUpperCase()}
           </span>
         </div>
-        <h2 className="text-2xl sm:text-3xl font-black text-[var(--text-main)] font-[var(--font-display)] tracking-tight">
+        <h2 className="text-2xl sm:text-3xl font-bebas text-[var(--text-main)] tracking-wide">
           Bagan Eliminasi Turnamen MMFC I
         </h2>
         <p className="text-xs sm:text-sm text-[var(--text-muted)] max-w-2xl leading-relaxed">
@@ -289,7 +289,7 @@ export const BracketTab: React.FC<BracketTabProps> = ({ sportCode = 'FUTSAL' }) 
                 <div className="flex items-center justify-between text-[11px] font-mono font-bold text-amber-700 dark:text-amber-300 pb-2 border-b border-[var(--border-subtle)]">
                   <span>{GRAND_FINAL.schedule}</span>
                   <span className="px-2 py-0.5 rounded-full bg-[var(--color-arena-accent)] text-slate-950 font-black text-[9px] flex items-center gap-1 shadow-2xs">
-                    <Sparkles className="w-3 h-3" />
+                    <Trophy className="w-3 h-3" />
                     <span>CHAMPION MATCH</span>
                   </span>
                 </div>
@@ -308,7 +308,7 @@ export const BracketTab: React.FC<BracketTabProps> = ({ sportCode = 'FUTSAL' }) 
                         <Crown className="w-3.5 h-3.5 text-amber-500 absolute -top-2 -right-1.5" />
                       </div>
                       <div className="truncate">
-                        <span className="font-black text-xs block truncate">
+                        <span className="font-barlow font-bold text-sm block truncate">
                           {GRAND_FINAL.teamA.name}
                         </span>
                         <span className="text-[10px] font-bold text-amber-600 dark:text-amber-400">
@@ -316,7 +316,7 @@ export const BracketTab: React.FC<BracketTabProps> = ({ sportCode = 'FUTSAL' }) 
                         </span>
                       </div>
                     </div>
-                    <span className="font-mono font-black text-base text-amber-600 dark:text-amber-400 tabular-nums">
+                    <span className="font-teko font-bold text-2xl text-amber-600 dark:text-amber-400 tabular-nums leading-none">
                       {GRAND_FINAL.teamA.score}
                     </span>
                   </div>
@@ -330,7 +330,7 @@ export const BracketTab: React.FC<BracketTabProps> = ({ sportCode = 'FUTSAL' }) 
                         className="w-5 h-5 rounded-md object-contain shrink-0"
                       />
                       <div className="truncate">
-                        <span className="font-bold text-xs text-[var(--text-main)] block truncate">
+                        <span className="font-barlow font-bold text-sm text-[var(--text-main)] block truncate">
                           {GRAND_FINAL.teamB.name}
                         </span>
                         <span className="text-[10px] text-[var(--text-muted)]">
@@ -338,7 +338,7 @@ export const BracketTab: React.FC<BracketTabProps> = ({ sportCode = 'FUTSAL' }) 
                         </span>
                       </div>
                     </div>
-                    <span className="font-mono font-bold text-sm tabular-nums">
+                    <span className="font-teko font-bold text-xl tabular-nums leading-none">
                       {GRAND_FINAL.teamB.score}
                     </span>
                   </div>
@@ -350,7 +350,7 @@ export const BracketTab: React.FC<BracketTabProps> = ({ sportCode = 'FUTSAL' }) 
                     <Trophy className="w-3 h-3" />
                     <span>Kampiun Trofi Bergilir MMFC I</span>
                   </div>
-                  <div className="text-xs font-black text-[var(--text-main)] font-[var(--font-display)] truncate">
+                  <div className="text-sm font-teko font-bold uppercase tracking-wider text-[var(--text-main)] truncate">
                     {championTeamName}
                   </div>
                 </div>

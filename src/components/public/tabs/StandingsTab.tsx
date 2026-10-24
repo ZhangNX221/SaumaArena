@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { HelpCircle, ChevronLeft, ChevronRight, ListOrdered } from 'lucide-react';
+import { HelpCircle, ChevronLeft, ChevronRight, ListOrdered, ShieldCheck } from 'lucide-react';
 import { getTeamLogoUrl } from '@/mocks/teamLogos';
 import { CABOR_STANDINGS_DATA } from '@/mocks/caborStandingsAndStats';
 import { SportCode } from '@/types';
@@ -89,17 +89,30 @@ export const StandingsTab: React.FC<StandingsTabProps> = ({ sportCode = 'FUTSAL'
       {/* Public Page Header */}
       <div className="space-y-1.5 pb-2">
         <div className="flex items-center gap-2 text-[var(--color-arena-primary)]">
-          <ListOrdered className="w-3.5 h-3.5 shrink-0" />
-          <span className="text-[11px] font-black uppercase tracking-widest">
+          <ListOrdered className="w-4 h-4 shrink-0" />
+          <span className="text-xs font-barlow font-bold uppercase tracking-wider">
             PERINGKAT FASE GRUP &bull; {sportCode}
           </span>
         </div>
-        <h2 className="text-2xl sm:text-3xl font-black text-[var(--text-main)] font-[var(--font-display)] tracking-tight">
-          Klasemen Grup &amp; Kualifikasi
+        <h2 className="text-3xl sm:text-4xl font-bebas text-[var(--text-main)] uppercase tracking-wide">
+          Klasemen &amp; Kualifikasi
         </h2>
         <p className="text-xs sm:text-sm text-[var(--text-muted)] max-w-2xl leading-relaxed">
           Perolehan poin, selisih gol, rekor kemenangan, dan penentuan dua tim teratas yang melaju ke babak gugur.
         </p>
+      </div>
+
+      {/* Two-Stage Verification Notice */}
+      <div className="p-3.5 rounded-2xl bg-blue-500/10 border border-blue-500/20 text-blue-950 dark:text-blue-200 text-xs flex items-start gap-3">
+        <ShieldCheck className="w-4 h-4 text-[var(--color-arena-primary)] shrink-0 mt-0.5" />
+        <div className="space-y-0.5">
+          <span className="font-barlow font-bold uppercase tracking-wider block text-xs">
+            Regulasi Klasemen Resmi &bull; Verifikasi Dua Tahap
+          </span>
+          <p className="text-[11px] text-[var(--text-muted)] leading-relaxed">
+            Klasemen resmi hanya mengakumulasi pertandingan yang telah berstatus <strong>✓ Terverifikasi Resmi</strong> oleh Admin turnamen. Hasil skor yang masih menunggu verifikasi juri lapangan tidak akan mengubah poin sebelum disahkan.
+          </p>
+        </div>
       </div>
 
       {/* Render Custom Cabor Standings (Voli / Esport) */}
@@ -111,7 +124,7 @@ export const StandingsTab: React.FC<StandingsTabProps> = ({ sportCode = 'FUTSAL'
                 className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] overflow-hidden shadow-xs"
               >
                 <div className="px-5 py-3.5 bg-[var(--bg-muted)]/80 border-b border-[var(--border-subtle)] flex items-center justify-between">
-                  <h3 className="font-extrabold text-sm text-[var(--text-main)] uppercase tracking-wider font-[var(--font-display)]">
+                  <h3 className="font-bebas text-base text-[var(--text-main)] uppercase tracking-wider">
                     Klasemen {grp.name} &bull; {sportCode}
                   </h3>
                   <span className="text-[11px] text-[var(--text-muted)]">Top 2 Lolos Semifinal</span>
@@ -119,15 +132,15 @@ export const StandingsTab: React.FC<StandingsTabProps> = ({ sportCode = 'FUTSAL'
 
                 <div className="overflow-x-auto">
                   <table className="w-full text-xs text-left">
-                    <thead className="text-[10px] uppercase font-bold text-[var(--text-muted)] border-b border-[var(--border-subtle)] bg-[var(--bg-muted)]/40 font-mono">
+                    <thead className="text-xs uppercase font-bold text-[var(--text-muted)] border-b border-[var(--border-subtle)] bg-[var(--bg-muted)]/40 font-barlow tracking-wider">
                       <tr>
                         <th className="py-2.5 px-3 text-center w-8">#</th>
-                        <th className="py-2.5 px-3 font-sans">Klub / Tim</th>
+                        <th className="py-2.5 px-3">Klub / Tim</th>
                         <th className="py-2.5 px-2 text-center">{customData.headers[0]}</th>
                         <th className="py-2.5 px-2 text-center">{customData.headers[1]}</th>
                         <th className="py-2.5 px-2 text-center">{customData.headers[2]}</th>
                         <th className="py-2.5 px-2 text-center">{customData.headers[3]}</th>
-                        <th className="py-2.5 px-3 text-center font-black text-[var(--text-main)] font-sans">Poin</th>
+                        <th className="py-2.5 px-3 text-center font-bold text-[var(--color-arena-primary)]">Poin</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-[var(--border-subtle)]">
@@ -149,14 +162,14 @@ export const StandingsTab: React.FC<StandingsTabProps> = ({ sportCode = 'FUTSAL'
                           <td className="py-2.5 px-3 font-semibold text-[var(--text-main)]">
                             <div className="flex items-center gap-2">
                               <img src={row.logoUrl} alt={row.teamName} className="w-6 h-6 object-contain shrink-0" />
-                              <span className="truncate max-w-[140px] font-medium font-[var(--font-display)]">{row.teamName}</span>
+                              <span className="truncate max-w-[140px] font-barlow font-bold text-sm tracking-wide">{row.teamName}</span>
                             </div>
                           </td>
                           <td className="py-2.5 px-2 text-center font-mono tabular-nums text-[var(--text-muted)]">{row.col1}</td>
                           <td className="py-2.5 px-2 text-center font-mono tabular-nums text-emerald-700 dark:text-emerald-400 font-bold">{row.col2}</td>
                           <td className="py-2.5 px-2 text-center font-mono tabular-nums text-red-600 font-medium">{row.col3}</td>
                           <td className="py-2.5 px-2 text-center font-mono tabular-nums text-[var(--text-muted)]">{row.col4}</td>
-                          <td className="py-2.5 px-3 text-center font-mono tabular-nums font-black text-sm text-[var(--color-arena-primary)]">
+                          <td className="py-2.5 px-3 text-center font-teko tabular-nums font-bold text-lg text-[var(--color-arena-primary)] leading-none">
                             {row.points}
                           </td>
                         </tr>
@@ -176,7 +189,7 @@ export const StandingsTab: React.FC<StandingsTabProps> = ({ sportCode = 'FUTSAL'
               className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] overflow-hidden shadow-xs"
             >
               <div className="px-5 py-3.5 bg-[var(--bg-muted)]/80 border-b border-[var(--border-subtle)] flex items-center justify-between">
-                <h3 className="font-extrabold text-sm text-[var(--text-main)] uppercase tracking-wider font-[var(--font-display)]">
+                <h3 className="font-bebas text-base text-[var(--text-main)] uppercase tracking-wider">
                   Klasemen {grp.groupName} &bull; MMFC I
                 </h3>
                 <span className="text-[11px] text-[var(--text-muted)]">Peringkat 1 &amp; 2 Lolos Gugur</span>
@@ -184,16 +197,16 @@ export const StandingsTab: React.FC<StandingsTabProps> = ({ sportCode = 'FUTSAL'
 
               <div className="overflow-x-auto">
                 <table className="w-full text-xs text-left">
-                  <thead className="text-[10px] uppercase font-bold text-[var(--text-muted)] border-b border-[var(--border-subtle)] bg-[var(--bg-muted)]/40 font-mono">
+                  <thead className="text-xs uppercase font-bold text-[var(--text-muted)] border-b border-[var(--border-subtle)] bg-[var(--bg-muted)]/40 font-barlow tracking-wider">
                     <tr>
                       <th className="py-2.5 px-3 text-center w-8">#</th>
-                      <th className="py-2.5 px-3 font-sans">Klub / Sekolah</th>
-                      <th className="py-2.5 px-2 text-center" title="Pernah Main">Mn</th>
-                      <th className="py-2.5 px-2 text-center" title="Menang">M</th>
-                      <th className="py-2.5 px-2 text-center" title="Seri">S</th>
-                      <th className="py-2.5 px-2 text-center" title="Kalah">K</th>
-                      <th className="py-2.5 px-2 text-center font-bold" title="Selisih Gol">SG</th>
-                      <th className="py-2.5 px-3 text-center font-black text-[var(--text-main)] font-sans">Poin</th>
+                      <th className="py-2.5 px-3">Klub / Sekolah</th>
+                      <th className="py-2.5 px-2 text-center">Mn</th>
+                      <th className="py-2.5 px-2 text-center">M</th>
+                      <th className="py-2.5 px-2 text-center">S</th>
+                      <th className="py-2.5 px-2 text-center">K</th>
+                      <th className="py-2.5 px-2 text-center font-bold">SG</th>
+                      <th className="py-2.5 px-3 text-center font-bold text-[var(--color-arena-primary)]">Poin</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[var(--border-subtle)]">
@@ -215,7 +228,7 @@ export const StandingsTab: React.FC<StandingsTabProps> = ({ sportCode = 'FUTSAL'
                         <td className="py-2.5 px-3 font-semibold text-[var(--text-main)]">
                           <div className="flex items-center gap-2">
                             <img src={row.logoUrl} alt={row.teamName} className="w-6 h-6 object-contain shrink-0" />
-                            <span className="truncate max-w-[130px] font-medium font-[var(--font-display)]">{row.teamName}</span>
+                            <span className="truncate max-w-[130px] font-barlow font-bold text-sm tracking-wide">{row.teamName}</span>
                           </div>
                         </td>
                         <td className="py-2.5 px-2 text-center font-mono tabular-nums text-[var(--text-muted)]">{row.played}</td>
@@ -223,7 +236,7 @@ export const StandingsTab: React.FC<StandingsTabProps> = ({ sportCode = 'FUTSAL'
                         <td className="py-2.5 px-2 text-center font-mono tabular-nums text-[var(--text-muted)]">{row.drawn}</td>
                         <td className="py-2.5 px-2 text-center font-mono tabular-nums text-red-600 font-medium">{row.lost}</td>
                         <td className="py-2.5 px-2 text-center font-mono tabular-nums font-bold">{row.goalDifference > 0 ? `+${row.goalDifference}` : row.goalDifference}</td>
-                        <td className="py-2.5 px-3 text-center font-mono tabular-nums font-black text-sm text-[var(--color-arena-primary)]">
+                        <td className="py-2.5 px-3 text-center font-teko tabular-nums font-bold text-lg text-[var(--color-arena-primary)] leading-none">
                           {row.points}
                         </td>
                       </tr>
@@ -273,7 +286,7 @@ export const StandingsTab: React.FC<StandingsTabProps> = ({ sportCode = 'FUTSAL'
 
       {/* Keterangan Singkatan Kolom & Regulasi Klasemen (Selalu Muncul) */}
       <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-5 sm:p-6 shadow-xs space-y-3.5">
-        <div className="flex items-center gap-2.5 text-xs sm:text-sm font-extrabold text-[var(--text-main)] font-[var(--font-display)] pb-2.5 border-b border-[var(--border-subtle)]">
+        <div className="flex items-center gap-2.5 text-sm font-barlow font-bold uppercase tracking-wider text-[var(--text-main)] pb-2.5 border-b border-[var(--border-subtle)]">
           <HelpCircle className="w-4 h-4 text-[var(--color-arena-primary)] shrink-0" />
           <span>
             Keterangan Singkatan Kolom &amp; Regulasi Klasemen {sportCode === 'FUTSAL' ? 'FFI' : sportCode}
@@ -302,10 +315,10 @@ export const StandingsTab: React.FC<StandingsTabProps> = ({ sportCode = 'FUTSAL'
             </span>
             <p>
               Apabila dua atau lebih tim memiliki poin akhir yang sama, urutan klasemen ditentukan melalui:{' '}
-              <strong className="text-[var(--text-main)]">1. Head-to-Head</strong> pertemuan langsung &rarr;{' '}
-              <strong className="text-[var(--text-main)]">2. Selisih Gol (SG)</strong> di seluruh laga grup &rarr;{' '}
-              <strong className="text-[var(--text-main)]">3. Produktivitas Gol Memasukkan (GM)</strong> &rarr;{' '}
-              <strong className="text-[var(--text-main)]">4. Nilai Fair Play</strong> berdasarkan akumulasi kartu juri.
+              <strong className="text-[var(--text-main)]">1. Selisih Gol / Selisih Skor (SG)</strong> di seluruh laga grup &rarr;{' '}
+              <strong className="text-[var(--text-main)]">2. Produktivitas Gol Memasukkan (GM)</strong> &rarr;{' '}
+              <strong className="text-[var(--text-main)]">3. Head-to-Head</strong> hasil pertemuan langsung antar tim terkait &rarr;{' '}
+              <strong className="text-[var(--text-main)]">4. Nilai Fair Play</strong> berdasarkan akumulasi kartu wasit.
             </p>
           </div>
         </div>

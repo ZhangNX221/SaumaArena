@@ -121,27 +121,29 @@ html.dark {
 
 ## 3. Typography
 
-### Font Selection
+### Font Selection: Kategori Sports / Athletic Display
 
-| Penggunaan | Font | Alasan |
-|:-----------|:-----|:-------|
-| **Heading & UI** | Plus Jakarta Sans (600, 700) | Geometrik, tegas, bagus di ukuran besar. Sudah digunakan di SaumaDrive sehingga menjaga konsistensi ekosistem Sauma. |
-| **Body & Data** | Inter (400, 500) | Dirancang untuk layar, tabular numbers bawaan, readability tinggi di ukuran kecil. Cocok untuk tabel klasemen dan data numerik. |
-| **Skor & Angka** | Inter Tabular (`font-variant-numeric: tabular-nums`) | Angka di klasemen dan skor harus sejajar vertikal. Tabular figures mencegah lompatan layout saat angka berubah. |
+Typography Sauma Arena didesain dengan perpaduan tipografi atletik berperforma tinggi (Sports / Athletic Display) yang memiliki karakter kuat, tebal, dan bernuansa kompetitif untuk branding, papan skor, jadwal, dan aksi turnamen:
 
-*Tidak ada monospace heading atau uppercase tracking lebar (R-06). Typeface dipilih berdasarkan kebutuhan readability data dan konsistensi ekosistem, bukan default AI.*
+| Peran Tipografi | Font Family | Karakter & Kesan | Penggunaan Terbaik di Sauma Arena |
+|:----------------|:------------|:-----------------|:-----------------------------------|
+| **Judul, Skor & Statistik** | **Teko** (Google Fonts, 400-700) | Sans-serif condensed (memanjang ke atas), tegas, berenergi, modern, dan sangat hemat ruang horizontal. | Judul aplikasi (`SAUMA ARENA`), nama turnamen hero banner, nomor punggung/statistik, papan skor (scoreboard), dan timer wasit. |
+| **Header, Poster & CTA** | **Bebas Neue** (Google Fonts, 400 All-Caps) | Bersih, gagah, kapital semua (all-caps), profesional, kokoh, dan berwibawa. | Header section tab, tombol aksi utama / Call to Action (`Beli Tiket`, `Pendaftaran Tim`, `Poin +1`), dan poster turnamen. |
+| **Nama Tim & Jadwal** | **Barlow Condensed** (Google Fonts, 400-700) | Terinspirasi tipografi utilitas jalan raya, sudut sedikit melengkung namun tetap tajam, fungsional, dinamis, dan industrial. | Nama kontingen/tim di bracket & jadwal laga, info waktu/lapangan, badge kategori olahraga (`Turnamen Olahraga`, `SD / MI`), dan filter bar. |
+| **Body & Readability Data** | **Inter** (Google Fonts, 400-500) | Geometrik neo-grotesque dengan tabular figures bawaan, readability tinggi di layar smartphone luar ruangan. | Paragraf deskripsi turnamen, label form input, petunjuk juri, dan teks konten reguler. |
 
 ### Type Scale
 
-| Level | Size | Weight | Line Height | Penggunaan |
-|:------|:----:|:------:|:-----------:|:-----------|
-| Display | 2rem (32px) | 700 | 1.2 | Skor pertandingan besar (bracket view) |
-| H1 | 1.5rem (24px) | 700 | 1.3 | Judul halaman |
-| H2 | 1.25rem (20px) | 600 | 1.35 | Judul section |
-| H3 | 1.125rem (18px) | 600 | 1.4 | Sub-section, nama tim di kartu |
-| Body | 1rem (16px) | 400 | 1.5 | Teks utama |
-| Caption | 0.875rem (14px) | 400 | 1.4 | Label, metadata, tabel |
-| Small | 0.75rem (12px) | 500 | 1.3 | Badge, status pill |
+| Level | Size | Weight / Font | Line Height | Penggunaan |
+|:------|:----:|:--------------|:-----------:|:-----------|
+| Scoreboard Large | 4.5rem - 6rem (72-96px) | 700 / Teko | 1.0 | Papan skor wasit (Referee Match Center) & Timer laga |
+| Display Hero | 3rem - 4.5rem (48-72px) | 700 / Teko | 1.05 | Judul turnamen di hero header publik & skor pertandingan |
+| H1 Section | 1.75rem - 2.25rem (28-36px) | 400 / Bebas Neue | 1.15 | Judul tab publik & judul modul back-office |
+| H2 Sub-Header | 1.25rem - 1.5rem (20-24px) | 400 / Bebas Neue | 1.2 | Header babak (Perempat Final, Semifinal, Final), grup |
+| Team Label | 1rem - 1.125rem (16-18px) | 700 / Barlow Condensed | 1.25 | Nama tim di bracket, jadwal laga, dan kartu tim |
+| CTA Button | 0.875rem - 1rem (14-16px) | 400 / Bebas Neue | 1.0 | Tombol aksi utama (Beli Tiket, Pendaftaran Tim) |
+| Body | 0.875rem - 1rem (14-16px) | 400 / Inter | 1.5 | Teks deskripsi, rincian aturan turnamen |
+| Badge / Pill | 0.75rem (12px) | 700 / Barlow Condensed | 1.2 | Kategori cabor, status verifikasi, pill grup |
 
 ---
 

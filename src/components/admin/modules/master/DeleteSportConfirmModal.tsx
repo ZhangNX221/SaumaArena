@@ -36,7 +36,7 @@ export const DeleteSportConfirmModal: React.FC<DeleteSportConfirmModalProps> = (
             <AlertTriangle className="w-6 h-6" />
           </div>
           <div>
-            <h3 className="font-extrabold text-base text-[var(--text-main)] font-[var(--font-display)]">
+            <h3 className="font-bebas text-xl uppercase tracking-wide text-[var(--text-main)]">
               Hapus Cabang Olahraga?
             </h3>
             <p className="text-xs text-[var(--text-muted)]">Tindakan ini tidak dapat dibatalkan</p>
@@ -45,8 +45,8 @@ export const DeleteSportConfirmModal: React.FC<DeleteSportConfirmModalProps> = (
 
         <div className="p-4 rounded-xl bg-[var(--bg-muted)] border border-[var(--border-subtle)] text-xs text-[var(--text-main)] space-y-1.5">
           <p>
-            Anda akan menghapus cabor <strong className="text-[var(--color-arena-primary)]">{sport.name}</strong> ({sport.code}) dengan{' '}
-            <strong>{sport.categories.length} nomor tanding</strong>.
+            Anda akan menghapus cabor <strong className="text-[var(--color-arena-primary)] font-bold">{sport.name}</strong> ({sport.code}) dengan{' '}
+            <strong className="font-bold">{sport.categories.length} nomor tanding</strong>.
           </p>
           <p className="text-[11px] text-[var(--text-muted)]">
             Pastikan tidak ada bagan turnamen aktif atau data pertandingan yang sedang berjalan pada cabor ini.
@@ -57,14 +57,14 @@ export const DeleteSportConfirmModal: React.FC<DeleteSportConfirmModalProps> = (
           <button
             type="button"
             onClick={onClose}
-            className="btn-tactile px-4 py-2 rounded-xl text-xs font-semibold text-[var(--text-muted)] hover:bg-[var(--bg-muted)] border border-[var(--border-subtle)] transition-colors min-h-[38px]"
+            className="btn-tactile px-4 py-2 rounded-xl text-xs font-barlow font-bold uppercase tracking-wider text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-muted)] border border-[var(--border-subtle)] transition-colors min-h-[38px]"
           >
             Batal
           </button>
           <button
             type="button"
             onClick={onConfirm}
-            className="btn-tactile px-4 py-2 rounded-xl text-xs font-bold bg-red-600 hover:bg-red-700 text-white shadow-xs flex items-center gap-1.5 transition-colors min-h-[38px]"
+            className="btn-tactile px-4 py-2 rounded-xl text-xs font-barlow font-bold uppercase tracking-wider bg-red-600 hover:bg-red-700 text-white shadow-xs flex items-center gap-1.5 transition-colors min-h-[38px]"
           >
             <Trash2 className="w-4 h-4" />
             <span>Hapus Cabor</span>

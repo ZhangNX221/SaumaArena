@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Users, Plus, Trash2, AlertCircle, CheckCircle2, Sparkles } from 'lucide-react';
+import { Users, Plus, Trash2, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { RegisteredPlayer, TeamRegistrationData } from '@/types/registration';
 
 interface StepRosterProps {
@@ -88,7 +88,7 @@ export const StepRoster: React.FC<StepRosterProps> = ({ data, onChange }) => {
             onClick={handleApplySampleRoster}
             className="btn-tactile text-xs font-bold px-3 py-1.5 rounded-xl bg-[var(--color-arena-primary-light)] text-[var(--color-arena-primary)] border border-[var(--border-subtle)] hover:bg-[var(--color-arena-primary)] hover:text-white transition-colors flex items-center gap-1.5 self-start sm:self-auto shrink-0"
           >
-            <Sparkles className="w-3.5 h-3.5" />
+            <Users className="w-3.5 h-3.5" />
             <span>Isi Roster Contoh</span>
           </button>
         )}

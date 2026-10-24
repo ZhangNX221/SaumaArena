@@ -42,16 +42,16 @@ export const GoalMinuteLineChart: React.FC = () => {
     <div className="p-5 sm:p-6 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] shadow-xs space-y-4">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-[var(--border-subtle)]">
         <div>
-          <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[var(--color-arena-primary)] block">
+          <span className="text-xs font-barlow font-bold uppercase tracking-wider text-[var(--color-arena-primary)] block">
             Trend Line Chart &bull; Ritme Pertandingan
           </span>
-          <h3 className="font-black text-base text-[var(--text-main)] font-[var(--font-display)] flex items-center gap-2 mt-0.5">
+          <h3 className="font-bebas text-lg text-[var(--text-main)] uppercase tracking-wide flex items-center gap-2 mt-0.5">
             <Activity className="w-4 h-4 text-emerald-500" />
             <span>Distribusi Waktu &amp; Menit Terciptanya Gol</span>
           </h3>
         </div>
         <div className="text-right">
-          <span className="text-xs font-mono font-bold text-emerald-600 dark:text-emerald-400">
+          <span className="text-xs font-barlow font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
             Puncak: 21 Gol (Menit 31&apos; - 40&apos;)
           </span>
           <span className="text-[10px] text-[var(--text-muted)] block">38.2% Gol di Fase Akhir</span>
@@ -155,7 +155,7 @@ export const GoalMinuteLineChart: React.FC = () => {
                 y={p.y - 12}
                 textAnchor="middle"
                 fill="var(--color-arena-accent)"
-                className="text-[10px] font-mono font-black"
+                className="text-sm font-teko font-bold tracking-wide"
               >
                 {p.goals}
               </text>
@@ -166,7 +166,7 @@ export const GoalMinuteLineChart: React.FC = () => {
                 y={plotBottom + 18}
                 textAnchor="middle"
                 fill="currentColor"
-                className="text-[var(--text-main)] text-[11px] font-mono font-bold"
+                className="text-[var(--text-main)] text-xs font-barlow font-bold tracking-wide"
               >
                 {p.interval}
               </text>
@@ -177,7 +177,7 @@ export const GoalMinuteLineChart: React.FC = () => {
                 y={plotBottom + 32}
                 textAnchor="middle"
                 fill="currentColor"
-                className="text-[var(--text-muted)] text-[9px]"
+                className="text-[var(--text-muted)] text-[10px] font-barlow"
               >
                 {p.phase}
               </text>

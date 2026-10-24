@@ -19,7 +19,7 @@ export const DrawingBracketTab: React.FC = () => {
     <div className="p-5 sm:p-6 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] shadow-xs space-y-5">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[var(--border-subtle)]">
         <div>
-          <h3 className="font-black text-base text-[var(--text-main)] font-[var(--font-display)] flex items-center gap-2">
+          <h3 className="font-bebas text-xl sm:text-2xl uppercase tracking-wide text-[var(--text-main)] flex items-center gap-2">
             <GitBranch className="w-5 h-5 text-[var(--color-arena-primary)]" />
             <span>Generator Bagan &amp; Drawing Otomatis</span>
           </h3>
@@ -30,7 +30,7 @@ export const DrawingBracketTab: React.FC = () => {
         <button
           type="button"
           onClick={handleRandomize}
-          className="btn-tactile px-4 py-2 rounded-xl bg-[var(--color-arena-primary)] hover:bg-[var(--color-arena-primary-hover)] text-white font-bold text-xs flex items-center gap-1.5 shadow-xs shrink-0"
+          className="btn-tactile px-4 py-2 rounded-xl bg-[var(--color-arena-primary)] hover:bg-[var(--color-arena-primary-hover)] text-white font-barlow font-bold uppercase tracking-wider text-xs flex items-center gap-1.5 shadow-xs shrink-0"
         >
           <RefreshCw className="w-4 h-4" />
           <span>Acak Drawing Ulang</span>
@@ -38,7 +38,7 @@ export const DrawingBracketTab: React.FC = () => {
       </div>
 
       {seedNotice && (
-        <div className="p-3 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-800 dark:text-emerald-300 text-xs font-bold animate-fadeIn">
+        <div className="p-3 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-800 dark:text-emerald-300 text-xs font-barlow font-bold uppercase tracking-wide animate-fadeIn">
           {seedNotice}
         </div>
       )}
@@ -47,7 +47,7 @@ export const DrawingBracketTab: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Column 1: Perempat Final */}
         <div className="space-y-3">
-          <div className="text-[11px] font-black uppercase tracking-wider text-[var(--text-muted)]">
+          <div className="text-xs font-barlow font-bold uppercase tracking-wider text-[var(--text-muted)]">
             Perempat Final ({qf.length} Laga)
           </div>
           <div className="space-y-2.5">
@@ -59,11 +59,11 @@ export const DrawingBracketTab: React.FC = () => {
                 <div className="text-[10px] text-[var(--text-faint)] font-mono">{node.stageName}</div>
                 <div className="flex justify-between items-center text-xs font-bold text-[var(--text-main)]">
                   <span className="truncate max-w-[120px]">{node.teamA.name || 'TBD'}</span>
-                  <span className="font-mono text-[var(--color-arena-accent)]">{node.teamA.score}</span>
+                  <span className="font-teko font-bold text-base tabular-nums text-[var(--color-arena-accent)]">{node.teamA.score}</span>
                 </div>
                 <div className="flex justify-between items-center text-xs font-bold text-[var(--text-main)]">
                   <span className="truncate max-w-[120px]">{node.teamB.name || 'TBD'}</span>
-                  <span className="font-mono text-[var(--color-arena-accent)]">{node.teamB.score}</span>
+                  <span className="font-teko font-bold text-base tabular-nums text-[var(--color-arena-accent)]">{node.teamB.score}</span>
                 </div>
               </div>
             ))}
@@ -72,7 +72,7 @@ export const DrawingBracketTab: React.FC = () => {
 
         {/* Column 2: Semifinal */}
         <div className="space-y-3">
-          <div className="text-[11px] font-black uppercase tracking-wider text-[var(--text-muted)]">
+          <div className="text-xs font-barlow font-bold uppercase tracking-wider text-[var(--text-muted)]">
             Babak Semifinal ({sf.length} Laga)
           </div>
           <div className="space-y-2.5">
@@ -84,11 +84,11 @@ export const DrawingBracketTab: React.FC = () => {
                 <div className="text-[10px] text-[var(--color-arena-primary)] font-bold">{node.stageName}</div>
                 <div className="flex justify-between items-center text-xs font-bold text-[var(--text-main)]">
                   <span className="truncate max-w-[120px]">{node.teamA.name || 'Pemenang QF'}</span>
-                  <span className="font-mono text-[var(--color-arena-accent)]">{node.teamA.score}</span>
+                  <span className="font-teko font-bold text-base tabular-nums text-[var(--color-arena-accent)]">{node.teamA.score}</span>
                 </div>
                 <div className="flex justify-between items-center text-xs font-bold text-[var(--text-main)]">
                   <span className="truncate max-w-[120px]">{node.teamB.name || 'Pemenang QF'}</span>
-                  <span className="font-mono text-[var(--color-arena-accent)]">{node.teamB.score}</span>
+                  <span className="font-teko font-bold text-base tabular-nums text-[var(--color-arena-accent)]">{node.teamB.score}</span>
                 </div>
               </div>
             ))}
@@ -97,18 +97,18 @@ export const DrawingBracketTab: React.FC = () => {
 
         {/* Column 3: Grand Final */}
         <div className="space-y-3">
-          <div className="text-[11px] font-black uppercase tracking-wider text-amber-500 flex items-center gap-1.5">
+          <div className="text-xs font-barlow font-bold uppercase tracking-wider text-amber-500 flex items-center gap-1.5">
             <Trophy className="w-3.5 h-3.5" />
             <span>Grand Final &amp; Juara</span>
           </div>
           <div className="p-4 rounded-xl border-2 border-amber-500/50 bg-amber-500/5 shadow-xs space-y-2 text-center">
-            <div className="text-[10px] font-black uppercase tracking-widest text-amber-700 dark:text-amber-400 font-mono">
+            <div className="text-[11px] font-barlow font-bold uppercase tracking-widest text-amber-700 dark:text-amber-400">
               PENENTUAN JUARA 1
             </div>
-            <div className="py-2 text-sm font-black text-[var(--text-main)]">
+            <div className="py-2 text-base font-bebas uppercase tracking-wide text-[var(--text-main)]">
               {gf.teamA.name || 'Finalis 1'} vs {gf.teamB.name || 'Finalis 2'}
             </div>
-            <div className="text-[11px] text-[var(--text-muted)]">
+            <div className="text-[11px] text-[var(--text-muted)] font-medium">
               {gf.court} &bull; {gf.schedule}
             </div>
           </div>

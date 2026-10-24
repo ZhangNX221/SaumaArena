@@ -65,12 +65,12 @@ export const SupporterTab: React.FC = () => {
       {/* Public Page Header */}
       <div className="space-y-1.5 pb-2">
         <div className="flex items-center gap-2 text-[var(--color-arena-primary)]">
-          <Award className="w-3.5 h-3.5 shrink-0" />
-          <span className="text-[11px] font-mono font-black uppercase tracking-widest">
+          <Award className="w-4 h-4 shrink-0" />
+          <span className="text-xs font-barlow font-bold uppercase tracking-wider">
             PENGHARGAAN TRIBUN &bull; MILAD MATSANEGA I
           </span>
         </div>
-        <h2 className="text-2xl sm:text-3xl font-black text-[var(--text-main)] font-[var(--font-display)] tracking-tight">
+        <h2 className="text-3xl sm:text-4xl font-bebas text-[var(--text-main)] uppercase tracking-wide">
           Klasemen Suporter Terbaik
         </h2>
         <p className="text-xs sm:text-sm text-[var(--text-muted)] max-w-2xl leading-relaxed">
@@ -82,7 +82,7 @@ export const SupporterTab: React.FC = () => {
       <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-5 sm:p-6 shadow-xs space-y-4">
         <div className="flex items-center gap-2 pb-3 border-b border-[var(--border-subtle)]">
           <Info className="w-4 h-4 text-[var(--color-arena-primary)] shrink-0" />
-          <h3 className="font-extrabold text-sm sm:text-base text-[var(--text-main)] font-[var(--font-display)] tracking-tight">
+          <h3 className="font-bebas text-base text-[var(--text-main)] tracking-wider">
             Ketentuan Penilaian
           </h3>
         </div>
@@ -202,42 +202,42 @@ export const SupporterTab: React.FC = () => {
         <div className="overflow-x-auto rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] shadow-xs">
           <table className="w-full text-left text-xs border-collapse">
             <thead>
-              <tr className="border-b border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-muted)] font-bold uppercase tracking-wider text-[11px] font-mono">
+              <tr className="border-b border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-muted)] font-bold uppercase tracking-wider text-xs font-barlow">
                 <th className="py-3 px-3 w-12 text-center">Pos</th>
-                <th className="py-3 px-4 min-w-[180px] sticky left-0 bg-[var(--bg-muted)] sm:static font-sans">Sekolah Suporter</th>
+                <th className="py-3 px-4 min-w-[180px] sticky left-0 bg-[var(--bg-muted)] sm:static">Sekolah Suporter</th>
                 <th className="py-3 px-2 text-center">Laga</th>
-                <th className="py-3 px-2 text-center" title="Poin 1: Koreografi (+25)">
+                <th className="py-3 px-2 text-center">
                   <div className="flex flex-col items-center">
                     <span className="w-5 h-5 rounded-md bg-[var(--bg-surface)] border border-[var(--border-subtle)] text-[var(--color-arena-primary)] font-black text-[11px] flex items-center justify-center shadow-2xs font-mono">1</span>
-                    <span className="text-[9px] text-[var(--text-muted)] font-bold mt-0.5 hidden sm:inline font-sans">Koreo</span>
+                    <span className="text-[10px] text-[var(--text-muted)] font-bold mt-0.5 hidden sm:inline font-barlow uppercase">Koreo</span>
                   </div>
                 </th>
-                <th className="py-3 px-2 text-center" title="Poin 2: Maskot (+20)">
+                <th className="py-3 px-2 text-center">
                   <div className="flex flex-col items-center">
                     <span className="w-5 h-5 rounded-md bg-[var(--bg-surface)] border border-[var(--border-subtle)] text-[var(--color-arena-primary)] font-black text-[11px] flex items-center justify-center shadow-2xs font-mono">2</span>
-                    <span className="text-[9px] text-[var(--text-muted)] font-bold mt-0.5 hidden sm:inline font-sans">Maskot</span>
+                    <span className="text-[10px] text-[var(--text-muted)] font-bold mt-0.5 hidden sm:inline font-barlow uppercase">Maskot</span>
                   </div>
                 </th>
-                <th className="py-3 px-2 text-center" title="Poin 3: Seragam (+15)">
+                <th className="py-3 px-2 text-center">
                   <div className="flex flex-col items-center">
                     <span className="w-5 h-5 rounded-md bg-[var(--bg-surface)] border border-[var(--border-subtle)] text-[var(--color-arena-primary)] font-black text-[11px] flex items-center justify-center shadow-2xs font-mono">3</span>
-                    <span className="text-[9px] text-[var(--text-muted)] font-bold mt-0.5 hidden sm:inline font-sans">Seragam</span>
+                    <span className="text-[10px] text-[var(--text-muted)] font-bold mt-0.5 hidden sm:inline font-barlow uppercase">Seragam</span>
                   </div>
                 </th>
-                <th className="py-3 px-2 text-center" title="Poin 4: Yel-yel (+10)">
+                <th className="py-3 px-2 text-center">
                   <div className="flex flex-col items-center">
                     <span className="w-5 h-5 rounded-md bg-[var(--bg-surface)] border border-[var(--border-subtle)] text-[var(--color-arena-primary)] font-black text-[11px] flex items-center justify-center shadow-2xs font-mono">4</span>
-                    <span className="text-[9px] text-[var(--text-muted)] font-bold mt-0.5 hidden sm:inline font-sans">Yel-yel</span>
+                    <span className="text-[10px] text-[var(--text-muted)] font-bold mt-0.5 hidden sm:inline font-barlow uppercase">Yel-yel</span>
                   </div>
                 </th>
-                <th className="py-3 px-2 text-center" title="Poin 5: Tiket Gate (+1/Tiket)">
+                <th className="py-3 px-2 text-center">
                   <div className="flex flex-col items-center">
                     <span className="w-5 h-5 rounded-md bg-[var(--bg-surface)] border border-[var(--border-subtle)] text-blue-600 dark:text-blue-400 font-black text-[11px] flex items-center justify-center shadow-2xs font-mono">5</span>
-                    <span className="text-[9px] text-[var(--text-muted)] font-bold mt-0.5 hidden sm:inline font-sans">Tiket</span>
+                    <span className="text-[10px] text-[var(--text-muted)] font-bold mt-0.5 hidden sm:inline font-barlow uppercase">Tiket</span>
                   </div>
                 </th>
                 <th className="py-3 px-2.5 text-center text-red-600 dark:text-red-400">Sanksi</th>
-                <th className="py-3 px-4 text-right font-black text-[var(--text-main)] font-sans">Total Skor</th>
+                <th className="py-3 px-4 text-right font-bold text-[var(--text-main)]">Total Skor</th>
                 <th className="py-3 px-3 text-center w-14">Rincian</th>
               </tr>
             </thead>
@@ -273,7 +273,7 @@ export const SupporterTab: React.FC = () => {
                           />
                         </div>
                         <div className="min-w-0">
-                          <div className="font-bold text-xs sm:text-sm tracking-tight text-[var(--text-main)] font-[var(--font-display)] truncate max-w-[200px] sm:max-w-none">
+                          <div className="font-barlow font-bold text-sm sm:text-base tracking-wide text-[var(--text-main)] truncate max-w-[200px] sm:max-w-none">
                             {row.schoolName}
                           </div>
                           <div className="text-[10px] text-[var(--text-muted)] font-medium">
@@ -312,7 +312,7 @@ export const SupporterTab: React.FC = () => {
                     </td>
 
                     <td className="py-4 px-5 text-right">
-                      <span className="text-base sm:text-lg font-black font-mono tabular-nums text-[var(--color-arena-primary)] tracking-tight">
+                      <span className="text-xl sm:text-2xl font-teko font-bold tabular-nums text-[var(--color-arena-primary)] leading-none tracking-wide">
                         {row.totalScore}
                       </span>
                     </td>
@@ -322,7 +322,6 @@ export const SupporterTab: React.FC = () => {
                         type="button"
                         onClick={() => setSelectedSchool(row.teamId)}
                         className="btn-tactile inline-flex items-center justify-center w-8 h-8 rounded-lg border border-[var(--border-subtle)] text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-muted)] transition-colors"
-                        title="Buka rincian penilaian juri per laga"
                         aria-label={`Rincian nilai ${row.schoolName}`}
                       >
                         <ChevronRight className="w-4 h-4" />

@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import {
   ShieldCheck,
   Lock,
-  Mail,
+  User,
   Eye,
   EyeOff,
   ArrowLeft,
@@ -28,7 +28,7 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({
   initialRole = 'ADMIN',
 }) => {
   const [activeRoleTab, setActiveRoleTab] = useState<UserRole>(initialRole);
-  const [email, setEmail] = useState('admin@sauma.arena');
+  const [username, setUsername] = useState('admin');
   const [password, setPassword] = useState('pass1234');
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
@@ -38,34 +38,40 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({
     setActiveRoleTab(role);
     setErrorMessage(null);
     if (role === 'ADMIN') {
-      setEmail('admin@sauma.arena');
+      setUsername('admin');
     } else {
-      setEmail('juri.laga1@sauma.arena');
+      setUsername('juri1');
     }
   };
-
-  const refereePresets = PRESET_USERS.filter((u) => u.role === 'REFEREE');
 
   const handleLogin = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
 
-    if (!email.trim() || !password.trim()) {
-      setErrorMessage('Mohon masukkan email dinas dan kata sandi Anda.');
+    if (!username.trim() || !password.trim()) {
+      setErrorMessage('Masukkan username dan kata sandi Anda untuk melanjutkan.');
       return;
     }
 
-    const matched = PRESET_USERS.find((u) => u.email.toLowerCase() === email.trim().toLowerCase());
+    const input = username.trim().toLowerCase();
+    const matched = PRESET_USERS.find(
+      (u) =>
+        (u.username && u.username.toLowerCase() === input) ||
+        u.email.toLowerCase() === input ||
+        u.email.toLowerCase().startsWith(input) ||
+        u.name.toLowerCase().includes(input)
+    );
 
     const user: AppUser = matched
       ? { ...matched, role: activeRoleTab }
       : {
           id: `usr-${Date.now()}`,
-          name: email.split('@')[0],
-          email: email.trim(),
+          name: username.trim(),
+          username: username.trim(),
+          email: `${username.trim()}@sauma.arena`,
           role: activeRoleTab,
-          roleLabel: activeRoleTab === 'ADMIN' ? 'Komisioner Pertandingan' : 'Juri Resmi Lapangan',
+          roleLabel: activeRoleTab === 'ADMIN' ? 'Admin Turnamen' : 'Panitia / Juri Lapangan',
           specialization: activeRoleTab === 'REFEREE' ? 'FUTSAL' : undefined,
-          avatarText: email.slice(0, 2).toUpperCase(),
+          avatarText: username.trim().slice(0, 2).toUpperCase(),
           isAvailable: true,
         };
 
@@ -82,47 +88,47 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({
             <div className="flex items-center gap-3">
               <SaumaArenaLogo size="lg" variant="dark" />
               <div>
-                <span className="font-black text-base sm:text-lg tracking-tight font-[var(--font-display)] block text-white">
+                <span className="font-bebas text-xl sm:text-2xl tracking-wider block text-white uppercase">
                   SAUMA ARENA
                 </span>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--color-arena-accent)]">
-                  Multi-Sport OS
+                <span className="text-xs font-barlow font-bold uppercase tracking-wider text-[var(--color-arena-accent)]">
+                  Sistem Turnamen Resmi
                 </span>
               </div>
             </div>
 
             <div className="space-y-2 pt-2">
-              <span className="text-[10px] font-black uppercase tracking-widest text-[var(--color-arena-accent)] block">
-                PORTAL ADMIN & KOMISIONER
+              <span className="text-xs font-barlow font-bold uppercase tracking-wider text-[var(--color-arena-accent)] block">
+                PANEL ADMIN &amp; PANITIA / JURI
               </span>
-              <h2 className="text-xl sm:text-2xl font-black font-[var(--font-display)] leading-tight text-white">
-                Pusat Komando & Jadwal Multi-Cabor
+              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bebas uppercase tracking-wide leading-tight text-white">
+                Kelola Jadwal &amp; Hasil Pertandingan
               </h2>
               <p className="text-xs text-slate-300 leading-relaxed pt-1">
-                Atur bagan bracket, plotting lapangan, verifikasi data atlet ber-QR, dan pengesahan BAP resmi.
+                Bagan kejuaraan, alokasi lapangan, data atlet, dan Berita Acara Pertandingan (BAP) resmi dalam satu meja kerja.
               </p>
             </div>
 
             <div className="space-y-2 pt-2 text-xs text-slate-200">
               <div className="flex items-center gap-2.5">
                 <CheckCircle2 className="w-4 h-4 text-[var(--color-arena-accent)] shrink-0" />
-                <span>Global Filter Cabor (Futsal, Badminton, Basket, Esport)</span>
+                <span>Mendukung multi-cabor: Futsal, Badminton, Basket, dan E-Sport</span>
               </div>
               <div className="flex items-center gap-2.5">
                 <CheckCircle2 className="w-4 h-4 text-[var(--color-arena-accent)] shrink-0" />
-                <span>Cetak massal ID Card atlet &amp; validasi tiket QR</span>
+                <span>ID Card atlet resmi dengan QR check-in sebelum tanding</span>
               </div>
               <div className="flex items-center gap-2.5">
                 <CheckCircle2 className="w-4 h-4 text-[var(--color-arena-accent)] shrink-0" />
-                <span>Hak override live score saat juri offline</span>
+                <span>Pembaruan skor langsung dan penandatanganan BAP digital</span>
               </div>
             </div>
           </div>
 
-          <div className="pt-6 border-t border-white/10 mt-6 relative z-10 flex items-center justify-between text-[11px] text-slate-400">
-            <span>MMFC I Matsanega 2026</span>
-            <span className="font-mono text-[var(--color-arena-accent)] font-bold">
-              Multi-Sport OS
+          <div className="pt-6 border-t border-white/10 mt-6 relative z-10 flex items-center justify-between text-xs text-slate-400">
+            <span className="font-barlow font-bold uppercase tracking-wider">MMFC I Matsanega 2026</span>
+            <span className="font-barlow text-[var(--color-arena-accent)] font-bold uppercase tracking-wider">
+              Edisi Resmi
             </span>
           </div>
         </div>
@@ -132,21 +138,21 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({
           <div>
             <div className="flex items-center justify-between pb-4">
               <div>
-                <h3 className="text-xl sm:text-2xl font-black text-[var(--text-main)] font-[var(--font-display)]">
-                  Masuk Kredensial
+                <h3 className="text-2xl sm:text-3xl font-bebas uppercase tracking-wide text-[var(--text-main)]">
+                  Masuk Akun Petugas
                 </h3>
                 <p className="text-xs text-[var(--text-muted)] mt-0.5">
-                  Pilih peran tugas Anda untuk membuka akses sistem.
+                  Pilih peran Anda untuk melanjutkan ke meja tugas pertandingan.
                 </p>
               </div>
 
               <button
                 type="button"
                 onClick={onBackToPublic}
-                className="btn-tactile inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[var(--border-subtle)] text-xs font-semibold text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-muted)] transition-colors shrink-0"
+                className="btn-tactile inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[var(--border-subtle)] text-xs font-barlow font-bold uppercase tracking-wider text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-muted)] transition-colors shrink-0"
               >
                 <ArrowLeft className="w-3.5 h-3.5" />
-                <span>Publik</span>
+                <span>Portal Publik</span>
               </button>
             </div>
 
@@ -155,78 +161,28 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({
               <button
                 type="button"
                 onClick={() => handleSelectRoleTab('ADMIN')}
-                className={`btn-tactile flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-bold transition-all ${
+                className={`btn-tactile flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-barlow font-bold uppercase tracking-wider transition-all ${
                   activeRoleTab === 'ADMIN'
                     ? 'bg-[var(--color-arena-primary)] text-white shadow-xs'
                     : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'
                 }`}
               >
                 <ShieldCheck className="w-4 h-4" />
-                <span>Admin / Panitia</span>
+                <span>Admin</span>
               </button>
               <button
                 type="button"
                 onClick={() => handleSelectRoleTab('REFEREE')}
-                className={`btn-tactile flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-bold transition-all ${
+                className={`btn-tactile flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-barlow font-bold uppercase tracking-wider transition-all ${
                   activeRoleTab === 'REFEREE'
                     ? 'bg-[var(--color-arena-accent)] text-slate-900 shadow-xs'
                     : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'
                 }`}
               >
                 <Whistle className="w-4 h-4" />
-                <span>Juri Lapangan</span>
+                <span>Panitia / Juri</span>
               </button>
             </div>
-
-            {/* Match-Based Referee Account Selector (1 Pertandingan 1 Juri) */}
-            {activeRoleTab === 'REFEREE' && (
-              <div className="mb-5 p-3.5 rounded-2xl bg-[var(--bg-muted)] border border-[var(--border-subtle)] space-y-2.5 animate-fadeIn">
-                <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-black uppercase tracking-wider text-[var(--text-main)] font-[var(--font-display)]">
-                    Pilih Juri Penilai Laga (1 Pertandingan 1 Juri):
-                  </span>
-                  <span className="text-[10px] font-mono text-[var(--color-arena-accent)] font-bold">
-                    MMFC I Futsal
-                  </span>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  {refereePresets.map((r) => {
-                    const isSelected = email.toLowerCase() === r.email.toLowerCase();
-                    return (
-                      <button
-                        key={r.id}
-                        type="button"
-                        onClick={() => {
-                          setEmail(r.email);
-                          setPassword('pass1234');
-                          if (errorMessage) setErrorMessage(null);
-                        }}
-                        className={`btn-tactile p-2.5 rounded-xl border text-left transition-all flex items-start gap-2.5 ${
-                          isSelected
-                            ? 'border-[var(--color-arena-accent)] bg-amber-500/10 ring-1 ring-[var(--color-arena-accent)]/50 shadow-xs'
-                            : 'border-[var(--border-subtle)] hover:border-slate-400 bg-[var(--bg-surface)]'
-                        }`}
-                      >
-                        <div className="w-7 h-7 rounded-lg bg-[var(--color-arena-dark)] text-[var(--color-arena-accent)] flex items-center justify-center font-black text-xs shrink-0 mt-0.5 shadow-2xs">
-                          {r.avatarText}
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <div className="font-bold text-xs text-[var(--text-main)] truncate">
-                            {r.name}
-                          </div>
-                          <div className="text-[11px] text-[var(--color-arena-primary)] dark:text-sky-300 font-bold truncate">
-                            {r.assignedMatchLabel || r.roleLabel}
-                          </div>
-                          <div className="text-[10px] text-[var(--text-muted)] font-mono truncate">
-                            {r.email}
-                          </div>
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
 
             {errorMessage && (
               <div className="p-3.5 rounded-xl bg-red-500/10 border border-red-500/20 text-red-900 dark:text-red-300 text-xs flex items-center gap-2.5 mb-4 animate-fadeIn">
@@ -237,20 +193,20 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({
 
             <form onSubmit={handleLogin} className="space-y-4 text-xs sm:text-sm">
               <div className="space-y-1.5">
-                <label className="block text-xs font-bold text-[var(--text-main)]">
-                  {activeRoleTab === 'ADMIN' ? 'Email Akun Admin / Panitia' : 'Email Akun Juri Resmi'}
+                <label className="block text-xs font-barlow font-bold uppercase tracking-wider text-[var(--text-main)]">
+                  Username
                 </label>
                 <div className="relative">
-                  <Mail className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-faint)]" />
+                  <User className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-faint)]" />
                   <input
-                    type="email"
+                    type="text"
                     required
-                    value={email}
+                    value={username}
                     onChange={(e) => {
-                      setEmail(e.target.value);
+                      setUsername(e.target.value);
                       if (errorMessage) setErrorMessage(null);
                     }}
-                    placeholder="nama@sauma.arena"
+                    placeholder="Masukkan username..."
                     className="w-full pl-10 pr-4 py-2.5 text-xs sm:text-sm rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] text-[var(--text-main)] focus:outline-none focus:border-[var(--color-arena-primary)] transition-all font-mono"
                   />
                 </div>
@@ -258,7 +214,7 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({
 
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between">
-                  <label className="block text-xs font-bold text-[var(--text-main)]">Kata Sandi</label>
+                  <label className="block text-xs font-barlow font-bold uppercase tracking-wider text-[var(--text-main)]">Kata Sandi</label>
                 </div>
                 <div className="relative">
                   <Lock className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-faint)]" />
@@ -291,16 +247,16 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({
                     onChange={(e) => setRememberMe(e.target.checked)}
                     className="w-4 h-4 rounded text-[var(--color-arena-primary)]"
                   />
-                  <span>Ingat sesi perangkat ini</span>
+                  <span>Ingat saya di perangkat ini</span>
                 </label>
-                <span className="text-[11px] text-[var(--color-arena-primary)] font-semibold cursor-pointer hover:underline">
-                  Bantuan Sandi
+                <span className="text-xs font-barlow font-bold uppercase tracking-wider text-[var(--color-arena-primary)] cursor-pointer hover:underline">
+                  Lupa kata sandi?
                 </span>
               </div>
 
               <button
                 type="submit"
-                className={`btn-tactile w-full py-3 rounded-xl font-bold text-xs sm:text-sm shadow-xs transition-colors min-h-[44px] flex items-center justify-center gap-2 ${
+                className={`btn-tactile w-full py-3.5 rounded-xl font-bebas text-lg uppercase tracking-wider shadow-xs transition-colors min-h-[48px] flex items-center justify-center gap-2 ${
                   activeRoleTab === 'ADMIN'
                     ? 'bg-[var(--color-arena-primary)] hover:bg-[var(--color-arena-primary-hover)] text-white'
                     : 'bg-[var(--color-arena-accent)] hover:brightness-105 text-slate-900'
@@ -308,7 +264,7 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({
               >
                 <ShieldCheck className="w-4 h-4" />
                 <span>
-                  {activeRoleTab === 'ADMIN' ? 'Buka Panel Admin Back-Office' : 'Buka Match Center Juri'}
+                  {activeRoleTab === 'ADMIN' ? 'Masuk sebagai Admin' : 'Masuk sebagai Panitia / Juri'}
                 </span>
               </button>
             </form>

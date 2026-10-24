@@ -3,19 +3,26 @@
 import React, { useState } from 'react';
 import {
   Image as ImageIcon,
-  Sparkles,
+  Calendar,
+  MapPin,
   CheckCircle2,
+  AlertCircle,
   RotateCcw,
   Save,
   Sliders,
   Eye,
   Plus,
-  Trash2,
   Trophy,
 } from 'lucide-react';
-import { PublicHeaderConfig, SportCode } from '@/types';
-import { BANNER_PRESETS, DEFAULT_CABOR_BANNERS, DEFAULT_HEADER_CONFIG } from '@/mocks/headerConfig';
+import { PublicHeaderConfig } from '@/types';
+import {
+  BANNER_PRESETS,
+  DEFAULT_CABOR_BANNERS,
+  DEFAULT_HEADER_CONFIG,
+  TEMPLATE_CABOR,
+} from '@/mocks/headerConfig';
 import { ConfirmModal } from '@/components/admin/common/ConfirmModal';
+import { BannerContentForm } from './banner/BannerContentForm';
 
 interface AdminBannerConfigProps {
   banners?: PublicHeaderConfig[];
@@ -23,48 +30,6 @@ interface AdminBannerConfigProps {
   config?: PublicHeaderConfig;
   onSaveConfig?: (updated: PublicHeaderConfig) => void;
 }
-
-const TEMPLATE_CABOR: Array<{
-  sportCode: SportCode;
-  sportLabel: string;
-  title: string;
-  categoryBadge: string;
-  description: string;
-  presetIndex: number;
-  venue: string;
-  contingentInfo: string;
-}> = [
-  {
-    sportCode: 'BASKET',
-    sportLabel: 'Bola Basket',
-    title: 'Matsanega Basketball Challenge 2026',
-    categoryBadge: 'BASKETBALL 5v5 PELAJAR',
-    description: 'Kompetisi bola basket antarpelajar tingkat SD/MI & SMP se-derajat. Menampilkan skill dribbling, 3-point shoot, dan pertahanan solid.',
-    presetIndex: 2,
-    venue: 'Matsanega Indoor Basketball Court',
-    contingentInfo: '8 Tim Kontingen Basket',
-  },
-  {
-    sportCode: 'BADMINTON',
-    sportLabel: 'Bulutangkis',
-    title: 'Matsanega Badminton Junior Open 2026',
-    categoryBadge: 'BULUTANGKIS TUNGGAL & GANDA',
-    description: 'Turnamen bulutangkis junior memperebutkan Piala Bergilir Kepala Madrasah. Reli-reli sengit dan smash menyilang di lapangan standar PBSI.',
-    presetIndex: 2,
-    venue: 'GOR Bulutangkis Matsanega',
-    contingentInfo: '16 Kontingen Atlet Bulutangkis',
-  },
-  {
-    sportCode: 'SEPAK_TAKRAW',
-    sportLabel: 'Sepak Takraw',
-    title: 'Matsanega Takraw Invitation Cup 2026',
-    categoryBadge: 'SEPAK TAKRAW INTER-REGU PELAJAR',
-    description: 'Adu kelincahan akrobatik, smash roll, dan kontrol bola rotan antarsekolah dasar dan madrasah se-Jawa Timur.',
-    presetIndex: 0,
-    venue: 'Lapangan Outdoor Matsanega',
-    contingentInfo: '8 Regu Kontingen Takraw',
-  },
-];
 
 export const AdminBannerConfig: React.FC<AdminBannerConfigProps> = ({
   banners,
@@ -77,6 +42,7 @@ export const AdminBannerConfig: React.FC<AdminBannerConfigProps> = ({
   );
   const [selectedIdx, setSelectedIdx] = useState<number>(0);
   const [isSaved, setIsSaved] = useState(false);
+  const [warningNotice, setWarningNotice] = useState<string | null>(null);
   const [isAddingNew, setIsAddingNew] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
@@ -113,7 +79,8 @@ export const AdminBannerConfig: React.FC<AdminBannerConfigProps> = ({
 
   const handleDeleteCurrent = () => {
     if (bannerList.length <= 1) {
-      alert('Minimal harus ada 1 banner cabor yang aktif.');
+      setWarningNotice('Minimal harus ada 1 banner cabor yang aktif.');
+      setTimeout(() => setWarningNotice(null), 3000);
       return;
     }
     setIsDeleteModalOpen(true);
@@ -160,7 +127,7 @@ export const AdminBannerConfig: React.FC<AdminBannerConfigProps> = ({
       {/* Top Banner Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] shadow-xs">
         <div>
-          <h3 className="font-black text-sm text-[var(--text-main)] flex items-center gap-2">
+          <h3 className="font-barlow font-bold uppercase tracking-wide text-sm text-[var(--text-main)] flex items-center gap-2">
             <Sliders className="w-4 h-4 text-[var(--color-arena-primary)]" />
             <span>Kustomisasi Multi-Banner Cabor (Slider Publik)</span>
           </h3>
@@ -173,7 +140,7 @@ export const AdminBannerConfig: React.FC<AdminBannerConfigProps> = ({
           <button
             type="button"
             onClick={handleResetToDefault}
-            className="btn-tactile flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[var(--border-subtle)] text-[11px] font-semibold text-[var(--text-muted)] hover:bg-[var(--bg-muted)]"
+            className="btn-tactile flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[var(--border-subtle)] text-xs font-barlow font-bold uppercase tracking-wider text-[var(--text-muted)] hover:bg-[var(--bg-muted)]"
           >
             <RotateCcw className="w-3.5 h-3.5" />
             <span>Reset Standar</span>
@@ -181,7 +148,7 @@ export const AdminBannerConfig: React.FC<AdminBannerConfigProps> = ({
           <button
             type="button"
             onClick={handleSave}
-            className="btn-tactile flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-[var(--color-arena-primary)] text-white text-xs font-bold hover:bg-[var(--color-arena-primary-hover)] shadow-xs"
+            className="btn-tactile flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-[var(--color-arena-primary)] text-white text-xs font-barlow font-bold uppercase tracking-wider hover:bg-[var(--color-arena-primary-hover)] shadow-xs"
           >
             <Save className="w-3.5 h-3.5" />
             <span>Simpan Semua Cabor</span>
@@ -196,16 +163,23 @@ export const AdminBannerConfig: React.FC<AdminBannerConfigProps> = ({
         </div>
       )}
 
+      {warningNotice && (
+        <div className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-800 dark:text-amber-300 text-xs font-bold flex items-center gap-2 animate-fadeIn">
+          <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
+          <span>{warningNotice}</span>
+        </div>
+      )}
+
       {/* Cabor Tabs Selector */}
       <div className="p-4 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] space-y-3">
         <div className="flex items-center justify-between">
-          <span className="font-bold text-[var(--text-main)] uppercase tracking-wider text-[11px]">
+          <span className="font-barlow font-bold text-[var(--text-main)] uppercase tracking-wider text-xs">
             Daftar Banner Cabor Aktif ({bannerList.length})
           </span>
           <button
             type="button"
             onClick={() => setIsAddingNew(!isAddingNew)}
-            className="btn-tactile flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[var(--color-arena-accent)] text-slate-950 font-bold text-[11px] shadow-xs"
+            className="btn-tactile flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[var(--color-arena-accent)] text-slate-950 font-barlow font-bold uppercase tracking-wider text-xs shadow-xs"
           >
             <Plus className="w-3.5 h-3.5" />
             <span>+ Tambah Banner Cabor</span>
@@ -223,7 +197,7 @@ export const AdminBannerConfig: React.FC<AdminBannerConfigProps> = ({
                   setSelectedIdx(idx);
                   setIsAddingNew(false);
                 }}
-                className={`btn-tactile px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${
+                className={`btn-tactile px-3.5 py-2 rounded-xl text-xs font-barlow font-bold uppercase tracking-wider transition-all flex items-center gap-2 ${
                   isCurrent
                     ? 'bg-[var(--color-arena-primary)] text-white shadow-xs ring-2 ring-[var(--color-arena-primary)]/30'
                     : 'bg-[var(--bg-muted)] text-[var(--text-muted)] hover:text-[var(--text-main)]'
@@ -267,7 +241,7 @@ export const AdminBannerConfig: React.FC<AdminBannerConfigProps> = ({
 
       {/* Live Preview of Selected Cabor Banner */}
       <div className="space-y-2">
-        <label className="text-[11px] font-black uppercase tracking-wider text-[var(--text-muted)] flex items-center gap-1.5">
+        <label className="text-[11px] font-barlow font-bold uppercase tracking-wider text-[var(--text-muted)] flex items-center gap-1.5">
           <Eye className="w-3.5 h-3.5 text-[var(--color-arena-primary)]" />
           <span>Pratinjau Banner Publik: {activeDraft.sportLabel}</span>
         </label>
@@ -282,17 +256,17 @@ export const AdminBannerConfig: React.FC<AdminBannerConfigProps> = ({
           />
           <div className="relative z-10 space-y-3">
             <div className="flex flex-wrap items-center gap-2 text-xs">
-              <span className="px-2.5 py-0.5 rounded bg-[var(--color-arena-primary)]/40 text-sky-200 font-bold border border-[var(--color-arena-primary)]/50">
+              <span className="px-2.5 py-0.5 rounded bg-[var(--color-arena-primary)]/40 text-sky-200 font-barlow font-bold uppercase tracking-wider border border-[var(--color-arena-primary)]/50">
                 {activeDraft.statusBadge}
               </span>
-              <span className="px-2 py-0.5 rounded bg-white/10 text-slate-200 font-semibold border border-white/15">
+              <span className="px-2 py-0.5 rounded bg-white/10 text-slate-200 font-barlow font-semibold uppercase tracking-wider border border-white/15">
                 {activeDraft.categoryBadge}
               </span>
               <span className="text-[11px] text-slate-300 ml-auto">
                 {activeDraft.organizer}
               </span>
             </div>
-            <h2 className="text-xl sm:text-2xl font-black font-[var(--font-display)] leading-tight text-white max-w-2xl">
+            <h2 className="text-2xl sm:text-3xl font-bebas uppercase tracking-wide leading-tight text-white max-w-2xl">
               {activeDraft.title}
             </h2>
             <p className="text-xs text-slate-300 line-clamp-2 max-w-xl">
@@ -300,14 +274,14 @@ export const AdminBannerConfig: React.FC<AdminBannerConfigProps> = ({
             </p>
           </div>
           <div className="relative z-10 pt-4 flex flex-wrap items-center justify-between gap-3 text-xs border-t border-white/15 text-slate-200">
-            <div className="flex gap-4">
-              <span>📅 {activeDraft.dates}</span>
-              <span>📍 {activeDraft.venue}</span>
-              <span>🏆 {activeDraft.contingentInfo}</span>
+            <div className="flex flex-wrap items-center gap-4">
+              <span className="flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5 text-[var(--color-arena-accent)]" /> {activeDraft.dates}</span>
+              <span className="flex items-center gap-1.5"><MapPin className="w-3.5 h-3.5 text-[var(--color-arena-accent)]" /> {activeDraft.venue}</span>
+              <span className="flex items-center gap-1.5"><Trophy className="w-3.5 h-3.5 text-[var(--color-arena-accent)]" /> {activeDraft.contingentInfo}</span>
             </div>
             <div className="flex gap-2">
-              <span className="px-3 py-1 rounded-lg bg-[var(--color-arena-primary)] font-bold text-xs">{activeDraft.ticketButtonText}</span>
-              <span className="px-3 py-1 rounded-lg bg-white/10 text-xs">{activeDraft.registerButtonText}</span>
+              <span className="px-3 py-1 rounded-lg bg-[var(--color-arena-primary)] font-barlow font-bold uppercase tracking-wider text-xs">{activeDraft.ticketButtonText}</span>
+              <span className="px-3 py-1 rounded-lg bg-white/10 font-barlow font-semibold uppercase tracking-wider text-xs">{activeDraft.registerButtonText}</span>
             </div>
           </div>
         </div>
@@ -315,7 +289,7 @@ export const AdminBannerConfig: React.FC<AdminBannerConfigProps> = ({
 
       {/* Preset Banner Backgrounds */}
       <div className="p-5 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] space-y-4 shadow-xs">
-        <h4 className="text-xs font-black uppercase tracking-wider text-[var(--text-main)] flex items-center gap-2">
+        <h4 className="text-xs font-barlow font-bold uppercase tracking-wider text-[var(--text-main)] flex items-center gap-2">
           <ImageIcon className="w-4 h-4 text-[var(--color-arena-primary)]" />
           <span>Latar Gambar untuk Cabor: {activeDraft.sportLabel}</span>
         </h4>
@@ -379,148 +353,13 @@ export const AdminBannerConfig: React.FC<AdminBannerConfigProps> = ({
       </div>
 
       {/* Form Edit Konten Cabor */}
-      <div className="p-5 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] space-y-4 shadow-xs">
-        <div className="flex items-center justify-between border-b border-[var(--border-subtle)] pb-3">
-          <h4 className="font-black text-xs uppercase tracking-wider text-[var(--text-main)] flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-[var(--color-arena-accent)]" />
-            <span>Informasi &amp; Teks Cabor: {activeDraft.sportLabel}</span>
-          </h4>
-
-          {bannerList.length > 1 && (
-            <button
-              type="button"
-              onClick={handleDeleteCurrent}
-              className="btn-tactile text-red-600 hover:text-red-700 flex items-center gap-1 font-bold text-[11px]"
-            >
-              <Trash2 className="w-3.5 h-3.5" />
-              <span>Hapus Cabor Ini</span>
-            </button>
-          )}
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label className="font-bold text-[var(--text-main)] block mb-1">Label Tab Cabor (Singkat)</label>
-            <input
-              type="text"
-              value={activeDraft.sportLabel}
-              onChange={(e) => updateActiveDraft({ sportLabel: e.target.value })}
-              className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)]/50 text-[var(--text-main)] font-semibold"
-            />
-          </div>
-
-          <div>
-            <label className="font-bold text-[var(--text-main)] block mb-1">Status Badge (Kiri)</label>
-            <input
-              type="text"
-              value={activeDraft.statusBadge}
-              onChange={(e) => updateActiveDraft({ statusBadge: e.target.value })}
-              className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)]/50 text-[var(--text-main)] font-semibold"
-            />
-          </div>
-
-          <div className="sm:col-span-2">
-            <label className="font-bold text-[var(--text-main)] block mb-1">Kategori / Badge Detail</label>
-            <input
-              type="text"
-              value={activeDraft.categoryBadge}
-              onChange={(e) => updateActiveDraft({ categoryBadge: e.target.value })}
-              className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)]/50 text-[var(--text-main)] font-semibold"
-            />
-          </div>
-
-          <div className="sm:col-span-2">
-            <label className="font-bold text-[var(--text-main)] block mb-1">Penyelenggara Resmi</label>
-            <input
-              type="text"
-              value={activeDraft.organizer}
-              onChange={(e) => updateActiveDraft({ organizer: e.target.value })}
-              className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)]/50 text-[var(--text-main)]"
-            />
-          </div>
-
-          <div className="sm:col-span-2">
-            <label className="font-bold text-[var(--text-main)] block mb-1">Judul Utama Turnamen Cabor</label>
-            <input
-              type="text"
-              value={activeDraft.title}
-              onChange={(e) => updateActiveDraft({ title: e.target.value })}
-              className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)]/50 text-[var(--text-main)] font-bold text-sm"
-            />
-          </div>
-
-          <div className="sm:col-span-2">
-            <label className="font-bold text-[var(--text-main)] block mb-1">Deskripsi Turnamen Cabor</label>
-            <textarea
-              rows={2}
-              value={activeDraft.description}
-              onChange={(e) => updateActiveDraft({ description: e.target.value })}
-              className="w-full p-3 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)]/50 text-[var(--text-main)] leading-relaxed"
-            />
-          </div>
-
-          <div>
-            <label className="font-bold text-[var(--text-main)] block mb-1">Tanggal Pelaksanaan</label>
-            <input
-              type="text"
-              value={activeDraft.dates}
-              onChange={(e) => updateActiveDraft({ dates: e.target.value })}
-              className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)]/50 text-[var(--text-main)]"
-            />
-          </div>
-
-          <div>
-            <label className="font-bold text-[var(--text-main)] block mb-1">Lokasi Gedung / Lapangan</label>
-            <input
-              type="text"
-              value={activeDraft.venue}
-              onChange={(e) => updateActiveDraft({ venue: e.target.value })}
-              className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)]/50 text-[var(--text-main)]"
-            />
-          </div>
-
-          <div>
-            <label className="font-bold text-[var(--text-main)] block mb-1">Keterangan Kuota Tim</label>
-            <input
-              type="text"
-              value={activeDraft.contingentInfo}
-              onChange={(e) => updateActiveDraft({ contingentInfo: e.target.value })}
-              className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)]/50 text-[var(--text-main)]"
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-2">
-            <div>
-              <label className="font-bold text-[var(--text-main)] block mb-1">Teks Tombol Tiket</label>
-              <input
-                type="text"
-                value={activeDraft.ticketButtonText}
-                onChange={(e) => updateActiveDraft({ ticketButtonText: e.target.value })}
-                className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)]/50 text-[var(--text-main)]"
-              />
-            </div>
-            <div>
-              <label className="font-bold text-[var(--text-main)] block mb-1">Teks Tombol Registrasi</label>
-              <input
-                type="text"
-                value={activeDraft.registerButtonText}
-                onChange={(e) => updateActiveDraft({ registerButtonText: e.target.value })}
-                className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)]/50 text-[var(--text-main)]"
-              />
-            </div>
-          </div>
-        </div>
-
-        <div className="pt-3 border-t border-[var(--border-subtle)] flex items-center justify-end gap-2">
-          <button
-            type="button"
-            onClick={handleSave}
-            className="btn-tactile px-5 py-2.5 rounded-xl bg-[var(--color-arena-primary)] text-white font-bold text-xs hover:bg-[var(--color-arena-primary-hover)] shadow-xs"
-          >
-            Terapkan &amp; Simpan ke Halaman Publik
-          </button>
-        </div>
-      </div>
+      <BannerContentForm
+        activeDraft={activeDraft}
+        updateActiveDraft={updateActiveDraft}
+        canDelete={bannerList.length > 1}
+        onDelete={handleDeleteCurrent}
+        onSave={handleSave}
+      />
 
       {/* Reusable Confirm Delete Modal */}
       <ConfirmModal

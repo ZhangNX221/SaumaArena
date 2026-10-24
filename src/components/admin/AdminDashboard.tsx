@@ -1,30 +1,24 @@
 'use client';
 
-import React, { useState } from 'react';
-import {
-  Menu,
-  ChevronRight,
-  Wifi,
-  Search,
-  ArrowLeft,
-  LogOut,
-  Moon,
-  Sun,
-  Filter,
-  Whistle,
-  X,
-} from 'lucide-react';
+import React, { useState, useEffect } from 'react';
 import { SportCode, AppUser, PublicHeaderConfig } from '@/types';
 import { AdminSidebar, AdminSubmenuId } from './AdminSidebar';
+import { AdminHeader } from './layout/AdminHeader';
 import { AdminOverviewModule } from './modules/AdminOverviewModule';
 import { AdminMasterDataModule } from './modules/AdminMasterDataModule';
 import { AdminParticipantsModule } from './modules/AdminParticipantsModule';
 import { AdminMatchOpsModule } from './modules/AdminMatchOpsModule';
 import { AdminTicketingModule } from './modules/AdminTicketingModule';
 import { AdminSystemModule } from './modules/AdminSystemModule';
-import { AdminCertificatesModule } from './modules/AdminCertificatesModule';
-import { tournamentMeta, initialMatches, initialTickets } from '@/mocks/tournamentData';
-import { ATHLETE_ID_CARDS } from '@/mocks/multiSportData';
+import { CompetitionsManagementView } from './modules/master/CompetitionsManagementView';
+import { AthletesPlayersTab } from './modules/participants/AthletesPlayersTab';
+import { ResultsVerificationTab } from './modules/matches/ResultsVerificationTab';
+import { MatchAssignmentsTab } from './modules/officials/MatchAssignmentsTab';
+import { AuditLogsTab } from './modules/system/AuditLogsTab';
+import { ReportsExportTab } from './modules/system/ReportsExportTab';
+import { AccountSettingsView } from './modules/system/AccountSettingsView';
+import { BackupRestoreTab } from './modules/system/BackupRestoreTab';
+import { FEATURES } from '@/config/features';
 
 interface AdminDashboardProps {
   user?: AppUser | null;
@@ -40,25 +34,32 @@ interface AdminDashboardProps {
 }
 
 const MENU_LABELS: Record<AdminSubmenuId, { category: string; title: string }> = {
-  overview_stats: { category: 'Dashboard Utama', title: 'Ringkasan Statistik' },
-  medal_tally: { category: 'Dashboard Utama', title: 'Klasemen Medali' },
-  sports_list: { category: 'Data Lapangan', title: 'Daftar Cabor' },
-  categories_numbers: { category: 'Data Lapangan', title: 'Nomor Tanding' },
-  venues_courts: { category: 'Data Lapangan', title: 'Data Lapangan' },
-  registration_verify: { category: 'Data Peserta', title: 'Verifikasi Berkas' },
-  contingents_teams: { category: 'Data Peserta', title: 'Data Tim' },
-  athletes_id_cards: { category: 'Data Peserta', title: 'Kartu Atlet' },
-  drawing_bracket: { category: 'Kelola Laga', title: 'Bagan Turnamen' },
-  schedule_plotting: { category: 'Kelola Laga', title: 'Jadwal Laga' },
-  live_score_control: { category: 'Kelola Laga', title: 'Kontrol Skor' },
-  group_standings: { category: 'Kelola Laga', title: 'Klasemen Grup' },
-  ticket_management: { category: 'Tiket Masuk', title: 'Kuota Tiket' },
-  transaction_history: { category: 'Tiket Masuk', title: 'Riwayat Transaksi' },
-  qr_scanner_gate: { category: 'Tiket Masuk', title: 'Pindai Tiket' },
-  cert_templates: { category: 'Sertifikat Digital', title: 'Desain Sertifikat' },
-  cert_distribution: { category: 'Sertifikat Digital', title: 'Kirim Sertifikat' },
-  referee_staff_accounts: { category: 'Pengaturan Sistem', title: 'Akun Petugas' },
-  event_settings: { category: 'Pengaturan Sistem', title: 'Profil Event' },
+  overview_stats: { category: 'BERANDA', title: 'Ringkasan Hari Ini' },
+  medal_tally: { category: 'BERANDA', title: 'Klasemen Medali' },
+  competitions_list: { category: 'PERSIAPAN KOMPETISI', title: 'Daftar Kompetisi' },
+  sports_list: { category: 'PERSIAPAN KOMPETISI', title: 'Cabang Olahraga & Aturan' },
+  categories_numbers: { category: 'PERSIAPAN KOMPETISI', title: 'Kategori & Kelas' },
+  venues_courts: { category: 'PERSIAPAN KOMPETISI', title: 'Lokasi & Lapangan' },
+  registration_verify: { category: 'PESERTA', title: 'Verifikasi Berkas' },
+  contingents_teams: { category: 'PESERTA', title: 'Tim' },
+  athletes_players: { category: 'PESERTA', title: 'Pemain & Atlet' },
+  athletes_id_cards: { category: 'PESERTA', title: 'Kartu Atlet' },
+  schedule_plotting: { category: 'PERTANDINGAN', title: 'Jadwal & Bagan' },
+  drawing_bracket: { category: 'PERTANDINGAN', title: 'Bagan Turnamen' },
+  live_score_control: { category: 'PERTANDINGAN', title: 'Skor Langsung' },
+  results_verification: { category: 'PERTANDINGAN', title: 'Verifikasi Hasil & Sanksi' },
+  group_standings: { category: 'PERTANDINGAN', title: 'Klasemen' },
+  protests_sanctions: { category: 'PERTANDINGAN', title: 'Protes & Sanksi' },
+  referee_staff_accounts: { category: 'PENGATURAN', title: 'Akun Petugas' },
+  match_assignments: { category: 'PERTANDINGAN', title: 'Penugasan Pertandingan' },
+  event_settings: { category: 'PENGATURAN', title: 'Pengaturan Publik' },
+  account_settings: { category: 'PENGATURAN', title: 'Pengaturan Akun' },
+  backup_restore: { category: 'PENGATURAN', title: 'Backup & Restore' },
+  audit_logs: { category: 'PENGATURAN', title: 'Riwayat Perubahan' },
+  reports_export: { category: 'PENGATURAN', title: 'Laporan & Ekspor' },
+  ticket_management: { category: 'TIKET MASUK', title: 'Kuota Tiket' },
+  transaction_history: { category: 'TIKET MASUK', title: 'Riwayat Transaksi' },
+  qr_scanner_gate: { category: 'TIKET MASUK', title: 'Pindai Tiket' },
 };
 
 export const AdminDashboard: React.FC<AdminDashboardProps> = ({
@@ -76,61 +77,31 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const [activeSubmenu, setActiveSubmenu] = useState<AdminSubmenuId>('overview_stats');
   const [selectedSport, setSelectedSport] = useState<SportCode>('ALL');
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [activeCompetition, setActiveCompetition] = useState(
+    'Milad Matsanega Futsal Competition I (MMFC I)'
+  );
+
+  // Redirect to home if ticketing is disabled but user hits ticketing route
+  useEffect(() => {
+    if (!FEATURES.ticketing) {
+      if (
+        activeSubmenu === 'ticket_management' ||
+        activeSubmenu === 'transaction_history' ||
+        activeSubmenu === 'qr_scanner_gate'
+      ) {
+        setActiveSubmenu('overview_stats');
+      }
+    }
+  }, [activeSubmenu]);
 
   const currentMeta = MENU_LABELS[activeSubmenu] || {
-    category: 'Admin Console',
+    category: 'Admin Arena',
     title: 'Manajemen Turnamen',
   };
 
-  const normalizedQuery = searchQuery.trim().toLowerCase();
-  const searchResults =
-    normalizedQuery.length > 1
-      ? [
-          ...ATHLETE_ID_CARDS.filter(
-            (a) =>
-              a.name.toLowerCase().includes(normalizedQuery) ||
-              a.contingent.toLowerCase().includes(normalizedQuery)
-          )
-            .slice(0, 3)
-            .map((a) => ({
-              type: 'Atlet',
-              label: a.name,
-              desc: `${a.contingent} • ${a.sport}`,
-              targetSubmenu: 'athletes_id_cards' as AdminSubmenuId,
-            })),
-          ...initialMatches
-            .filter(
-              (m) =>
-                m.teamAName.toLowerCase().includes(normalizedQuery) ||
-                m.teamBName.toLowerCase().includes(normalizedQuery)
-            )
-            .slice(0, 3)
-            .map((m) => ({
-              type: 'Laga',
-              label: `${m.teamAName} vs ${m.teamBName}`,
-              desc: `${m.courtName} • ${m.scheduledTime}`,
-              targetSubmenu: 'schedule_plotting' as AdminSubmenuId,
-            })),
-          ...initialTickets
-            .filter(
-              (t) =>
-                t.code.toLowerCase().includes(normalizedQuery) ||
-                t.buyerName.toLowerCase().includes(normalizedQuery)
-            )
-            .slice(0, 3)
-            .map((t) => ({
-              type: 'Tiket',
-              label: t.code,
-              desc: `${t.buyerName} (${t.quantity} tiket)`,
-              targetSubmenu: 'ticket_management' as AdminSubmenuId,
-            })),
-        ]
-      : [];
-
   return (
     <div className="w-full min-h-screen h-screen flex bg-[var(--bg-page)] text-[var(--text-main)] overflow-hidden">
-      {/* Collapsible Left Sidebar with Global Filter Cabor */}
+      {/* Collapsible Left Sidebar */}
       <AdminSidebar
         activeSubmenu={activeSubmenu}
         onSelectSubmenu={setActiveSubmenu}
@@ -142,184 +113,26 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         onLogout={onLogout}
         onBackToPublic={onBackToPublic}
         onGoToReferee={onGoToReferee}
+        activeCompetition={activeCompetition}
+        onSelectCompetition={setActiveCompetition}
       />
 
       <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
-        <header className="h-16 px-4 sm:px-6 lg:px-8 bg-[var(--bg-surface)] border-b border-[var(--border-subtle)] flex items-center justify-between gap-3 sm:gap-4 sticky top-0 z-30 shrink-0 box-border">
-          <div className="flex items-center gap-3 min-w-0 flex-1">
-            <button
-              type="button"
-              onClick={() => setIsMobileSidebarOpen(true)}
-              className="btn-tactile p-2 rounded-xl border border-[var(--border-subtle)] text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-muted)] lg:hidden shrink-0"
-              aria-label="Buka menu navigasi"
-            >
-              <Menu className="w-5 h-5" />
-            </button>
+        <AdminHeader
+          onOpenMobileSidebar={() => setIsMobileSidebarOpen(true)}
+          selectedSport={selectedSport}
+          onSelectSubmenu={setActiveSubmenu}
+          user={user}
+          onLogout={onLogout}
+          darkMode={darkMode}
+          onToggleDarkMode={onToggleDarkMode}
+          currentMeta={currentMeta}
+        />
 
-            <div className="relative max-w-sm w-full hidden md:block">
-              <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-faint)]" />
-              <input
-                type="text"
-                placeholder="Cari atlet, jadwal, tiket, atau cabor..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                aria-label="Cari data turnamen"
-                className="w-full pl-10 pr-9 py-2 text-xs font-medium rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)]/70 text-[var(--text-main)] focus:outline-none focus:border-[var(--color-arena-primary)] focus:bg-[var(--bg-surface)] transition-all font-[var(--font-sans)]"
-              />
-              {searchQuery && (
-                <button
-                  type="button"
-                  onClick={() => setSearchQuery('')}
-                  aria-label="Hapus pencarian"
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-faint)] hover:text-[var(--text-main)] transition-colors"
-                >
-                  <X className="w-3.5 h-3.5" />
-                </button>
-              )}
-
-              {/* Spotlight Live Search Dropdown */}
-              {normalizedQuery.length > 1 && searchResults.length > 0 && (
-                <div className="absolute left-0 right-0 top-full mt-1.5 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-2xl shadow-xl p-1.5 z-50 divide-y divide-[var(--border-subtle)] max-h-80 overflow-y-auto animate-fadeIn">
-                  <div className="px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-wider text-[var(--text-faint)] font-[var(--font-display)]">
-                    Hasil Pencarian ({searchResults.length})
-                  </div>
-                  {searchResults.map((res, idx) => (
-                    <button
-                      key={idx}
-                      type="button"
-                      onClick={() => {
-                        setActiveSubmenu(res.targetSubmenu);
-                        setSearchQuery('');
-                      }}
-                      className="w-full text-left px-3 py-2 hover:bg-[var(--bg-muted)] rounded-xl transition-colors flex items-center justify-between gap-2 group"
-                    >
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-1.5">
-                          <span className="text-[10px] font-extrabold uppercase tracking-wider px-1.5 py-0.5 rounded-md bg-[var(--color-arena-primary)]/10 text-[var(--color-arena-primary)] font-[var(--font-display)]">
-                            {res.type}
-                          </span>
-                          <span className="text-xs font-bold text-[var(--text-main)] truncate font-[var(--font-display)]">
-                            {res.label}
-                          </span>
-                        </div>
-                        <p className="text-[11px] text-[var(--text-muted)] truncate mt-0.5 font-[var(--font-sans)]">
-                          {res.desc}
-                        </p>
-                      </div>
-                      <ChevronRight className="w-3.5 h-3.5 text-[var(--text-faint)] group-hover:text-[var(--text-main)] shrink-0 transition-transform group-hover:translate-x-0.5" />
-                    </button>
-                  ))}
-                </div>
-              )}
-
-              {normalizedQuery.length > 1 && searchResults.length === 0 && (
-                <div className="absolute left-0 right-0 top-full mt-1.5 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-2xl shadow-xl p-3 z-50 text-center animate-fadeIn">
-                  <p className="text-xs text-[var(--text-muted)] font-[var(--font-sans)]">
-                    Tidak ditemukan hasil untuk &ldquo;{searchQuery}&rdquo;
-                  </p>
-                </div>
-              )}
-            </div>
-
-            {selectedSport !== 'ALL' && (
-              <span className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[var(--color-arena-primary)]/10 text-[var(--color-arena-primary)] text-xs font-bold font-[var(--font-display)] border border-[var(--color-arena-primary)]/20 shadow-2xs">
-                <Filter className="w-3.5 h-3.5" />
-                <span>Cabor: {selectedSport}</span>
-              </span>
-            )}
-          </div>
-
-          <div className="flex items-center gap-2 sm:gap-3">
-            <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20 text-xs font-bold font-[var(--font-display)]">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
-              <span>Realtime Matchday</span>
-            </div>
-
-            {onGoToReferee && (
-              <button
-                type="button"
-                onClick={onGoToReferee}
-                className="btn-tactile flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-[var(--color-arena-accent)] text-slate-900 font-extrabold text-xs shadow-xs hover:brightness-105 transition-all font-[var(--font-display)] tracking-wide"
-                title="Buka panel juri lapangan"
-              >
-                <span>Panel Juri</span>
-              </button>
-            )}
-
-            {onToggleDarkMode && (
-              <button
-                type="button"
-                onClick={onToggleDarkMode}
-                className="btn-tactile p-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-muted)]"
-                title={darkMode ? 'Mode terang' : 'Mode gelap'}
-                aria-label="Ganti mode tampilan"
-              >
-                {darkMode ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4" />}
-              </button>
-            )}
-
-            {onBackToPublic && (
-              <button
-                type="button"
-                onClick={onBackToPublic}
-                className="btn-tactile hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-surface)] text-xs font-semibold font-[var(--font-display)]"
-              >
-                <ArrowLeft className="w-3.5 h-3.5" />
-                <span>Halaman Publik</span>
-              </button>
-            )}
-
-            {/* User Profile Section */}
-            <div className="flex items-center gap-2 sm:gap-2.5 pl-2 sm:pl-3 border-l border-[var(--border-subtle)] shrink-0">
-              <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-[var(--color-arena-dark)] text-[var(--color-arena-accent)] flex items-center justify-center font-black text-xs shrink-0 shadow-2xs border border-[var(--border-subtle)] font-[var(--font-display)]">
-                {user?.avatarText || 'SA'}
-              </div>
-              <div className="hidden sm:block text-left max-w-[170px] lg:max-w-[240px]">
-                <div className="text-xs font-bold text-[var(--text-main)] truncate leading-tight font-[var(--font-display)]">
-                  {user?.name || 'Ust. H. Syamsul Arifin, M.Pd'}
-                </div>
-                <div className="text-[10px] text-[var(--text-muted)] truncate font-medium mt-0.5 font-[var(--font-sans)]">
-                  {user?.roleLabel || 'Komisioner & Superadmin MMFC I'}
-                </div>
-              </div>
-              {onLogout && (
-                <button
-                  type="button"
-                  onClick={onLogout}
-                  className="btn-tactile p-1.5 sm:p-2 rounded-xl text-red-600 hover:text-red-700 hover:bg-red-500/10 transition-colors"
-                  title="Keluar"
-                  aria-label="Logout dari sesi admin"
-                >
-                  <LogOut className="w-4 h-4" />
-                </button>
-              )}
-            </div>
-          </div>
-        </header>
-
-        {/* Viewport Content with Generous Breathing Room */}
+        {/* Viewport Content */}
         <div className="flex-1 overflow-y-auto">
-          <div className="px-6 sm:px-10 lg:px-12 pt-7 pb-4">
-            <div className="pb-5 border-b border-[var(--border-subtle)]">
-              <div className="flex items-center gap-2 text-xs text-[var(--text-muted)] font-medium font-[var(--font-sans)]">
-                <span className="font-semibold text-[var(--text-faint)]">Sauma Arena Back-Office</span>
-                <ChevronRight className="w-3.5 h-3.5 text-[var(--text-faint)]" />
-                <span className="font-bold text-[var(--color-arena-primary)] font-[var(--font-display)]">{currentMeta.category}</span>
-                <ChevronRight className="w-3.5 h-3.5 text-[var(--text-faint)]" />
-                <span className="text-[var(--text-main)] font-semibold">{currentMeta.title}</span>
-              </div>
-              <div className="mt-2 flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-1">
-                <h1 className="text-2xl sm:text-3xl font-extrabold text-[var(--text-main)] font-[var(--font-display)] tracking-tight">
-                  {currentMeta.title}
-                </h1>
-                <span className="text-xs font-mono tabular-nums text-[var(--text-muted)]">
-                  Turnamen: {tournamentMeta.shortTitle}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          <main className="px-6 sm:px-10 lg:px-12 pt-4 pb-24 max-w-7xl">
+          <main className="px-6 sm:px-10 lg:px-12 pt-7 pb-24 max-w-7xl">
+            {/* 1. Beranda */}
             {activeSubmenu === 'overview_stats' && (
               <AdminOverviewModule
                 subTab="stats"
@@ -335,7 +148,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               />
             )}
 
-            {/* 2. Master Data & Venue */}
+            {/* 2. Persiapan Kompetisi */}
+            {activeSubmenu === 'competitions_list' && (
+              <CompetitionsManagementView />
+            )}
             {activeSubmenu === 'sports_list' && (
               <AdminMasterDataModule
                 subTab="sports"
@@ -361,7 +177,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               />
             )}
 
-            {/* 3. Registrasi & Peserta */}
+            {/* 3. Peserta */}
             {activeSubmenu === 'registration_verify' && (
               <AdminParticipantsModule
                 subTab="verification"
@@ -380,6 +196,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 selectedSport={selectedSport}
               />
             )}
+            {activeSubmenu === 'athletes_players' && (
+              <AthletesPlayersTab />
+            )}
             {activeSubmenu === 'athletes_id_cards' && (
               <AdminParticipantsModule
                 subTab="id_cards"
@@ -390,19 +209,19 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               />
             )}
 
-            {/* 4. Manajemen Pertandingan */}
-            {activeSubmenu === 'drawing_bracket' && (
+            {/* 4. Pertandingan */}
+            {activeSubmenu === 'schedule_plotting' && (
               <AdminMatchOpsModule
-                subTab="brackets"
+                subTab="schedule"
                 onSelectSubTab={(t) =>
                   setActiveSubmenu(t === 'brackets' ? 'drawing_bracket' : t === 'schedule' ? 'schedule_plotting' : t === 'override' ? 'live_score_control' : 'group_standings')
                 }
                 selectedSport={selectedSport}
               />
             )}
-            {activeSubmenu === 'schedule_plotting' && (
+            {activeSubmenu === 'drawing_bracket' && (
               <AdminMatchOpsModule
-                subTab="schedule"
+                subTab="brackets"
                 onSelectSubTab={(t) =>
                   setActiveSubmenu(t === 'brackets' ? 'drawing_bracket' : t === 'schedule' ? 'schedule_plotting' : t === 'override' ? 'live_score_control' : 'group_standings')
                 }
@@ -418,6 +237,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 selectedSport={selectedSport}
               />
             )}
+            {(activeSubmenu === 'results_verification' || activeSubmenu === 'protests_sanctions') && (
+              <ResultsVerificationTab
+                activeSubTab={activeSubmenu === 'protests_sanctions' ? 'SANCTIONS' : 'VERIFICATION'}
+              />
+            )}
             {activeSubmenu === 'group_standings' && (
               <AdminMatchOpsModule
                 subTab="standings"
@@ -428,44 +252,17 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               />
             )}
 
-            {/* 5. Tiket & Akses Gate */}
-            {activeSubmenu === 'ticket_management' && (
-              <AdminTicketingModule
-                subTab="ticket_management"
-                onSelectSubTab={(t) => setActiveSubmenu(t)}
+            {/* 5. Pengaturan & Akun */}
+            {(activeSubmenu === 'account_settings' || activeSubmenu === 'referee_staff_accounts') && (
+              <AccountSettingsView
+                initialSubTab={activeSubmenu === 'referee_staff_accounts' ? 'referee_staff_accounts' : 'admin_profile'}
+                user={user}
+                darkMode={darkMode}
+                onToggleDarkMode={onToggleDarkMode}
               />
             )}
-            {activeSubmenu === 'transaction_history' && (
-              <AdminTicketingModule
-                subTab="transaction_history"
-                onSelectSubTab={(t) => setActiveSubmenu(t)}
-              />
-            )}
-            {activeSubmenu === 'qr_scanner_gate' && (
-              <AdminTicketingModule
-                subTab="qr_scanner_gate"
-                onSelectSubTab={(t) => setActiveSubmenu(t)}
-              />
-            )}
-
-            {/* 6. E-Sertifikat */}
-            {(activeSubmenu === 'cert_templates' || activeSubmenu === 'cert_distribution') && (
-              <AdminCertificatesModule
-                subTab={activeSubmenu}
-                onSelectSubTab={(t) => setActiveSubmenu(t)}
-              />
-            )}
-
-            {/* 7. Pengguna & Sistem */}
-            {activeSubmenu === 'referee_staff_accounts' && (
-              <AdminSystemModule
-                subTab="referee_staff_accounts"
-                onSelectSubTab={(t) => setActiveSubmenu(t)}
-                headerConfig={headerConfig}
-                onSaveHeaderConfig={onSaveHeaderConfig}
-                banners={banners}
-                onSaveBanners={onSaveBanners}
-              />
+            {activeSubmenu === 'backup_restore' && (
+              <BackupRestoreTab />
             )}
             {activeSubmenu === 'event_settings' && (
               <AdminSystemModule
@@ -476,6 +273,39 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 banners={banners}
                 onSaveBanners={onSaveBanners}
               />
+            )}
+            {activeSubmenu === 'match_assignments' && (
+              <MatchAssignmentsTab />
+            )}
+            {activeSubmenu === 'audit_logs' && (
+              <AuditLogsTab />
+            )}
+            {activeSubmenu === 'reports_export' && (
+              <ReportsExportTab />
+            )}
+
+            {/* 7. Tiket Masuk (Only when enabled) */}
+            {FEATURES.ticketing && (
+              <>
+                {activeSubmenu === 'ticket_management' && (
+                  <AdminTicketingModule
+                    subTab="ticket_management"
+                    onSelectSubTab={(t) => setActiveSubmenu(t)}
+                  />
+                )}
+                {activeSubmenu === 'transaction_history' && (
+                  <AdminTicketingModule
+                    subTab="transaction_history"
+                    onSelectSubTab={(t) => setActiveSubmenu(t)}
+                  />
+                )}
+                {activeSubmenu === 'qr_scanner_gate' && (
+                  <AdminTicketingModule
+                    subTab="qr_scanner_gate"
+                    onSelectSubTab={(t) => setActiveSubmenu(t)}
+                  />
+                )}
+              </>
             )}
           </main>
         </div>

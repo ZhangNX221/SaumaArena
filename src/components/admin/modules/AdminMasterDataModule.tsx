@@ -130,18 +130,15 @@ export const AdminMasterDataModule: React.FC<AdminMasterDataModuleProps> = ({
         </div>
       )}
 
-      {/* Subtab Segmented Switcher & Header */}
+      {/* Subtab Segmented Switcher & Description */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-xl sm:text-2xl font-black text-[var(--text-main)] font-[var(--font-display)] tracking-tight">
-            Data Lapangan &amp; Cabor
-          </h2>
-          <p className="text-xs text-[var(--text-muted)] font-[var(--font-sans)] mt-1">
-            Fondasi multi-cabor: kelola cabang olahraga, nomor tanding resmi, serta titik lapangan arena.
+          <p className="text-xs sm:text-sm text-[var(--text-muted)]">
+            Persiapan kompetisi: kelola cabang olahraga &amp; aturan, kategori &amp; kelas tanding, serta lokasi &amp; lapangan arena.
           </p>
         </div>
 
-        <div className="flex items-center gap-1 p-1.5 rounded-2xl bg-[var(--bg-muted)]/80 border border-[var(--border-subtle)] text-xs font-bold font-[var(--font-display)] w-fit">
+        <div className="flex items-center gap-1 p-1.5 rounded-2xl bg-[var(--bg-muted)]/80 border border-[var(--border-subtle)] text-xs font-barlow font-bold uppercase tracking-wider w-fit">
           <button
             type="button"
             onClick={() => handleTabChange('SPORTS')}
@@ -151,7 +148,7 @@ export const AdminMasterDataModule: React.FC<AdminMasterDataModuleProps> = ({
                 : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'
             }`}
           >
-            Daftar Cabor ({sports.length})
+            Cabang Olahraga &amp; Aturan ({sports.length})
           </button>
           <button
             type="button"
@@ -162,7 +159,7 @@ export const AdminMasterDataModule: React.FC<AdminMasterDataModuleProps> = ({
                 : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'
             }`}
           >
-            Nomor Tanding
+            Kategori &amp; Kelas
           </button>
           <button
             type="button"
@@ -173,7 +170,7 @@ export const AdminMasterDataModule: React.FC<AdminMasterDataModuleProps> = ({
                 : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'
             }`}
           >
-            Data Lapangan ({venues.length})
+            Lokasi &amp; Lapangan ({venues.length})
           </button>
         </div>
       </div>
@@ -187,7 +184,7 @@ export const AdminMasterDataModule: React.FC<AdminMasterDataModuleProps> = ({
               <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-faint)]" />
               <input
                 type="text"
-                placeholder="Cari cabor atau nomor tanding..."
+                placeholder="Cari cabang olahraga atau kategori &amp; kelas..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full pl-9 pr-3 py-2 text-xs rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] text-[var(--text-main)] focus:outline-none focus:border-[var(--color-arena-primary)]"
@@ -229,7 +226,7 @@ export const AdminMasterDataModule: React.FC<AdminMasterDataModuleProps> = ({
               <button
                 type="button"
                 onClick={handleOpenAddModal}
-                className="btn-tactile px-4 py-2 rounded-xl bg-[var(--color-arena-primary)] hover:bg-[var(--color-arena-primary-hover)] text-white text-xs font-bold flex items-center gap-1.5 shadow-xs transition-colors min-h-[38px]"
+                className="btn-tactile px-4 py-2 rounded-xl bg-[var(--color-arena-primary)] hover:bg-[var(--color-arena-primary-hover)] text-white text-xs font-barlow font-bold uppercase tracking-wider flex items-center gap-1.5 shadow-xs transition-colors min-h-[38px]"
               >
                 <Plus className="w-4 h-4" />
                 <span>Tambah Cabor</span>

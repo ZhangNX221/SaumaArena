@@ -134,17 +134,17 @@ export const TransactionHistoryTab: React.FC = () => {
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[var(--border-subtle)]">
         <div>
-          <h3 className="font-black text-lg text-[var(--text-main)] font-[var(--font-display)] tracking-tight">
+          <h3 className="font-bebas text-xl sm:text-2xl uppercase tracking-wide text-[var(--text-main)]">
             Data Transaksi Penjualan Tiket
           </h3>
-          <p className="text-xs text-[var(--text-muted)] font-[var(--font-sans)] mt-1">
+          <p className="text-xs text-[var(--text-muted)] mt-1">
             Log riwayat pembelian tiket online dan cetak manual di loket pintu arena.
           </p>
         </div>
         <button
           type="button"
           onClick={handleOpenAdd}
-          className="btn-tactile px-4 py-2.5 rounded-xl bg-[var(--color-arena-primary)] hover:bg-[var(--color-arena-primary-hover)] text-white text-xs font-bold font-[var(--font-display)] flex items-center gap-2 shadow-xs shrink-0"
+          className="btn-tactile px-4 py-2.5 rounded-xl bg-[var(--color-arena-primary)] hover:bg-[var(--color-arena-primary-hover)] text-white text-xs font-barlow font-bold uppercase tracking-wider flex items-center gap-2 shadow-xs shrink-0"
         >
           <Plus className="w-4 h-4" />
           <span>Transaksi Loket Baru</span>
@@ -160,13 +160,13 @@ export const TransactionHistoryTab: React.FC = () => {
             placeholder="Cari no. order, nama pembeli, atau sekolah..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 text-xs rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] text-[var(--text-main)] focus:outline-none focus:border-[var(--color-arena-primary)] font-[var(--font-sans)]"
+            className="w-full pl-10 pr-4 py-2 text-xs rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] text-[var(--text-main)] focus:outline-none focus:border-[var(--color-arena-primary)]"
           />
         </div>
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
-          className="w-full sm:w-44 px-3.5 py-2 text-xs rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] text-[var(--text-main)] font-bold font-[var(--font-display)]"
+          className="w-full sm:w-44 px-3.5 py-2 text-xs rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] text-[var(--text-main)] font-barlow font-bold uppercase tracking-wider"
         >
           <option value="ALL">Semua Status</option>
           <option value="PAID">LUNAS</option>
@@ -177,7 +177,7 @@ export const TransactionHistoryTab: React.FC = () => {
       {/* Table CRUD */}
       <div className="overflow-x-auto rounded-xl border border-[var(--border-subtle)]">
         <table className="w-full text-xs text-left">
-          <thead className="bg-[var(--bg-muted)]/70 text-[11px] font-black uppercase tracking-wider font-[var(--font-display)] text-[var(--text-muted)] border-b border-[var(--border-subtle)]">
+          <thead className="bg-[var(--bg-muted)]/70 text-[11px] font-barlow font-bold uppercase tracking-wider text-[var(--text-muted)] border-b border-[var(--border-subtle)]">
             <tr>
               <th className="py-3.5 px-4">No. Order</th>
               <th className="py-3.5 px-4">Pembeli &amp; Afiliasi</th>
@@ -191,28 +191,28 @@ export const TransactionHistoryTab: React.FC = () => {
           <tbody className="divide-y divide-[var(--border-subtle)] font-medium">
             {filtered.length === 0 ? (
               <tr>
-                <td colSpan={7} className="text-center py-10 text-[var(--text-muted)] font-[var(--font-sans)]">
+                <td colSpan={7} className="text-center py-10 text-[var(--text-muted)]">
                   Tidak ada transaksi yang sesuai.
                 </td>
               </tr>
             ) : (
               filtered.map((trx) => (
                 <tr key={trx.id} className="hover:bg-[var(--bg-muted)]/30 transition-colors">
-                  <td className="py-4 px-4 font-[var(--font-mono)] tabular-nums font-bold text-[var(--text-main)]">
+                  <td className="py-4 px-4 font-mono tabular-nums font-semibold text-[var(--text-main)]">
                     {trx.orderCode}
                   </td>
                   <td className="py-4 px-4">
-                    <div className="font-bold text-[var(--text-main)] font-[var(--font-display)]">{trx.customerName}</div>
+                    <div className="font-bold text-[var(--text-main)]">{trx.customerName}</div>
                     <div className="text-[11px] text-[var(--text-muted)] font-medium">{trx.schoolAffiliation}</div>
                   </td>
                   <td className="py-4 px-4 text-[var(--text-muted)] font-medium">{trx.category}</td>
-                  <td className="py-4 px-4 text-center font-bold font-[var(--font-mono)] tabular-nums">{trx.qty} tiket</td>
-                  <td className="py-4 px-4 text-right font-[var(--font-mono)] tabular-nums font-bold text-emerald-700 dark:text-emerald-400">
+                  <td className="py-4 px-4 text-center font-teko font-bold text-base tabular-nums text-[var(--text-main)]">{trx.qty} tiket</td>
+                  <td className="py-4 px-4 text-right font-teko font-bold text-base tabular-nums text-emerald-700 dark:text-emerald-400">
                     Rp {trx.total.toLocaleString('id-ID')}
                   </td>
                   <td className="py-4 px-4 text-center">
                     <span
-                      className={`inline-flex items-center gap-1.5 text-[10px] font-bold font-[var(--font-display)] px-2.5 py-1 rounded-lg ${
+                      className={`inline-flex items-center gap-1.5 text-[10px] font-barlow font-bold uppercase tracking-wider px-2.5 py-1 rounded-lg ${
                         trx.status === 'PAID'
                           ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400'
                           : 'bg-amber-500/15 text-amber-700 dark:text-amber-400'
@@ -263,7 +263,7 @@ export const TransactionHistoryTab: React.FC = () => {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fadeIn">
           <div className="bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
             <div className="flex items-center justify-between pb-2 border-b border-[var(--border-subtle)]">
-              <h3 className="font-black text-base text-[var(--text-main)]">
+              <h3 className="font-bebas text-xl uppercase tracking-wide text-[var(--text-main)]">
                 {editingTrx ? `Edit Transaksi: ${editingTrx.orderCode}` : 'Transaksi Loket Baru'}
               </h3>
               <button
@@ -277,7 +277,7 @@ export const TransactionHistoryTab: React.FC = () => {
 
             <form onSubmit={handleSubmit} className="space-y-3 text-xs">
               <div>
-                <label className="font-bold text-[var(--text-main)] block mb-1">Nama Pembeli</label>
+                <label className="font-barlow font-bold uppercase tracking-wider text-[var(--text-main)] block mb-1">Nama Pembeli</label>
                 <input
                   type="text"
                   required
@@ -289,7 +289,7 @@ export const TransactionHistoryTab: React.FC = () => {
               </div>
 
               <div>
-                <label className="font-bold text-[var(--text-main)] block mb-1">Sekolah / Afiliasi</label>
+                <label className="font-barlow font-bold uppercase tracking-wider text-[var(--text-main)] block mb-1">Sekolah / Afiliasi</label>
                 <input
                   type="text"
                   required
@@ -301,7 +301,7 @@ export const TransactionHistoryTab: React.FC = () => {
               </div>
 
               <div>
-                <label className="font-bold text-[var(--text-main)] block mb-1">Kategori Tiket</label>
+                <label className="font-barlow font-bold uppercase tracking-wider text-[var(--text-main)] block mb-1">Kategori Tiket</label>
                 <select
                   value={formData.category}
                   onChange={(e) => {
@@ -320,22 +320,22 @@ export const TransactionHistoryTab: React.FC = () => {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="font-bold text-[var(--text-main)] block mb-1">Jumlah Tiket</label>
+                  <label className="font-barlow font-bold uppercase tracking-wider text-[var(--text-main)] block mb-1">Jumlah Tiket</label>
                   <input
                     type="number"
                     min="1"
                     required
                     value={formData.qty}
                     onChange={(e) => setFormData({ ...formData, qty: Number(e.target.value) })}
-                    className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)] font-mono font-bold"
+                    className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)] font-teko font-bold text-base"
                   />
                 </div>
                 <div>
-                  <label className="font-bold text-[var(--text-main)] block mb-1">Status Pembayaran</label>
+                  <label className="font-barlow font-bold uppercase tracking-wider text-[var(--text-main)] block mb-1">Status Pembayaran</label>
                   <select
                     value={formData.status}
                     onChange={(e) => setFormData({ ...formData, status: e.target.value as 'PAID' | 'PENDING' })}
-                    className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)] font-semibold"
+                    className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)] font-barlow font-bold uppercase text-xs"
                   >
                     <option value="PAID">LUNAS (Cetak QR)</option>
                     <option value="PENDING">PENDING (Menunggu)</option>
@@ -344,8 +344,8 @@ export const TransactionHistoryTab: React.FC = () => {
               </div>
 
               <div className="p-3 rounded-xl bg-[var(--bg-muted)] text-xs flex justify-between items-center">
-                <span className="text-[var(--text-muted)]">Estimasi Total Tagihan:</span>
-                <span className="font-black text-sm font-mono text-emerald-700 dark:text-emerald-400">
+                <span className="text-[var(--text-muted)] font-medium">Estimasi Total Tagihan:</span>
+                <span className="font-teko font-bold text-lg tabular-nums text-emerald-700 dark:text-emerald-400">
                   Rp {(formData.qty * formData.pricePerTicket).toLocaleString('id-ID')}
                 </span>
               </div>
@@ -353,14 +353,14 @@ export const TransactionHistoryTab: React.FC = () => {
               <div className="flex gap-2 pt-3">
                 <button
                   type="submit"
-                  className="btn-tactile flex-1 py-2.5 rounded-xl bg-[var(--color-arena-primary)] text-white font-bold text-xs"
+                  className="btn-tactile flex-1 py-2.5 rounded-xl bg-[var(--color-arena-primary)] text-white font-barlow font-bold uppercase tracking-wider text-xs"
                 >
                   {editingTrx ? 'Simpan Perubahan' : 'Proses Tiket Loket'}
                 </button>
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="btn-tactile px-4 py-2.5 rounded-xl border border-[var(--border-subtle)] text-xs font-semibold"
+                  className="btn-tactile px-4 py-2.5 rounded-xl border border-[var(--border-subtle)] text-xs font-barlow font-bold uppercase tracking-wider"
                 >
                   Batal
                 </button>

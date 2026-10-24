@@ -133,17 +133,17 @@ export const CertificateTemplatesTab: React.FC = () => {
       {/* Header */}
       <div className="p-6 sm:p-7 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h3 className="font-black text-lg text-[var(--text-main)] font-[var(--font-display)] tracking-tight">
+          <h3 className="font-bebas text-xl sm:text-2xl uppercase tracking-wide text-[var(--text-main)]">
             Desain &amp; Template E-Sertifikat Digital
           </h3>
-          <p className="text-xs text-[var(--text-muted)] font-[var(--font-sans)] mt-1">
+          <p className="text-xs text-[var(--text-muted)] mt-1">
             Konfigurasi template piagam penghargaan resmi ber-QR, tanda tangan digital, dan kop instansi.
           </p>
         </div>
         <button
           type="button"
           onClick={handleOpenAdd}
-          className="btn-tactile px-4 py-2.5 rounded-xl bg-[var(--color-arena-primary)] hover:bg-[var(--color-arena-primary-hover)] text-white text-xs font-bold font-[var(--font-display)] flex items-center gap-2 shadow-xs shrink-0"
+          className="btn-tactile px-4 py-2.5 rounded-xl bg-[var(--color-arena-primary)] hover:bg-[var(--color-arena-primary-hover)] text-white text-xs font-barlow font-bold uppercase tracking-wider flex items-center gap-2 shadow-xs shrink-0"
         >
           <Plus className="w-4 h-4" />
           <span>Tambah Template Desain</span>
@@ -153,7 +153,7 @@ export const CertificateTemplatesTab: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left: Template List with Edit/Delete */}
         <div className="space-y-3">
-          <div className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)] font-[var(--font-display)]">
+          <div className="text-xs font-barlow font-bold uppercase tracking-wider text-[var(--text-muted)]">
             Template Tersedia ({templates.length})
           </div>
           <div className="space-y-3">
@@ -168,7 +168,7 @@ export const CertificateTemplatesTab: React.FC = () => {
                 }`}
               >
                 <div className="flex items-center justify-between mb-1.5">
-                  <span className="text-[11px] font-bold font-[var(--font-display)] text-[var(--color-arena-primary)]">
+                  <span className="text-[11px] font-barlow font-bold uppercase tracking-wider text-[var(--color-arena-primary)]">
                     {tmpl.category}
                   </span>
                   <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
@@ -190,10 +190,10 @@ export const CertificateTemplatesTab: React.FC = () => {
                     </button>
                   </div>
                 </div>
-                <h4 className="font-extrabold text-base text-[var(--text-main)] font-[var(--font-display)] tracking-tight truncate">
+                <h4 className="font-bebas text-lg uppercase tracking-wide text-[var(--text-main)] truncate">
                   {tmpl.title}
                 </h4>
-                <p className="text-xs text-[var(--text-muted)] font-medium font-[var(--font-sans)] truncate mt-1">
+                <p className="text-xs text-[var(--text-muted)] font-medium truncate mt-1">
                   {tmpl.signatory}
                 </p>
               </div>
@@ -206,17 +206,17 @@ export const CertificateTemplatesTab: React.FC = () => {
           <div className="p-6 sm:p-8 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] shadow-xs space-y-6">
             <div className="flex items-center justify-between pb-4 border-b border-[var(--border-subtle)]">
               <div>
-                <span className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)] font-[var(--font-display)]">
+                <span className="text-xs font-barlow font-bold uppercase tracking-wider text-[var(--text-muted)]">
                   Pratinjau Desain Template Aktif
                 </span>
-                <h3 className="font-extrabold text-lg text-[var(--text-main)] font-[var(--font-display)] tracking-tight mt-0.5">
+                <h3 className="font-bebas text-xl sm:text-2xl uppercase tracking-wide text-[var(--text-main)] mt-0.5">
                   {activeTemplate.title}
                 </h3>
               </div>
               <button
                 type="button"
                 onClick={() => alert(`Mengunduh sampel PDF untuk: ${activeTemplate.title}`)}
-                className="btn-tactile inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[var(--color-arena-primary)] text-white text-xs font-bold font-[var(--font-display)] shadow-xs"
+                className="btn-tactile inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[var(--color-arena-primary)] hover:bg-[var(--color-arena-primary-hover)] text-white text-xs font-barlow font-bold uppercase tracking-wider shadow-xs"
               >
                 <Download className="w-4 h-4" />
                 <span>Unduh Sampel PDF</span>
@@ -230,10 +230,10 @@ export const CertificateTemplatesTab: React.FC = () => {
               </div>
 
               <div className="space-y-1">
-                <span className="text-[10px] font-black uppercase tracking-widest text-amber-800 dark:text-amber-300 font-mono">
+                <span className="text-[11px] font-barlow font-bold uppercase tracking-wider text-amber-800 dark:text-amber-300">
                   {activeTemplate.issuerOrg}
                 </span>
-                <h2 className="text-xl sm:text-2xl font-black text-[var(--text-main)] font-[var(--font-display)] uppercase">
+                <h2 className="text-2xl sm:text-3xl font-bebas text-[var(--text-main)] uppercase tracking-wide">
                   {activeTemplate.category}
                 </h2>
                 <div className="text-xs text-[var(--text-muted)]">
@@ -243,7 +243,7 @@ export const CertificateTemplatesTab: React.FC = () => {
 
               <div className="py-2">
                 <span className="text-xs text-[var(--text-muted)] block">Dengan bangga dianugerahkan kepada:</span>
-                <div className="text-xl sm:text-2xl font-black text-[var(--text-main)] font-[var(--font-display)] mt-1">
+                <div className="text-2xl sm:text-3xl font-bebas text-[var(--text-main)] uppercase tracking-wide mt-1">
                   Nama Penerima / Kontingen
                 </div>
                 <p className="text-xs text-[var(--text-muted)] max-w-md mx-auto mt-1 leading-relaxed">
@@ -258,7 +258,7 @@ export const CertificateTemplatesTab: React.FC = () => {
                 </div>
                 <div className="text-[var(--text-faint)] text-right">
                   <div>Tertanda Komisioner:</div>
-                  <strong className="text-[var(--text-main)]">{activeTemplate.signatory}</strong>
+                  <strong className="text-[var(--text-main)] font-semibold">{activeTemplate.signatory}</strong>
                 </div>
               </div>
             </div>
@@ -271,90 +271,100 @@ export const CertificateTemplatesTab: React.FC = () => {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fadeIn">
           <div className="bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
             <div className="flex items-center justify-between pb-2 border-b border-[var(--border-subtle)]">
-              <h3 className="font-black text-base text-[var(--text-main)]">
+              <h3 className="font-bebas text-xl uppercase tracking-wide text-[var(--text-main)]">
                 {editingTemplate ? 'Edit Template Desain' : 'Buat Template Desain Baru'}
               </h3>
               <button
                 type="button"
                 onClick={() => setIsModalOpen(false)}
-                className="p-1 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-main)]"
+                className="p-1.5 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-muted)] transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-3 text-xs">
+            <form onSubmit={handleSubmit} className="space-y-3.5 text-xs">
               <div>
-                <label className="font-bold text-[var(--text-main)] block mb-1">Judul Template</label>
+                <label className="font-barlow font-bold uppercase tracking-wider text-[11px] text-[var(--text-main)] block mb-1">
+                  Judul Template
+                </label>
                 <input
                   type="text"
                   required
                   placeholder="Contoh: Piagam Juara Futsal Putra"
                   value={formData.title}
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)]"
+                  className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)] focus:outline-none focus:border-[var(--color-arena-primary)]"
                 />
               </div>
 
               <div>
-                <label className="font-bold text-[var(--text-main)] block mb-1">Kategori Penghargaan</label>
+                <label className="font-barlow font-bold uppercase tracking-wider text-[11px] text-[var(--text-main)] block mb-1">
+                  Kategori Penghargaan
+                </label>
                 <input
                   type="text"
                   required
                   placeholder="Contoh: Juara 1 / Top Scorer / Best Supporter"
                   value={formData.category}
                   onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                  className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)]"
+                  className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)] focus:outline-none focus:border-[var(--color-arena-primary)]"
                 />
               </div>
 
               <div>
-                <label className="font-bold text-[var(--text-main)] block mb-1">Kop Lembaga / Penerbit</label>
+                <label className="font-barlow font-bold uppercase tracking-wider text-[11px] text-[var(--text-main)] block mb-1">
+                  Kop Lembaga / Penerbit
+                </label>
                 <input
                   type="text"
                   required
                   placeholder="Contoh: PANITIA MILAD MATSANEGA I & MTsN 1 KOTA MALANG"
                   value={formData.issuerOrg}
                   onChange={(e) => setFormData({ ...formData, issuerOrg: e.target.value })}
-                  className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)] uppercase"
+                  className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)] uppercase font-semibold focus:outline-none focus:border-[var(--color-arena-primary)]"
                 />
               </div>
 
               <div>
-                <label className="font-bold text-[var(--text-main)] block mb-1">Nama Turnamen Resmi</label>
+                <label className="font-barlow font-bold uppercase tracking-wider text-[11px] text-[var(--text-main)] block mb-1">
+                  Nama Turnamen Resmi
+                </label>
                 <input
                   type="text"
                   required
                   placeholder="Contoh: Milad Matsanega Futsal Competition I (MMFC I)"
                   value={formData.tournamentName}
                   onChange={(e) => setFormData({ ...formData, tournamentName: e.target.value })}
-                  className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)]"
+                  className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)] focus:outline-none focus:border-[var(--color-arena-primary)]"
                 />
               </div>
 
               <div>
-                <label className="font-bold text-[var(--text-main)] block mb-1">Pejabat Penandatangan</label>
+                <label className="font-barlow font-bold uppercase tracking-wider text-[11px] text-[var(--text-main)] block mb-1">
+                  Pejabat Penandatangan
+                </label>
                 <input
                   type="text"
                   required
                   placeholder="Contoh: Dra. Hj. Erni Qomariyah, M.Pd (Kepala MTsN 1 Malang)"
                   value={formData.signatory}
                   onChange={(e) => setFormData({ ...formData, signatory: e.target.value })}
-                  className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)]"
+                  className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)] focus:outline-none focus:border-[var(--color-arena-primary)]"
                 />
               </div>
 
               <div className="flex gap-2 pt-3">
                 <button
                   type="submit"
-                  className="btn-tactile flex-1 py-2.5 rounded-xl bg-[var(--color-arena-primary)] text-white font-bold text-xs"
+                  className="btn-tactile flex-1 py-2.5 rounded-xl bg-[var(--color-arena-primary)] hover:bg-[var(--color-arena-primary-hover)] text-white font-barlow font-bold uppercase tracking-wider text-xs shadow-xs"
                 >
                   {editingTemplate ? 'Simpan Perubahan' : 'Simpan Template'}
                 </button>
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="btn-tactile px-4 py-2.5 rounded-xl border border-[var(--border-subtle)] text-xs font-semibold"
+                  className="btn-tactile px-4 py-2.5 rounded-xl border border-[var(--border-subtle)] hover:bg-[var(--bg-muted)] text-[var(--text-main)] text-xs font-barlow font-bold uppercase tracking-wider"
                 >
                   Batal
                 </button>

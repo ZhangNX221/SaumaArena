@@ -94,3 +94,47 @@ export const DEFAULT_CABOR_BANNERS: PublicHeaderConfig[] = [
     registerButtonText: 'Registrasi Squad',
   },
 ];
+
+export interface CaborTemplate {
+  sportCode: import('@/types').SportCode;
+  sportLabel: string;
+  title: string;
+  categoryBadge: string;
+  description: string;
+  presetIndex: number;
+  venue: string;
+  contingentInfo: string;
+}
+
+export const TEMPLATE_CABOR: CaborTemplate[] = [
+  {
+    sportCode: 'BASKET',
+    sportLabel: 'Bola Basket',
+    title: 'Matsanega Basketball Challenge 2026',
+    categoryBadge: 'BASKETBALL 5v5 PELAJAR',
+    description: 'Kompetisi bola basket antarpelajar tingkat SD/MI & SMP se-derajat. Menampilkan skill dribbling, 3-point shoot, dan pertahanan solid.',
+    presetIndex: 2,
+    venue: 'Matsanega Indoor Basketball Court',
+    contingentInfo: '8 Tim Kontingen Basket',
+  },
+  {
+    sportCode: 'BADMINTON',
+    sportLabel: 'Bulutangkis',
+    title: 'Matsanega Badminton Junior Open 2026',
+    categoryBadge: 'BULUTANGKIS TUNGGAL & GANDA',
+    description: 'Turnamen bulutangkis junior memperebutkan Piala Bergilir Kepala Madrasah. Reli-reli sengit dan smash menyilang di lapangan standar PBSI.',
+    presetIndex: 2,
+    venue: 'GOR Bulutangkis Matsanega',
+    contingentInfo: '16 Kontingen Atlet Bulutangkis',
+  },
+  {
+    sportCode: 'SEPAK_TAKRAW',
+    sportLabel: 'Sepak Takraw',
+    title: 'Matsanega Takraw Invitation Cup 2026',
+    categoryBadge: 'SEPAK TAKRAW INTER-REGU PELAJAR',
+    description: 'Adu kelincahan akrobatik, smash roll, dan kontrol bola rotan antarsekolah dasar dan madrasah se-Jawa Timur.',
+    presetIndex: 0,
+    venue: 'Lapangan Outdoor Matsanega',
+    contingentInfo: '8 Regu Kontingen Takraw',
+  },
+];

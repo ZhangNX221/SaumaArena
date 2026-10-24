@@ -87,12 +87,12 @@ export const SaumaArenaLogo: React.FC<SaumaArenaLogoProps> = ({
       {withText && (
         <div className="flex flex-col">
           <div className="flex items-center gap-2">
-            <span className="font-black text-base sm:text-lg tracking-tight text-[var(--text-main)] font-[var(--font-display)] leading-tight">
+            <span className="font-teko font-bold text-xl sm:text-2xl tracking-wide text-[var(--text-main)] leading-none">
               SAUMA ARENA
             </span>
           </div>
           {subtitle && (
-            <span className="text-[10px] font-extrabold uppercase tracking-wider text-[var(--color-arena-accent)] leading-tight">
+            <span className="font-barlow text-xs font-bold uppercase tracking-wider text-[var(--color-arena-accent)] leading-tight">
               {subtitle}
             </span>
           )}

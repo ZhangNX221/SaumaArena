@@ -3,7 +3,7 @@
 import React from 'react';
 import { TicketManagementTab } from './ticketing/TicketManagementTab';
 import { TransactionHistoryTab } from './ticketing/TransactionHistoryTab';
-import { GateScannerTab } from '../tabs/GateScannerTab';
+import { GateScannerTab } from './ticketing/GateScannerTab';
 
 interface AdminTicketingModuleProps {
   subTab: 'ticket_management' | 'transaction_history' | 'qr_scanner_gate';
@@ -13,18 +13,15 @@ interface AdminTicketingModuleProps {
 export const AdminTicketingModule: React.FC<AdminTicketingModuleProps> = ({ subTab, onSelectSubTab }) => {
   return (
     <div className="space-y-8 animate-fadeIn">
-      {/* Module Header & Segmented Pill Navigation */}
+      {/* Sub-Tab Navigation & Module Description */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-xl sm:text-2xl font-black text-[var(--text-main)] font-[var(--font-display)] tracking-tight">
-            Tiket &amp; Akses Gate Masuk
-          </h2>
-          <p className="text-xs text-[var(--text-muted)] font-[var(--font-sans)] mt-1">
+          <p className="text-xs sm:text-sm text-[var(--text-muted)]">
             Kelola alokasi kuota tiket per kategori, pantau riwayat transaksi riil, dan validasi tiket QR di gate masuk.
           </p>
         </div>
 
-        <div className="flex items-center gap-1 p-1.5 rounded-2xl bg-[var(--bg-muted)]/80 border border-[var(--border-subtle)] text-xs font-bold font-[var(--font-display)] w-fit">
+        <div className="flex items-center gap-1 p-1.5 rounded-2xl bg-[var(--bg-muted)]/80 border border-[var(--border-subtle)] text-xs font-barlow font-bold uppercase tracking-wider w-fit">
           <button
             type="button"
             onClick={() => onSelectSubTab('ticket_management')}

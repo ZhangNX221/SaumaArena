@@ -1,8 +1,9 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Plus, Search, Edit2, Trash2, X, Download, QrCode, CheckCircle2, Send } from 'lucide-react';
+import { Plus, Search, Edit2, Trash2, Download, QrCode, CheckCircle2, Send } from 'lucide-react';
 import { ConfirmModal } from '@/components/admin/common/ConfirmModal';
+import { CertificateIssueModal, CertificateFormData } from './CertificateIssueModal';
 
 export interface IssuedCertificate {
   id: string;
@@ -58,39 +59,19 @@ export const CertificateDistributionTab: React.FC = () => {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('ALL');
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
+  const [sentNotice, setSentNotice] = useState<string | null>(null);
 
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCert, setEditingCert] = useState<IssuedCertificate | null>(null);
-  const [formData, setFormData] = useState({
-    recipientName: '',
-    contingent: '',
-    awardTitle: 'Juara 1 Futsal Pelajar SD/MI',
-    issueDate: '28 Okt 2026',
-    status: 'READY' as 'SENT' | 'READY',
-  });
 
   const handleOpenAdd = () => {
     setEditingCert(null);
-    setFormData({
-      recipientName: '',
-      contingent: 'MIN 1 Kota',
-      awardTitle: 'Juara 1 Futsal Pelajar SD/MI',
-      issueDate: '28 Okt 2026',
-      status: 'READY',
-    });
     setIsModalOpen(true);
   };
 
   const handleOpenEdit = (cert: IssuedCertificate) => {
     setEditingCert(cert);
-    setFormData({
-      recipientName: cert.recipientName,
-      contingent: cert.contingent,
-      awardTitle: cert.awardTitle,
-      issueDate: cert.issueDate,
-      status: cert.status,
-    });
     setIsModalOpen(true);
   };
 
@@ -106,16 +87,14 @@ export const CertificateDistributionTab: React.FC = () => {
   };
 
   const handleSendEmail = (cert: IssuedCertificate) => {
-    alert(`E-Sertifikat ${cert.serialNumber} berhasil dikirimkan ke email resmi ${cert.recipientName}.`);
+    setSentNotice(`E-Sertifikat ${cert.serialNumber} berhasil dikirimkan ke email resmi ${cert.recipientName}.`);
+    setTimeout(() => setSentNotice(null), 3500);
     setCertificates((prev) =>
       prev.map((c) => (c.id === cert.id ? { ...c, status: 'SENT' } : c))
     );
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!formData.recipientName.trim()) return;
-
+  const handleSubmit = (formData: CertificateFormData) => {
     if (editingCert) {
       setCertificates((prev) =>
         prev.map((c) =>
@@ -150,22 +129,29 @@ export const CertificateDistributionTab: React.FC = () => {
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[var(--border-subtle)]">
         <div>
-          <h3 className="font-black text-lg text-[var(--text-main)] font-[var(--font-display)] tracking-tight">
+          <h3 className="font-bebas text-xl sm:text-2xl uppercase tracking-wide text-[var(--text-main)]">
             Distribusi &amp; Penerbitan Piagam Digital
           </h3>
-          <p className="text-xs text-[var(--text-muted)] font-[var(--font-sans)] mt-1">
+          <p className="text-xs text-[var(--text-muted)] mt-1">
             Kirim sertifikat ber-QR ke kontingen sekolah pemenang, atlet peraih medali, dan suporter terbaik.
           </p>
         </div>
         <button
           type="button"
           onClick={handleOpenAdd}
-          className="btn-tactile px-4 py-2.5 rounded-xl bg-[var(--color-arena-primary)] hover:bg-[var(--color-arena-primary-hover)] text-white text-xs font-bold font-[var(--font-display)] flex items-center gap-2 shadow-xs shrink-0"
+          className="btn-tactile px-4 py-2.5 rounded-xl bg-[var(--color-arena-primary)] hover:bg-[var(--color-arena-primary-hover)] text-white text-xs font-barlow font-bold uppercase tracking-wider flex items-center gap-2 shadow-xs shrink-0"
         >
           <Plus className="w-4 h-4" />
           <span>Terbitkan Sertifikat</span>
         </button>
       </div>
+
+      {sentNotice && (
+        <div className="p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-800 dark:text-emerald-300 text-xs font-bold flex items-center gap-2 animate-fadeIn">
+          <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+          <span>{sentNotice}</span>
+        </div>
+      )}
 
       {/* Search and Filter */}
       <div className="flex flex-col sm:flex-row items-center gap-3">
@@ -176,13 +162,13 @@ export const CertificateDistributionTab: React.FC = () => {
             placeholder="Cari penerima, kontingen, no. seri QR, atau kategori..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 text-xs rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] text-[var(--text-main)] focus:outline-none focus:border-[var(--color-arena-primary)] font-[var(--font-sans)]"
+            className="w-full pl-10 pr-4 py-2 text-xs rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] text-[var(--text-main)] focus:outline-none focus:border-[var(--color-arena-primary)]"
           />
         </div>
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
-          className="w-full sm:w-48 px-3.5 py-2 text-xs rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] text-[var(--text-main)] font-bold font-[var(--font-display)]"
+          className="w-full sm:w-48 px-3.5 py-2 text-xs rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] text-[var(--text-main)] font-barlow font-bold uppercase tracking-wider"
         >
           <option value="ALL">Semua Status</option>
           <option value="SENT">Terkirim ke Email</option>
@@ -193,7 +179,7 @@ export const CertificateDistributionTab: React.FC = () => {
       {/* Table CRUD */}
       <div className="overflow-x-auto rounded-xl border border-[var(--border-subtle)]">
         <table className="w-full text-xs text-left">
-          <thead className="bg-[var(--bg-muted)]/70 text-[11px] font-black uppercase tracking-wider font-[var(--font-display)] text-[var(--text-muted)] border-b border-[var(--border-subtle)]">
+          <thead className="bg-[var(--bg-muted)]/70 text-[11px] font-barlow font-bold uppercase tracking-wider text-[var(--text-muted)] border-b border-[var(--border-subtle)]">
             <tr>
               <th className="py-3.5 px-4">No. Seri Sertifikat</th>
               <th className="py-3.5 px-4">Nama Penerima &amp; Kontingen</th>
@@ -206,32 +192,34 @@ export const CertificateDistributionTab: React.FC = () => {
           <tbody className="divide-y divide-[var(--border-subtle)] font-medium">
             {filtered.length === 0 ? (
               <tr>
-                <td colSpan={6} className="text-center py-10 text-[var(--text-muted)] font-[var(--font-sans)]">
+                <td colSpan={6} className="text-center py-10 text-[var(--text-muted)]">
                   Tidak ada sertifikat yang ditemukan.
                 </td>
               </tr>
             ) : (
               filtered.map((cert) => (
                 <tr key={cert.id} className="hover:bg-[var(--bg-muted)]/30 transition-colors">
-                  <td className="py-4 px-4 font-[var(--font-mono)] tabular-nums font-bold text-[var(--color-arena-primary)]">
+                  <td className="py-4 px-4 font-mono tabular-nums font-bold text-[var(--color-arena-primary)]">
                     <span className="flex items-center gap-2">
                       <QrCode className="w-4 h-4 shrink-0 text-[var(--color-arena-primary)]" />
                       <span>{cert.serialNumber}</span>
                     </span>
                   </td>
                   <td className="py-4 px-4">
-                    <div className="font-bold text-[var(--text-main)] font-[var(--font-display)]">{cert.recipientName}</div>
+                    <div className="font-bold text-[var(--text-main)]">{cert.recipientName}</div>
                     <div className="text-[11px] text-[var(--text-muted)] font-medium">{cert.contingent}</div>
                   </td>
-                  <td className="py-4 px-4 font-bold text-[var(--text-main)] font-[var(--font-display)]">
-                    {cert.awardTitle}
+                  <td className="py-4 px-4">
+                    <span className="font-barlow font-bold uppercase tracking-wide text-xs text-[var(--text-main)] block">
+                      {cert.awardTitle}
+                    </span>
                   </td>
-                  <td className="py-4 px-4 text-[var(--text-muted)] font-[var(--font-mono)] tabular-nums text-xs font-medium">
+                  <td className="py-4 px-4 text-[var(--text-muted)] font-mono tabular-nums text-xs font-medium">
                     {cert.issueDate}
                   </td>
                   <td className="py-4 px-4 text-center">
                     <span
-                      className={`px-3 py-1 rounded-full text-[10px] font-bold font-[var(--font-display)] inline-flex items-center gap-1.5 ${
+                      className={`px-3 py-1 rounded-full text-[10px] font-barlow font-bold uppercase tracking-wider inline-flex items-center gap-1.5 ${
                         cert.status === 'SENT'
                           ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400'
                           : 'bg-[var(--color-arena-primary)]/10 text-[var(--color-arena-primary)]'
@@ -291,102 +279,15 @@ export const CertificateDistributionTab: React.FC = () => {
       </div>
 
       {/* Modal CRUD (Create & Update) */}
-      {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fadeIn">
-          <div className="bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
-            <div className="flex items-center justify-between pb-2 border-b border-[var(--border-subtle)]">
-              <h3 className="font-black text-base text-[var(--text-main)]">
-                {editingCert ? 'Edit Data Sertifikat' : 'Terbitkan Sertifikat Baru'}
-              </h3>
-              <button
-                type="button"
-                onClick={() => setIsModalOpen(false)}
-                className="p-1 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-main)]"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            <form onSubmit={handleSubmit} className="space-y-3 text-xs">
-              <div>
-                <label className="font-bold text-[var(--text-main)] block mb-1">Nama Lengkap Penerima</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="Contoh: Muhammad Faiz / MIN 1 Kota"
-                  value={formData.recipientName}
-                  onChange={(e) => setFormData({ ...formData, recipientName: e.target.value })}
-                  className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)]"
-                />
-              </div>
-
-              <div>
-                <label className="font-bold text-[var(--text-main)] block mb-1">Kontingen / Sekolah Asal</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="Contoh: MIN 1 Kota Malang"
-                  value={formData.contingent}
-                  onChange={(e) => setFormData({ ...formData, contingent: e.target.value })}
-                  className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)]"
-                />
-              </div>
-
-              <div>
-                <label className="font-bold text-[var(--text-main)] block mb-1">Gelar / Kategori Penghargaan</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="Contoh: Juara 1 Futsal Pelajar Putra"
-                  value={formData.awardTitle}
-                  onChange={(e) => setFormData({ ...formData, awardTitle: e.target.value })}
-                  className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)]"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="font-bold text-[var(--text-main)] block mb-1">Tanggal Terbit</label>
-                  <input
-                    type="text"
-                    required
-                    value={formData.issueDate}
-                    onChange={(e) => setFormData({ ...formData, issueDate: e.target.value })}
-                    className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)] font-mono"
-                  />
-                </div>
-                <div>
-                  <label className="font-bold text-[var(--text-main)] block mb-1">Status Distribusi</label>
-                  <select
-                    value={formData.status}
-                    onChange={(e) => setFormData({ ...formData, status: e.target.value as 'SENT' | 'READY' })}
-                    className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)] font-semibold"
-                  >
-                    <option value="READY">Siap Terbit</option>
-                    <option value="SENT">Terkirim ke Email</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="flex gap-2 pt-3">
-                <button
-                  type="submit"
-                  className="btn-tactile flex-1 py-2.5 rounded-xl bg-[var(--color-arena-primary)] text-white font-bold text-xs"
-                >
-                  {editingCert ? 'Simpan Perubahan' : 'Terbitkan Sertifikat'}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setIsModalOpen(false)}
-                  className="btn-tactile px-4 py-2.5 rounded-xl border border-[var(--border-subtle)] text-xs font-semibold"
-                >
-                  Batal
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      <CertificateIssueModal
+        isOpen={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false);
+          setEditingCert(null);
+        }}
+        onSubmit={handleSubmit}
+        editingCert={editingCert}
+      />
 
       {/* Reusable Confirm Delete Modal */}
       <ConfirmModal

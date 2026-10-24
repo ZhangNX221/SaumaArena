@@ -1,7 +1,5 @@
-'use client';
-
 import React from 'react';
-import { ClipboardList, Calendar, Activity, BookOpen, User } from 'lucide-react';
+import { LayoutDashboard, ClipboardList, Activity, FileText, BookOpen, User } from 'lucide-react';
 import { RefereeTabKey } from './RefereeSidebar';
 
 interface RefereeBottomNavProps {
@@ -11,11 +9,12 @@ interface RefereeBottomNavProps {
 
 export const RefereeBottomNav: React.FC<RefereeBottomNavProps> = ({ activeTab, onSelectTab }) => {
   const ITEMS = [
+    { id: 'dashboard' as RefereeTabKey, label: 'Dashboard', icon: LayoutDashboard },
     { id: 'duty' as RefereeTabKey, label: 'Tugas', icon: ClipboardList },
-    { id: 'schedule' as RefereeTabKey, label: 'Jadwal', icon: Calendar },
-    { id: 'match_center' as RefereeTabKey, label: 'Match Center', icon: Activity, isCenter: true },
-    { id: 'rulebook' as RefereeTabKey, label: 'Regulasi', icon: BookOpen },
-    { id: 'profile' as RefereeTabKey, label: 'Kesiapan', icon: User },
+    { id: 'match_center' as RefereeTabKey, label: 'Skor', icon: Activity, isCenter: true },
+    { id: 'reports' as RefereeTabKey, label: 'Laporan', icon: FileText },
+    { id: 'rulebook' as RefereeTabKey, label: 'Aturan', icon: BookOpen },
+    { id: 'profile' as RefereeTabKey, label: 'Profil', icon: User },
   ];
 
   return (
@@ -25,7 +24,7 @@ export const RefereeBottomNav: React.FC<RefereeBottomNavProps> = ({ activeTab, o
     >
       {ITEMS.map((item) => {
         const Icon = item.icon;
-        const isActive = activeTab === item.id;
+        const isActive = activeTab === item.id || (item.id === 'duty' && activeTab === 'schedule');
 
         if (item.isCenter) {
           return (
@@ -33,14 +32,14 @@ export const RefereeBottomNav: React.FC<RefereeBottomNavProps> = ({ activeTab, o
               key={item.id}
               type="button"
               onClick={() => onSelectTab(item.id)}
-              className={`btn-tactile flex flex-col items-center justify-center -mt-5 px-3 py-1.5 rounded-2xl transition-all shadow-md ${
+              className={`btn-tactile flex flex-col items-center justify-center -mt-5 px-3.5 py-1.5 rounded-2xl transition-all shadow-md ${
                 isActive ? 'bg-[#f6ae2d] text-slate-950 scale-105' : 'bg-[#33658a] text-white'
               }`}
             >
               <div className="w-10 h-10 rounded-xl flex items-center justify-center">
                 <Icon className="w-5 h-5" />
               </div>
-              <span className="text-[10px] font-black -mt-1">{item.label}</span>
+              <span className="text-[10px] font-barlow font-bold uppercase tracking-wider -mt-1">{item.label}</span>
             </button>
           );
         }
@@ -50,12 +49,12 @@ export const RefereeBottomNav: React.FC<RefereeBottomNavProps> = ({ activeTab, o
             key={item.id}
             type="button"
             onClick={() => onSelectTab(item.id)}
-            className={`btn-tactile flex flex-col items-center justify-center py-1 px-2.5 rounded-lg text-center transition-colors min-w-[56px] ${
+            className={`btn-tactile flex flex-col items-center justify-center py-1 px-2.5 rounded-lg text-center transition-colors min-w-[50px] ${
               isActive ? 'text-[#f6ae2d] font-bold' : 'text-slate-400 hover:text-white'
             }`}
           >
             <Icon className="w-4 h-4 mb-0.5" />
-            <span className="text-[10px] truncate">{item.label}</span>
+            <span className="text-[10px] font-barlow font-bold uppercase tracking-wider truncate">{item.label}</span>
           </button>
         );
       })}

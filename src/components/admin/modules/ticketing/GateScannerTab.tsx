@@ -37,28 +37,26 @@ export const GateScannerTab: React.FC = () => {
   return (
     <div className="p-6 sm:p-8 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] space-y-6 shadow-xs max-w-xl mx-auto">
       <div className="text-center space-y-2">
-        <h3 className="font-extrabold text-lg sm:text-xl text-[var(--text-main)] font-[var(--font-display)] tracking-tight">
+        <h3 className="text-xl sm:text-2xl font-bebas uppercase tracking-wide text-[var(--text-main)]">
           Pemindai Pintu Masuk Arena (Gate Scanner)
         </h3>
-        <p className="text-xs text-[var(--text-muted)] font-[var(--font-sans)] max-w-md mx-auto leading-relaxed">
+        <p className="text-xs text-[var(--text-muted)] max-w-md mx-auto leading-relaxed">
           Pindai QR code e-tiket penonton untuk memberikan izin masuk dan mencatat poin kehadiran suporter sekolah secara otomatis.
         </p>
       </div>
 
-      {/* Scanner View Simulation Box */}
       <div className="aspect-video bg-[var(--arena-dark)] rounded-2xl relative flex flex-col items-center justify-center p-6 overflow-hidden border-2 border-dashed border-[var(--color-arena-primary)]/70 shadow-inner">
         <div className="w-36 h-36 sm:w-40 sm:h-40 border-2 border-[var(--color-arena-primary)] rounded-2xl relative flex items-center justify-center shadow-lg">
           <QrCode className="w-20 h-20 sm:w-24 sm:h-24 text-[var(--color-arena-primary)]/80" />
         </div>
-        <span className="text-xs text-sky-200 font-[var(--font-mono)] mt-3.5 font-medium">
+        <span className="text-xs text-sky-200 font-barlow font-bold uppercase tracking-wider mt-3.5">
           Kamera Pemindai Siap &bull; Arahkan QR Code Tiket
         </span>
       </div>
 
-      {/* Form Input Kode Manual */}
       <form onSubmit={(e) => handleScanTicket(e)} className="space-y-4">
         <div>
-          <label className="block text-xs font-bold text-[var(--text-main)] mb-1.5 font-[var(--font-display)]">
+          <label className="block text-xs font-barlow font-bold uppercase tracking-wider text-[var(--text-main)] mb-1.5">
             Atau Masukkan Kode Tiket Manual:
           </label>
           <div className="flex gap-2">
@@ -67,44 +65,42 @@ export const GateScannerTab: React.FC = () => {
               value={scanCodeInput}
               onChange={(e) => setScanCodeInput(e.target.value)}
               placeholder="Contoh: SA-TIK-MIN1-0941"
-              className="flex-1 px-4 py-2.5 text-xs rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] font-[var(--font-mono)] text-[var(--text-main)] focus:outline-none focus:ring-2 focus:ring-[var(--color-arena-primary)]"
+              className="flex-1 px-4 py-2.5 text-xs rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] font-mono text-[var(--text-main)] focus:outline-none focus:ring-2 focus:ring-[var(--color-arena-primary)]"
             />
             <button
               type="submit"
-              className="btn-tactile px-5 py-2.5 rounded-xl bg-[var(--color-arena-primary)] text-white font-bold text-xs font-[var(--font-display)] hover:bg-[var(--color-arena-primary-hover)] transition-colors min-h-[40px] shrink-0 shadow-xs"
+              className="btn-tactile px-5 py-2.5 rounded-xl bg-[var(--color-arena-primary)] text-white font-barlow font-bold uppercase tracking-wider text-xs hover:bg-[var(--color-arena-primary-hover)] transition-colors min-h-[40px] shrink-0 shadow-xs"
             >
               Verifikasi
             </button>
           </div>
         </div>
 
-        {/* Quick Sample Test Chips (Frictionless QA) */}
         <div className="flex items-center gap-2 pt-1 text-xs text-[var(--text-muted)] flex-wrap">
-          <span className="font-bold text-[var(--text-faint)] font-[var(--font-display)]">Coba Cepat:</span>
+          <span className="font-barlow font-bold uppercase tracking-wider text-[var(--text-faint)]">Coba Cepat:</span>
           <button
             type="button"
             onClick={() => handleScanTicket(undefined, 'SA-TIK-MIN1-0941')}
-            className="btn-tactile px-3 py-1.5 rounded-xl bg-[var(--color-arena-primary)]/10 text-[var(--color-arena-primary)] hover:bg-[var(--color-arena-primary)]/20 font-[var(--font-mono)] text-xs font-bold transition-colors"
+            className="btn-tactile px-3 py-1.5 rounded-xl bg-[var(--color-arena-primary)]/10 text-[var(--color-arena-primary)] hover:bg-[var(--color-arena-primary)]/20 font-barlow font-bold uppercase tracking-wider text-xs transition-colors"
           >
             MIN 1 (Sah)
           </button>
           <button
             type="button"
             onClick={() => handleScanTicket(undefined, 'SA-TIK-USED-1024')}
-            className="btn-tactile px-3 py-1.5 rounded-xl bg-red-500/10 text-red-700 dark:text-red-300 hover:bg-red-500/20 font-[var(--font-mono)] text-xs font-bold transition-colors"
+            className="btn-tactile px-3 py-1.5 rounded-xl bg-red-500/10 text-red-700 dark:text-red-300 hover:bg-red-500/20 font-barlow font-bold uppercase tracking-wider text-xs transition-colors"
           >
             USED (Sudah Dipakai)
           </button>
           <button
             type="button"
             onClick={() => handleScanTicket(undefined, 'SA-TIK-UNKNOWN-0000')}
-            className="btn-tactile px-3 py-1.5 rounded-xl bg-amber-500/10 text-amber-700 dark:text-amber-300 hover:bg-amber-500/20 font-[var(--font-mono)] text-xs font-bold transition-colors"
+            className="btn-tactile px-3 py-1.5 rounded-xl bg-amber-500/10 text-amber-700 dark:text-amber-300 hover:bg-amber-500/20 font-barlow font-bold uppercase tracking-wider text-xs transition-colors"
           >
             TEST (Tidak Terdaftar)
           </button>
         </div>
 
-        {/* Humanist Feedback Toast */}
         {scanFeedback && (
           <div
             className={`p-4 rounded-xl text-xs font-medium animate-fadeIn flex items-start gap-3 border ${
@@ -118,7 +114,7 @@ export const GateScannerTab: React.FC = () => {
             {scanFeedback.status === 'SUCCESS' && <CheckCircle2 className="w-5 h-5 text-[var(--color-arena-primary)] shrink-0 mt-0.5" />}
             {scanFeedback.status === 'REPLAY' && <AlertTriangle className="w-5 h-5 text-red-600 shrink-0 mt-0.5" />}
             {scanFeedback.status === 'INVALID' && <XCircle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />}
-            <span className="leading-relaxed font-[var(--font-sans)]">{scanFeedback.msg}</span>
+            <span className="leading-relaxed">{scanFeedback.msg}</span>
           </div>
         )}
       </form>

@@ -23,11 +23,11 @@ export const SportGridView: React.FC<SportGridViewProps> = ({ sports, onEdit, on
               <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-[var(--color-arena-primary-light)] text-[var(--color-arena-primary)] font-bold">
                 {sport.code}
               </span>
-              <h3 className="font-black text-lg text-[var(--text-main)] mt-1 font-[var(--font-display)]">
+              <h3 className="font-bebas text-2xl uppercase tracking-wide text-[var(--text-main)] mt-1">
                 {sport.name}
               </h3>
             </div>
-            <span className="px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider bg-[var(--bg-muted)] text-[var(--text-muted)] border border-[var(--border-subtle)]">
+            <span className="px-2.5 py-1 rounded-md text-[10px] font-barlow font-bold uppercase tracking-wider bg-[var(--bg-muted)] text-[var(--text-muted)] border border-[var(--border-subtle)]">
               {sport.scoringType === 'TIME_BASED'
                 ? 'Waktu / Babak'
                 : sport.scoringType === 'SET_POINTS'
@@ -50,14 +50,14 @@ export const SportGridView: React.FC<SportGridViewProps> = ({ sports, onEdit, on
           </div>
 
           <div className="pt-1 flex items-center justify-between text-xs">
-            <span className="text-[11px] text-[var(--text-muted)] font-medium">
-              {sport.categories.length} Nomor Tanding Aktif
+            <span className="text-[11px] text-[var(--text-muted)] font-medium" title="Contoh: Putra U-15, kelas 55 kg">
+              {sport.categories.length} Kategori &amp; Kelas Aktif
             </span>
             <div className="flex items-center gap-2">
               <button
                 type="button"
                 onClick={() => onEdit(sport)}
-                className="btn-tactile px-3 py-1.5 rounded-lg border border-[var(--border-subtle)] hover:border-[var(--color-arena-primary)] text-[var(--text-main)] text-[11px] font-bold flex items-center gap-1.5 transition-colors"
+                className="btn-tactile px-3 py-1.5 rounded-lg border border-[var(--border-subtle)] hover:border-[var(--color-arena-primary)] text-[var(--text-main)] text-xs font-barlow font-bold uppercase tracking-wider flex items-center gap-1.5 transition-colors"
               >
                 <Edit2 className="w-3.5 h-3.5 text-[var(--color-arena-primary)]" />
                 <span>Ubah Regulasi</span>

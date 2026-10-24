@@ -14,12 +14,12 @@ export const SportTableView: React.FC<SportTableViewProps> = ({ sports, onEdit, 
   return (
     <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] overflow-x-auto shadow-xs">
       <table className="w-full text-xs text-left">
-        <thead className="bg-[var(--bg-muted)]/70 text-[var(--text-muted)] uppercase text-[11px] font-black tracking-wider font-[var(--font-display)] border-b border-[var(--border-subtle)]">
+        <thead className="bg-[var(--bg-muted)]/70 text-[var(--text-muted)] uppercase text-[11px] font-barlow font-bold tracking-wider border-b border-[var(--border-subtle)]">
           <tr>
             <th className="py-3.5 px-4">Cabang Olahraga</th>
             <th className="py-3.5 px-4">Format Penilaian</th>
             <th className="py-3.5 px-4">Durasi &amp; Babak</th>
-            <th className="py-3.5 px-4">Nomor Tanding</th>
+            <th className="py-3.5 px-4" title="Contoh: Putra U-15, kelas 55 kg">Kategori &amp; Kelas</th>
             <th className="py-3.5 px-4 text-right">Aksi</th>
           </tr>
         </thead>
@@ -28,16 +28,16 @@ export const SportTableView: React.FC<SportTableViewProps> = ({ sports, onEdit, 
             <tr key={sport.code} className="hover:bg-[var(--bg-muted)]/30 transition-colors">
               <td className="py-4 px-4">
                 <div className="flex items-center gap-2">
-                  <span className="font-black text-sm font-[var(--font-display)]">{sport.name}</span>
-                  <span className="text-[10px] font-[var(--font-mono)] px-2 py-0.5 rounded bg-[var(--color-arena-primary-light)] text-[var(--color-arena-primary)] font-bold">
+                  <span className="font-barlow font-bold text-sm uppercase tracking-wide">{sport.name}</span>
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-[var(--color-arena-primary-light)] text-[var(--color-arena-primary)] font-bold">
                     {sport.code}
                   </span>
                 </div>
               </td>
               <td className="py-4 px-4">
                 <div>
-                  <span className="font-semibold block font-[var(--font-display)]">{sport.scoringLabel}</span>
-                  <span className="text-[11px] text-[var(--text-muted)] font-[var(--font-sans)]">
+                  <span className="font-semibold block">{sport.scoringLabel}</span>
+                  <span className="text-[11px] text-[var(--text-muted)]">
                     {sport.scoringType === 'TIME_BASED'
                       ? 'Waktu/Babak'
                       : sport.scoringType === 'SET_POINTS'
@@ -46,14 +46,14 @@ export const SportTableView: React.FC<SportTableViewProps> = ({ sports, onEdit, 
                   </span>
                 </div>
               </td>
-              <td className="py-4 px-4 font-[var(--font-mono)] tabular-nums">
+              <td className="py-4 px-4 font-mono tabular-nums">
                 <span className="font-bold">{sport.durationMinutes} Menit</span>
-                <span className="text-[var(--text-muted)] text-[11px] block font-[var(--font-sans)]">
+                <span className="text-[var(--text-muted)] text-[11px] block">
                   {sport.periodCount} Babak/Set
                 </span>
               </td>
               <td className="py-4 px-4">
-                <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold bg-[var(--bg-muted)] border border-[var(--border-subtle)] text-[var(--text-main)] font-[var(--font-display)]">
+                <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-barlow font-bold uppercase tracking-wider bg-[var(--bg-muted)] border border-[var(--border-subtle)] text-[var(--text-main)]">
                   {sport.categories.length} Nomor
                 </span>
               </td>
@@ -62,7 +62,7 @@ export const SportTableView: React.FC<SportTableViewProps> = ({ sports, onEdit, 
                   <button
                     type="button"
                     onClick={() => onEdit(sport)}
-                    className="btn-tactile px-3 py-1.5 rounded-xl border border-[var(--border-subtle)] hover:border-[var(--color-arena-primary)] text-[var(--text-main)] text-xs font-bold font-[var(--font-display)] inline-flex items-center gap-1.5 transition-colors"
+                    className="btn-tactile px-3 py-1.5 rounded-xl border border-[var(--border-subtle)] hover:border-[var(--color-arena-primary)] text-[var(--text-main)] text-xs font-barlow font-bold uppercase tracking-wider inline-flex items-center gap-1.5 transition-colors"
                   >
                     <Edit2 className="w-3.5 h-3.5 text-[var(--color-arena-primary)]" />
                     <span>Ubah</span>

@@ -1,9 +1,10 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Plus, Search, Edit2, Trash2, X, Trophy } from 'lucide-react';
+import { Plus, Search, Edit2, Trash2, Trophy } from 'lucide-react';
 import { StandingRow } from '@/types';
 import { ConfirmModal } from '@/components/admin/common/ConfirmModal';
+import { StandingFormModal, StandingFormData } from './StandingFormModal';
 
 const DEFAULT_GROUP_A_STANDINGS: StandingRow[] = [
   { rank: 1, teamId: 'team-min1', teamName: 'MIN 1 KOTA', schoolName: 'Madrasah Ibtidaiyah Negeri 1 Kota', logoUrl: '/teams/default.png', played: 3, won: 2, drawn: 0, lost: 1, goalsFor: 15, goalsAgainst: 14, goalDifference: 1, points: 6, fairPlayScore: 10 },
@@ -31,50 +32,14 @@ export const GroupStandingsTab: React.FC = () => {
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingRow, setEditingRow] = useState<StandingRow | null>(null);
-  const [formData, setFormData] = useState({
-    teamName: '',
-    schoolName: '',
-    played: 3,
-    won: 2,
-    drawn: 1,
-    lost: 0,
-    goalsFor: 8,
-    goalsAgainst: 2,
-    points: 7,
-    fairPlayScore: 10,
-  });
 
   const handleOpenAdd = () => {
     setEditingRow(null);
-    setFormData({
-      teamName: '',
-      schoolName: '',
-      played: 0,
-      won: 0,
-      drawn: 0,
-      lost: 0,
-      goalsFor: 0,
-      goalsAgainst: 0,
-      points: 0,
-      fairPlayScore: 10,
-    });
     setIsModalOpen(true);
   };
 
   const handleOpenEdit = (row: StandingRow) => {
     setEditingRow(row);
-    setFormData({
-      teamName: row.teamName,
-      schoolName: row.schoolName,
-      played: row.played,
-      won: row.won,
-      drawn: row.drawn,
-      lost: row.lost,
-      goalsFor: row.goalsFor,
-      goalsAgainst: row.goalsAgainst,
-      points: row.points,
-      fairPlayScore: row.fairPlayScore,
-    });
     setIsModalOpen(true);
   };
 
@@ -89,10 +54,7 @@ export const GroupStandingsTab: React.FC = () => {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!formData.teamName.trim()) return;
-
+  const handleSubmit = (formData: StandingFormData) => {
     const gf = Number(formData.goalsFor) || 0;
     const ga = Number(formData.goalsAgainst) || 0;
     const gd = gf - ga;
@@ -154,16 +116,16 @@ export const GroupStandingsTab: React.FC = () => {
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[var(--border-subtle)]">
         <div>
-          <h3 className="font-black text-lg text-[var(--text-main)] font-[var(--font-display)] tracking-tight flex items-center gap-2">
+          <h3 className="font-bebas text-xl sm:text-2xl uppercase tracking-wide text-[var(--text-main)] flex items-center gap-2">
             <Trophy className="w-5 h-5 text-amber-500" />
             <span>Klasemen Poin Babak Grup</span>
           </h3>
-          <p className="text-xs text-[var(--text-muted)] font-[var(--font-sans)] mt-1">
+          <p className="text-xs text-[var(--text-muted)] mt-1">
             Perhitungan otomatis menang (3 poin), seri (1 poin), kalah (0 poin), selisih gol, dan fair-play.
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
-          <div className="flex rounded-2xl bg-[var(--bg-muted)]/80 p-1.5 border border-[var(--border-subtle)] text-xs font-bold font-[var(--font-display)]">
+          <div className="flex rounded-2xl bg-[var(--bg-muted)]/80 p-1.5 border border-[var(--border-subtle)] text-xs font-barlow font-bold uppercase tracking-wider">
             <button
               type="button"
               onClick={() => setSelectedGroup('A')}
@@ -186,7 +148,7 @@ export const GroupStandingsTab: React.FC = () => {
           <button
             type="button"
             onClick={handleOpenAdd}
-            className="btn-tactile px-4 py-2.5 rounded-xl bg-[var(--color-arena-primary)] hover:bg-[var(--color-arena-primary-hover)] text-white text-xs font-bold font-[var(--font-display)] flex items-center gap-2 shadow-xs shrink-0"
+            className="btn-tactile px-4 py-2.5 rounded-xl bg-[var(--color-arena-primary)] hover:bg-[var(--color-arena-primary-hover)] text-white text-xs font-barlow font-bold uppercase tracking-wider flex items-center gap-2 shadow-xs shrink-0"
           >
             <Plus className="w-4 h-4" />
             <span>Tambah Tim Grup {selectedGroup}</span>
@@ -197,7 +159,7 @@ export const GroupStandingsTab: React.FC = () => {
       {/* Table Standings CRUD */}
       <div className="overflow-x-auto rounded-xl border border-[var(--border-subtle)]">
         <table className="w-full text-xs text-left">
-          <thead className="bg-[var(--bg-muted)]/70 text-[11px] font-black uppercase tracking-wider font-[var(--font-display)] text-[var(--text-muted)] border-b border-[var(--border-subtle)]">
+          <thead className="bg-[var(--bg-muted)]/70 text-[11px] font-barlow font-bold uppercase tracking-wider text-[var(--text-muted)] border-b border-[var(--border-subtle)]">
             <tr>
               <th className="py-3.5 px-3.5 text-center">Pos</th>
               <th className="py-3.5 px-3.5">Klub / Sekolah</th>
@@ -208,36 +170,36 @@ export const GroupStandingsTab: React.FC = () => {
               <th className="py-3.5 px-3 text-center">GM</th>
               <th className="py-3.5 px-3 text-center">GK</th>
               <th className="py-3.5 px-3 text-center">SG</th>
-              <th className="py-3.5 px-3.5 text-center font-black text-sm text-[var(--color-arena-primary)]">PTS</th>
+              <th className="py-3.5 px-3.5 text-center font-bold text-sm text-[var(--color-arena-primary)]">PTS</th>
               <th className="py-3.5 px-3.5 text-right">Aksi</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-[var(--border-subtle)] font-medium">
             {sortedStandings.map((row, idx) => (
               <tr key={row.teamId} className="hover:bg-[var(--bg-muted)]/30 transition-colors">
-                <td className="py-4 px-3.5 text-center font-bold font-[var(--font-mono)] tabular-nums">
+                <td className="py-4 px-3.5 text-center font-barlow font-bold tabular-nums">
                   <span
-                    className={`inline-flex items-center justify-center w-6 h-6 rounded-lg text-xs font-[var(--font-mono)] tabular-nums ${
-                      idx < 2 ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 font-black' : 'text-[var(--text-muted)]'
+                    className={`inline-flex items-center justify-center w-6 h-6 rounded-lg text-xs font-teko font-bold tabular-nums ${
+                      idx < 2 ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 text-sm' : 'text-[var(--text-muted)]'
                     }`}
                   >
                     {idx + 1}
                   </span>
                 </td>
                 <td className="py-4 px-3.5 font-bold text-[var(--text-main)]">
-                  <div className="font-[var(--font-display)]">{row.teamName}</div>
+                  <div>{row.teamName}</div>
                   <div className="text-[11px] text-[var(--text-muted)] font-normal">{row.schoolName}</div>
                 </td>
-                <td className="py-4 px-3 text-center font-[var(--font-mono)] tabular-nums text-xs">{row.played}</td>
-                <td className="py-4 px-3 text-center font-[var(--font-mono)] tabular-nums text-xs font-bold text-emerald-600 dark:text-emerald-400">{row.won}</td>
-                <td className="py-4 px-3 text-center font-[var(--font-mono)] tabular-nums text-xs text-amber-600 dark:text-amber-400">{row.drawn}</td>
-                <td className="py-4 px-3 text-center font-[var(--font-mono)] tabular-nums text-xs text-red-600 dark:text-red-400">{row.lost}</td>
-                <td className="py-4 px-3 text-center font-[var(--font-mono)] tabular-nums text-xs">{row.goalsFor}</td>
-                <td className="py-4 px-3 text-center font-[var(--font-mono)] tabular-nums text-xs">{row.goalsAgainst}</td>
-                <td className="py-4 px-3 text-center font-[var(--font-mono)] tabular-nums text-xs font-bold">
+                <td className="py-4 px-3 text-center font-mono tabular-nums text-xs">{row.played}</td>
+                <td className="py-4 px-3 text-center font-mono tabular-nums text-xs font-bold text-emerald-600 dark:text-emerald-400">{row.won}</td>
+                <td className="py-4 px-3 text-center font-mono tabular-nums text-xs text-amber-600 dark:text-amber-400">{row.drawn}</td>
+                <td className="py-4 px-3 text-center font-mono tabular-nums text-xs text-red-600 dark:text-red-400">{row.lost}</td>
+                <td className="py-4 px-3 text-center font-mono tabular-nums text-xs">{row.goalsFor}</td>
+                <td className="py-4 px-3 text-center font-mono tabular-nums text-xs">{row.goalsAgainst}</td>
+                <td className="py-4 px-3 text-center font-mono tabular-nums text-xs font-bold">
                   {row.goalDifference > 0 ? `+${row.goalDifference}` : row.goalDifference}
                 </td>
-                <td className="py-4 px-3.5 text-center font-[var(--font-mono)] tabular-nums font-black text-sm text-[var(--color-arena-primary)]">
+                <td className="py-4 px-3.5 text-center font-teko font-bold text-lg tabular-nums text-[var(--color-arena-primary)]">
                   {row.points}
                 </td>
                 <td className="py-4 px-3.5 text-right">
@@ -267,135 +229,21 @@ export const GroupStandingsTab: React.FC = () => {
       </div>
 
       {/* Modal CRUD (Create & Update) */}
-      {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fadeIn">
-          <div className="bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
-            <div className="flex items-center justify-between pb-2 border-b border-[var(--border-subtle)]">
-              <h3 className="font-black text-base text-[var(--text-main)]">
-                {editingRow ? `Koreksi Poin: ${editingRow.teamName}` : `Tambah Tim ke Klasemen Grup ${selectedGroup}`}
-              </h3>
-              <button
-                type="button"
-                onClick={() => setIsModalOpen(false)}
-                className="p-1 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-main)]"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            <form onSubmit={handleSubmit} className="space-y-3 text-xs">
-              <div>
-                <label className="font-bold text-[var(--text-main)] block mb-1">Nama Tim / Sekolah</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="Contoh: MIN 1 Kota Malang"
-                  value={formData.teamName}
-                  onChange={(e) => setFormData({ ...formData, teamName: e.target.value })}
-                  className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)]"
-                />
-              </div>
-
-              <div className="grid grid-cols-4 gap-2">
-                <div>
-                  <label className="font-bold text-[var(--text-main)] block mb-1">Main (MN)</label>
-                  <input
-                    type="number"
-                    min="0"
-                    value={formData.played}
-                    onChange={(e) => setFormData({ ...formData, played: Number(e.target.value) })}
-                    className="w-full px-2 py-1.5 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)] font-mono text-center"
-                  />
-                </div>
-                <div>
-                  <label className="font-bold text-emerald-600 block mb-1">Menang (M)</label>
-                  <input
-                    type="number"
-                    min="0"
-                    value={formData.won}
-                    onChange={(e) => setFormData({ ...formData, won: Number(e.target.value) })}
-                    className="w-full px-2 py-1.5 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)] font-mono text-center font-bold"
-                  />
-                </div>
-                <div>
-                  <label className="font-bold text-amber-600 block mb-1">Seri (S)</label>
-                  <input
-                    type="number"
-                    min="0"
-                    value={formData.drawn}
-                    onChange={(e) => setFormData({ ...formData, drawn: Number(e.target.value) })}
-                    className="w-full px-2 py-1.5 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)] font-mono text-center"
-                  />
-                </div>
-                <div>
-                  <label className="font-bold text-red-600 block mb-1">Kalah (K)</label>
-                  <input
-                    type="number"
-                    min="0"
-                    value={formData.lost}
-                    onChange={(e) => setFormData({ ...formData, lost: Number(e.target.value) })}
-                    className="w-full px-2 py-1.5 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)] font-mono text-center"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-3 gap-2">
-                <div>
-                  <label className="font-bold text-[var(--text-main)] block mb-1">Gol Memasukkan (GM)</label>
-                  <input
-                    type="number"
-                    min="0"
-                    value={formData.goalsFor}
-                    onChange={(e) => setFormData({ ...formData, goalsFor: Number(e.target.value) })}
-                    className="w-full px-2 py-1.5 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)] font-mono text-center"
-                  />
-                </div>
-                <div>
-                  <label className="font-bold text-[var(--text-main)] block mb-1">Gol Kemasukan (GK)</label>
-                  <input
-                    type="number"
-                    min="0"
-                    value={formData.goalsAgainst}
-                    onChange={(e) => setFormData({ ...formData, goalsAgainst: Number(e.target.value) })}
-                    className="w-full px-2 py-1.5 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)] font-mono text-center"
-                  />
-                </div>
-                <div>
-                  <label className="font-bold text-[var(--color-arena-primary)] block mb-1">Poin Total (PTS)</label>
-                  <input
-                    type="number"
-                    min="0"
-                    value={formData.points}
-                    onChange={(e) => setFormData({ ...formData, points: Number(e.target.value) })}
-                    className="w-full px-2 py-1.5 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)] font-mono text-center font-black"
-                  />
-                </div>
-              </div>
-
-              <div className="flex gap-2 pt-3">
-                <button
-                  type="submit"
-                  className="btn-tactile flex-1 py-2.5 rounded-xl bg-[var(--color-arena-primary)] text-white font-bold text-xs"
-                >
-                  {editingRow ? 'Simpan Koreksi' : 'Tambahkan ke Klasemen'}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setIsModalOpen(false)}
-                  className="btn-tactile px-4 py-2.5 rounded-xl border border-[var(--border-subtle)] text-xs font-semibold"
-                >
-                  Batal
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      <StandingFormModal
+        isOpen={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false);
+          setEditingRow(null);
+        }}
+        onSubmit={handleSubmit}
+        editingRow={editingRow}
+        selectedGroup={selectedGroup}
+      />
 
       {/* Reusable Confirm Delete Modal */}
       <ConfirmModal
         isOpen={Boolean(deleteTarget)}
-        title="Hapus Dari Klasemen Grup"
+        title="Hapus Dari Klasemen"
         message={`Apakah Anda yakin ingin menghapus tim "${deleteTarget?.teamName}" dari klasemen Grup ${selectedGroup}? Tindakan ini tidak dapat dibatalkan.`}
         confirmLabel="Ya, Hapus Tim"
         cancelLabel="Batal"

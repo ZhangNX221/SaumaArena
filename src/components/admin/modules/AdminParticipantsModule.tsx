@@ -37,18 +37,15 @@ export const AdminParticipantsModule: React.FC<AdminParticipantsModuleProps> = (
 
   return (
     <div className="space-y-8 animate-fadeIn">
-      {/* Top Segmented Navigation */}
+      {/* Top Segmented Navigation & Description */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-xl sm:text-2xl font-black text-[var(--text-main)] font-[var(--font-display)] tracking-tight">
-            Registrasi &amp; Database Peserta
-          </h2>
-          <p className="text-xs text-[var(--text-muted)] font-[var(--font-sans)] mt-1">
+          <p className="text-xs sm:text-sm text-[var(--text-muted)]">
             Verifikasi berkas legalitas pendaftaran, basis data kontingen, dan ID pass QR resmi atlet.
           </p>
         </div>
 
-        <div className="flex items-center gap-1 p-1.5 rounded-2xl bg-[var(--bg-muted)]/80 border border-[var(--border-subtle)] text-xs font-bold font-[var(--font-display)] w-fit">
+        <div className="flex items-center gap-1 p-1.5 rounded-2xl bg-[var(--bg-muted)]/80 border border-[var(--border-subtle)] text-xs font-barlow font-bold uppercase tracking-wider w-fit">
           <button
             type="button"
             onClick={() => handleTabChange('ATHLETES')}
@@ -58,7 +55,7 @@ export const AdminParticipantsModule: React.FC<AdminParticipantsModuleProps> = (
                 : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'
             }`}
           >
-            ID Card Atlet QR
+            Kartu Atlet
           </button>
           <button
             type="button"
@@ -69,7 +66,7 @@ export const AdminParticipantsModule: React.FC<AdminParticipantsModuleProps> = (
                 : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'
             }`}
           >
-            Data Kontingen Tim
+            Tim
           </button>
           <button
             type="button"

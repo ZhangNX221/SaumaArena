@@ -1,7 +1,7 @@
 'use client';
 
-import React from 'react';
-import { X, Award, ShieldAlert, Sparkles, Ticket } from 'lucide-react';
+import React, { useEffect } from 'react';
+import { X, Award, ShieldAlert, Ticket } from 'lucide-react';
 import { Team, SupporterAssessment } from '@/types';
 import { getTeamLogoUrl } from '@/mocks/teamLogos';
 
@@ -18,6 +18,15 @@ export const SupporterDetailModal: React.FC<SupporterDetailModalProps> = ({
   team,
   assessments,
 }) => {
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
+
   if (!isOpen || !team) return null;
 
   const teamAssessments = assessments.filter((a) => a.teamId === team.id);

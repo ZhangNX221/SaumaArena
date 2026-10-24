@@ -1,53 +1,169 @@
 'use client';
 
 import React, { useState } from 'react';
-import { User, Award, ShieldCheck, CheckCircle2, Moon, Sun, ToggleLeft, ToggleRight, DollarSign } from 'lucide-react';
+import { 
+  User, 
+  CheckCircle2, 
+  Lock, 
+  Save, 
+  ToggleLeft, 
+  Clock,
+} from 'lucide-react';
 import { AppUser } from '@/types';
+import { ProfileIdentityTab } from './profile/ProfileIdentityTab';
+import { ProfileAvailabilityTab } from './profile/ProfileAvailabilityTab';
+import { ProfileSecurityTab } from './profile/ProfileSecurityTab';
 
 interface RefereeProfileProps {
   user: AppUser;
+  onUpdateProfile?: (updated: Partial<AppUser>) => void;
   onUpdateAvailability?: (status: boolean) => void;
   darkMode?: boolean;
   onToggleDarkMode?: () => void;
 }
 
+type ProfileTab = 'IDENTITY' | 'AVAILABILITY' | 'SECURITY';
+
 export const RefereeProfile: React.FC<RefereeProfileProps> = ({
   user,
+  onUpdateProfile,
   onUpdateAvailability,
-  darkMode,
-  onToggleDarkMode,
 }) => {
-  const [isAvailable, setIsAvailable] = useState(user.isAvailable ?? true);
+  const [activeTab, setActiveTab] = useState<ProfileTab>('IDENTITY');
+  const [isAvailable, setIsAvailable] = useState<boolean>(user.isAvailable ?? true);
+
+  // Form Fields State
+  const [name, setName] = useState(user.name || '');
+  const [email, setEmail] = useState(user.email || '');
+  const [phone, setPhone] = useState('0812-3456-7890');
+  const [roleLabel, setRoleLabel] = useState(user.roleLabel || 'Wasit Utama FFI MMFC I');
+  const [licenseLevel, setLicenseLevel] = useState(user.licenseLevel || 'Lisensi 2 Nasional FFI');
+  const [licenseId, setLicenseId] = useState('FFI-WASIT-2026-089');
+  const [association, setAssociation] = useState('Asosiasi Futsal Kota (AFK) Malang');
+
+  // Duty Preference State
+  const [preferredRoles, setPreferredRoles] = useState<string[]>([
+    'Wasit 1 (Utama)',
+    'Wasit 2 (Garis)',
+    'Wasit 3 (Meja/Waktu)',
+  ]);
+  const [availabilityNotes, setAvailabilityNotes] = useState(
+    'Tersedia memimpin sesi pagi (08:00 - 12:00) dan sesi sore (14:00 - 18:00 WIB).'
+  );
+
+  // Security State
+  const [oldPassword, setOldPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [deskPin, setDeskPin] = useState('2026');
+
+  // Toast / Save State
+  const [saveSuccess, setSaveSuccess] = useState(false);
+  const [saveMessage, setSaveMessage] = useState('');
 
   const toggleAvailability = () => {
     const next = !isAvailable;
     setIsAvailable(next);
     onUpdateAvailability?.(next);
+    onUpdateProfile?.({ isAvailable: next });
+    showToast(`Status ketersediaan diubah ke: ${next ? 'Siap Bertugas' : 'Sedang Istirahat'}`);
+  };
+
+  const showToast = (msg: string) => {
+    setSaveMessage(msg);
+    setSaveSuccess(true);
+    setTimeout(() => setSaveSuccess(false), 3500);
+  };
+
+  const handleSaveProfile = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    const avatarInitials = name
+      .split(' ')
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((n) => n[0].toUpperCase())
+      .join('') || 'RH';
+
+    onUpdateProfile?.({
+      name,
+      email,
+      roleLabel,
+      licenseLevel,
+      avatarText: avatarInitials,
+      isAvailable,
+    });
+
+    showToast('Perubahan profil berhasil disimpan dan langsung aktif.');
+  };
+
+  const toggleRolePreference = (role: string) => {
+    setPreferredRoles((prev) =>
+      prev.includes(role) ? prev.filter((r) => r !== role) : [...prev, role]
+    );
+  };
+
+  const scrollToSection = (sectionId: string, tabKey: ProfileTab) => {
+    setActiveTab(tabKey);
+    const el = document.getElementById(sectionId);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
   };
 
   return (
-    <div className="space-y-6 max-w-4xl mx-auto pb-16">
-      <div>
-        <h2 className="text-xl sm:text-2xl font-black text-[var(--text-main)] font-[var(--font-display)]">
-          Profil Juri &amp; Status Ketersediaan
-        </h2>
-        <p className="text-xs text-[var(--text-muted)] mt-0.5">
-          Atur kesiapan bertugas Anda agar komisioner pertandingan dapat melakukan plotting jadwal dadakan secara akurat.
-        </p>
+    <form onSubmit={handleSaveProfile} className="space-y-6 max-w-5xl mx-auto pb-24 animate-fadeIn">
+      {/* 1. Header Banner Ringkas & Minimalis */}
+      <div className="p-5 sm:p-6 rounded-2xl bg-[#0D1E30] text-white border border-[#1C3B5B] transition-all duration-200 shadow-xs">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="space-y-1">
+            <h1 className="font-bebas text-2xl sm:text-3xl tracking-wide uppercase text-white leading-none">
+              PROFIL &amp; PENGATURAN WASIT
+            </h1>
+            <p className="text-xs text-slate-300 max-w-xl font-sans">
+              Semua pengaturan akun wasit dalam 1 halaman: biodata &amp; lisensi, kesiapan penugasan, dan keamanan akun.
+            </p>
+          </div>
+
+          <button
+            type="submit"
+            className="btn-tactile px-5 py-2.5 rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] active:scale-[0.98] text-white text-xs font-barlow font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-all duration-150 shrink-0 self-start sm:self-auto min-h-[42px]"
+          >
+            <Save className="w-3.5 h-3.5" />
+            <span>Simpan Profil</span>
+          </button>
+        </div>
       </div>
 
-      {/* Main Status Toggle Card */}
-      <div className="p-6 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="flex items-center gap-4">
-          <div className="w-14 h-14 rounded-2xl bg-[#0b1a28] text-[#f6ae2d] flex items-center justify-center font-black text-xl shadow-xs">
-            {user.avatarText || 'RH'}
+      {/* Toast Notification - Animate */}
+      {saveSuccess && (
+        <div className="p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/25 text-emerald-800 dark:text-emerald-300 text-xs sm:text-sm font-medium flex items-center gap-2.5 animate-fadeIn font-sans">
+          <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+          <span>{saveMessage}</span>
+        </div>
+      )}
+
+      {/* 2. Official Accreditation ID Card - Ringkas & Minimalis */}
+      <div className="p-4 sm:p-5 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xs">
+        <div className="flex items-center gap-3.5">
+          <div className="w-14 h-14 rounded-2xl bg-[#07131F] text-[#F6AE2D] flex items-center justify-center font-bebas text-2xl border border-[#1C3B5B] shrink-0">
+            {user.avatarText || 'MI'}
           </div>
-          <div>
-            <h3 className="font-black text-base text-[var(--text-main)]">{user.name}</h3>
-            <p className="text-xs text-[var(--text-muted)]">{user.roleLabel}</p>
-            <div className="flex items-center gap-2 mt-1">
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-[var(--bg-muted)] text-[var(--text-muted)]">
-                {user.licenseLevel || 'Lisensi 2 Nasional FFI'}
+          <div className="space-y-0.5 min-w-0">
+            <div className="flex items-center gap-2 flex-wrap">
+              <h2 className="font-bebas text-xl sm:text-2xl uppercase tracking-wide text-[var(--text-main)] leading-none truncate">
+                {name || user.name || 'Juri M. Irfan, S.Pd'}
+              </h2>
+              <span className="text-[10px] font-barlow font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20 shrink-0">
+                Terverifikasi
+              </span>
+            </div>
+            <p className="text-xs text-[var(--text-muted)] font-sans truncate">{roleLabel}</p>
+            <div className="flex flex-wrap items-center gap-2 pt-0.5 font-sans">
+              <span className="text-[10px] font-barlow font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-[var(--bg-muted)] text-[var(--text-muted)] border border-[var(--border-subtle)]">
+                {licenseLevel}
+              </span>
+              <span className="text-[10px] font-mono text-[var(--text-muted)]">
+                No: {licenseId}
               </span>
             </div>
           </div>
@@ -57,59 +173,103 @@ export const RefereeProfile: React.FC<RefereeProfileProps> = ({
         <button
           type="button"
           onClick={toggleAvailability}
-          className={`btn-tactile px-5 py-3 rounded-2xl font-black text-xs sm:text-sm flex items-center gap-3 transition-all min-h-[50px] shadow-xs ${
+          className={`btn-tactile px-4 py-2.5 rounded-xl font-barlow font-bold uppercase tracking-wider text-xs flex items-center justify-center gap-2 transition-all duration-150 active:scale-[0.98] min-h-[44px] shrink-0 ${
             isAvailable
               ? 'bg-emerald-600 hover:bg-emerald-700 text-white'
               : 'bg-amber-600 hover:bg-amber-700 text-white'
           }`}
         >
-          {isAvailable ? <CheckCircle2 className="w-5 h-5" /> : <ToggleLeft className="w-5 h-5" />}
+          {isAvailable ? <CheckCircle2 className="w-4 h-4" /> : <ToggleLeft className="w-4 h-4" />}
           <span>{isAvailable ? 'Status: Siap Bertugas' : 'Status: Sedang Istirahat'}</span>
         </button>
       </div>
 
-      {/* Statistics and Duty History Overview */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="p-4 rounded-xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] shadow-xs space-y-1">
-          <span className="text-[11px] font-semibold text-[var(--text-muted)]">Total Laga Dipimpin</span>
-          <div className="text-2xl font-black font-mono text-[var(--text-main)]">12 Laga</div>
-          <span className="text-[10px] text-[#33658a] font-bold">MMFC I Matsanega 2026</span>
-        </div>
-
-        <div className="p-4 rounded-xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] shadow-xs space-y-1">
-          <span className="text-[11px] font-semibold text-[var(--text-muted)]">Akurasi BAP Disahkan</span>
-          <div className="text-2xl font-black font-mono text-emerald-600">100%</div>
-          <span className="text-[10px] text-[var(--text-muted)]">12 / 12 Laga Ditandatangani</span>
-        </div>
-
-        <div className="p-4 rounded-xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] shadow-xs space-y-1">
-          <span className="text-[11px] font-semibold text-[var(--text-muted)]">Honorarium Tugas</span>
-          <div className="text-2xl font-black font-mono text-[#f6ae2d]">Rp 3.600.000</div>
-          <span className="text-[10px] text-[var(--text-muted)]">Panitia MMFC I Official</span>
+      {/* 3. Sticky Quick-Jump Pill Bar */}
+      <div className="sticky top-2 z-20 p-1.5 rounded-2xl bg-[var(--bg-surface)]/95 backdrop-blur-md border border-[var(--border-subtle)] shadow-sm">
+        <div className="grid grid-cols-3 gap-1.5">
+          {[
+            { key: 'IDENTITY' as const, id: 'section-identity', label: '1. Biodata & Lisensi', icon: User },
+            { key: 'AVAILABILITY' as const, id: 'section-availability', label: '2. Kesiapan & Tugas', icon: Clock },
+            { key: 'SECURITY' as const, id: 'section-security', label: '3. Keamanan Akun', icon: Lock },
+          ].map((item) => {
+            const Icon = item.icon;
+            const isActive = activeTab === item.key;
+            return (
+              <button
+                key={item.key}
+                type="button"
+                onClick={() => scrollToSection(item.id, item.key)}
+                className={`btn-tactile flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-barlow font-bold uppercase tracking-wider transition-all duration-150 active:scale-[0.98] ${
+                  isActive
+                    ? 'bg-[var(--color-arena-primary)] text-white shadow-xs'
+                    : 'text-[var(--text-muted)] hover:bg-[var(--bg-muted)] hover:text-[var(--text-main)]'
+                }`}
+              >
+                <Icon className="w-3.5 h-3.5 shrink-0" />
+                <span className="truncate">{item.label}</span>
+              </button>
+            );
+          })}
         </div>
       </div>
 
-      {/* High Contrast / Outdoor Display Setting */}
-      {onToggleDarkMode && (
-        <div className="p-5 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] shadow-xs flex items-center justify-between">
-          <div>
-            <div className="font-bold text-xs sm:text-sm text-[var(--text-main)]">
-              Mode Tampilan Layar Lapangan
-            </div>
-            <p className="text-xs text-[var(--text-muted)] mt-0.5">
-              Aktifkan mode kontras tinggi saat memimpin di bawah sinar matahari atau lampu sorot malam hari.
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={onToggleDarkMode}
-            className="btn-tactile px-4 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-xs font-bold flex items-center gap-2"
-          >
-            {darkMode ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4" />}
-            <span>{darkMode ? 'Mode Siang' : 'Mode Malam'}</span>
-          </button>
-        </div>
-      )}
-    </div>
+      {/* 4. Section 1: Biodata & Lisensi Resmi */}
+      <section id="section-identity" className="scroll-mt-20">
+        <ProfileIdentityTab
+          name={name}
+          setName={setName}
+          email={email}
+          setEmail={setEmail}
+          phone={phone}
+          setPhone={setPhone}
+          roleLabel={roleLabel}
+          setRoleLabel={setRoleLabel}
+          licenseLevel={licenseLevel}
+          setLicenseLevel={setLicenseLevel}
+          licenseId={licenseId}
+          setLicenseId={setLicenseId}
+          association={association}
+          setAssociation={setAssociation}
+        />
+      </section>
+
+      {/* 5. Section 2: Kesiapan Bertugas & Preferensi Meja */}
+      <section id="section-availability" className="scroll-mt-20">
+        <ProfileAvailabilityTab
+          isAvailable={isAvailable}
+          setIsAvailable={setIsAvailable}
+          onUpdateAvailability={onUpdateAvailability}
+          preferredRoles={preferredRoles}
+          toggleRolePreference={toggleRolePreference}
+          availabilityNotes={availabilityNotes}
+          setAvailabilityNotes={setAvailabilityNotes}
+        />
+      </section>
+
+      {/* 6. Section 3: Keamanan Akun & PIN Meja Skor */}
+      <section id="section-security" className="scroll-mt-20">
+        <ProfileSecurityTab
+          deskPin={deskPin}
+          setDeskPin={setDeskPin}
+          oldPassword={oldPassword}
+          setOldPassword={setOldPassword}
+          newPassword={newPassword}
+          setNewPassword={setNewPassword}
+          confirmPassword={confirmPassword}
+          setConfirmPassword={setConfirmPassword}
+        />
+      </section>
+
+      {/* 7. Bottom Unified Save Action Bar */}
+      <div className="flex justify-end pt-2">
+        <button
+          type="submit"
+          className="btn-tactile w-full sm:w-auto px-8 py-3.5 rounded-xl bg-[var(--color-arena-primary)] hover:bg-[var(--color-arena-primary-hover)] active:scale-[0.98] text-white font-barlow font-bold uppercase tracking-wider text-sm flex items-center justify-center gap-2.5 shadow-sm transition-all duration-150 min-h-[48px]"
+        >
+          <Save className="w-4 h-4" />
+          <span>Simpan Seluruh Perubahan Profil</span>
+        </button>
+      </div>
+    </form>
   );
 };

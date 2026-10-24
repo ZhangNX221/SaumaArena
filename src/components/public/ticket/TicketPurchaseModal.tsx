@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
-import { X, ChevronLeft, ChevronRight, Plus, Minus, AlertCircle, Sparkles } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { X, ChevronLeft, ChevronRight, Plus, Minus, AlertCircle } from 'lucide-react';
 import { TicketCategoryType, PaymentChannelType, TicketOrderData } from '@/types/ticket';
 import { TICKET_CATEGORIES, PAYMENT_CHANNELS } from '@/mocks/ticketConfig';
 import { initialTeams } from '@/mocks/tournamentData';
@@ -34,6 +34,15 @@ export const TicketPurchaseModal: React.FC<TicketPurchaseModalProps> = ({
   const [validationError, setValidationError] = useState<string | null>(null);
   const [createdOrder, setCreatedOrder] = useState<TicketOrderData | null>(null);
   const [ticketCode, setTicketCode] = useState<string>('');
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
 
   if (!isOpen) return null;
 
@@ -358,7 +367,6 @@ export const TicketPurchaseModal: React.FC<TicketPurchaseModalProps> = ({
                 type="submit"
                 className="btn-tactile px-6 py-2.5 rounded-xl text-xs font-extrabold bg-[var(--color-arena-primary)] hover:bg-[var(--color-arena-primary-hover)] text-white shadow-xs transition-colors flex items-center justify-center gap-2 min-h-[42px]"
               >
-                <Sparkles className="w-4 h-4" />
                 <span>Lanjut Bayar (Rp {calculateTotal().toLocaleString('id-ID')})</span>
                 <ChevronRight className="w-4 h-4" />
               </button>

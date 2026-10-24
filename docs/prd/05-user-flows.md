@@ -1,165 +1,115 @@
-# 05. Alur Pengguna Utama (User Flows)
+# 05. Alur Pengguna Operasional (User Flows)
 
-**Dokumen PRD: Bagian 5/7**  
-**Produk:** Sauma Arena  
-**Tanggal:** 19 Oktober 2026  
-**Referensi:** [00-index.md](./00-index.md) | [02-target-personas.md](./02-target-personas.md) | [04-functional-specs.md](./04-functional-specs.md)
-
----
-
-## 5.1 Gambaran Umum
-
-Dokumen ini memetakan empat alur pengguna utama (*end-to-end user journeys*) dalam Sauma Arena, yang menghubungkan interaksi antar-peran dari tahap pra-turnamen, hari pelaksanaan laga (*matchday*), hingga pasca-turnamen. Setiap alur dilengkapi diagram alur Mermaid, skenario sukses (*happy path*), dan penanganan skenario khusus (*edge cases*).
+**Dokumen PRD — Bagian 5/12**  
+**Produk:** Sauma Arena (Platform Manajemen Pertandingan Multi-Cabang Olahraga)  
+**Versi:** 1.0  
 
 ---
 
-## 5.2 Alur 1: Penyelenggara Turnamen (Siklus Hidup Turnamen Penuh)
+## 5.1 Alur 1: Setup Kompetisi & Pembekuan Aturan (Admin)
 
-Alur kerja panitia/EO dari inisiasi turnamen hingga penutupan resmi dan distribusi sertifikat.
-
-```mermaid
-graph TD
-    A[Mulai: Buat Turnamen Baru] --> B[Konfigurasi Cabor, Kategori, Format & Kuota]
-    B --> C[Buka Periode Pendaftaran Publik]
-    C --> D{Verifikasi Pendaftaran & Pembayaran}
-    D -- Berkas Tidak Lengkap / Ditolak --> E[Kirim Notifikasi Revisi ke Manajer Tim]
-    E --> D
-    D -- Disetujui (Approved) --> F[Kunci Pendaftaran & Roster]
-    F --> G[Undian Grup / Seeding Bagan Gugur]
-    G --> H[Susun Jadwal Laga & Tetapkan Lapangan]
-    H --> I{Cek Konflik Jadwal}
-    I -- Ada Tabrakan --> H
-    I -- Jadwal Bersih --> J[Publikasikan Jadwal ke Publik]
-    J --> K[Pelaksanaan Turnamen / Matchday Supervision]
-    K --> L[Laga Final Selesai & Verifikasi Seluruh BAP]
-    L --> M[Generate E-Sertifikat Otomatis Ber-QR]
-    M --> N[Tutup Turnamen Resmi & Publikasikan Juara]
+```
+[Mulai] ──► [Admin Login] ──► [Pilih Cabor & Template Aturan]
+                                       │
+                                       ▼
+                         [Atur Override Regulasi Khusus]
+                                       │
+                                       ▼
+                          [Input Data Tim & Roster Pemain]
+                                       │
+                                       ▼
+                         [Ubah Status Menjadi 'ongoing']
+                                       │
+                                       ▼
+                   [Sistem Bekukan Snapshot ke 'rules_snapshot'] ──► [Selesai]
 ```
 
-### Langkah demi Langkah:
-1. **Inisiasi Turnamen:** Admin memasukkan nama turnamen, tanggal, logo, deskripsi, lokasi/venue, dan peraturan umum.
-2. **Pengaturan Kategori & Format:** Menentukan cabang olahraga (futsal, voli, basket, e-sports), format kompetisi (Grup + Gugur atau Gugur Murni), jumlah kuota tim, dan besaran biaya registrasi.
-3. **Verifikasi Peserta:** Admin meninjau data roster dan bukti pembayaran di dasbor verifikasi. Memberikan status *Approved* atau *Rejected* dengan catatan revisi yang jelas.
-4. **Pembagian Grup & Bagan:** Melakukan undian tim ke dalam pool grup atau bagan gugur (*bracket*) menggunakan fitur undian otomatis atau slotting manual.
-5. **Penjadwalan Bebas Konflik:** Memetakan laga ke slot tanggal, jam, dan nomor lapangan. Sistem otomatis mencegah jadwal ganda pada venue yang sama.
-6. **Supervisi Pertandingan:** Memantau dasbor hasil skor yang diinput oleh petugas meja lapangan secara real-time.
-7. **Penerbitan Sertifikat & Penutupan:** Mengesahkan hasil final, mencetak laporan akhir, dan menerbitkan e-sertifikat massal ber-QR untuk seluruh pemenang dan peserta.
+1. **Inisiasi Turnamen:** Admin membuka `/admin/competitions`, memilih cabor (misal `futsal`), menentukan nama, slug URL, dan tanggal pelaksanaan.
+2. **Kustomisasi Aturan:** Admin meninjau template standar. Jika ada penyesuaian khusus (misal durasi babak 2x15 menit atau batas kartu kuning), Admin mengisi `rules_overrides`. Sistem memvalidasi konfigurasi dengan skema Zod cabor.
+3. **Penyusunan Peserta:** Admin memasukkan tim peserta dan memvalidasi kelayakan berkas pemain (kartu pelajar/identitas).
+4. **Pembekuan Regulasi:** Saat kompetisi diubah menjadi `ongoing`, sistem otomatis menggabungkan template default dengan overrides dan menyimpannya ke `competitions.rules_snapshot`. Regulasi turnamen terkunci permanen dari perubahan global.
 
 ---
 
-## 5.3 Alur 2: Manajer Tim & Peserta (Pendaftaran hingga Kompetisi)
+## 5.2 Alur 2: Plotting Jadwal, Venue & Penugasan Panitia (Admin)
 
-Alur perjalanan manajer tim atau kapten sekolah dari registrasi awal hingga bertanding dan mengunduh sertifikat prestasi.
-
-```mermaid
-graph TD
-    A[Buka Halaman Publik Turnamen] --> B[Klik 'Daftar Tim']
-    B --> C[Isi Profil Tim, Kontak & Kategori]
-    C --> D[Input Roster Pemain & Upload Berkas: KTP/Kartu Pelajar]
-    D --> E[Upload Bukti Transfer Pembayaran]
-    E --> F[Terima Kode Registrasi & Pantau Status]
-    F --> G{Status Verifikasi Panitia?}
-    G -- Ditolak / Perlu Perbaikan --> H[Perbaiki Berkas sesuai Catatan Panitia]
-    H --> F
-    G -- Disetujui --> I[Menerima Jadwal Pertandingan & Grup]
-    I --> J[Hadir di Venue & Check-in Skuad Lapangan]
-    J --> K[Menjalani Pertandingan]
-    K --> L[Pantau Klasemen, Statistik Pemain & Sanksi Kartu]
-    L --> M{Turnamen Selesai?}
-    M -- Ya --> N[Unduh E-Sertifikat Tim & Piagam Prestasi]
-```
-
-### Penanganan Skenario Khusus (Edge Cases):
-- **Pemain Terkena Sanksi Akumulasi Kartu:** Jika seorang pemain mengantongi 2 kartu kuning di babak penyisihan, sistem otomatis memblokir centang pemain tersebut pada formulir line-up laga berikutnya. Manajer tim menerima peringatan visual bahwa pemain harus menjalani hukuman 1 laga.
-- **Kuota Pendaftaran Penuh:** Formulir pendaftaran otomatis mengunci pengiriman data dan menawarkan opsi bergabung ke *Daftar Tunggu (Waiting List)* jika ada tim yang mengundurkan diri.
+1. **Pemilihan Fase:** Admin membuka tab Plotting Jadwal pada kompetisi bersangkutan.
+2. **Alokasi Slot:** Menentukan nomor laga, tanggal, jam tanding (disimpan UTC), venue, dan nomor lapangan (misal GOR Flobamora, Lapangan A).
+3. **Penugasan Perangkat Laga:** Memilih panitia terdaftar dan menetapkan tugasnya (`referee`, `scorekeeper`, atau `judge`).
+4. **Deteksi Bentrok Otomatis:** Sistem mengecek:
+   - Apakah lapangan yang sama sudah terpakai pada jam tersebut?
+   - Apakah salah satu tim dijadwalkan bertanding di waktu yang sama?
+   - Apakah wasit yang ditugaskan sedang memimpin laga lain?
+5. **Konfirmasi Jadwal:** Jika tidak ada bentrok (atau jika Admin menyetujui override bentrok), jadwal tersimpan dengan status awal `scheduled`.
 
 ---
 
-## 5.4 Alur 3: Penonton & Suporter (Tiket Digital & Pemantauan Laga)
+## 5.3 Alur 3: Persiapan Lapangan & Konfirmasi Lineup (Panitia / Official)
 
-Alur penonton untuk mendapatkan akses masuk venue dan mengikuti perkembangan turnamen favorit.
-
-```mermaid
-graph TD
-    A[Akses Tautan Publik Turnamen / Pindai Banner] --> B[Eksplorasi Halaman Publik: Jadwal & Tim]
-    B --> C[Pilih 'Klaim / Beli Tiket Masuk']
-    C --> D[Pilih Hari & Kategori Tiket: Reguler / Rombongan]
-    D --> E[Isi Nama & Nomor WhatsApp]
-    E --> F[Dapatkan E-Tiket Digital dengan QR Code Unik]
-    F --> G[Tiba di Venue Turnamen]
-    G --> H[Tunjukkan QR Code ke Petugas Pintu Masuk]
-    H --> I{Validasi Scanner Petugas}
-    I -- Tiket Valid / Pertama Kali --> J[Pintu Dibuka, Masuk ke Tribun]
-    I -- Tiket Duplikat / Pernah Dipakai --> K[Alarm Merah: Akses Ditolak]
-    J --> L[Pantau Skor Langsung, Klasemen & Top Skor via Ponsel]
-```
-
-### Keunggulan Alur:
-- **Tanpa Unduh Aplikasi Tambahan:** E-tiket dapat disimpan langsung sebagai tangkapan layar, file PDF, atau dibuka melalui peramban web ponsel.
-- **Kecepatan Gate:** Proses pemindaian di pintu masuk berlangsung kurang dari 2 detik per penonton, mencegah penumpukan massa di depan arena.
+1. **Akses Konsol Mobile:** Wasit atau operator membuka smartphone di `/official`, memilih laga tugas hari ini.
+2. **Pengecekan Identitas:** Memeriksa kehadiran fisik tim di lapangan sesuai daftar pemain terdaftar.
+3. **Pemilihan Lineup:**
+   - Memilih pemain inti (*starters*) sesuai kuota template cabor (misal 5 pemain untuk futsal, 11 untuk sepakbola, 6 untuk voli).
+   - Memilih pemain cadangan (*substitutes*).
+4. **Validasi Kesiapan:** Sistem memeriksa apakah syarat kuota minimum pemain terpenuhi dan memastikan tidak ada pemain yang berstatus terkena sanksi larangan bertanding (*suspended*).
+5. **Kunci Lineup:** Panitia menekan tombol "Konfirmasi Lineup"; status laga beralih menjadi `lineup_confirmed`.
 
 ---
 
-## 5.5 Alur 4: Petugas Meja / Scorer Lapangan (Pencatatan Pertandingan)
+## 5.4 Alur 4: Pencatatan Event Laga & Validasi Lapangan (Official)
 
-Alur kerja petugas meja dan wasit lapangan saat mencatat peristiwa pertandingan secara langsung di pinggir arena.
-
-```mermaid
-graph TD
-    A[Buka Dasbor Meja Petugas di Tablet / HP] --> B[Pilih Laga Aktif Sesuai Jadwal Lapangan]
-    B --> C[Verifikasi Kehadiran & Line-up Pemain Kedua Tim]
-    C --> D[Klik 'Mulai Pertandingan' Kick-off]
-    D --> E[Input Peristiwa Pertandingan Secara Real-time]
-    E --> F[Pencatatan Gol / Poin: Tombol +1 & Pilih Pemain]
-    E --> G[Pencatatan Kartu Kuning / Merah: Pilih Pemain & Alasan]
-    E --> H[Pencatatan Pergantian Pemain]
-    F --> I[Peluit Akhir: Klik 'Selesai Laga']
-    G --> I
-    H --> I
-    I --> J{Apakah Skor Imbang di Fase Gugur?}
-    J -- Ya --> K[Aktifkan Modul Adu Penalti & Catat Hasil Tendangan]
-    K --> L[Tinjau Ringkasan BAP Pertandingan]
-    J -- Tidak --> L
-    L --> M[Konfirmasi & Kunci Hasil Pertandingan Final]
-    M --> N[Klasemen & Bagan Gugur Terbarui Otomatis]
+```
+[Laga 'live'] ──► [Panitia Tap Aksi: Gol / Kartu / Poin]
+                              │
+                              ▼
+                [Mesin Validasi: validateEvent()]
+                 ├── Tidak Sah ──► [Tolak Event + Tampilkan Pesan Error]
+                 └── Sah ───────► [Simpan Event + UUID Unik Klien]
+                                          │
+                                          ▼
+                         [Hitung Ulang Skor & Broadcast Realtime]
+                                          │
+                                          ▼
+                         [Tersimpan di Cache Lokal Perangkat]
 ```
 
-### Fitur Kritis Petugas Lapangan:
-- **Tombol Koreksi Cepat (Undo Event):** Jika petugas salah memasukkan pencetak gol atau menekan tombol skor, tersedia tombol pembatalan aksi (*Undo*) dalam waktu 30 detik sebelum log tersimpan permanen.
-- **Dukungan Mode Offline / Jaringan Lemah:** Semua pencatatan skor tetap tersimpan di penyimpanan lokal (*local storage*) perangkat jika jaringan seluler terputus tiba-tiba, dan otomatis diunggah (*sync*) ke server saat koneksi internet kembali normal.
+1. **Memulai Laga:** Panitia menekan tombol "Mulai Pertandingan" / "Mulai Babak"; status berubah menjadi `live`.
+2. **Pencatatan Cepat (1–2 Ketukan):**
+   - *Sepakbola/Futsal:* Tekan **+ Poin Tim A** $\rightarrow$ Pilih nama pemain pencetak gol $\rightarrow$ Skor bertambah seketika.
+   - *Voli/Bulutangkis:* Tekan tombol raksasa **+1 Poin** untuk tim yang memenangkan rally.
+3. **Penyaringan Pelanggaran Regulasi:** Setiap event diverifikasi oleh `validateEvent()`. Bila pemain berkartu merah dipilih untuk mencetak gol atau pergantian pemain melebihi batas, aksi ditolak seketika dengan pesan bahasa Indonesia.
+4. **Koreksi Kesalahan (Void Event):** Jika terjadi salah pencet, panitia memilih tombol undo/void, memasukkan alasan koreksi (misal "Salah identifikasi nomor punggung"). Sistem menghitung ulang skor dari event-event valid yang tersisa.
+5. **Penyelesaian Laga:** Saat waktu berakhir atau salah satu tim mencapai set penentu, panitia menekan "Selesaikan Laga"; status berubah menjadi `finished`.
 
 ---
 
-## 5.6 Alur 5: Juri Suporter & Penonton (Penilaian & Pemantauan Skor Suporter)
+## 5.5 Alur 5: Verifikasi Hasil Dua Tahap & Pengesahan Klasemen (Admin)
 
-Alur terintegrasi antara penilaian di Admin Dashboard oleh tim pengawas/juri tribun dengan pemantauan real-time suporter di portal publik.
-
-```mermaid
-graph TD
-    A[Penonton Masuk Gate & Tiket Ter-scan] --> B[Sistem: Otomatis Tambah +1 Poin Tiket per Suporter Terdata]
-    C[Juri Tribun Login ke Admin Dashboard] --> D[Buka Form Penilaian Laga Aktif]
-    D --> E[Amati Aksi Tribun Kedua Sekolah]
-    E --> F[Centang Aksi Positif: Koreo +25, Maskot +20, Seragam +15, Yel-yel +10]
-    E --> G{Apakah Terjadi Pelanggaran Tribun?}
-    G -- Ya --> H[Catat Penalti: Rusuh -50, Lempar Benda -25, Rasis -15, Barang Dilarang -5]
-    G -- Tidak --> I[Lanjut ke Penyelesaian Penilaian]
-    H --> I
-    B --> I
-    I --> J[Juri Klik 'Simpan & Publikasikan Nilai Laga']
-    J --> K[Sistem Kalkulasi Total Skor Suporter Kumulatif]
-    K --> L[Tabel Klasemen Skor Suporter Terupdate Otomatis di Portal Publik]
-    L --> M[Suporter / Publik Membuka Tab 'Skor Suporter' Tanpa Perlu Login]
+```
+[Laga 'finished'] ──► [Admin Tinjau Timeline & Statistik]
+                                  │
+                                  ▼
+                    [Admin Klik 'Verifikasi Hasil']
+                                  │
+                                  ▼
+                [Status Berubah 'verified' & 'locked=true']
+                                  │
+                                  ▼
+                [Sistem Hitung Ulang Poin Klasemen Resmi]
+                                  │
+                                  ▼
+                [Bagan Gugur Memajukan Tim Pemenang ke Babak Berikutnya]
 ```
 
-### Langkah demi Langkah:
-1. **Akumulasi Tiket Otomatis:** Saat penonton rombongan sekolah memindai tiket di pintu gate, sistem tiket QR otomatis menambah **+1 Poin per Tiket Masuk** ke pundi-pundi poin suporter sekolah tersebut.
-2. **Pengisian Form Penilaian oleh Juri di Admin Dashboard:**
-   - Juri atau pengawas pertandingan membuka antarmuka khusus di `/admin/tournaments/[id]/supporter-scoring`.
-   - Memilih sekolah dan pertandingan yang sedang berlangsung.
-   - Menandai checklist aksi kreativitas: Membentang Koreografi (+25), Membawa Maskot Sekolah (+20), Mengenakan Seragam Supporter (+15), dan Menyanyikan Yel-yel Minimal 3 (+10).
-3. **Pencatatan Penalti Pelanggaran:**
-   - Jika suporter menyalakan flare, melempar botol/benda ke lapangan (-25), menyuarakan ujaran rasis/provokasi (-15), menyelundupkan barang terlarang (-5), atau memicu kericuhan fisik (-50), juri menandai penalti pelanggaran tersebut disertai catatan menit kejadian.
-4. **Publikasi & Tampilan Tabel Publik:**
-   - Setelah formulir diverifikasi dan disimpan, sistem menggabungkan poin tiket, kreativitas, dan penalti pelanggaran.
-   - Tabel Klasemen Skor Suporter pada Halaman Publik & Live Score (Tab `[Skor Suporter]`) seketika memperbarui peringkat seluruh sekolah peserta.
-   - Pengunjung umum, siswa, dan guru dapat melihat transparansi rincian perolehan poin setiap saat tanpa memerlukan login.
+1. **Tinjauan Hasil:** Admin membuka tab verifikasi hasil pada dasbor, memeriksa kesesuaian skor dan kartu.
+2. **Pengesahan Resmi:** Admin mengklik tombol "Sahkan & Kunci Pertandingan". Status laga berubah menjadi `verified` dan dikunci permanen (`locked = true`).
+3. **Kalkulasi Klasemen:** Sistem memicu fungsi `recalculateStandings()`. Hanya laga berstatus `verified` yang diakumulasikan ke dalam poin, selisih gol, dan rasio set pada tabel klasemen publik.
+4. **Propagasi Bagan Gugur:** Jika pertandingan merupakan bagian dari bagan eliminasi (`single_elimination`), pemenang laga otomatis dipropagasikan mengisi slot tim di babak selanjutnya (`next_match_id`).
+
+---
+
+## 5.6 Alur 6: Akses Suporter & Penonton Publik
+
+1. **Akses Langsung:** Penonton membuka portal turnamen melalui URL `/c/[slug]` atau memindai QR code dari tribun. Tidak memerlukan registrasi maupun login.
+2. **Pemantauan Live Score:** Pada tab Jadwal, pertandingan yang sedang berlangsung menampilkan lencana `🔴 LIVE` berdenyut, dengan pembaruan angka skor yang masuk secara instan via Web Realtime (< 3 detik).
+3. **Pemberitahuan Status:** Jika pertandingan belum disahkan oleh Admin turnamen, skor menyertakan label penjelas *"Belum Resmi"*, menjamin transparansi informasi sebelum pengesahan final.

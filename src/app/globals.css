@@ -39,9 +39,12 @@
   --color-status-rejected: #ef4444;
   --color-status-used: #64748b;
 
-  --font-display: var(--font-display), "Plus Jakarta Sans", -apple-system, sans-serif;
   --font-sans: var(--font-sans), "Inter", -apple-system, sans-serif;
-  --font-mono: var(--font-mono), "JetBrains Mono", monospace;
+  --font-teko: var(--font-teko), "Teko", sans-serif;
+  --font-bebas: var(--font-bebas), "Bebas Neue", sans-serif;
+  --font-barlow: var(--font-barlow-condensed), "Barlow Condensed", sans-serif;
+  --font-display: var(--font-bebas), "Bebas Neue", var(--font-teko), sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 
   --radius-xs: 4px;
   --radius-sm: 6px;
@@ -300,3 +303,34 @@ html.dark ::-webkit-scrollbar-thumb {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Sports Athletic Typography Utilities */
+.font-teko {
+  font-family: var(--font-teko), "Teko", sans-serif;
+  letter-spacing: 0.02em;
+}
+
+.font-bebas {
+  font-family: var(--font-bebas), "Bebas Neue", sans-serif;
+  font-weight: 400 !important;
+  letter-spacing: 0.04em;
+}
+
+.font-barlow,
+.font-barlow-condensed {
+  font-family: var(--font-barlow-condensed), "Barlow Condensed", sans-serif;
+}
+
+.font-scoreboard {
+  font-family: var(--font-teko), "Teko", sans-serif;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.04em;
+}
+
+.font-cta {
+  font-family: var(--font-bebas), "Bebas Neue", sans-serif;
+  font-weight: 400 !important;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+

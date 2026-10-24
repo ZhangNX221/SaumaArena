@@ -1,99 +1,17 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Plus, Search, CheckCircle2, XCircle, Trash2, Edit2, ShieldCheck, X } from 'lucide-react';
+import { Plus, Search, CheckCircle2, XCircle, Trash2, Edit2, ShieldCheck } from 'lucide-react';
 import { SportCode } from '@/types';
 import { ConfirmModal } from '@/components/admin/common/ConfirmModal';
+import {
+  RegistrationDossierModal,
+  RegistrationDossier,
+  RegistrationFormData,
+} from './RegistrationDossierModal';
+import { INITIAL_REGISTRATIONS } from '@/mocks/registrationMockData';
 
-export interface RegistrationDossier {
-  id: string;
-  regNumber: string;
-  schoolName: string;
-  teamName: string;
-  sport: string;
-  category: string;
-  coachName: string;
-  coachPhone: string;
-  athleteCount: number;
-  nisnStatus: 'VALID' | 'NEED_REVISION';
-  status: 'APPROVED' | 'PENDING' | 'REJECTED';
-  rejectionReason?: string;
-  submittedAt: string;
-}
-
-const INITIAL_REGISTRATIONS: RegistrationDossier[] = [
-  {
-    id: 'reg-001',
-    regNumber: 'REG-MMFC-2026-001',
-    schoolName: 'MIN 1 Kota',
-    teamName: 'MIN 1 Kota Futsal',
-    sport: 'FUTSAL',
-    category: 'SD/MI Putra (Usia 10-12)',
-    coachName: 'Ust. Rahmat Hidayat, S.Pd',
-    coachPhone: '0812-3456-7801',
-    athleteCount: 12,
-    nisnStatus: 'VALID',
-    status: 'APPROVED',
-    submittedAt: '17 Okt 2026',
-  },
-  {
-    id: 'reg-002',
-    regNumber: 'REG-MMFC-2026-002',
-    schoolName: 'SDN Percobaan 1',
-    teamName: 'Percobaan 1 Squad',
-    sport: 'FUTSAL',
-    category: 'SD/MI Putra (Usia 10-12)',
-    coachName: 'Bambang Sutrisno, S.Pd',
-    coachPhone: '0812-3456-7803',
-    athleteCount: 10,
-    nisnStatus: 'VALID',
-    status: 'APPROVED',
-    submittedAt: '17 Okt 2026',
-  },
-  {
-    id: 'reg-003',
-    regNumber: 'REG-MMFC-2026-003',
-    schoolName: 'MIS Al-Hidayah',
-    teamName: 'Al-Hidayah Futsal',
-    sport: 'FUTSAL',
-    category: 'SD/MI Putra (Usia 10-12)',
-    coachName: 'Ahmad Zaki, S.Pd.I',
-    coachPhone: '0812-3456-7804',
-    athleteCount: 10,
-    nisnStatus: 'VALID',
-    status: 'APPROVED',
-    submittedAt: '18 Okt 2026',
-  },
-  {
-    id: 'reg-004',
-    regNumber: 'REG-MMFC-2026-004',
-    schoolName: 'SDIT Bina Insani',
-    teamName: 'Bina Insani FC',
-    sport: 'FUTSAL',
-    category: 'SD/MI Putra (Usia 10-12)',
-    coachName: 'Dwi Cahyono, S.Or',
-    coachPhone: '0812-3456-7805',
-    athleteCount: 10,
-    nisnStatus: 'VALID',
-    status: 'APPROVED',
-    submittedAt: '18 Okt 2026',
-  },
-  {
-    id: 'reg-005',
-    regNumber: 'REG-MMFC-2026-005',
-    schoolName: 'MI Tarbiyatul Islam',
-    teamName: 'Tarbiyah Warrior',
-    sport: 'FUTSAL',
-    category: 'SD/MI Putra (Usia 10-12)',
-    coachName: 'Wahyu Kurniawan, S.Pd',
-    coachPhone: '0812-3456-7811',
-    athleteCount: 10,
-    nisnStatus: 'NEED_REVISION',
-    status: 'PENDING',
-    rejectionReason: 'Surat rekomendasi kepala madrasah dan NISN pemain nomor 11 sedang diverifikasi.',
-    submittedAt: '19 Okt 2026',
-  },
-];
+export type { RegistrationDossier };
 
 interface RegistrationVerificationTabProps {
   selectedSport?: SportCode;
@@ -108,50 +26,14 @@ export const RegistrationVerificationTab: React.FC<RegistrationVerificationTabPr
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<RegistrationDossier | null>(null);
-  const [formData, setFormData] = useState({
-    schoolName: '',
-    teamName: '',
-    sport: 'FUTSAL',
-    category: 'SD/MI Putra (Usia 10-12)',
-    coachName: '',
-    coachPhone: '',
-    athleteCount: 12,
-    nisnStatus: 'VALID' as 'VALID' | 'NEED_REVISION',
-    status: 'PENDING' as 'APPROVED' | 'PENDING' | 'REJECTED',
-    rejectionReason: '',
-  });
 
   const handleOpenAdd = () => {
     setEditingItem(null);
-    setFormData({
-      schoolName: '',
-      teamName: '',
-      sport: selectedSport !== 'ALL' ? selectedSport : 'FUTSAL',
-      category: 'SD/MI Putra (Usia 10-12)',
-      coachName: '',
-      coachPhone: '',
-      athleteCount: 12,
-      nisnStatus: 'VALID',
-      status: 'PENDING',
-      rejectionReason: '',
-    });
     setIsModalOpen(true);
   };
 
   const handleOpenEdit = (item: RegistrationDossier) => {
     setEditingItem(item);
-    setFormData({
-      schoolName: item.schoolName,
-      teamName: item.teamName,
-      sport: item.sport,
-      category: item.category,
-      coachName: item.coachName,
-      coachPhone: item.coachPhone,
-      athleteCount: item.athleteCount,
-      nisnStatus: item.nisnStatus,
-      status: item.status,
-      rejectionReason: item.rejectionReason || '',
-    });
     setIsModalOpen(true);
   };
 
@@ -172,10 +54,7 @@ export const RegistrationVerificationTab: React.FC<RegistrationVerificationTabPr
     );
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!formData.schoolName.trim() || !formData.teamName.trim()) return;
-
+  const handleSubmit = (formData: RegistrationFormData) => {
     if (editingItem) {
       setRegistrations((prev) =>
         prev.map((r) =>
@@ -214,17 +93,17 @@ export const RegistrationVerificationTab: React.FC<RegistrationVerificationTabPr
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[var(--border-subtle)]">
         <div>
-          <h3 className="font-black text-lg text-[var(--text-main)] font-[var(--font-display)] tracking-tight">
+          <h3 className="font-bebas text-xl sm:text-2xl uppercase tracking-wide text-[var(--text-main)]">
             Verifikasi Berkas &amp; Dokumen Usia Siswa (NISN)
           </h3>
-          <p className="text-xs text-[var(--text-muted)] font-[var(--font-sans)] mt-1">
+          <p className="text-xs text-[var(--text-muted)] mt-1">
             Pemeriksaan keabsahan surat rekomendasi sekolah, NISN Kemdikbud, dan legalitas roster atlet.
           </p>
         </div>
         <button
           type="button"
           onClick={handleOpenAdd}
-          className="btn-tactile px-4 py-2.5 rounded-xl bg-[var(--color-arena-primary)] hover:bg-[var(--color-arena-primary-hover)] text-white text-xs font-bold font-[var(--font-display)] flex items-center gap-2 shadow-xs shrink-0"
+          className="btn-tactile px-4 py-2.5 rounded-xl bg-[var(--color-arena-primary)] hover:bg-[var(--color-arena-primary-hover)] text-white text-xs font-barlow font-bold uppercase tracking-wider flex items-center gap-2 shadow-xs shrink-0"
         >
           <Plus className="w-4 h-4" />
           <span>Tambah Berkas Pendaftaran</span>
@@ -240,13 +119,13 @@ export const RegistrationVerificationTab: React.FC<RegistrationVerificationTabPr
             placeholder="Cari no. registrasi, sekolah, tim, atau pelatih..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 text-xs rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] text-[var(--text-main)] focus:outline-none focus:border-[var(--color-arena-primary)] font-[var(--font-sans)]"
+            className="w-full pl-10 pr-4 py-2 text-xs rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] text-[var(--text-main)] focus:outline-none focus:border-[var(--color-arena-primary)]"
           />
         </div>
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
-          className="w-full sm:w-48 px-3.5 py-2 text-xs rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] text-[var(--text-main)] font-bold font-[var(--font-display)]"
+          className="w-full sm:w-48 px-3.5 py-2 text-xs rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] text-[var(--text-main)] font-barlow font-bold uppercase tracking-wider"
         >
           <option value="ALL">Semua Status</option>
           <option value="APPROVED">Lolos Berkas</option>
@@ -258,7 +137,7 @@ export const RegistrationVerificationTab: React.FC<RegistrationVerificationTabPr
       {/* Table CRUD */}
       <div className="overflow-x-auto rounded-xl border border-[var(--border-subtle)]">
         <table className="w-full text-xs text-left">
-          <thead className="bg-[var(--bg-muted)]/70 text-[11px] font-black uppercase tracking-wider font-[var(--font-display)] text-[var(--text-muted)] border-b border-[var(--border-subtle)]">
+          <thead className="bg-[var(--bg-muted)]/70 text-[11px] font-barlow font-bold uppercase tracking-wider text-[var(--text-muted)] border-b border-[var(--border-subtle)]">
             <tr>
               <th className="py-3.5 px-4">No. Berkas</th>
               <th className="py-3.5 px-4">Kontingen &amp; Tim</th>
@@ -272,31 +151,31 @@ export const RegistrationVerificationTab: React.FC<RegistrationVerificationTabPr
           <tbody className="divide-y divide-[var(--border-subtle)] font-medium">
             {filtered.length === 0 ? (
               <tr>
-                <td colSpan={7} className="text-center py-10 text-[var(--text-muted)] font-[var(--font-sans)]">
+                <td colSpan={7} className="text-center py-10 text-[var(--text-muted)]">
                   Tidak ada berkas pendaftaran yang ditemukan.
                 </td>
               </tr>
             ) : (
               filtered.map((item) => (
                 <tr key={item.id} className="hover:bg-[var(--bg-muted)]/30 transition-colors">
-                  <td className="py-4 px-4 font-[var(--font-mono)] tabular-nums font-bold text-[var(--color-arena-primary)]">
+                  <td className="py-4 px-4 font-mono tabular-nums font-bold text-[var(--color-arena-primary)]">
                     {item.regNumber}
                   </td>
                   <td className="py-4 px-4">
-                    <div className="font-bold text-[var(--text-main)] font-[var(--font-display)]">{item.schoolName}</div>
+                    <div className="font-bold text-[var(--text-main)]">{item.schoolName}</div>
                     <div className="text-[11px] text-[var(--text-muted)] font-medium">{item.teamName}</div>
                   </td>
                   <td className="py-4 px-4">
-                    <span className="font-bold text-[var(--text-main)] font-[var(--font-display)] block">{item.sport}</span>
+                    <span className="font-barlow font-bold uppercase tracking-wide text-xs text-[var(--text-main)] block">{item.sport}</span>
                     <span className="text-[11px] text-[var(--text-muted)]">{item.category}</span>
                   </td>
                   <td className="py-4 px-4 text-[var(--text-muted)]">
                     <div className="text-[var(--text-main)] font-semibold">{item.coachName}</div>
-                    <div className="text-[11px] font-[var(--font-mono)] tabular-nums">{item.coachPhone}</div>
+                    <div className="text-[11px] font-mono tabular-nums">{item.coachPhone}</div>
                   </td>
                   <td className="py-4 px-4 text-center">
                     <span
-                      className={`px-2.5 py-1 rounded-lg text-[10px] font-bold font-[var(--font-display)] ${
+                      className={`px-2.5 py-1 rounded-lg text-[10px] font-barlow font-bold uppercase tracking-wider ${
                         item.nisnStatus === 'VALID'
                           ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400'
                           : 'bg-amber-500/10 text-amber-700 dark:text-amber-400'
@@ -307,7 +186,7 @@ export const RegistrationVerificationTab: React.FC<RegistrationVerificationTabPr
                   </td>
                   <td className="py-4 px-4 text-center">
                     <span
-                      className={`px-3 py-1 rounded-full text-[10px] font-bold font-[var(--font-display)] inline-flex items-center gap-1.5 ${
+                      className={`px-3 py-1 rounded-full text-[10px] font-barlow font-bold uppercase tracking-wider inline-flex items-center gap-1.5 ${
                         item.status === 'APPROVED'
                           ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400'
                           : item.status === 'REJECTED'
@@ -378,153 +257,16 @@ export const RegistrationVerificationTab: React.FC<RegistrationVerificationTabPr
       </div>
 
       {/* Modal CRUD (Create & Update) */}
-      {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fadeIn">
-          <div className="bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
-            <div className="flex items-center justify-between pb-2 border-b border-[var(--border-subtle)]">
-              <h3 className="font-black text-base text-[var(--text-main)]">
-                {editingItem ? 'Edit Status & Berkas Pendaftaran' : 'Tambah Pendaftaran Tim Baru'}
-              </h3>
-              <button
-                type="button"
-                onClick={() => setIsModalOpen(false)}
-                className="p-1 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-main)]"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            <form onSubmit={handleSubmit} className="space-y-3 text-xs">
-              <div>
-                <label className="font-bold text-[var(--text-main)] block mb-1">Nama Sekolah / Kontingen</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="Contoh: MIN 1 Kota Malang"
-                  value={formData.schoolName}
-                  onChange={(e) => setFormData({ ...formData, schoolName: e.target.value })}
-                  className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)]"
-                />
-              </div>
-
-              <div>
-                <label className="font-bold text-[var(--text-main)] block mb-1">Nama Tim / Julukan</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="Contoh: Elang Matsanega"
-                  value={formData.teamName}
-                  onChange={(e) => setFormData({ ...formData, teamName: e.target.value })}
-                  className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)]"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="font-bold text-[var(--text-main)] block mb-1">Cabor</label>
-                  <input
-                    type="text"
-                    required
-                    value={formData.sport}
-                    onChange={(e) => setFormData({ ...formData, sport: e.target.value })}
-                    className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)] font-bold"
-                  />
-                </div>
-                <div>
-                  <label className="font-bold text-[var(--text-main)] block mb-1">Kategori</label>
-                  <input
-                    type="text"
-                    required
-                    value={formData.category}
-                    onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                    className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)]"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="font-bold text-[var(--text-main)] block mb-1">Nama Pelatih</label>
-                  <input
-                    type="text"
-                    required
-                    value={formData.coachName}
-                    onChange={(e) => setFormData({ ...formData, coachName: e.target.value })}
-                    placeholder="Bram Ndolu"
-                    className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)]"
-                  />
-                </div>
-                <div>
-                  <label className="font-bold text-[var(--text-main)] block mb-1">No. WhatsApp</label>
-                  <input
-                    type="text"
-                    required
-                    value={formData.coachPhone}
-                    onChange={(e) => setFormData({ ...formData, coachPhone: e.target.value })}
-                    placeholder="0812-xxxx"
-                    className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)]"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="font-bold text-[var(--text-main)] block mb-1">Status Verifikasi</label>
-                  <select
-                    value={formData.status}
-                    onChange={(e) => setFormData({ ...formData, status: e.target.value as 'APPROVED' | 'PENDING' | 'REJECTED' })}
-                    className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)] font-semibold"
-                  >
-                    <option value="APPROVED">Lolos Verifikasi</option>
-                    <option value="PENDING">Menunggu Antrean</option>
-                    <option value="REJECTED">Tolak / Revisi</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="font-bold text-[var(--text-main)] block mb-1">Status NISN</label>
-                  <select
-                    value={formData.nisnStatus}
-                    onChange={(e) => setFormData({ ...formData, nisnStatus: e.target.value as 'VALID' | 'NEED_REVISION' })}
-                    className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)] font-semibold"
-                  >
-                    <option value="VALID">NISN Sah Kemdikbud</option>
-                    <option value="NEED_REVISION">Perlu Perbaikan</option>
-                  </select>
-                </div>
-              </div>
-
-              {formData.status === 'REJECTED' && (
-                <div>
-                  <label className="font-bold text-red-600 block mb-1">Catatan Penolakan / Revisi</label>
-                  <textarea
-                    rows={2}
-                    value={formData.rejectionReason}
-                    onChange={(e) => setFormData({ ...formData, rejectionReason: e.target.value })}
-                    placeholder="Sebutkan berkas yang perlu dilengkapi..."
-                    className="w-full px-3 py-2 rounded-xl border border-red-500/30 bg-[var(--bg-muted)] text-[var(--text-main)]"
-                  />
-                </div>
-              )}
-
-              <div className="flex gap-2 pt-3">
-                <button
-                  type="submit"
-                  className="btn-tactile flex-1 py-2.5 rounded-xl bg-[var(--color-arena-primary)] text-white font-bold text-xs"
-                >
-                  {editingItem ? 'Simpan Perubahan' : 'Tambahkan Berkas'}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setIsModalOpen(false)}
-                  className="btn-tactile px-4 py-2.5 rounded-xl border border-[var(--border-subtle)] text-xs font-semibold"
-                >
-                  Batal
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      <RegistrationDossierModal
+        isOpen={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false);
+          setEditingItem(null);
+        }}
+        onSubmit={handleSubmit}
+        editingItem={editingItem}
+        defaultSport={selectedSport}
+      />
 
       {/* Reusable Confirm Delete Modal */}
       <ConfirmModal

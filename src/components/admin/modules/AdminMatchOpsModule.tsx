@@ -44,18 +44,15 @@ export const AdminMatchOpsModule: React.FC<AdminMatchOpsModuleProps> = ({
 
   return (
     <div className="space-y-8 animate-fadeIn">
-      {/* Top Segmented Navigation */}
+      {/* Top Segmented Navigation & Description */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-xl sm:text-2xl font-black text-[var(--text-main)] font-[var(--font-display)] tracking-tight">
-            Manajemen Pertandingan
-          </h2>
-          <p className="text-xs text-[var(--text-muted)] font-[var(--font-sans)] mt-1">
-            Drawing bagan turnamen, plotting jadwal laga &amp; penugasan juri, pantauan live score, serta klasemen grup.
+          <p className="text-xs sm:text-sm text-[var(--text-muted)]">
+            Drawing bagan turnamen, penjadwalan pertandingan &amp; penugasan juri, pantauan skor langsung, serta klasemen.
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-1 p-1.5 rounded-2xl bg-[var(--bg-muted)]/80 border border-[var(--border-subtle)] text-xs font-bold font-[var(--font-display)] w-fit">
+        <div className="flex flex-wrap items-center gap-1 p-1.5 rounded-2xl bg-[var(--bg-muted)]/80 border border-[var(--border-subtle)] text-xs font-barlow font-bold uppercase tracking-wider w-fit">
           <button
             type="button"
             onClick={() => handleTabChange('SCHEDULE')}
@@ -65,7 +62,7 @@ export const AdminMatchOpsModule: React.FC<AdminMatchOpsModuleProps> = ({
                 : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'
             }`}
           >
-            Plotting Jadwal &amp; Juri
+            Jadwal Pertandingan
           </button>
           <button
             type="button"
@@ -76,7 +73,7 @@ export const AdminMatchOpsModule: React.FC<AdminMatchOpsModuleProps> = ({
                 : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'
             }`}
           >
-            Live Monitor &amp; Override
+            Skor Langsung
           </button>
           <button
             type="button"
@@ -98,7 +95,7 @@ export const AdminMatchOpsModule: React.FC<AdminMatchOpsModuleProps> = ({
                 : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'
             }`}
           >
-            Klasemen Grup
+            Klasemen
           </button>
         </div>
       </div>

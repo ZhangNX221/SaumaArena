@@ -1,113 +1,38 @@
 # 06. Kebutuhan Non-Fungsional (Non-Functional Requirements)
 
-**Dokumen PRD: Bagian 6/7**  
-**Produk:** Sauma Arena  
-**Tanggal:** 19 Oktober 2026  
-**Referensi:** [00-index.md](./00-index.md) | [04-functional-specs.md](./04-functional-specs.md)
+**Dokumen PRD — Bagian 6/12**  
+**Produk:** Sauma Arena (Platform Manajemen Pertandingan Multi-Cabang Olahraga)  
+**Versi:** 1.0  
 
 ---
 
-## 6.1 Gambaran Umum
+## 6.1 Matriks Kebutuhan Non-Fungsional (NFR-01 s/d NFR-10)
 
-Kebutuhan Non-Fungsional (NFR) menetapkan standar kualitas, keandalan, keamanan, dan kinerja sistem yang harus dipenuhi oleh arsitektur perangkat lunak Sauma Arena. Standar ini disusun secara realistis untuk operasional turnamen di lapangan olahraga (GOR/stadion) yang kerap menghadapi keterbatasan infrastruktur jaringan seluler dan daya listrik.
-
----
-
-## 6.2 Keamanan & Privasi Data (Security & Privacy)
-
-### 6.2.1 Kepatuhan Perlindungan Data Pribadi (UU PDP No. 27/2022)
-Turnamen antar-pelajar dan amatir melibatkan data sensitif atlet usia muda (foto kartu pelajar, NISN, NIK, ijazah, dan tanggal lahir).
-- **Proteksi Akses Data:** Dokumen identitas (KTP, kartu pelajar, akta kelahiran) hanya dapat diakses oleh Panitia Terverifikasi dan Manajer Tim pemilik berkas. Dokumen disimpan pada penyimpanan objek privat berizin waktu terbatas (*pre-signed URLs* dengan masa aktif maksimal 15 menit).
-- **Penyamaran Data Publik:** Halaman publik turnamen hanya menampilkan Nama Pemain, Nomor Punggung, Asal Sekolah/Klub, dan Foto Profil atlet. NIK, nomor telepon, dan NISN tidak pernah diekspos ke publik atau respon API publik.
-
-### 6.2.2 Enkripsi
-- **Data in Transit:** Wajib menggunakan protokol HTTPS dengan TLS 1.3 di seluruh endpoint.
-- **Data at Rest:** Database utama dan arsip dokumen dienkripsi menggunakan standar AES-256.
-- **Kata Sandi Akun:** Disimpan menggunakan fungsi hash adaptif dengan garam acak (Argon2id atau bcrypt dengan *work factor* minimal 12).
-
-### 6.2.3 Kontrol Akses Berbasis Peran (Role-Based Access Control / RBAC)
-Sistem menerapkan pemisahan hak akses ketat (*least privilege principle*):
-
-| Peran (Role) | Hak Akses Utama |
-|:-------------|:----------------|
-| **Super Admin** | Akses penuh sistem, manajemen konfigurasi platform, dan audit log menyeluruh. |
-| **Event Admin / Panitia** | Manajemen turnamen spesifik, verifikasi tim, pengaturan jadwal, dan penerbitan sertifikat. |
-| **Scorer / Petugas Meja** | Akses terbatas ke kontrol laga yang ditugaskan di Admin Dashboard: input skor, kartu, dan verifikasi line-up. |
-| **Juri Suporter / Pengawas Tribun** | Akses ke formulir penilaian suporter di Admin Dashboard: input checklist koreo, maskot, seragam, yel-yel, dan sanksi penalti. |
-| **Gate Officer / Scanner** | Akses khusus pemindaian QR tiket masuk di pintu venue (terintegrasi otomatis ke poin tiket suporter). |
-| **Manajer Tim** | Mengelola profil tim sendiri, mendaftarkan roster, mengunggah berkas, dan mengunduh sertifikat tim. |
-| **Penonton / Publik** | Akses bebas (*read-only*) tanpa login ke portal publik: Info, Tim, Jadwal & Live Score, Klasemen, Bracket, Statistik, dan Skor Suporter. |
-
-### 6.2.4 Keamanan Tiket QR & Anti-Brute Force
-- Payload tiket menggunakan tanda tangan kriptografis HMAC-SHA256 untuk mencegah pemalsuan QR.
-- Proteksi rate limiting pada endpoint pendaftaran dan klaim tiket (maksimal 10 request per menit per alamat IP) untuk mencegah penyerangan bot otomatis.
-
-### 6.2.5 Isolasi Keamanan Admin Dashboard vs Portal Publik
-- **Admin Dashboard (`/admin/*`):** Terisolasi penuh dengan autentikasi session berbasis HTTP-Only Secure Cookie, perlindungan CSRF token pada setiap mutasi POST/PUT/DELETE, dan larangan perayapan mesin pencari (`robots.txt: Disallow: /admin`).
-- **Portal Publik (`/event/[slug]/*`):** Bersifat *stateless* dan *read-heavy*, dilindungi Cloudflare DDoS mitigation dan didukung lapisan Edge Caching sehingga ribuan penonton dapat memantau livescore dan skor suporter tanpa membebani database utama panitia.
+| ID | Parameter | Spesifikasi Teknis | Standar Pengujian |
+|---|---|---|---|
+| **NFR-01** | Kecepatan Muat Halaman Publik | Waktu muat Largest Contentful Paint (LCP) **< 2,5 detik** pada jaringan seluler 4G standar. Gunakan strategi caching dan Incremental Static Regeneration (ISR) untuk halaman publik. | Lighthouse Performance Score $\ge 90$ |
+| **NFR-02** | Latensi Pembaruan Real-Time | Pembaruan peristiwa pertandingan (skor gol, poin rally, kartu) diterima oleh penonton publik dalam waktu **< 3 detik** sejak disimpan panitia, memanfaatkan koneksi Supabase Realtime / WebSocket / Server-Sent Events (SSE). | Realtime latency benchmark |
+| **NFR-03** | Responsivitas Sentuhan Konsol | Tombol aksi pada konsol panitia/wasit wajib merespons ketukan dalam waktu **< 100 milidetik** memanfaatkan prinsip *Optimistic UI*, dengan mekanisme *rollback* halus jika server menolak validasi. | Mobile input response test |
+| **NFR-04** | Keamanan Data & Autorisasi (RLS) | Mekanisme **Row Level Security (RLS)** wajib diaktifkan pada seluruh tabel PostgreSQL. Kunci rahasia API tidak boleh bocor ke bundle JavaScript klien. Semua input wajib divalidasi ganda di server menggunakan Zod. | Audit keamanan & penetration testing dasar |
+| **NFR-05** | Perlindungan Privasi Pemain | Data sensitif atlet (tanggal lahir, nomor telepon, NISN/NIK) **dilarang keras** diekspos ke publik. Gunakan PostgreSQL Database View khusus untuk endpoint publik tanpa login. | RLS Policy unit test untuk peran anonim |
+| **NFR-06** | Audit Trail Lengkap | Seluruh aksi modifikasi data penting (void event, pengubahan jadwal, putusan WO, pembukaan kunci laga) wajib mencatat rekaman ke tabel `audit_logs` (mencakup `actor_id`, `before`, `after`, dan `reason`). | Integritas audit log test |
+| **NFR-07** | Konsistensi Zona Waktu | Seluruh stempel waktu (`scheduled_at`, `created_at`, durasi clock) disimpan dalam format **UTC**. Antarmuka pengguna menyajikan waktu dalam zona **Asia/Jakarta (WIB)** atau zona waktu lokal venue (WITA/WIT). | Timezone conversion test |
+| **NFR-08** | Aksesibilitas & Ergonomi Lapangan | Memenuhi pedoman dasar aksesibilitas: kontras warna tinggi (terbaca jelas di bawah terik matahari lapangan outdoor), ukuran target sentuh minimal **44 × 44 piksel**, dan dukungan navigasi keyboard di sisi Admin. | Antislop-human & WCAG 2.1 AA check |
+| **NFR-09** | Pembatasan Beban & Anti-Scraping | Pembatasan laju permintaan (*Rate Limiting*) diterapkan pada rute publik untuk mencegah scraping agresif dan serangan denial of service (DoS) saat lonjakan suporter di hari final. | Load test 1.000 req/sec |
+| **NFR-10** | Dukungan Tema Terang / Gelap | Antarmuka mendukung mode gelap (*Dark Mode*) dan terang (*Light Mode*) secara konsisten, mengadaptasi preferensi sistem perangkat pengguna dengan opsi toggle manual. | Visual contrast audit |
 
 ---
 
-## 6.3 Performa Sistem (Performance Targets)
+## 6.2 Ketahanan Jaringan & Mode Offline Lapangan
 
-Operasional di lapangan menuntut kecepatan respons tinggi agar tidak menghambat jalannya pertandingan.
+Mengingat venue pertandingan olahraga (seperti gedung olahraga bawah tanah atau lapangan tertutup) kerap memiliki sinyal seluler yang fluktuatif, platform mengimplementasikan protokol ketahanan jaringan:
 
-| Parameter | Target Ambang Batas | Kondisi Uji |
-|:----------|:--------------------|:------------|
-| **Waktu Muat Halaman Publik (First Load)** | < 1.5 detik | Koneksi seluler 4G standar (7 Mbps unduh) |
-| **Waktu Muat Ulang (Subsequent Visits)** | < 0.6 detik | Memanfaatkan browser caching & Service Worker |
-| **Largest Contentful Paint (LCP)** | < 2.0 detik | Core Web Vitals standar Google |
-| **Cumulative Layout Shift (CLS)** | < 0.05 | Tidak ada pergeseran tata letak saat data live termuat |
-| **Latensi Sinkronisasi Live Score** | < 3.0 detik | Dari tombol skor ditekan petugas meja hingga layar penonton |
-| **Latensi Distribusi Skor Suporter** | < 2.0 detik | Dari konfirmasi juri admin hingga pembaruan tabel publik |
-| **Kecepatan Validasi Scanner QR** | < 0.8 detik | Pemindaian kamera hingga verifikasi database & +1 poin tiket |
-| **Kalkulasi Klasemen Otomatis** | < 200 milidetik | Setelah status laga diubah menjadi `COMPLETED` |
-| **Penerbitan E-Sertifikat Massal** | < 60 detik | Untuk 300 lembar sertifikat tim & suporter (background worker) |
+1. **Idempotensi Berbasis UUID Klien:**
+   - Setiap kali panitia menekan tombol aksi (misal +1 Gol), klien men-generate UUID unik v4 di sisi browser.
+   - Database memiliki *unique constraint* pada pasangan `(match_id, id)`.
+   - Jika jaringan terputus dan browser melakukan pengiriman ulang (*retry*), basis data akan mengabaikan duplikasi secara aman tanpa menambah skor dobel.
 
----
-
-## 6.4 Skalabilitas & Ketersediaan (Scalability & Availability)
-
-### 6.4.1 Tingkat Ketersediaan (Availability)
-- Menjamin tingkat ketersediaan (*uptime SLA*) minimal **99.9%** selama rentang hari turnamen aktif.
-- Masa pemeliharaan sistem (*maintenance window*) hanya diizinkan di luar jam pertandingan (antara pukul 23:00 hingga 05:00 waktu setempat).
-
-### 6.4.2 Kapasitas & Beban Puncak (Traffic Concurrency)
-- Mampu melayani hingga **2.500 pengguna aktif serentak (concurrent users)** saat babak semifinal dan final berlangsung tanpa degradasi performa.
-- Arsitektur backend bersifat *stateless* untuk memfasilitasi penambahan kapasitas instan (*horizontal auto-scaling*).
-- Lapisan *Edge Caching* (CDN) diaktifkan untuk aset statis dan API publik jadwal/klasemen guna memotong 80% beban kueri langsung ke database utama.
-
----
-
-## 6.5 Ketahanan Operasional Lapangan (Offline Resilience)
-
-Sistem dirancang tangguh terhadap situasi darurat di arena olahraga:
-
-1. **Penyimpanan Lokal Petugas Meja (Local Storage Fallback):**
-   - Jika koneksi internet di meja pertandingan terputus tiba-tiba, antarmuka pencatatan skor tetap dapat digunakan normal.
-   - Peristiwa gol, kartu, dan skor tersimpan di IndexedDB browser lokal petugas dengan stempel waktu perangkat.
-   - Begitu koneksi internet kembali terdeteksi, data secara otomatis dikirimkan ke server (*background sync*).
-2. **Pencadangan Data Berkala (Automated Backups):**
-   - Pencadangan basis data otomatis dilakukan setiap 6 jam sekali selama turnamen berlangsung.
-   - Titik pemulihan data (*Recovery Point Objective / RPO*) maksimal 15 menit jika terjadi insiden kegagalan sistem.
-   - Waktu pemulihan layanan (*Recovery Time Objective / RTO*) maksimal 30 menit.
-
----
-
-## 6.6 Kompatibilitas & Aksesibilitas (Compatibility & Accessibility)
-
-### 6.6.1 Dukungan Peramban Web (Browser Support)
-Sistem web Sauma Arena dapat diakses tanpa instalasi khusus pada seluruh peramban modern (versi 2 tahun terakhir):
-- Google Chrome (Desktop & Android)
-- Apple Safari (macOS & iOS)
-- Mozilla Firefox
-- Microsoft Edge
-
-### 6.6.2 Responsivitas Tata Letak (Responsive Breakpoints)
-- **Smartphone Layar Sempit (360px - 480px):** Tata letak optimal satu kolom untuk manajer tim, atlet, dan penonton tribun.
-- **Tablet (768px - 1024px):** Tata letak dua kolom untuk petugas meja pencatat skor (*quick touch layout*).
-- **Desktop / Laptop (1280px+):** Dasbor lebar dengan navigasi samping (*sidebar*) untuk kebutuhan admin menyusun jadwal dan bagan turnamen.
-
-### 6.6.3 Aksesibilitas (WCAG 2.1 Level AA)
-- Rasio kontras teks terhadap latar belakang minimal 4.5:1 untuk menjamin keterbacaan di bawah lampu sorot malam hari atau pantulan terik sinar matahari lapangan semi-terbuka.
-- Area ketuk (*touch target*) untuk tombol operasional utama di smartphone berukuran minimal 44 x 44 piksel guna mencegah salah pencet saat jari berkeringat.
+2. **Penyimpanan Lokal Sementara (Local Caching):**
+   - State pertandingan dan antrean event yang belum terkirim disimpan dalam `localStorage` / IndexedDB.
+   - Header konsol menampilkan pill indikator koneksi: `🟢 Online • Sinkron` vs `🟡 Offline Lokal • Tersimpan`.
+   - Begitu koneksi internet pulih, antrean event disinkronkan secara otomatis sesuai nomor urut `seq`.

@@ -5,9 +5,9 @@ import {
   Trophy,
   ShieldAlert,
   BarChart3,
+  Award,
   Flame,
   Zap,
-  Award,
 } from 'lucide-react';
 import { initialTeams } from '@/mocks/tournamentData';
 import { CABOR_STATS_LEADERS } from '@/mocks/caborStandingsAndStats';
@@ -49,7 +49,7 @@ export const StatsTab: React.FC<StatsTabProps> = ({ sportCode = 'FUTSAL' }) => {
             INFOGRAFIS &amp; ANALISIS PERTANDINGAN &bull; {sportCode}
           </span>
         </div>
-        <h2 className="text-2xl sm:text-3xl font-black text-[var(--text-main)] font-[var(--font-display)] tracking-tight">
+        <h2 className="text-2xl sm:text-3xl font-bebas text-[var(--text-main)] tracking-wide">
           {isCustomCabor && customStats ? customStats.title : `Statistik Turnamen MMFC I ${sportCode}`}
         </h2>
         <p className="text-xs sm:text-sm text-[var(--text-muted)] max-w-2xl leading-relaxed">
@@ -120,37 +120,37 @@ export const StatsTab: React.FC<StatsTabProps> = ({ sportCode = 'FUTSAL' }) => {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
             <div className="p-4 rounded-xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] shadow-xs">
               <div className="flex items-center justify-between text-[var(--text-muted)]">
-                <span className="text-[11px] font-bold">Total Gol Tercipta</span>
+                <span className="text-[11px] font-barlow font-bold uppercase tracking-wider">Total Gol Tercipta</span>
                 <Flame className="w-4 h-4 text-amber-500" />
               </div>
-              <div className="text-2xl font-black font-mono text-[var(--text-main)] mt-1">55</div>
+              <div className="text-3xl sm:text-4xl font-teko font-bold text-[var(--text-main)] mt-1 leading-none tracking-wide">55</div>
               <span className="text-[10px] text-[var(--text-muted)] font-mono">3.67 Gol per Laga</span>
             </div>
 
             <div className="p-4 rounded-xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] shadow-xs">
               <div className="flex items-center justify-between text-[var(--text-muted)]">
-                <span className="text-[11px] font-bold">Laga Selesai</span>
+                <span className="text-[11px] font-barlow font-bold uppercase tracking-wider">Laga Selesai</span>
                 <Zap className="w-4 h-4 text-[var(--color-arena-primary)]" />
               </div>
-              <div className="text-2xl font-black font-mono text-[var(--text-main)] mt-1">15 / 26</div>
+              <div className="text-3xl sm:text-4xl font-teko font-bold text-[var(--text-main)] mt-1 leading-none tracking-wide">15 / 26</div>
               <span className="text-[10px] text-[var(--text-muted)] font-mono">Fase Grup Selesai 100%</span>
             </div>
 
             <div className="p-4 rounded-xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] shadow-xs">
               <div className="flex items-center justify-between text-[var(--text-muted)]">
-                <span className="text-[11px] font-bold">Kartu Kuning</span>
+                <span className="text-[11px] font-barlow font-bold uppercase tracking-wider">Kartu Kuning</span>
                 <div className="w-3.5 h-4 bg-amber-400 rounded-xs" />
               </div>
-              <div className="text-2xl font-black font-mono text-amber-600 mt-1">12</div>
+              <div className="text-3xl sm:text-4xl font-teko font-bold text-amber-600 mt-1 leading-none tracking-wide">12</div>
               <span className="text-[10px] text-[var(--text-muted)] font-mono">0.80 Kartu per Laga</span>
             </div>
 
             <div className="p-4 rounded-xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] shadow-xs">
               <div className="flex items-center justify-between text-[var(--text-muted)]">
-                <span className="text-[11px] font-bold">Kartu Merah</span>
+                <span className="text-[11px] font-barlow font-bold uppercase tracking-wider">Kartu Merah</span>
                 <div className="w-3.5 h-4 bg-red-500 rounded-xs" />
               </div>
-              <div className="text-2xl font-black font-mono text-red-600 mt-1">1</div>
+              <div className="text-3xl sm:text-4xl font-teko font-bold text-red-600 mt-1 leading-none tracking-wide">1</div>
               <span className="text-[10px] text-[var(--text-muted)] font-mono">Fair Play Terkendali</span>
             </div>
           </div>
@@ -190,11 +190,11 @@ export const StatsTab: React.FC<StatsTabProps> = ({ sportCode = 'FUTSAL' }) => {
                           #{idx + 1}
                         </span>
                         <div>
-                          <div className="font-bold text-[var(--text-main)] font-[var(--font-display)]">{player.name}</div>
-                          <div className="text-[10px] text-[var(--text-muted)]">{player.teamName}</div>
+                          <div className="font-barlow font-bold text-sm text-[var(--text-main)] tracking-wide">{player.name}</div>
+                          <div className="text-xs text-[var(--text-muted)] font-barlow">{player.teamName}</div>
                         </div>
                       </div>
-                      <span className="font-mono tabular-nums font-black text-sm text-[var(--color-arena-primary)]">
+                      <span className="font-teko font-bold text-lg text-[var(--color-arena-primary)] leading-none tracking-wide">
                         {player.goals} Gol
                       </span>
                     </div>

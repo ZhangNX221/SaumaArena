@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next';
-import { Inter, Plus_Jakarta_Sans, JetBrains_Mono } from 'next/font/google';
+import { Inter, Teko, Bebas_Neue, Barlow_Condensed } from 'next/font/google';
 import './globals.css';
 
 const inter = Inter({
@@ -8,20 +8,29 @@ const inter = Inter({
   display: 'swap',
 });
 
-const plusJakarta = Plus_Jakarta_Sans({
+const teko = Teko({
   subsets: ['latin'],
-  variable: '--font-display',
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-teko',
   display: 'swap',
 });
 
-const jetbrainsMono = JetBrains_Mono({
+const bebasNeue = Bebas_Neue({
   subsets: ['latin'],
-  variable: '--font-mono',
+  weight: '400',
+  variable: '--font-bebas',
+  display: 'swap',
+});
+
+const barlowCondensed = Barlow_Condensed({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-barlow-condensed',
   display: 'swap',
 });
 
 export const metadata: Metadata = {
-  title: 'Sauma Arena — Platform Manajemen Turnamen Olahraga & Live Score',
+  title: 'Sauma Arena | Platform Manajemen Turnamen Olahraga & Live Score',
   description:
     'Sistem manajemen turnamen terpadu untuk panitia, peserta, dan penonton. Dilengkapi 7 tab publik, papan klasemen, live score, dan penilaian best supporter.',
   keywords: [
@@ -43,7 +52,7 @@ export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   maximumScale: 5,
-  themeColor: '#0D9748',
+  themeColor: '#1D63B8',
 };
 
 export default function RootLayout({
@@ -52,7 +61,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="id" className={`${inter.variable} ${plusJakarta.variable} ${jetbrainsMono.variable}`}>
+    <html
+      lang="id"
+      className={`${inter.variable} ${teko.variable} ${bebasNeue.variable} ${barlowCondensed.variable}`}
+    >
       <body className="min-h-screen bg-[var(--bg-page)] text-[var(--text-main)] font-[var(--font-sans)] antialiased transition-colors duration-150">
         {children}
       </body>

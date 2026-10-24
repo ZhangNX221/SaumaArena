@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { X, Sparkles, Plus, Trash2, CheckCircle2, Trophy, Clock, Layers } from 'lucide-react';
+import { X, Plus, Trash2, CheckCircle2, Trophy, Clock, Layers } from 'lucide-react';
 import { SportConfig, ScoringType, SportCode } from '@/types';
 
 import { SPORT_TEMPLATES, SportTemplate } from './sportTemplates';
@@ -28,6 +28,15 @@ export const SportFormModal: React.FC<SportFormModalProps> = ({
   const [categories, setCategories] = useState<string[]>([]);
   const [newCatInput, setNewCatInput] = useState('');
   const [selectedTemplateName, setSelectedTemplateName] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
 
   useEffect(() => {
     if (initialData) {
@@ -97,11 +106,11 @@ export const SportFormModal: React.FC<SportFormModalProps> = ({
               <Trophy className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="font-extrabold text-base sm:text-lg text-[var(--text-main)] font-[var(--font-display)]">
-                {initialData ? 'Ubah Regulasi Cabor' : 'Tambah Cabang Olahraga Baru'}
+              <h3 className="font-bebas text-xl sm:text-2xl uppercase tracking-wide text-[var(--text-main)]">
+                {initialData ? 'Ubah Regulasi Cabang Olahraga' : 'Tambah Cabang Olahraga Baru'}
               </h3>
               <p className="text-xs text-[var(--text-muted)]">
-                Atur format penilaian, durasi laga, dan nomor tanding resmi
+                Atur format penilaian, durasi pertandingan, dan kategori &amp; kelas resmi
               </p>
             </div>
           </div>
@@ -117,8 +126,8 @@ export const SportFormModal: React.FC<SportFormModalProps> = ({
 
         {/* 1-Click Sport Regulation Templates */}
         <div className="space-y-2.5 p-4 rounded-xl bg-[var(--bg-muted)]/60 border border-[var(--border-subtle)]">
-          <div className="flex items-center gap-2 text-xs font-bold text-[var(--color-arena-primary)]">
-            <Sparkles className="w-4 h-4 text-[var(--color-arena-accent)]" />
+          <div className="flex items-center gap-2 text-xs font-barlow font-bold uppercase tracking-wider text-[var(--color-arena-primary)]">
+            <Layers className="w-4 h-4 text-[var(--color-arena-accent)]" />
             <span>Rekomendasi Template Peraturan Cabor (Pilih Cepat):</span>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
@@ -150,7 +159,7 @@ export const SportFormModal: React.FC<SportFormModalProps> = ({
         <form onSubmit={handleSubmit} className="space-y-4 text-xs">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1">
-              <label className="font-bold text-[var(--text-main)]">Nama Cabang Olahraga</label>
+              <label className="font-barlow font-bold uppercase tracking-wider text-[11px] text-[var(--text-main)]">Nama Cabang Olahraga</label>
               <input
                 type="text"
                 required
@@ -162,7 +171,7 @@ export const SportFormModal: React.FC<SportFormModalProps> = ({
             </div>
 
             <div className="space-y-1">
-              <label className="font-bold text-[var(--text-main)]">Kode Singkat Cabor</label>
+              <label className="font-barlow font-bold uppercase tracking-wider text-[11px] text-[var(--text-main)]">Kode Singkat Cabor</label>
               <input
                 type="text"
                 required
@@ -176,7 +185,7 @@ export const SportFormModal: React.FC<SportFormModalProps> = ({
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div className="space-y-1">
-              <label className="font-bold text-[var(--text-main)]">Format Penilaian</label>
+              <label className="font-barlow font-bold uppercase tracking-wider text-[11px] text-[var(--text-main)]">Format Penilaian</label>
               <select
                 value={scoringType}
                 onChange={(e) => setScoringType(e.target.value as ScoringType)}
@@ -189,7 +198,7 @@ export const SportFormModal: React.FC<SportFormModalProps> = ({
             </div>
 
             <div className="space-y-1">
-              <label className="font-bold text-[var(--text-main)]">Durasi Laga (Menit)</label>
+              <label className="font-barlow font-bold uppercase tracking-wider text-[11px] text-[var(--text-main)]">Durasi Laga (Menit)</label>
               <input
                 type="number"
                 min={5}
@@ -201,7 +210,7 @@ export const SportFormModal: React.FC<SportFormModalProps> = ({
             </div>
 
             <div className="space-y-1">
-              <label className="font-bold text-[var(--text-main)]">Jumlah Babak / Set</label>
+              <label className="font-barlow font-bold uppercase tracking-wider text-[11px] text-[var(--text-main)]">Jumlah Babak / Set</label>
               <input
                 type="number"
                 min={1}
@@ -214,7 +223,7 @@ export const SportFormModal: React.FC<SportFormModalProps> = ({
           </div>
 
           <div className="space-y-1">
-            <label className="font-bold text-[var(--text-main)]">Label Format Penilaian Resmi</label>
+            <label className="font-barlow font-bold uppercase tracking-wider text-[11px] text-[var(--text-main)]">Label Format Penilaian Resmi</label>
             <input
               type="text"
               value={scoringLabel}
@@ -224,16 +233,19 @@ export const SportFormModal: React.FC<SportFormModalProps> = ({
             />
           </div>
 
-          {/* Nomor Tanding Tags */}
+          {/* Kategori & Kelas Tags */}
           <div className="space-y-2 pt-2 border-t border-[var(--border-subtle)]">
-            <label className="font-bold text-[var(--text-main)] block">
-              Nomor Tanding &amp; Kategori ({categories.length} Nomor)
+            <label 
+              title="Contoh: Putra U-15, kelas 55 kg"
+              className="font-barlow font-bold uppercase tracking-wider text-[11px] text-[var(--text-main)] block"
+            >
+              Kategori &amp; Kelas ({categories.length} Kelas) <span className="text-[10px] font-normal text-[var(--text-muted)] lowercase">(contoh: Putra U-15, kelas 55 kg)</span>
             </label>
             <div className="flex flex-wrap gap-2">
               {categories.map((cat, idx) => (
                 <span
                   key={idx}
-                  className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-[var(--bg-muted)] border border-[var(--border-subtle)] text-[11px] font-bold text-[var(--text-main)]"
+                  className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-[var(--bg-muted)] border border-[var(--border-subtle)] text-[11px] font-barlow font-bold uppercase tracking-wider text-[var(--text-main)]"
                 >
                   <span>{cat}</span>
                   <button
@@ -251,7 +263,7 @@ export const SportFormModal: React.FC<SportFormModalProps> = ({
             <div className="flex items-center gap-2 pt-1">
               <input
                 type="text"
-                placeholder="Tambah nomor tanding baru (misal: Ganda Putra U-15)..."
+                placeholder="Tambah kategori/kelas baru (contoh: Putra U-15, kelas 55 kg)..."
                 value={newCatInput}
                 onChange={(e) => setNewCatInput(e.target.value)}
                 onKeyDown={(e) => {
@@ -265,7 +277,7 @@ export const SportFormModal: React.FC<SportFormModalProps> = ({
               <button
                 type="button"
                 onClick={handleAddCategory}
-                className="btn-tactile px-3.5 py-2 rounded-xl bg-[var(--bg-muted)] hover:bg-[var(--border-subtle)] text-[var(--text-main)] font-bold text-xs flex items-center gap-1.5 min-h-[38px]"
+                className="btn-tactile px-3.5 py-2 rounded-xl bg-[var(--bg-muted)] hover:bg-[var(--border-subtle)] text-[var(--text-main)] font-barlow font-bold uppercase tracking-wider text-xs flex items-center gap-1.5 min-h-[38px]"
               >
                 <Plus className="w-3.5 h-3.5" />
                 <span>Tambah</span>
@@ -278,13 +290,13 @@ export const SportFormModal: React.FC<SportFormModalProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="btn-tactile px-4 py-2.5 rounded-xl border border-[var(--border-subtle)] text-[var(--text-muted)] hover:bg-[var(--bg-muted)] font-semibold text-xs min-h-[40px]"
+              className="btn-tactile px-4 py-2.5 rounded-xl border border-[var(--border-subtle)] text-[var(--text-muted)] hover:bg-[var(--bg-muted)] font-barlow font-bold uppercase tracking-wider text-xs min-h-[40px]"
             >
               Batal
             </button>
             <button
               type="submit"
-              className="btn-tactile px-5 py-2.5 rounded-xl bg-[var(--color-arena-primary)] hover:bg-[var(--color-arena-primary-hover)] text-white font-bold text-xs flex items-center gap-1.5 shadow-xs min-h-[40px]"
+              className="btn-tactile px-5 py-2.5 rounded-xl bg-[var(--color-arena-primary)] hover:bg-[var(--color-arena-primary-hover)] text-white font-barlow font-bold uppercase tracking-wider text-xs flex items-center gap-1.5 shadow-xs min-h-[40px]"
             >
               <CheckCircle2 className="w-4 h-4" />
               <span>{initialData ? 'Perbarui Cabor' : 'Simpan Cabor'}</span>

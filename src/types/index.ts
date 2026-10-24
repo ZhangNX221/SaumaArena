@@ -119,8 +119,9 @@ export interface Match {
   events: MatchEvent[];
   bapSigned?: boolean;
   bapSigner?: string;
-  refereeIds?: string[]; // Mendukung 1 pertandingan lebih dari 1 juri
-  assignedReferees?: MatchRefereeAssignment[]; // Detail juri yang bertugas
+  isVerified?: boolean;
+  refereeIds?: string[];
+  assignedReferees?: MatchRefereeAssignment[];
 }
 
 export interface StandingRow {
@@ -275,6 +276,7 @@ export interface MatchBAP {
 export interface AppUser {
   id: string;
   name: string;
+  username?: string;
   email: string;
   role: 'ADMIN' | 'REFEREE';
   roleLabel: string;
@@ -307,3 +309,4 @@ export interface PublicHeaderConfig {
   registerButtonText: string;
 }
 
+export * from './partner';

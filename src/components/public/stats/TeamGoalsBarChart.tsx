@@ -40,16 +40,16 @@ export const TeamGoalsBarChart: React.FC = () => {
     <div className="p-5 sm:p-6 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] shadow-xs space-y-4">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-[var(--border-subtle)]">
         <div>
-          <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[var(--color-arena-primary)] block">
+          <span className="text-xs font-barlow font-bold uppercase tracking-wider text-[var(--color-arena-primary)] block">
             Column Chart &bull; Produktivitas Tim
           </span>
-          <h3 className="font-black text-base text-[var(--text-main)] font-[var(--font-display)] flex items-center gap-2 mt-0.5">
+          <h3 className="font-bebas text-lg text-[var(--text-main)] uppercase tracking-wide flex items-center gap-2 mt-0.5">
             <Trophy className="w-4 h-4 text-[var(--color-arena-accent)]" />
             <span>Distribusi Total Gol per Kontingen Sekolah</span>
           </h3>
         </div>
         <div className="text-right sm:text-right">
-          <span className="text-xs font-mono font-bold text-[var(--color-arena-accent)]">
+          <span className="text-xs font-barlow font-bold uppercase tracking-wider text-[var(--color-arena-accent)]">
             Total 55 Gol Tercipta
           </span>
           <span className="text-[10px] text-[var(--text-muted)] block">Rata-rata 3.67 Gol/Laga</span>
@@ -137,7 +137,7 @@ export const TeamGoalsBarChart: React.FC = () => {
                   y={y - 8}
                   textAnchor="middle"
                   fill={item.isFocal ? 'var(--color-arena-accent)' : 'var(--text-main)'}
-                  className="text-[11px] font-mono font-black"
+                  className="text-base font-teko font-bold tracking-wide"
                 >
                   {item.goals}
                 </text>
@@ -148,7 +148,7 @@ export const TeamGoalsBarChart: React.FC = () => {
                   y={plotBottom + 16}
                   textAnchor="middle"
                   fill="currentColor"
-                  className="text-[var(--text-main)] text-[11px] font-bold"
+                  className="text-[var(--text-main)] text-xs font-barlow font-bold tracking-wide"
                 >
                   {item.shortName}
                 </text>
@@ -159,7 +159,7 @@ export const TeamGoalsBarChart: React.FC = () => {
                   y={plotBottom + 30}
                   textAnchor="middle"
                   fill="currentColor"
-                  className="text-[var(--text-muted)] text-[9px] font-mono"
+                  className="text-[var(--text-muted)] text-[10px] font-barlow"
                 >
                   {(item.goals / item.matches).toFixed(1)} gol/laga
                 </text>

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, ChevronLeft, ChevronRight, Check, AlertCircle } from 'lucide-react';
 import { RegistrationStep, TeamRegistrationData } from '@/types/registration';
 import { StepTeamProfile } from './StepTeamProfile';
@@ -52,6 +52,15 @@ export const TeamRegistrationModal: React.FC<TeamRegistrationModalProps> = ({
   const [currentStep, setCurrentStep] = useState<RegistrationStep>('team');
   const [formData, setFormData] = useState<TeamRegistrationData>(INITIAL_FORM_DATA);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
 
   if (!isOpen) return null;
 

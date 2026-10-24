@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { TicketOrderData } from '@/types/ticket';
-import { QrCode, Copy, Check, Clock, ShieldCheck, AlertCircle, Sparkles } from 'lucide-react';
+import { QrCode, Copy, Check, Clock, ShieldCheck, AlertCircle } from 'lucide-react';
 
 interface PaymentCheckoutScreenProps {
   order: TicketOrderData;
@@ -166,7 +166,7 @@ export const PaymentCheckoutScreen: React.FC<PaymentCheckoutScreenProps> = ({
           onClick={handleSimulatePayment}
           className="btn-tactile w-full sm:w-auto px-6 py-2.5 rounded-xl text-xs font-extrabold bg-[var(--color-arena-primary)] hover:bg-[var(--color-arena-primary-hover)] text-white shadow-xs transition-colors flex items-center justify-center gap-2 min-h-[42px]"
         >
-          <Sparkles className="w-4 h-4" />
+          <ShieldCheck className="w-4 h-4" />
           <span>
             {isProcessing
               ? 'Memverifikasi Pembayaran...'

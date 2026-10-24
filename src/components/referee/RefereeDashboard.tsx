@@ -12,7 +12,10 @@ import {
   Moon, 
   Sun,
   ShieldCheck,
-  Bell
+  Bell,
+  WifiOff,
+  LogOut,
+  User,
 } from 'lucide-react';
 import { AppUser, Match, MatchEvent } from '@/types';
 import { initialMatches } from '@/mocks/tournamentData';
@@ -23,6 +26,8 @@ import { RefereeMatchCenter } from './RefereeMatchCenter';
 import { RefereeSchedule } from './RefereeSchedule';
 import { RefereeRulebook } from './RefereeRulebook';
 import { RefereeProfile } from './RefereeProfile';
+import { RefereeDashboardHome } from './RefereeDashboardHome';
+import { RefereeReportsView } from './RefereeReportsView';
 
 interface RefereeDashboardProps {
   user: AppUser;
@@ -34,25 +39,46 @@ interface RefereeDashboardProps {
 }
 
 export const RefereeDashboard: React.FC<RefereeDashboardProps> = ({
-  user,
+  user: initialUser,
   onLogout,
   onBackToPublic,
   onGoToAdmin,
   darkMode = false,
   onToggleDarkMode,
 }) => {
-  const [activeTab, setActiveTab] = useState<RefereeTabKey>('match_center');
+  const [currentUser, setCurrentUser] = useState<AppUser>(initialUser);
+  const [activeTab, setActiveTab] = useState<RefereeTabKey>('dashboard');
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   
   // Real match state: automatically linked to the match assigned to this referee
   const assignedMatch =
-    initialMatches.find((m) => m.refereeIds?.includes(user.id)) ||
-    (user.assignedMatchIds && initialMatches.find((m) => user.assignedMatchIds?.includes(m.id))) ||
+    initialMatches.find((m) => m.refereeIds?.includes(currentUser.id)) ||
+    (currentUser.assignedMatchIds && initialMatches.find((m) => currentUser.assignedMatchIds?.includes(m.id))) ||
     initialMatches[0];
 
   const [liveMatch, setLiveMatch] = useState<Match>(assignedMatch);
   const [recentEvents, setRecentEvents] = useState<MatchEvent[]>(assignedMatch.events);
   const [notificationDismissed, setNotificationDismissed] = useState(false);
+  const [isOnline, setIsOnline] = useState(true);
+
+  const handleUpdateProfile = (updated: Partial<AppUser>) => {
+    setCurrentUser((prev) => ({
+      ...prev,
+      ...updated,
+    }));
+  };
+
+  React.useEffect(() => {
+    setIsOnline(typeof navigator !== 'undefined' ? navigator.onLine : true);
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
 
   const handleUpdateScore = (team: 'A' | 'B', delta: number) => {
     setLiveMatch((prev) => ({
@@ -73,7 +99,7 @@ export const RefereeDashboard: React.FC<RefereeDashboardProps> = ({
       ...prev,
       status: 'COMPLETED',
       bapSigned: true,
-      bapSigner: user.name,
+      bapSigner: currentUser.name,
     }));
   };
 
@@ -83,7 +109,7 @@ export const RefereeDashboard: React.FC<RefereeDashboardProps> = ({
       <RefereeSidebar
         activeTab={activeTab}
         onSelectTab={setActiveTab}
-        user={user}
+        user={currentUser}
         isOpenMobile={isMobileSidebarOpen}
         onCloseMobile={() => setIsMobileSidebarOpen(false)}
         onBackToPublic={onBackToPublic}
@@ -92,36 +118,6 @@ export const RefereeDashboard: React.FC<RefereeDashboardProps> = ({
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0 h-screen overflow-y-auto">
-        {/* Urgent Court Assignment Call Banner (Notice Rule 2) */}
-        {!notificationDismissed && (
-          <div className="bg-[#33658a] text-white px-4 py-2.5 sm:px-6 flex items-center justify-between text-xs font-semibold shadow-xs">
-            <div className="flex items-center gap-2.5 min-w-0">
-              <span className="flex items-center justify-center w-6 h-6 rounded-full bg-white/20 shrink-0">
-                <Bell className="w-3.5 h-3.5 text-[#f6ae2d]" />
-              </span>
-              <span className="truncate">
-                <strong>Panggilan Tugas:</strong> Anda bertugas memimpin Laga #{liveMatch.matchNumber} ({liveMatch.teamAName} vs {liveMatch.teamBName}) di {liveMatch.courtName}.
-              </span>
-            </div>
-            <div className="flex items-center gap-2 shrink-0">
-              <button
-                type="button"
-                onClick={() => setActiveTab('match_center')}
-                className="btn-tactile px-2.5 py-1 rounded-md bg-[#f6ae2d] text-slate-950 font-black text-[11px]"
-              >
-                Masuk Lapangan
-              </button>
-              <button
-                type="button"
-                onClick={() => setNotificationDismissed(true)}
-                className="text-white/70 hover:text-white px-1 text-[11px]"
-              >
-                Tutup
-              </button>
-            </div>
-          </div>
-        )}
-
         {/* Top Navbar */}
         <header className="sticky top-0 z-30 bg-[var(--bg-surface)]/95 backdrop-blur-md border-b border-[var(--border-subtle)] h-16 px-4 sm:px-6 flex items-center justify-between shrink-0">
           <div className="flex items-center gap-3">
@@ -135,119 +131,114 @@ export const RefereeDashboard: React.FC<RefereeDashboardProps> = ({
             </button>
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="font-black text-sm sm:text-base text-[var(--text-main)] font-[var(--font-display)]">
-                  {user.name}
+                <h1 className="font-bebas text-lg sm:text-xl text-[var(--text-main)] tracking-wide uppercase">
+                  Konsol Juri
                 </h1>
-                <span className="text-[10px] font-black px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-800 dark:text-emerald-300 border border-emerald-500/20">
-                  Siap Bertugas
+                <span className="flex items-center gap-1 text-[10px] font-barlow font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-800 dark:text-emerald-300 border border-emerald-500/20">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                  Tersinkron
                 </span>
               </div>
-              <p className="text-[11px] text-[var(--text-muted)] hidden sm:block">
-                {user.roleLabel} &bull; Spesialisasi: Futsal FFI
+              <p className="text-[11px] text-[var(--text-muted)] hidden sm:block font-sans">
+                {currentUser.name} &bull; {currentUser.roleLabel || 'Wasit Lapangan'}
               </p>
             </div>
           </div>
 
           <div className="flex items-center gap-2 sm:gap-3">
+            {/* Connection Pill */}
+            <div
+              title={isOnline ? 'Terhubung ke server turnamen - Skor tersinkron otomatis' : 'Jaringan terputus - Mode offline aktif, skor tersimpan di perangkat'}
+              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-barlow font-bold uppercase tracking-wider border transition-colors duration-150 ${
+                isOnline
+                  ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20'
+                  : 'bg-amber-500/15 text-amber-800 dark:text-amber-300 border-amber-500/30'
+              }`}
+            >
+              {isOnline ? (
+                <>
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                  <span className="hidden sm:inline">Online &bull; Sinkron</span>
+                </>
+              ) : (
+                <>
+                  <WifiOff className="w-3 h-3 text-amber-600 dark:text-amber-400 shrink-0" />
+                  <span>Mode Offline &bull; Tersimpan</span>
+                </>
+              )}
+            </div>
+
             {onToggleDarkMode && (
               <button
                 type="button"
                 onClick={onToggleDarkMode}
-                className="btn-tactile p-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] text-[var(--text-muted)] hover:bg-[var(--bg-muted)] transition-colors"
+                className="btn-tactile p-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] text-[var(--text-muted)] hover:bg-[var(--bg-muted)] active:scale-95 transition-all duration-150 min-h-[38px] min-w-[38px] flex items-center justify-center"
                 title={darkMode ? 'Beralih ke mode siang' : 'Beralih ke mode malam'}
+                aria-label="Mode tampilan"
               >
                 {darkMode ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4" />}
               </button>
             )}
 
-            {onGoToAdmin && (
+            {/* Profile Section in Topbar Right */}
+            <div className="flex items-center gap-2 sm:gap-2.5 pl-2 sm:pl-3 border-l border-[var(--border-subtle)] shrink-0">
               <button
                 type="button"
-                onClick={onGoToAdmin}
-                className="btn-tactile flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[var(--color-arena-primary)] text-white text-xs font-bold hover:bg-[var(--color-arena-primary-hover)] shadow-xs"
-                title="Buka panel admin"
+                onClick={() => setActiveTab('profile')}
+                className={`btn-tactile flex items-center gap-2 sm:gap-2.5 p-1 -m-1 rounded-xl transition-all duration-150 active:scale-[0.98] text-left ${
+                  activeTab === 'profile'
+                    ? 'ring-2 ring-[var(--color-arena-primary)] bg-[var(--bg-muted)]'
+                    : 'hover:bg-[var(--bg-muted)]'
+                }`}
+                title="Buka Profil & Kesiapan Juri"
+                aria-label="Profil juri"
               >
-                <ShieldCheck className="w-3.5 h-3.5" />
-                <span>Panel Admin</span>
+                <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-[var(--color-arena-dark)] text-[var(--color-arena-accent)] flex items-center justify-center font-bebas text-base shrink-0 border border-[var(--border-subtle)]">
+                  {currentUser.avatarText || 'RH'}
+                </div>
+                <div className="hidden md:block text-left max-w-[170px] lg:max-w-[220px]">
+                  <div className="text-xs font-barlow font-bold text-[var(--text-main)] truncate leading-tight tracking-wide">
+                    {currentUser.name}
+                  </div>
+                  <div className="text-[10px] text-[var(--text-muted)] truncate font-medium mt-0.5">
+                    {currentUser.roleLabel || 'Juri Resmi Lapangan'}
+                  </div>
+                </div>
               </button>
-            )}
 
-            {onBackToPublic && (
-              <button
-                type="button"
-                onClick={onBackToPublic}
-                className="btn-tactile hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[var(--border-subtle)] text-xs font-semibold text-[var(--text-muted)] hover:bg-[var(--bg-muted)]"
-              >
-                <span>Portal Publik</span>
-              </button>
-            )}
+              {onLogout && (
+                <button
+                  type="button"
+                  onClick={onLogout}
+                  className="btn-tactile p-1.5 sm:p-2 rounded-xl text-red-600 hover:text-red-700 hover:bg-red-500/10 active:scale-90 transition-all duration-150"
+                  title="Keluar dari akun juri"
+                  aria-label="Logout"
+                >
+                  <LogOut className="w-4 h-4" />
+                </button>
+              )}
+            </div>
           </div>
         </header>
 
         {/* Dynamic Juri Views */}
         <main className="flex-1 p-4 sm:p-6 lg:p-8">
-          {/* TAB 1: TUGAS HARI INI (DASHBOARD JURI) */}
-          {activeTab === 'duty' && (
-            <div className="space-y-6 max-w-4xl mx-auto pb-16">
-              <div>
-                <h2 className="text-xl sm:text-2xl font-black text-[var(--text-main)] font-[var(--font-display)]">
-                  Tugas Harian
-                </h2>
-                <p className="text-xs text-[var(--text-muted)] mt-0.5">
-                  Ringkasan status tugas harian dan akses langsung ke kontrol pertandingan lapangan.
-                </p>
-              </div>
-
-              {/* Duty Stat Cards */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div className="p-4 rounded-xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] shadow-xs space-y-1">
-                  <span className="text-[11px] font-semibold text-[var(--text-muted)]">Sudah Dipimpin</span>
-                  <div className="text-2xl font-black font-mono text-[var(--text-main)]">1 Laga</div>
-                  <span className="text-[10px] text-emerald-600 font-bold">BAP Selesai Sah</span>
-                </div>
-                <div className="p-4 rounded-xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] shadow-xs space-y-1">
-                  <span className="text-[11px] font-semibold text-[var(--text-muted)]">Sedang Berjalan</span>
-                  <div className="text-2xl font-black font-mono text-red-600">Laga #{liveMatch.matchNumber}</div>
-                  <span className="text-[10px] text-red-500 font-bold">Court 1 (Futsal)</span>
-                </div>
-                <div className="p-4 rounded-xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] shadow-xs space-y-1">
-                  <span className="text-[11px] font-semibold text-[var(--text-muted)]">Belum Dipimpin Hari Ini</span>
-                  <div className="text-2xl font-black font-mono text-[#33658a]">1 Laga</div>
-                  <span className="text-[10px] text-[var(--text-muted)]">Pukul 16:30 WITA</span>
-                </div>
-              </div>
-
-              {/* Urgent Action Card */}
-              <div className="p-6 rounded-2xl bg-[#0b1a28] text-white border border-[#1f374f] shadow-md flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div className="space-y-1">
-                  <span className="text-[10px] font-bold uppercase tracking-widest text-red-400 flex items-center gap-1.5">
-                    <Radio className="w-3.5 h-3.5 text-red-500 animate-pulse" />
-                    <span>Laga Berjalan Saat Ini</span>
-                  </span>
-                  <h3 className="text-lg font-black font-[var(--font-display)]">
-                    {liveMatch.teamAName} vs {liveMatch.teamBName}
-                  </h3>
-                  <p className="text-xs text-slate-300">
-                    Court 1 &bull; Babak 2 &bull; Skor: {liveMatch.scoreA} - {liveMatch.scoreB}
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setActiveTab('match_center')}
-                  className="btn-tactile px-6 py-3 rounded-xl bg-[#33658a] hover:bg-[#264e6b] text-white font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-xs"
-                >
-                  <Play className="w-4 h-4" />
-                  <span>Buka Match Center</span>
-                  <ChevronRight className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
+          {/* TAB 0: DASHBOARD JURI */}
+          {activeTab === 'dashboard' && (
+            <RefereeDashboardHome
+              user={currentUser}
+              liveMatch={liveMatch}
+              onGoToMatchCenter={() => setActiveTab('match_center')}
+              onGoToSchedule={() => setActiveTab('duty')}
+              onGoToReports={() => setActiveTab('reports')}
+            />
           )}
 
-          {/* TAB 2: JADWAL SAYA */}
-          {activeTab === 'schedule' && (
+          {/* TAB 1: TUGAS SAYA (DASHBOARD JURI - 3 TABS: HARI INI | MENDATANG | RIWAYAT) */}
+          {activeTab === 'duty' && (
             <RefereeSchedule
-              user={user}
+              user={currentUser}
+              initialTab="TODAY"
               onSelectDutyMatch={(duty) => {
                 const found = initialMatches.find((m) => m.id === duty.matchId) || initialMatches[0];
                 setLiveMatch(found);
@@ -256,7 +247,20 @@ export const RefereeDashboard: React.FC<RefereeDashboardProps> = ({
             />
           )}
 
-          {/* TAB 3: MATCH CENTER (4-STEP WORKFLOW) */}
+          {/* TAB 2: JADWAL SAYA (MENDATANG) */}
+          {activeTab === 'schedule' && (
+            <RefereeSchedule
+              user={currentUser}
+              initialTab="UPCOMING"
+              onSelectDutyMatch={(duty) => {
+                const found = initialMatches.find((m) => m.id === duty.matchId) || initialMatches[0];
+                setLiveMatch(found);
+                setActiveTab('match_center');
+              }}
+            />
+          )}
+
+          {/* TAB 3: CATAT SKOR (DULU MATCH CENTER - 4-STEP WORKFLOW) */}
           {activeTab === 'match_center' && (
             <RefereeMatchCenter
               currentMatch={liveMatch}
@@ -267,13 +271,20 @@ export const RefereeDashboard: React.FC<RefereeDashboardProps> = ({
             />
           )}
 
-          {/* TAB 4: RULEBOOK */}
-          {activeTab === 'rulebook' && <RefereeRulebook />}
+          {/* TAB 4: LAPORAN & CATATAN WASIT */}
+          {activeTab === 'reports' && (
+            <RefereeReportsView user={currentUser} />
+          )}
 
-          {/* TAB 5: PROFILE & KESIAPAN */}
+          {/* TAB 5: BUKU ATURAN (DULU BUKU REGULASI) */}
+          {activeTab === 'rulebook' && <RefereeRulebook user={currentUser} />}
+
+          {/* TAB 6: PROFIL & KESIAPAN */}
           {activeTab === 'profile' && (
             <RefereeProfile
-              user={user}
+              user={currentUser}
+              onUpdateProfile={handleUpdateProfile}
+              onUpdateAvailability={(status) => handleUpdateProfile({ isAvailable: status })}
               darkMode={darkMode}
               onToggleDarkMode={onToggleDarkMode}
             />

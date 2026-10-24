@@ -44,6 +44,23 @@ export const PublicTournamentHeader: React.FC<PublicTournamentHeaderProps> = ({
     onSelectBanner(nextIdx);
   };
 
+  const [selectedCompBySport, setSelectedCompBySport] = React.useState<Record<string, string>>({});
+
+  const sportKey = (activeBanner.sportLabel || activeBanner.categoryBadge || 'FUTSAL').toUpperCase();
+  const SPORT_COMPETITIONS: Record<string, string[]> = {
+    FUTSAL: ['Turnamen Futsal Matsanega 2026', 'Piala Walikota Futsal Pelajar'],
+    'E-SPORT': ['Matsanega E-Sport Arena Cup 2026 (MLBB)', 'MLBB Junior Invitational Series'],
+    'E-SPORT MLBB': ['Matsanega E-Sport Arena Cup 2026 (MLBB)', 'MLBB Junior Invitational Series'],
+    ESPORT: ['Matsanega E-Sport Arena Cup 2026 (MLBB)', 'MLBB Junior Invitational Series'],
+    VOLI: ['Piala Rektor Bola Voli Pelajar 2026'],
+    'BOLA VOLI': ['Piala Rektor Bola Voli Pelajar 2026'],
+  };
+
+  const matchedCompetitions = 
+    Object.entries(SPORT_COMPETITIONS).find(([key]) => sportKey.includes(key))?.[1] || [];
+
+  const currentComp = selectedCompBySport[sportKey] || matchedCompetitions[0] || activeBanner.title;
+
   return (
     <section className="relative overflow-hidden border-b border-[var(--border-subtle)] pt-6 pb-10 sm:pb-12 px-4 sm:px-6 lg:px-8 text-white transition-colors">
       {/* Background Banner Image with smooth cross-fade */}
@@ -75,7 +92,7 @@ export const PublicTournamentHeader: React.FC<PublicTournamentHeaderProps> = ({
         <button
           type="button"
           onClick={handlePrev}
-          aria-label="Cabor Sebelumnya"
+          aria-label="Cabang Olahraga Sebelumnya"
           className="btn-tactile absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-black/40 hover:bg-black/75 border border-white/20 text-white flex items-center justify-center backdrop-blur-md shadow-lg transition-transform hover:scale-105"
         >
           <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
@@ -87,7 +104,7 @@ export const PublicTournamentHeader: React.FC<PublicTournamentHeaderProps> = ({
         <button
           type="button"
           onClick={handleNext}
-          aria-label="Cabor Berikutnya"
+          aria-label="Cabang Olahraga Berikutnya"
           className="btn-tactile absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-black/40 hover:bg-black/75 border border-white/20 text-white flex items-center justify-center backdrop-blur-md shadow-lg transition-transform hover:scale-105"
         >
           <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
@@ -127,9 +144,35 @@ export const PublicTournamentHeader: React.FC<PublicTournamentHeaderProps> = ({
                 })}
               </div>
 
-              {/* Slider Counter Indicator */}
-              <div className="text-[11px] font-mono text-slate-300 bg-black/40 backdrop-blur-xs px-2.5 py-1 rounded-lg border border-white/10 ml-auto shrink-0">
-                Cabor <strong className="text-white">{safeIndex + 1}</strong> dari {currentList.length}
+              {/* Action bar: Ganti Kompetisi dropdown & Cabang Olahraga counter */}
+              <div className="flex items-center gap-2 ml-auto shrink-0 flex-wrap">
+                {matchedCompetitions.length > 1 && (
+                  <div className="flex items-center gap-1.5 bg-black/40 backdrop-blur-xs px-2.5 py-1 rounded-lg border border-white/15 text-xs text-slate-200">
+                    <span className="text-[11px] text-slate-400">Ganti Kompetisi:</span>
+                    <select
+                      value={currentComp}
+                      onChange={(e) =>
+                        setSelectedCompBySport((prev) => ({
+                          ...prev,
+                          [sportKey]: e.target.value,
+                        }))
+                      }
+                      aria-label="Pilih Kompetisi"
+                      className="bg-transparent text-white font-semibold text-xs outline-none cursor-pointer border-none py-0.5"
+                    >
+                      {matchedCompetitions.map((comp) => (
+                        <option key={comp} value={comp} className="bg-slate-900 text-white">
+                          {comp}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+
+                {/* Counter: {jumlah} Cabang Olahraga */}
+                <div className="text-[11px] font-mono text-slate-300 bg-black/40 backdrop-blur-xs px-2.5 py-1 rounded-lg border border-white/10 shrink-0">
+                  <strong className="text-white">{currentList.length}</strong> Cabang Olahraga
+                </div>
               </div>
             </div>
           );
@@ -138,23 +181,23 @@ export const PublicTournamentHeader: React.FC<PublicTournamentHeaderProps> = ({
         {/* Eyebrow & Status Strip */}
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-2.5">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-mono font-black bg-[var(--color-arena-accent)]/20 text-[var(--color-arena-accent)] border border-[var(--color-arena-accent)]/35 backdrop-blur-xs">
-              <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-barlow font-bold uppercase tracking-wider bg-[var(--color-arena-accent)]/20 text-[var(--color-arena-accent)] border border-[var(--color-arena-accent)]/35 backdrop-blur-xs">
+              <span className="w-2 h-2 rounded-full bg-red-500" />
               <span>{activeBanner.statusBadge}</span>
             </span>
-            <span className="px-2.5 py-1 rounded-md text-xs font-mono font-bold uppercase tracking-wider bg-white/10 text-slate-200 border border-white/15 backdrop-blur-xs">
+            <span className="px-2.5 py-1 rounded-md text-xs font-barlow font-bold uppercase tracking-wider bg-white/10 text-slate-200 border border-white/15 backdrop-blur-xs">
               {activeBanner.categoryBadge}
             </span>
           </div>
 
-          <div className="text-xs text-slate-300 font-medium bg-black/30 backdrop-blur-xs px-3 py-1 rounded-lg border border-white/10">
+          <div className="text-xs text-slate-300 font-barlow font-semibold bg-black/30 backdrop-blur-xs px-3 py-1 rounded-lg border border-white/10">
             {activeBanner.organizer}
           </div>
         </div>
 
         {/* Tournament Hero Title */}
         <div className="space-y-3">
-          <h1 className="text-2xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight font-[var(--font-display)] leading-tight max-w-4xl drop-shadow-sm">
+          <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold uppercase text-white tracking-wide font-teko leading-tight sm:leading-snug max-w-4xl drop-shadow-sm">
             {activeBanner.title}
           </h1>
 
@@ -170,18 +213,18 @@ export const PublicTournamentHeader: React.FC<PublicTournamentHeaderProps> = ({
         {/* Tournament Facts */}
         <div className="pt-4 border-t border-white/15">
           {/* Metadata Badges */}
-          <div className="flex flex-wrap items-center gap-4 sm:gap-6 text-xs text-slate-200">
-            <div className="flex items-center gap-2 font-medium">
-              <Calendar className="w-4 h-4 text-[var(--color-arena-accent)]" />
-              <span className="font-semibold text-white">{activeBanner.dates}</span>
+          <div className="flex flex-wrap items-center gap-4 sm:gap-6 text-xs sm:text-sm font-barlow text-slate-200">
+            <div className="flex items-center gap-2">
+              <Calendar className="w-4 h-4 text-[var(--color-arena-accent)] shrink-0" />
+              <span className="font-bold text-white tracking-wide">{activeBanner.dates}</span>
             </div>
-            <div className="flex items-center gap-2 font-medium">
-              <MapPin className="w-4 h-4 text-[var(--color-arena-accent)]" />
-              <span className="font-semibold text-white">{activeBanner.venue}</span>
+            <div className="flex items-center gap-2">
+              <MapPin className="w-4 h-4 text-[var(--color-arena-accent)] shrink-0" />
+              <span className="font-bold text-white tracking-wide">{activeBanner.venue}</span>
             </div>
-            <div className="flex items-center gap-2 font-medium">
-              <Trophy className="w-4 h-4 text-[var(--color-arena-accent)]" />
-              <span className="font-semibold text-white">{activeBanner.contingentInfo}</span>
+            <div className="flex items-center gap-2">
+              <Trophy className="w-4 h-4 text-[var(--color-arena-accent)] shrink-0" />
+              <span className="font-bold text-white tracking-wide">{activeBanner.contingentInfo}</span>
             </div>
           </div>
         </div>

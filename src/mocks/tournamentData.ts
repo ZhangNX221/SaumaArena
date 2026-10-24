@@ -46,6 +46,7 @@ export const initialMatches: Match[] = [
     scheduledTime: '24 Okt 2026, 08:30 WIB',
     bapSigned: true,
     bapSigner: 'Juri FFI: M. Irfan, S.Pd',
+    isVerified: true,
     refereeIds: ['USR-JURI-1'],
     assignedReferees: [
       {
@@ -85,6 +86,7 @@ export const initialMatches: Match[] = [
     scheduledTime: '24 Okt 2026, 10:00 WIB',
     bapSigned: true,
     bapSigner: 'Juri FFI: Hendra Wijaya, S.Or',
+    isVerified: false,
     refereeIds: ['USR-JURI-2'],
     assignedReferees: [
       {
