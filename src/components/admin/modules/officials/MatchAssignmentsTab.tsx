@@ -5,6 +5,8 @@ import { UserCog, Calendar, MapPin, CheckCircle2, AlertCircle, Edit2, X, Plus, S
 import { initialMatches } from '@/mocks/tournamentData';
 import { PRESET_USERS, REFEREE_DUTIES } from '@/mocks/multiSportData';
 import { Match, RefereeMatchDuty } from '@/types';
+import { ModalPortal } from '@/components/common/ModalPortal';
+import { AdminPageHeaderCard } from '@/components/admin/common/AdminPageHeaderCard';
 
 export const MatchAssignmentsTab: React.FC = () => {
   const [duties, setDuties] = useState<RefereeMatchDuty[]>(REFEREE_DUTIES);
@@ -42,30 +44,21 @@ export const MatchAssignmentsTab: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6 max-w-5xl mx-auto animate-fadeIn pb-12">
+    <div className="space-y-6 animate-fadeIn pb-12">
       {/* Header */}
-      <div className="p-5 sm:p-6 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2 text-[var(--color-arena-primary)]">
-            <UserCog className="w-4 h-4 shrink-0" />
-            <span className="text-xs font-barlow font-bold uppercase tracking-wider">
-              PERANGKAT PERTANDINGAN &bull; PENUGASAN JURI
+      <AdminPageHeaderCard
+        icon={UserCog}
+        category="PERANGKAT PERTANDINGAN • PENUGASAN JURI"
+        title="Penugasan Wasit &amp; Juri Lapangan"
+        description="Plotting wasit utama, asisten wasit, dan pencatat meja untuk seluruh pertandingan turnamen sesuai jadwal &amp; lisensi resmi."
+        action={
+          <div className="flex items-center gap-2">
+            <span className="px-3 py-1 rounded-xl bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20 text-xs font-barlow font-bold uppercase tracking-wider">
+              {refereeUsers.length} Wasit Bersertifikat
             </span>
           </div>
-          <h2 className="text-2xl sm:text-3xl font-bebas text-[var(--text-main)] uppercase tracking-wide mt-1">
-            Penugasan Wasit &amp; Juri Lapangan
-          </h2>
-          <p className="text-xs text-[var(--text-muted)] mt-0.5 max-w-xl">
-            Plotting wasit utama, asisten wasit, dan pencatat meja untuk seluruh pertandingan turnamen sesuai jadwal &amp; lisensi resmi.
-          </p>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <span className="px-3 py-1 rounded-xl bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20 text-xs font-barlow font-bold uppercase tracking-wider">
-            {refereeUsers.length} Wasit Bersertifikat
-          </span>
-        </div>
-      </div>
+        }
+      />
 
       {/* Duty Assignment Cards */}
       <div className="space-y-3">
@@ -127,78 +120,80 @@ export const MatchAssignmentsTab: React.FC = () => {
 
       {/* Assignment Modal */}
       {isAssignModalOpen && selectedDuty && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fadeIn">
-          <div className="bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
-            <div className="flex items-center justify-between pb-2 border-b border-[var(--border-subtle)]">
-              <div>
-                <h3 className="font-bebas text-xl uppercase tracking-wide text-[var(--text-main)]">
-                  Plotting Perangkat Wasit
-                </h3>
-                <p className="text-xs text-[var(--text-muted)]">
-                  Pertandingan #{selectedDuty.matchNumber}: {selectedDuty.teamA} vs {selectedDuty.teamB}
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => setIsAssignModalOpen(false)}
-                className="p-1 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-main)]"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            <form onSubmit={handleSaveAssign} className="space-y-3 text-xs">
-              <div>
-                <label className="font-barlow font-bold uppercase tracking-wider text-[11px] text-[var(--text-main)] block mb-1">
-                  Pilih Petugas / Wasit
-                </label>
-                <select
-                  value={selectedRefereeId}
-                  onChange={(e) => setSelectedRefereeId(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)] font-semibold"
-                >
-                  {refereeUsers.map((ref) => (
-                    <option key={ref.id} value={ref.id}>
-                      {ref.name} ({ref.licenseLevel || 'Lisensi Daerah'})
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="font-barlow font-bold uppercase tracking-wider text-[11px] text-[var(--text-main)] block mb-1">
-                  Peran Penugasan di Lapangan
-                </label>
-                <select
-                  value={selectedRole}
-                  onChange={(e) => setSelectedRole(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)]"
-                >
-                  <option value="Wasit Utama (Wasit 1)">Wasit Utama (Wasit 1)</option>
-                  <option value="Asisten Wasit (Wasit 2)">Asisten Wasit (Wasit 2)</option>
-                  <option value="Pencatat Meja / Timer">Pencatat Meja / Timer</option>
-                  <option value="Hakim Garis">Hakim Garis</option>
-                </select>
-              </div>
-
-              <div className="pt-2 flex items-center justify-end gap-2">
+        <ModalPortal>
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/70 backdrop-blur-md animate-fadeIn" onClick={() => setIsAssignModalOpen(false)}>
+            <div className="bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4" onClick={(e) => e.stopPropagation()}>
+              <div className="flex items-center justify-between pb-2 border-b border-[var(--border-subtle)]">
+                <div>
+                  <h3 className="font-bebas text-xl uppercase tracking-wide text-[var(--text-main)]">
+                    Plotting Perangkat Wasit
+                  </h3>
+                  <p className="text-xs text-[var(--text-muted)]">
+                    Pertandingan #{selectedDuty.matchNumber}: {selectedDuty.teamA} vs {selectedDuty.teamB}
+                  </p>
+                </div>
                 <button
                   type="button"
                   onClick={() => setIsAssignModalOpen(false)}
-                  className="btn-tactile px-4 py-2 rounded-xl border border-[var(--border-subtle)] font-barlow font-bold uppercase tracking-wider text-xs"
+                  className="p-1 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-main)]"
                 >
-                  Batal
-                </button>
-                <button
-                  type="submit"
-                  className="btn-tactile px-4 py-2 rounded-xl bg-[var(--color-arena-primary)] text-white font-barlow font-bold uppercase tracking-wider text-xs"
-                >
-                  Simpan Penugasan
+                  <X className="w-4 h-4" />
                 </button>
               </div>
-            </form>
+
+              <form onSubmit={handleSaveAssign} className="space-y-3 text-xs">
+                <div>
+                  <label className="font-barlow font-bold uppercase tracking-wider text-[11px] text-[var(--text-main)] block mb-1">
+                    Pilih Petugas / Wasit
+                  </label>
+                  <select
+                    value={selectedRefereeId}
+                    onChange={(e) => setSelectedRefereeId(e.target.value)}
+                    className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)] font-semibold"
+                  >
+                    {refereeUsers.map((ref) => (
+                      <option key={ref.id} value={ref.id}>
+                        {ref.name} ({ref.licenseLevel || 'Lisensi Daerah'})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="font-barlow font-bold uppercase tracking-wider text-[11px] text-[var(--text-main)] block mb-1">
+                    Peran Penugasan di Lapangan
+                  </label>
+                  <select
+                    value={selectedRole}
+                    onChange={(e) => setSelectedRole(e.target.value)}
+                    className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)]"
+                  >
+                    <option value="Wasit Utama (Wasit 1)">Wasit Utama (Wasit 1)</option>
+                    <option value="Asisten Wasit (Wasit 2)">Asisten Wasit (Wasit 2)</option>
+                    <option value="Pencatat Meja / Timer">Pencatat Meja / Timer</option>
+                    <option value="Hakim Garis">Hakim Garis</option>
+                  </select>
+                </div>
+
+                <div className="pt-2 flex items-center justify-end gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setIsAssignModalOpen(false)}
+                    className="btn-tactile px-4 py-2 rounded-xl border border-[var(--border-subtle)] font-barlow font-bold uppercase tracking-wider text-xs"
+                  >
+                    Batal
+                  </button>
+                  <button
+                    type="submit"
+                    className="btn-tactile px-4 py-2 rounded-xl bg-[var(--color-arena-primary)] text-white font-barlow font-bold uppercase tracking-wider text-xs"
+                  >
+                    Simpan Penugasan
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
-        </div>
+        </ModalPortal>
       )}
     </div>
   );

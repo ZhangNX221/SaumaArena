@@ -237,7 +237,7 @@ html.dark .stadium-badge-penalty {
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: none;
   }
 }
 
@@ -248,7 +248,7 @@ html.dark .stadium-badge-penalty {
   }
   to {
     opacity: 1;
-    transform: scale(1);
+    transform: none;
   }
 }
 

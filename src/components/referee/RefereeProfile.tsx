@@ -2,12 +2,9 @@
 
 import React, { useState } from 'react';
 import { 
-  User, 
   CheckCircle2, 
-  Lock, 
   Save, 
   ToggleLeft, 
-  Clock,
 } from 'lucide-react';
 import { AppUser } from '@/types';
 import { ProfileIdentityTab } from './profile/ProfileIdentityTab';
@@ -22,14 +19,11 @@ interface RefereeProfileProps {
   onToggleDarkMode?: () => void;
 }
 
-type ProfileTab = 'IDENTITY' | 'AVAILABILITY' | 'SECURITY';
-
 export const RefereeProfile: React.FC<RefereeProfileProps> = ({
   user,
   onUpdateProfile,
   onUpdateAvailability,
 }) => {
-  const [activeTab, setActiveTab] = useState<ProfileTab>('IDENTITY');
   const [isAvailable, setIsAvailable] = useState<boolean>(user.isAvailable ?? true);
 
   // Form Fields State
@@ -100,14 +94,6 @@ export const RefereeProfile: React.FC<RefereeProfileProps> = ({
     setPreferredRoles((prev) =>
       prev.includes(role) ? prev.filter((r) => r !== role) : [...prev, role]
     );
-  };
-
-  const scrollToSection = (sectionId: string, tabKey: ProfileTab) => {
-    setActiveTab(tabKey);
-    const el = document.getElementById(sectionId);
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
   };
 
   return (
@@ -184,36 +170,7 @@ export const RefereeProfile: React.FC<RefereeProfileProps> = ({
         </button>
       </div>
 
-      {/* 3. Sticky Quick-Jump Pill Bar */}
-      <div className="sticky top-2 z-20 p-1.5 rounded-2xl bg-[var(--bg-surface)]/95 backdrop-blur-md border border-[var(--border-subtle)] shadow-sm">
-        <div className="grid grid-cols-3 gap-1.5">
-          {[
-            { key: 'IDENTITY' as const, id: 'section-identity', label: '1. Biodata & Lisensi', icon: User },
-            { key: 'AVAILABILITY' as const, id: 'section-availability', label: '2. Kesiapan & Tugas', icon: Clock },
-            { key: 'SECURITY' as const, id: 'section-security', label: '3. Keamanan Akun', icon: Lock },
-          ].map((item) => {
-            const Icon = item.icon;
-            const isActive = activeTab === item.key;
-            return (
-              <button
-                key={item.key}
-                type="button"
-                onClick={() => scrollToSection(item.id, item.key)}
-                className={`btn-tactile flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-barlow font-bold uppercase tracking-wider transition-all duration-150 active:scale-[0.98] ${
-                  isActive
-                    ? 'bg-[var(--color-arena-primary)] text-white shadow-xs'
-                    : 'text-[var(--text-muted)] hover:bg-[var(--bg-muted)] hover:text-[var(--text-main)]'
-                }`}
-              >
-                <Icon className="w-3.5 h-3.5 shrink-0" />
-                <span className="truncate">{item.label}</span>
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* 4. Section 1: Biodata & Lisensi Resmi */}
+      {/* 3. Section 1: Biodata & Lisensi Resmi */}
       <section id="section-identity" className="scroll-mt-20">
         <ProfileIdentityTab
           name={name}

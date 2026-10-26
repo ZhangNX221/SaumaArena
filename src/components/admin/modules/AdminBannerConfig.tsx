@@ -23,6 +23,7 @@ import {
 } from '@/mocks/headerConfig';
 import { ConfirmModal } from '@/components/admin/common/ConfirmModal';
 import { BannerContentForm } from './banner/BannerContentForm';
+import { BannerLogoConfigCard } from './banner/BannerLogoConfigCard';
 
 interface AdminBannerConfigProps {
   banners?: PublicHeaderConfig[];
@@ -111,8 +112,11 @@ export const AdminBannerConfig: React.FC<AdminBannerConfigProps> = ({
       contingentInfo: tpl.contingentInfo,
       ticketButtonText: 'Ambil Tiket',
       registerButtonText: 'Daftar Kontingen',
+      logoUrl: '/brand/matsanega-futsal-logo.png',
+      logoSize: 260,
+      logoOffsetX: -40,
+      logoVisible: true,
     };
-
     const next = [...bannerList, newBanner];
     setBannerList(next);
     setSelectedIdx(next.length - 1);
@@ -226,12 +230,8 @@ export const AdminBannerConfig: React.FC<AdminBannerConfigProps> = ({
                   className="btn-tactile p-3 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] hover:border-[var(--color-arena-primary)] text-left space-y-1 transition-all"
                 >
                   <div className="font-bold text-[var(--text-main)]">{tpl.sportLabel}</div>
-                  <div className="text-[10px] text-[var(--text-muted)] line-clamp-2">
-                    {tpl.title}
-                  </div>
-                  <div className="text-[9px] text-[var(--color-arena-primary)] font-bold pt-1">
-                    + Tambahkan Sekarang
-                  </div>
+                  <div className="text-[10px] text-[var(--text-muted)] line-clamp-2">{tpl.title}</div>
+                  <div className="text-[9px] text-[var(--color-arena-primary)] font-bold pt-1">+ Tambahkan Sekarang</div>
                 </button>
               ))}
             </div>
@@ -246,32 +246,25 @@ export const AdminBannerConfig: React.FC<AdminBannerConfigProps> = ({
           <span>Pratinjau Banner Publik: {activeDraft.sportLabel}</span>
         </label>
         <div className="relative rounded-2xl overflow-hidden border border-[var(--border-subtle)] p-6 sm:p-8 text-white min-h-[220px] flex flex-col justify-between shadow-md">
-          <div
-            className="absolute inset-0 bg-cover bg-center transition-all duration-300"
-            style={{ backgroundImage: `url('${activeDraft.bannerImageUrl}')` }}
-          />
-          <div
-            className="absolute inset-0 bg-gradient-to-r from-[#0b1a28] via-[#0b1a28]/95 to-[#0b1a28]/80 transition-opacity"
-            style={{ opacity: activeDraft.bannerOverlayOpacity }}
-          />
-          <div className="relative z-10 space-y-3">
-            <div className="flex flex-wrap items-center gap-2 text-xs">
-              <span className="px-2.5 py-0.5 rounded bg-[var(--color-arena-primary)]/40 text-sky-200 font-barlow font-bold uppercase tracking-wider border border-[var(--color-arena-primary)]/50">
-                {activeDraft.statusBadge}
-              </span>
-              <span className="px-2 py-0.5 rounded bg-white/10 text-slate-200 font-barlow font-semibold uppercase tracking-wider border border-white/15">
-                {activeDraft.categoryBadge}
-              </span>
-              <span className="text-[11px] text-slate-300 ml-auto">
-                {activeDraft.organizer}
-              </span>
+          <div className="absolute inset-0 bg-cover bg-center transition-all duration-300" style={{ backgroundImage: `url('${activeDraft.bannerImageUrl}')` }} />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#0b1a28] via-[#0b1a28]/95 to-[#0b1a28]/80 transition-opacity" style={{ opacity: activeDraft.bannerOverlayOpacity }} />
+          <div className="relative z-10 flex flex-col md:flex-row items-center md:items-start justify-between gap-4">
+            <div className="space-y-3 flex-1 min-w-0">
+              <div className="flex flex-wrap items-center gap-2 text-xs">
+                <span className="px-2.5 py-0.5 rounded bg-[var(--color-arena-primary)]/40 text-sky-200 font-barlow font-bold uppercase tracking-wider border border-[var(--color-arena-primary)]/50">{activeDraft.statusBadge}</span>
+                <span className="px-2 py-0.5 rounded bg-white/10 text-slate-200 font-barlow font-semibold uppercase tracking-wider border border-white/15">{activeDraft.categoryBadge}</span>
+                <span className="text-[11px] text-slate-300 ml-auto">{activeDraft.organizer}</span>
+              </div>
+              <h2 className="text-2xl sm:text-3xl font-bebas uppercase tracking-wide leading-tight text-white max-w-xl">{activeDraft.title}</h2>
+              <p className="text-xs text-slate-300 line-clamp-2 max-w-lg">{activeDraft.description}</p>
             </div>
-            <h2 className="text-2xl sm:text-3xl font-bebas uppercase tracking-wide leading-tight text-white max-w-2xl">
-              {activeDraft.title}
-            </h2>
-            <p className="text-xs text-slate-300 line-clamp-2 max-w-xl">
-              {activeDraft.description}
-            </p>
+            {/* Logo Preview */}
+            {activeDraft.logoVisible !== false && (
+              <div className="shrink-0 transition-transform duration-300 pt-2" style={{ transform: `translateX(${Math.round((activeDraft.logoOffsetX ?? -40) * 0.45)}px)` }}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={activeDraft.logoUrl || '/brand/matsanega-futsal-logo.png'} alt="Logo Preview" style={{ width: `${Math.round((activeDraft.logoSize ?? 260) * 0.5)}px`, height: `${Math.round((activeDraft.logoSize ?? 260) * 0.5)}px` }} className="object-contain drop-shadow-md aspect-square" />
+              </div>
+            )}
           </div>
           <div className="relative z-10 pt-4 flex flex-wrap items-center justify-between gap-3 text-xs border-t border-white/15 text-slate-200">
             <div className="flex flex-wrap items-center gap-4">
@@ -293,7 +286,6 @@ export const AdminBannerConfig: React.FC<AdminBannerConfigProps> = ({
           <ImageIcon className="w-4 h-4 text-[var(--color-arena-primary)]" />
           <span>Latar Gambar untuk Cabor: {activeDraft.sportLabel}</span>
         </h4>
-
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {BANNER_PRESETS.map((preset) => {
             const isSelected = activeDraft.bannerImageUrl === preset.url;
@@ -303,18 +295,11 @@ export const AdminBannerConfig: React.FC<AdminBannerConfigProps> = ({
                 type="button"
                 onClick={() => updateActiveDraft({ bannerImageUrl: preset.url })}
                 className={`btn-tactile rounded-xl overflow-hidden border text-left p-1.5 transition-all ${
-                  isSelected
-                    ? 'border-[var(--color-arena-primary)] ring-2 ring-[var(--color-arena-primary)]/30'
-                    : 'border-[var(--border-subtle)] hover:border-slate-400 bg-[var(--bg-muted)]/40'
+                  isSelected ? 'border-[var(--color-arena-primary)] ring-2 ring-[var(--color-arena-primary)]/30' : 'border-[var(--border-subtle)] hover:border-slate-400 bg-[var(--bg-muted)]/40'
                 }`}
               >
-                <div
-                  className="h-20 w-full rounded-lg bg-cover bg-center mb-1.5"
-                  style={{ backgroundImage: `url('${preset.previewThumbnail}')` }}
-                />
-                <div className="text-[11px] font-bold text-[var(--text-main)] truncate px-0.5">
-                  {preset.name}
-                </div>
+                <div className="h-20 w-full rounded-lg bg-cover bg-center mb-1.5" style={{ backgroundImage: `url('${preset.previewThumbnail}')` }} />
+                <div className="text-[11px] font-bold text-[var(--text-main)] truncate px-0.5">{preset.name}</div>
                 <div className="text-[10px] text-[var(--text-muted)] px-0.5">{preset.category}</div>
               </button>
             );
@@ -351,6 +336,12 @@ export const AdminBannerConfig: React.FC<AdminBannerConfigProps> = ({
           </div>
         </div>
       </div>
+
+      {/* Pengaturan Logo Banner */}
+      <BannerLogoConfigCard
+        activeDraft={activeDraft}
+        updateActiveDraft={updateActiveDraft}
+      />
 
       {/* Form Edit Konten Cabor */}
       <BannerContentForm

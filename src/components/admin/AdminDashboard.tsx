@@ -34,29 +34,29 @@ interface AdminDashboardProps {
 }
 
 const MENU_LABELS: Record<AdminSubmenuId, { category: string; title: string }> = {
-  overview_stats: { category: 'BERANDA', title: 'Ringkasan Hari Ini' },
+  overview_stats: { category: 'BERANDA', title: 'Ringkasan Utama' },
   medal_tally: { category: 'BERANDA', title: 'Klasemen Medali' },
   competitions_list: { category: 'PERSIAPAN KOMPETISI', title: 'Daftar Kompetisi' },
-  sports_list: { category: 'PERSIAPAN KOMPETISI', title: 'Cabang Olahraga & Aturan' },
-  categories_numbers: { category: 'PERSIAPAN KOMPETISI', title: 'Kategori & Kelas' },
-  venues_courts: { category: 'PERSIAPAN KOMPETISI', title: 'Lokasi & Lapangan' },
+  sports_list: { category: 'PERSIAPAN KOMPETISI', title: 'Cabang Olahraga' },
+  categories_numbers: { category: 'PERSIAPAN KOMPETISI', title: 'Kategori Kelas' },
+  venues_courts: { category: 'PERSIAPAN KOMPETISI', title: 'Lokasi Lapangan' },
   registration_verify: { category: 'PESERTA', title: 'Verifikasi Berkas' },
-  contingents_teams: { category: 'PESERTA', title: 'Tim' },
-  athletes_players: { category: 'PESERTA', title: 'Pemain & Atlet' },
+  contingents_teams: { category: 'PESERTA', title: 'Daftar Tim' },
+  athletes_players: { category: 'PESERTA', title: 'Daftar Atlet' },
   athletes_id_cards: { category: 'PESERTA', title: 'Kartu Atlet' },
-  schedule_plotting: { category: 'PERTANDINGAN', title: 'Jadwal & Bagan' },
+  schedule_plotting: { category: 'PERTANDINGAN', title: 'Jadwal Bagan' },
   drawing_bracket: { category: 'PERTANDINGAN', title: 'Bagan Turnamen' },
   live_score_control: { category: 'PERTANDINGAN', title: 'Skor Langsung' },
-  results_verification: { category: 'PERTANDINGAN', title: 'Verifikasi Hasil & Sanksi' },
+  results_verification: { category: 'PERTANDINGAN', title: 'Verifikasi Hasil' },
   group_standings: { category: 'PERTANDINGAN', title: 'Klasemen' },
-  protests_sanctions: { category: 'PERTANDINGAN', title: 'Protes & Sanksi' },
+  protests_sanctions: { category: 'PERTANDINGAN', title: 'Protes Sanksi' },
   referee_staff_accounts: { category: 'PENGATURAN', title: 'Akun Petugas' },
   match_assignments: { category: 'PERTANDINGAN', title: 'Penugasan Pertandingan' },
   event_settings: { category: 'PENGATURAN', title: 'Pengaturan Publik' },
   account_settings: { category: 'PENGATURAN', title: 'Pengaturan Akun' },
-  backup_restore: { category: 'PENGATURAN', title: 'Backup & Restore' },
+  backup_restore: { category: 'PENGATURAN', title: 'Pengaturan Database' },
   audit_logs: { category: 'PENGATURAN', title: 'Riwayat Perubahan' },
-  reports_export: { category: 'PENGATURAN', title: 'Laporan & Ekspor' },
+  reports_export: { category: 'PENGATURAN', title: 'Laporan Ekspor' },
   ticket_management: { category: 'TIKET MASUK', title: 'Kuota Tiket' },
   transaction_history: { category: 'TIKET MASUK', title: 'Riwayat Transaksi' },
   qr_scanner_gate: { category: 'TIKET MASUK', title: 'Pindai Tiket' },
@@ -131,19 +131,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
         {/* Viewport Content */}
         <div className="flex-1 overflow-y-auto">
-          <main className="px-6 sm:px-10 lg:px-12 pt-7 pb-24 max-w-7xl">
+          <main className="w-full px-6 sm:px-10 lg:px-12 pt-7 pb-24 max-w-7xl">
             {/* 1. Beranda */}
-            {activeSubmenu === 'overview_stats' && (
+            {(activeSubmenu === 'overview_stats' || activeSubmenu === 'medal_tally') && (
               <AdminOverviewModule
-                subTab="stats"
-                onSelectSubTab={(t) => setActiveSubmenu(t === 'stats' ? 'overview_stats' : 'medal_tally')}
-                selectedSport={selectedSport}
-              />
-            )}
-            {activeSubmenu === 'medal_tally' && (
-              <AdminOverviewModule
-                subTab="medals"
-                onSelectSubTab={(t) => setActiveSubmenu(t === 'stats' ? 'overview_stats' : 'medal_tally')}
                 selectedSport={selectedSport}
               />
             )}

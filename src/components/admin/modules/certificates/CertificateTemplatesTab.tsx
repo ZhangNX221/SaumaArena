@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { Plus, Edit2, Trash2, X, Award, Download, QrCode } from 'lucide-react';
 import { ConfirmModal } from '@/components/admin/common/ConfirmModal';
+import { ModalPortal } from '@/components/common/ModalPortal';
 
 export interface CertificateTemplate {
   id: string;
@@ -268,110 +269,112 @@ export const CertificateTemplatesTab: React.FC = () => {
 
       {/* Modal CRUD (Create & Update) */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fadeIn">
-          <div className="bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
-            <div className="flex items-center justify-between pb-2 border-b border-[var(--border-subtle)]">
-              <h3 className="font-bebas text-xl uppercase tracking-wide text-[var(--text-main)]">
-                {editingTemplate ? 'Edit Template Desain' : 'Buat Template Desain Baru'}
-              </h3>
-              <button
-                type="button"
-                onClick={() => setIsModalOpen(false)}
-                className="p-1.5 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-muted)] transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            <form onSubmit={handleSubmit} className="space-y-3.5 text-xs">
-              <div>
-                <label className="font-barlow font-bold uppercase tracking-wider text-[11px] text-[var(--text-main)] block mb-1">
-                  Judul Template
-                </label>
-                <input
-                  type="text"
-                  required
-                  placeholder="Contoh: Piagam Juara Futsal Putra"
-                  value={formData.title}
-                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)] focus:outline-none focus:border-[var(--color-arena-primary)]"
-                />
-              </div>
-
-              <div>
-                <label className="font-barlow font-bold uppercase tracking-wider text-[11px] text-[var(--text-main)] block mb-1">
-                  Kategori Penghargaan
-                </label>
-                <input
-                  type="text"
-                  required
-                  placeholder="Contoh: Juara 1 / Top Scorer / Best Supporter"
-                  value={formData.category}
-                  onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                  className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)] focus:outline-none focus:border-[var(--color-arena-primary)]"
-                />
-              </div>
-
-              <div>
-                <label className="font-barlow font-bold uppercase tracking-wider text-[11px] text-[var(--text-main)] block mb-1">
-                  Kop Lembaga / Penerbit
-                </label>
-                <input
-                  type="text"
-                  required
-                  placeholder="Contoh: PANITIA MILAD MATSANEGA I & MTsN 1 KOTA MALANG"
-                  value={formData.issuerOrg}
-                  onChange={(e) => setFormData({ ...formData, issuerOrg: e.target.value })}
-                  className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)] uppercase font-semibold focus:outline-none focus:border-[var(--color-arena-primary)]"
-                />
-              </div>
-
-              <div>
-                <label className="font-barlow font-bold uppercase tracking-wider text-[11px] text-[var(--text-main)] block mb-1">
-                  Nama Turnamen Resmi
-                </label>
-                <input
-                  type="text"
-                  required
-                  placeholder="Contoh: Milad Matsanega Futsal Competition I (MMFC I)"
-                  value={formData.tournamentName}
-                  onChange={(e) => setFormData({ ...formData, tournamentName: e.target.value })}
-                  className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)] focus:outline-none focus:border-[var(--color-arena-primary)]"
-                />
-              </div>
-
-              <div>
-                <label className="font-barlow font-bold uppercase tracking-wider text-[11px] text-[var(--text-main)] block mb-1">
-                  Pejabat Penandatangan
-                </label>
-                <input
-                  type="text"
-                  required
-                  placeholder="Contoh: Dra. Hj. Erni Qomariyah, M.Pd (Kepala MTsN 1 Malang)"
-                  value={formData.signatory}
-                  onChange={(e) => setFormData({ ...formData, signatory: e.target.value })}
-                  className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)] focus:outline-none focus:border-[var(--color-arena-primary)]"
-                />
-              </div>
-
-              <div className="flex gap-2 pt-3">
-                <button
-                  type="submit"
-                  className="btn-tactile flex-1 py-2.5 rounded-xl bg-[var(--color-arena-primary)] hover:bg-[var(--color-arena-primary-hover)] text-white font-barlow font-bold uppercase tracking-wider text-xs shadow-xs"
-                >
-                  {editingTemplate ? 'Simpan Perubahan' : 'Simpan Template'}
-                </button>
+        <ModalPortal>
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/70 backdrop-blur-md animate-fadeIn" onClick={() => setIsModalOpen(false)}>
+            <div className="bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4" onClick={(e) => e.stopPropagation()}>
+              <div className="flex items-center justify-between pb-2 border-b border-[var(--border-subtle)]">
+                <h3 className="font-bebas text-xl uppercase tracking-wide text-[var(--text-main)]">
+                  {editingTemplate ? 'Edit Template Desain' : 'Buat Template Desain Baru'}
+                </h3>
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="btn-tactile px-4 py-2.5 rounded-xl border border-[var(--border-subtle)] hover:bg-[var(--bg-muted)] text-[var(--text-main)] text-xs font-barlow font-bold uppercase tracking-wider"
+                  className="p-1.5 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-muted)] transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
                 >
-                  Batal
+                  <X className="w-4 h-4" />
                 </button>
               </div>
-            </form>
+
+              <form onSubmit={handleSubmit} className="space-y-3.5 text-xs">
+                <div>
+                  <label className="font-barlow font-bold uppercase tracking-wider text-[11px] text-[var(--text-main)] block mb-1">
+                    Judul Template
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="Contoh: Piagam Juara Futsal Putra"
+                    value={formData.title}
+                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                    className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)] focus:outline-none focus:border-[var(--color-arena-primary)]"
+                  />
+                </div>
+
+                <div>
+                  <label className="font-barlow font-bold uppercase tracking-wider text-[11px] text-[var(--text-main)] block mb-1">
+                    Kategori Penghargaan
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="Contoh: Juara 1 / Top Scorer / Best Supporter"
+                    value={formData.category}
+                    onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                    className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)] focus:outline-none focus:border-[var(--color-arena-primary)]"
+                  />
+                </div>
+
+                <div>
+                  <label className="font-barlow font-bold uppercase tracking-wider text-[11px] text-[var(--text-main)] block mb-1">
+                    Kop Lembaga / Penerbit
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="Contoh: PANITIA MILAD MATSANEGA I & MTsN 1 KOTA MALANG"
+                    value={formData.issuerOrg}
+                    onChange={(e) => setFormData({ ...formData, issuerOrg: e.target.value })}
+                    className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)] uppercase font-semibold focus:outline-none focus:border-[var(--color-arena-primary)]"
+                  />
+                </div>
+
+                <div>
+                  <label className="font-barlow font-bold uppercase tracking-wider text-[11px] text-[var(--text-main)] block mb-1">
+                    Nama Turnamen Resmi
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="Contoh: Milad Matsanega Futsal Competition I (MMFC I)"
+                    value={formData.tournamentName}
+                    onChange={(e) => setFormData({ ...formData, tournamentName: e.target.value })}
+                    className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)] focus:outline-none focus:border-[var(--color-arena-primary)]"
+                  />
+                </div>
+
+                <div>
+                  <label className="font-barlow font-bold uppercase tracking-wider text-[11px] text-[var(--text-main)] block mb-1">
+                    Pejabat Penandatangan
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="Contoh: Dra. Hj. Erni Qomariyah, M.Pd (Kepala MTsN 1 Malang)"
+                    value={formData.signatory}
+                    onChange={(e) => setFormData({ ...formData, signatory: e.target.value })}
+                    className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)] focus:outline-none focus:border-[var(--color-arena-primary)]"
+                  />
+                </div>
+
+                <div className="flex gap-2 pt-3">
+                  <button
+                    type="submit"
+                    className="btn-tactile flex-1 py-2.5 rounded-xl bg-[var(--color-arena-primary)] hover:bg-[var(--color-arena-primary-hover)] text-white font-barlow font-bold uppercase tracking-wider text-xs shadow-xs"
+                  >
+                    {editingTemplate ? 'Simpan Perubahan' : 'Simpan Template'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setIsModalOpen(false)}
+                    className="btn-tactile px-4 py-2.5 rounded-xl border border-[var(--border-subtle)] hover:bg-[var(--bg-muted)] text-[var(--text-main)] text-xs font-barlow font-bold uppercase tracking-wider"
+                  >
+                    Batal
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
-        </div>
+        </ModalPortal>
       )}
 
       {/* Reusable Confirm Delete Modal */}

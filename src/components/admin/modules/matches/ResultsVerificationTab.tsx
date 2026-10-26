@@ -4,6 +4,8 @@ import React, { useState } from 'react';
 import { FileCheck2, CheckCircle2, AlertOctagon, Clock, ShieldCheck, Check, AlertCircle, Plus, X } from 'lucide-react';
 import { initialMatches } from '@/mocks/tournamentData';
 import { Match } from '@/types';
+import { ModalPortal } from '@/components/common/ModalPortal';
+import { AdminPageHeaderCard } from '@/components/admin/common/AdminPageHeaderCard';
 
 interface SanctionItem {
   id: string;
@@ -87,57 +89,47 @@ export const ResultsVerificationTab: React.FC<ResultsVerificationTabProps> = ({
   };
 
   return (
-    <div className="space-y-6 max-w-5xl mx-auto animate-fadeIn pb-12">
+    <div className="space-y-6 animate-fadeIn pb-12">
       {/* Header and Segmented Sub-Tab Bar */}
-      <div className="p-5 sm:p-6 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2 text-[var(--color-arena-primary)]">
-            <FileCheck2 className="w-4 h-4 shrink-0" />
-            <span className="text-xs font-barlow font-bold uppercase tracking-wider">
-              OPERASIONAL PERTANDINGAN &bull; PENGESAHAN HASIL
-            </span>
+      <AdminPageHeaderCard
+        icon={FileCheck2}
+        category="OPERASIONAL PERTANDINGAN • PENGESAHAN HASIL"
+        title="Verifikasi Hasil &amp; Sanksi Pertandingan"
+        description="Verifikasi resmi Berita Acara Pertandingan (BAP) dari wasit lapangan, pengesahan poin klasemen, serta pencatatan sanksi &amp; protes."
+        action={
+          <div className="flex items-center gap-1 p-1.5 rounded-xl bg-[var(--bg-muted)] border border-[var(--border-subtle)] text-xs font-barlow font-bold uppercase tracking-wider w-fit shrink-0">
+            <button
+              type="button"
+              onClick={() => setCurrentTab('VERIFICATION')}
+              className={`btn-tactile px-3.5 py-1.5 rounded-lg transition-all flex items-center gap-1.5 ${
+                currentTab === 'VERIFICATION'
+                  ? 'bg-[var(--color-arena-primary)] text-white shadow-xs'
+                  : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'
+              }`}
+            >
+              <span>Verifikasi BAP</span>
+              {pendingVerificationMatches.length > 0 && (
+                <span className="px-1.5 py-0.2 rounded-full bg-red-500 text-white text-[10px]">
+                  {pendingVerificationMatches.length}
+                </span>
+              )}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setCurrentTab('SANCTIONS')}
+              className={`btn-tactile px-3.5 py-1.5 rounded-lg transition-all flex items-center gap-1.5 ${
+                currentTab === 'SANCTIONS'
+                  ? 'bg-[var(--color-arena-primary)] text-white shadow-xs'
+                  : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'
+              }`}
+            >
+              <AlertOctagon className="w-3.5 h-3.5" />
+              <span>Protes &amp; Sanksi ({sanctions.length})</span>
+            </button>
           </div>
-          <h2 className="text-2xl sm:text-3xl font-bebas text-[var(--text-main)] uppercase tracking-wide mt-1">
-            Verifikasi Hasil &amp; Sanksi Pertandingan
-          </h2>
-          <p className="text-xs text-[var(--text-muted)] mt-0.5 max-w-xl">
-            Verifikasi resmi Berita Acara Pertandingan (BAP) dari wasit lapangan, pengesahan poin klasemen, serta pencatatan sanksi &amp; protes.
-          </p>
-        </div>
-
-        {/* 2-Tab Segmented Selector */}
-        <div className="flex items-center gap-1 p-1.5 rounded-xl bg-[var(--bg-muted)] border border-[var(--border-subtle)] text-xs font-barlow font-bold uppercase tracking-wider w-fit shrink-0">
-          <button
-            type="button"
-            onClick={() => setCurrentTab('VERIFICATION')}
-            className={`btn-tactile px-3.5 py-1.5 rounded-lg transition-all flex items-center gap-1.5 ${
-              currentTab === 'VERIFICATION'
-                ? 'bg-[var(--color-arena-primary)] text-white shadow-xs'
-                : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'
-            }`}
-          >
-            <span>Verifikasi BAP</span>
-            {pendingVerificationMatches.length > 0 && (
-              <span className="px-1.5 py-0.2 rounded-full bg-red-500 text-white text-[10px]">
-                {pendingVerificationMatches.length}
-              </span>
-            )}
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setCurrentTab('SANCTIONS')}
-            className={`btn-tactile px-3.5 py-1.5 rounded-lg transition-all flex items-center gap-1.5 ${
-              currentTab === 'SANCTIONS'
-                ? 'bg-[var(--color-arena-primary)] text-white shadow-xs'
-                : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'
-            }`}
-          >
-            <AlertOctagon className="w-3.5 h-3.5" />
-            <span>Protes &amp; Sanksi ({sanctions.length})</span>
-          </button>
-        </div>
-      </div>
+        }
+      />
 
       {/* TAB 1: VERIFIKASI BERITA ACARA (BAP) */}
       {currentTab === 'VERIFICATION' && (
@@ -299,85 +291,87 @@ export const ResultsVerificationTab: React.FC<ResultsVerificationTabProps> = ({
 
       {/* Sanction Modal */}
       {isSanctionModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fadeIn">
-          <div className="bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
-            <div className="flex items-center justify-between pb-2 border-b border-[var(--border-subtle)]">
-              <h3 className="font-bebas text-xl uppercase tracking-wide text-[var(--text-main)]">
-                Catat Protes / Sanksi Disiplin
-              </h3>
-              <button
-                type="button"
-                onClick={() => setIsSanctionModalOpen(false)}
-                className="p-1 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-main)]"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            <form onSubmit={handleCreateSanction} className="space-y-3 text-xs">
-              <div>
-                <label className="font-barlow font-bold uppercase tracking-wider text-[11px] text-[var(--text-main)] block mb-1">
-                  Pertandingan
-                </label>
-                <select
-                  value={newSanction.matchNumber}
-                  onChange={(e) => setNewSanction({ ...newSanction, matchNumber: Number(e.target.value) })}
-                  className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)]"
-                >
-                  {initialMatches.map((m) => (
-                    <option key={m.id} value={m.matchNumber}>
-                      Pertandingan #{m.matchNumber}: {m.teamAName} vs {m.teamBName}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="font-barlow font-bold uppercase tracking-wider text-[11px] text-[var(--text-main)] block mb-1">
-                  Pihak / Nama Terlibat
-                </label>
-                <input
-                  type="text"
-                  required
-                  placeholder="Contoh: Pemain #7 / Manajer Tim"
-                  value={newSanction.party}
-                  onChange={(e) => setNewSanction({ ...newSanction, party: e.target.value })}
-                  className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)]"
-                />
-              </div>
-
-              <div>
-                <label className="font-barlow font-bold uppercase tracking-wider text-[11px] text-[var(--text-main)] block mb-1">
-                  Uraian Sanksi / Protes
-                </label>
-                <textarea
-                  rows={3}
-                  required
-                  placeholder="Deskripsikan insiden, pasal regulasi, dan putusan panitia..."
-                  value={newSanction.details}
-                  onChange={(e) => setNewSanction({ ...newSanction, details: e.target.value })}
-                  className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)]"
-                />
-              </div>
-
-              <div className="pt-2 flex items-center justify-end gap-2">
+        <ModalPortal>
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/70 backdrop-blur-md animate-fadeIn" onClick={() => setIsSanctionModalOpen(false)}>
+            <div className="bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4" onClick={(e) => e.stopPropagation()}>
+              <div className="flex items-center justify-between pb-2 border-b border-[var(--border-subtle)]">
+                <h3 className="font-bebas text-xl uppercase tracking-wide text-[var(--text-main)]">
+                  Catat Protes / Sanksi Disiplin
+                </h3>
                 <button
                   type="button"
                   onClick={() => setIsSanctionModalOpen(false)}
-                  className="btn-tactile px-4 py-2 rounded-xl border border-[var(--border-subtle)] font-barlow font-bold uppercase tracking-wider text-xs"
+                  className="p-1 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-main)]"
                 >
-                  Batal
-                </button>
-                <button
-                  type="submit"
-                  className="btn-tactile px-4 py-2 rounded-xl bg-red-600 text-white font-barlow font-bold uppercase tracking-wider text-xs"
-                >
-                  Simpan Catatan Sanksi
+                  <X className="w-4 h-4" />
                 </button>
               </div>
-            </form>
+
+              <form onSubmit={handleCreateSanction} className="space-y-3 text-xs">
+                <div>
+                  <label className="font-barlow font-bold uppercase tracking-wider text-[11px] text-[var(--text-main)] block mb-1">
+                    Pertandingan
+                  </label>
+                  <select
+                    value={newSanction.matchNumber}
+                    onChange={(e) => setNewSanction({ ...newSanction, matchNumber: Number(e.target.value) })}
+                    className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)]"
+                  >
+                    {initialMatches.map((m) => (
+                      <option key={m.id} value={m.matchNumber}>
+                        Pertandingan #{m.matchNumber}: {m.teamAName} vs {m.teamBName}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="font-barlow font-bold uppercase tracking-wider text-[11px] text-[var(--text-main)] block mb-1">
+                    Pihak / Nama Terlibat
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="Contoh: Pemain #7 / Manajer Tim"
+                    value={newSanction.party}
+                    onChange={(e) => setNewSanction({ ...newSanction, party: e.target.value })}
+                    className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)]"
+                  />
+                </div>
+
+                <div>
+                  <label className="font-barlow font-bold uppercase tracking-wider text-[11px] text-[var(--text-main)] block mb-1">
+                    Uraian Sanksi / Protes
+                  </label>
+                  <textarea
+                    rows={3}
+                    required
+                    placeholder="Deskripsikan insiden, pasal regulasi, dan putusan panitia..."
+                    value={newSanction.details}
+                    onChange={(e) => setNewSanction({ ...newSanction, details: e.target.value })}
+                    className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)]"
+                  />
+                </div>
+
+                <div className="pt-2 flex items-center justify-end gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setIsSanctionModalOpen(false)}
+                    className="btn-tactile px-4 py-2 rounded-xl border border-[var(--border-subtle)] font-barlow font-bold uppercase tracking-wider text-xs"
+                  >
+                    Batal
+                  </button>
+                  <button
+                    type="submit"
+                    className="btn-tactile px-4 py-2 rounded-xl bg-red-600 text-white font-barlow font-bold uppercase tracking-wider text-xs"
+                  >
+                    Simpan Catatan Sanksi
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
-        </div>
+        </ModalPortal>
       )}
     </div>
   );

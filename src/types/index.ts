@@ -300,6 +300,10 @@ export interface PublicHeaderConfig {
   statusBadge: string;
   categoryBadge: string;
   organizer: string;
+  logoUrl?: string;
+  logoSize?: number; // Size in px (e.g. 160 to 380, default 260)
+  logoOffsetX?: number; // Offset horizontal in px (e.g. -120 to 60, default -40)
+  logoVisible?: boolean; // Show or hide banner logo
   title: string;
   description: string;
   dates: string;

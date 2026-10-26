@@ -4,6 +4,8 @@ import React, { useState } from 'react';
 import { Search, UserCheck, ShieldCheck, Filter, AlertCircle, Edit2, X, Plus } from 'lucide-react';
 import { initialTeams } from '@/mocks/tournamentData';
 import { Player } from '@/types';
+import { ModalPortal } from '@/components/common/ModalPortal';
+import { AdminPageHeaderCard } from '@/components/admin/common/AdminPageHeaderCard';
 
 interface FlattenedAthlete extends Player {
   teamId: string;
@@ -63,38 +65,28 @@ export const AthletesPlayersTab: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6 max-w-6xl mx-auto animate-fadeIn pb-12">
+    <div className="space-y-6 animate-fadeIn pb-12">
       {/* Header */}
-      <div className="p-5 sm:p-6 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2 text-[var(--color-arena-primary)]">
-            <UserCheck className="w-4 h-4 shrink-0" />
-            <span className="text-xs font-barlow font-bold uppercase tracking-wider">
-              DATABASE PESERTA &bull; KONTINGEN RESMI
-            </span>
+      <AdminPageHeaderCard
+        icon={UserCheck}
+        category="DATABASE PESERTA • KONTINGEN RESMI"
+        title="Database Pemain &amp; Atlet"
+        description="Pusat data induk seluruh atlet terdaftar, nomor punggung, posisi bermain, verifikasi dokumen NISN, dan catatan disiplin kartu."
+        action={
+          <div className="flex items-center gap-3">
+            <div className="px-4 py-2 rounded-xl bg-[var(--bg-muted)] border border-[var(--border-subtle)] text-right">
+              <span className="text-[10px] font-barlow font-bold uppercase tracking-wider text-[var(--text-muted)] block">Total Atlet</span>
+              <span className="text-xl font-teko font-bold text-[var(--text-main)] leading-none">{allAthletes.length} Atlet</span>
+            </div>
+            <div className="px-4 py-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-right">
+              <span className="text-[10px] font-barlow font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-300 block">Dokumen Sah</span>
+              <span className="text-xl font-teko font-bold text-emerald-600 leading-none">
+                {allAthletes.filter((a) => a.documentStatus === 'APPROVED').length} Atlet
+              </span>
+            </div>
           </div>
-          <h2 className="text-2xl sm:text-3xl font-bebas text-[var(--text-main)] uppercase tracking-wide mt-1">
-            Database Pemain &amp; Atlet
-          </h2>
-          <p className="text-xs text-[var(--text-muted)] mt-0.5 max-w-xl">
-            Pusat data induk seluruh atlet terdaftar, nomor punggung, posisi bermain, verifikasi dokumen NISN, dan catatan disiplin kartu.
-          </p>
-        </div>
-
-        {/* Stats Strip */}
-        <div className="flex items-center gap-3">
-          <div className="px-4 py-2 rounded-xl bg-[var(--bg-muted)] border border-[var(--border-subtle)] text-right">
-            <span className="text-[10px] font-barlow font-bold uppercase tracking-wider text-[var(--text-muted)] block">Total Atlet</span>
-            <span className="text-xl font-teko font-bold text-[var(--text-main)] leading-none">{allAthletes.length} Atlet</span>
-          </div>
-          <div className="px-4 py-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-right">
-            <span className="text-[10px] font-barlow font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-300 block">Dokumen Sah</span>
-            <span className="text-xl font-teko font-bold text-emerald-600 leading-none">
-              {allAthletes.filter((a) => a.documentStatus === 'APPROVED').length} Atlet
-            </span>
-          </div>
-        </div>
-      </div>
+        }
+      />
 
       {/* Filter Toolbar */}
       <div className="p-4 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] shadow-xs flex flex-col sm:flex-row items-center gap-3">
@@ -218,8 +210,15 @@ export const AthletesPlayersTab: React.FC = () => {
 
       {/* Edit Modal */}
       {editingAthlete && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fadeIn">
-          <div className="bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-2xl max-w-sm w-full p-6 shadow-2xl space-y-4">
+        <ModalPortal>
+          <div
+            className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/70 backdrop-blur-md animate-fadeIn"
+            onClick={() => setEditingAthlete(null)}
+          >
+            <div
+              className="bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-2xl max-w-sm w-full p-6 shadow-2xl space-y-4"
+              onClick={(e) => e.stopPropagation()}
+            >
             <div className="flex items-center justify-between pb-2 border-b border-[var(--border-subtle)]">
               <div>
                 <h3 className="font-bebas text-xl uppercase tracking-wide text-[var(--text-main)]">
@@ -284,7 +283,8 @@ export const AthletesPlayersTab: React.FC = () => {
             </form>
           </div>
         </div>
-      )}
+      </ModalPortal>
+    )}
     </div>
   );
 };

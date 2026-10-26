@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <!-- Rounded Square Container in Dark Athletic Slate -->
+  <rect x="4" y="4" width="92" height="92" rx="20" fill="#0F172A" stroke="#334155" stroke-width="1.5" />
+  
+  <!-- Specs Dual Chevron Arrow Motif -->
+  <!-- Back Chevron (Red) -->
+  <path d="M 28 34 L 46 34 L 62 48 L 46 62 L 28 62 L 44 48 Z" fill="#DC2626" />
+  <!-- Front Chevron (White/Silver) -->
+  <path d="M 44 34 L 62 34 L 78 48 L 62 62 L 44 62 L 60 48 Z" fill="#FFFFFF" />
+  
+  <!-- "SPECS" Italic Athletic Typography -->
+  <text x="50" y="78" font-family="'Impact', 'Arial Black', sans-serif" font-style="italic" font-size="14" font-weight="900" fill="#FFFFFF" text-anchor="middle" letter-spacing="2">SPECS</text>
+  <text x="50" y="86" font-family="Arial, sans-serif" font-size="4" font-weight="700" fill="#EF4444" text-anchor="middle" letter-spacing="1">INDONESIA</text>
+</svg>

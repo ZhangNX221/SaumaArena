@@ -28,6 +28,7 @@ import { RefereeRulebook } from './RefereeRulebook';
 import { RefereeProfile } from './RefereeProfile';
 import { RefereeDashboardHome } from './RefereeDashboardHome';
 import { RefereeReportsView } from './RefereeReportsView';
+import { RefereeRosterView } from './RefereeRosterView';
 
 interface RefereeDashboardProps {
   user: AppUser;
@@ -268,6 +269,15 @@ export const RefereeDashboard: React.FC<RefereeDashboardProps> = ({
               onUpdateScore={handleUpdateScore}
               onAddIncident={handleAddIncident}
               onFinalizeBAP={handleFinalizeBAP}
+            />
+          )}
+
+          {/* TAB 4: SUSUNAN PEMAIN & VERIFIKASI KEHADIRAN (TABEL TERPISAH) */}
+          {activeTab === 'roster' && (
+            <RefereeRosterView
+              user={currentUser}
+              currentMatch={liveMatch}
+              onGoToScoring={() => setActiveTab('match_center')}
             />
           )}
 

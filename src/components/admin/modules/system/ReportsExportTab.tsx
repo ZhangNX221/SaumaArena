@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { FileSpreadsheet, Download, FileText, CheckCircle2, Table, Sparkles } from 'lucide-react';
+import { AdminPageHeaderCard } from '@/components/admin/common/AdminPageHeaderCard';
 
 interface ExportCardItem {
   id: string;
@@ -64,30 +65,21 @@ export const ReportsExportTab: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6 max-w-5xl mx-auto animate-fadeIn pb-12">
+    <div className="space-y-6 animate-fadeIn pb-12">
       {/* Header */}
-      <div className="p-5 sm:p-6 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2 text-[var(--color-arena-primary)]">
-            <FileSpreadsheet className="w-4 h-4 shrink-0" />
-            <span className="text-xs font-barlow font-bold uppercase tracking-wider">
-              PENGATURAN &bull; REKAPITULASI DOKUMEN
+      <AdminPageHeaderCard
+        icon={FileSpreadsheet}
+        category="PENGATURAN • REKAPITULASI DOKUMEN"
+        title="Laporan &amp; Ekspor Turnamen"
+        description="Unduh rekapitulasi data resmi turnamen dalam format Excel (.xlsx) dan dokumen Berita Acara siap cetak (PDF)."
+        action={
+          <div className="flex items-center gap-2">
+            <span className="px-3 py-1 rounded-xl bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20 text-xs font-barlow font-bold uppercase tracking-wider">
+              Format Standar Turnamen
             </span>
           </div>
-          <h2 className="text-2xl sm:text-3xl font-bebas text-[var(--text-main)] uppercase tracking-wide mt-1">
-            Laporan &amp; Ekspor Turnamen
-          </h2>
-          <p className="text-xs text-[var(--text-muted)] mt-0.5 max-w-xl">
-            Unduh rekapitulasi data resmi turnamen dalam format Excel (.xlsx) dan dokumen Berita Acara siap cetak (PDF).
-          </p>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <span className="px-3 py-1 rounded-xl bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20 text-xs font-barlow font-bold uppercase tracking-wider">
-            Format Standar FFI &amp; PBSI
-          </span>
-        </div>
-      </div>
+        }
+      />
 
       {/* Success Download Alert Banner */}
       {downloadSuccessMessage && (

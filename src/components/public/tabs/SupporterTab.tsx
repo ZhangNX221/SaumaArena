@@ -6,6 +6,7 @@ import { initialSupporterAssessments, initialTeams } from '@/mocks/tournamentDat
 import { getTeamLogoUrl } from '@/mocks/teamLogos';
 import { SupporterAssessment } from '@/types';
 import { SupporterDetailModal } from './SupporterDetailModal';
+import { PublicPageHeader } from '../layout/PublicPageHeader';
 
 export const SupporterTab: React.FC = () => {
   const [assessments] = useState<SupporterAssessment[]>(initialSupporterAssessments);
@@ -63,20 +64,12 @@ export const SupporterTab: React.FC = () => {
   return (
     <div className="space-y-8 animate-fadeIn">
       {/* Public Page Header */}
-      <div className="space-y-1.5 pb-2">
-        <div className="flex items-center gap-2 text-[var(--color-arena-primary)]">
-          <Award className="w-4 h-4 shrink-0" />
-          <span className="text-xs font-barlow font-bold uppercase tracking-wider">
-            PENGHARGAAN TRIBUN &bull; MILAD MATSANEGA I
-          </span>
-        </div>
-        <h2 className="text-3xl sm:text-4xl font-bebas text-[var(--text-main)] uppercase tracking-wide">
-          Klasemen Suporter Terbaik
-        </h2>
-        <p className="text-xs sm:text-sm text-[var(--text-muted)] max-w-2xl leading-relaxed">
-          Peringkat kreativitas dan ketertiban suporter sekolah berdasarkan koreografi, maskot, seragam, yel-yel, tiket resmi, serta kedisiplinan tribun.
-        </p>
-      </div>
+      <PublicPageHeader
+        icon={Award}
+        category="PENGHARGAAN TRIBUN • SUPORTER KONTINGEN"
+        title="Klasemen Suporter Terbaik"
+        description="Peringkat kreativitas dan ketertiban suporter tim berdasarkan koreografi, yel-yel, tiket resmi, serta sportivitas di tribun."
+      />
 
       {/* Ketentuan Penilaian */}
       <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-5 sm:p-6 shadow-xs space-y-4">

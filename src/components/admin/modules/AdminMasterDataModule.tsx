@@ -7,6 +7,7 @@ import {
   List,
   Search,
   CheckCircle2,
+  Trophy,
 } from 'lucide-react';
 import { SPORTS_CONFIG, VENUES } from '@/mocks/multiSportData';
 import { SportConfig, Venue } from '@/types';
@@ -15,6 +16,7 @@ import { DeleteSportConfirmModal } from './master/DeleteSportConfirmModal';
 import { SportGridView } from './master/SportGridView';
 import { SportTableView } from './master/SportTableView';
 import { CategoriesTab, VenuesTab } from './master/VenuesAndCategoriesTab';
+import { AdminPageHeaderCard } from '@/components/admin/common/AdminPageHeaderCard';
 
 export interface AdminMasterDataModuleProps {
   subTab?: 'sports' | 'categories' | 'venues';
@@ -130,50 +132,68 @@ export const AdminMasterDataModule: React.FC<AdminMasterDataModuleProps> = ({
         </div>
       )}
 
-      {/* Subtab Segmented Switcher & Description */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <p className="text-xs sm:text-sm text-[var(--text-muted)]">
-            Persiapan kompetisi: kelola cabang olahraga &amp; aturan, kategori &amp; kelas tanding, serta lokasi &amp; lapangan arena.
-          </p>
-        </div>
-
-        <div className="flex items-center gap-1 p-1.5 rounded-2xl bg-[var(--bg-muted)]/80 border border-[var(--border-subtle)] text-xs font-barlow font-bold uppercase tracking-wider w-fit">
-          <button
-            type="button"
-            onClick={() => handleTabChange('SPORTS')}
-            className={`btn-tactile px-4 py-2 rounded-xl transition-all ${
-              currentTab === 'SPORTS'
-                ? 'bg-[var(--color-arena-primary)] text-white shadow-xs'
-                : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'
-            }`}
-          >
-            Cabang Olahraga &amp; Aturan ({sports.length})
-          </button>
-          <button
-            type="button"
-            onClick={() => handleTabChange('CATEGORIES')}
-            className={`btn-tactile px-4 py-2 rounded-xl transition-all ${
-              currentTab === 'CATEGORIES'
-                ? 'bg-[var(--color-arena-primary)] text-white shadow-xs'
-                : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'
-            }`}
-          >
-            Kategori &amp; Kelas
-          </button>
-          <button
-            type="button"
-            onClick={() => handleTabChange('VENUES')}
-            className={`btn-tactile px-4 py-2 rounded-xl transition-all ${
-              currentTab === 'VENUES'
-                ? 'bg-[var(--color-arena-primary)] text-white shadow-xs'
-                : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'
-            }`}
-          >
-            Lokasi &amp; Lapangan ({venues.length})
-          </button>
-        </div>
-      </div>
+      {/* Title Card */}
+      <AdminPageHeaderCard
+        icon={Trophy}
+        category={
+          currentTab === 'SPORTS'
+            ? 'PERSIAPAN KOMPETISI • CABANG OLAHRAGA'
+            : currentTab === 'CATEGORIES'
+            ? 'PERSIAPAN KOMPETISI • KATEGORI & KELAS'
+            : 'PERSIAPAN KOMPETISI • LOKASI & LAPANGAN'
+        }
+        title={
+          currentTab === 'SPORTS'
+            ? 'Cabang Olahraga & Aturan Turnamen'
+            : currentTab === 'CATEGORIES'
+            ? 'Kategori & Kelas Pertandingan'
+            : 'Lokasi & Lapangan Arena'
+        }
+        description={
+          currentTab === 'SPORTS'
+            ? 'Kelola regulasi teknis cabang olahraga, durasi pertandingan, sistem poin kemenangan, dan format set tanding.'
+            : currentTab === 'CATEGORIES'
+            ? 'Kelola nomor tanding dan kelas resmi turnamen, batasan usia atlet, serta alokasi kuota tim per kelas.'
+            : 'Pusat lokasi gelanggang olahraga, pembagian titik lapangan tanding, dan pemetaan kategori & kelas.'
+        }
+        action={
+          <div className="flex items-center gap-1 p-1.5 rounded-2xl bg-[var(--bg-muted)]/80 border border-[var(--border-subtle)] text-xs font-barlow font-bold uppercase tracking-wider w-fit">
+            <button
+              type="button"
+              onClick={() => handleTabChange('SPORTS')}
+              className={`btn-tactile px-3.5 py-2 rounded-xl transition-all ${
+                currentTab === 'SPORTS'
+                  ? 'bg-[var(--color-arena-primary)] text-white shadow-xs'
+                  : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'
+              }`}
+            >
+              Cabang Olahraga ({sports.length})
+            </button>
+            <button
+              type="button"
+              onClick={() => handleTabChange('CATEGORIES')}
+              className={`btn-tactile px-3.5 py-2 rounded-xl transition-all ${
+                currentTab === 'CATEGORIES'
+                  ? 'bg-[var(--color-arena-primary)] text-white shadow-xs'
+                  : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'
+              }`}
+            >
+              Kategori &amp; Kelas
+            </button>
+            <button
+              type="button"
+              onClick={() => handleTabChange('VENUES')}
+              className={`btn-tactile px-3.5 py-2 rounded-xl transition-all ${
+                currentTab === 'VENUES'
+                  ? 'bg-[var(--color-arena-primary)] text-white shadow-xs'
+                  : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'
+              }`}
+            >
+              Lokasi &amp; Lapangan ({venues.length})
+            </button>
+          </div>
+        }
+      />
 
       {/* SUB-TAB 1: DAFTAR CABANG OLAHRAGA (CRUD & VIEW TOGGLE) */}
       {currentTab === 'SPORTS' && (

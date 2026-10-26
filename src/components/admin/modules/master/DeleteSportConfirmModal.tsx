@@ -3,6 +3,7 @@
 import React from 'react';
 import { AlertTriangle, Trash2, X } from 'lucide-react';
 import { SportConfig } from '@/types';
+import { ModalPortal } from '@/components/common/ModalPortal';
 
 interface DeleteSportConfirmModalProps {
   isOpen: boolean;
@@ -20,8 +21,15 @@ export const DeleteSportConfirmModal: React.FC<DeleteSportConfirmModalProps> = (
   if (!isOpen || !sport) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fadeIn">
-      <div className="bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-2xl max-w-md w-full p-6 shadow-2xl relative space-y-4 animate-modalEnter">
+    <ModalPortal>
+      <div
+        className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/70 backdrop-blur-md animate-fadeIn"
+        onClick={onClose}
+      >
+        <div
+          className="bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-2xl max-w-md w-full p-6 shadow-2xl relative space-y-4 animate-modalEnter"
+          onClick={(e) => e.stopPropagation()}
+        >
         <button
           type="button"
           onClick={onClose}
@@ -72,5 +80,6 @@ export const DeleteSportConfirmModal: React.FC<DeleteSportConfirmModalProps> = (
         </div>
       </div>
     </div>
+  </ModalPortal>
   );
 };

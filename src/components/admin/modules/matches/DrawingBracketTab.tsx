@@ -17,16 +17,11 @@ export const DrawingBracketTab: React.FC = () => {
 
   return (
     <div className="p-5 sm:p-6 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] shadow-xs space-y-5">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[var(--border-subtle)]">
-        <div>
-          <h3 className="font-bebas text-xl sm:text-2xl uppercase tracking-wide text-[var(--text-main)] flex items-center gap-2">
-            <GitBranch className="w-5 h-5 text-[var(--color-arena-primary)]" />
-            <span>Generator Bagan &amp; Drawing Otomatis</span>
-          </h3>
-          <p className="text-xs text-[var(--text-muted)] mt-0.5">
-            Sistem Gugur Tunggal (Single Elimination) &amp; Pembagian Bagan Babak Gugur Resmi.
-          </p>
-        </div>
+      {/* Action Toolbar */}
+      <div className="flex items-center justify-between gap-3 pb-2 border-b border-[var(--border-subtle)]">
+        <span className="text-xs font-barlow font-bold uppercase tracking-wider text-[var(--text-muted)]">
+          Format Sistem Gugur Tunggal (Single Elimination)
+        </span>
         <button
           type="button"
           onClick={handleRandomize}

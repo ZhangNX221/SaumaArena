@@ -5,6 +5,7 @@ import { MapPin, Clock, ChevronDown, ChevronUp, ShieldCheck, Calendar } from 'lu
 import { initialMatches } from '@/mocks/tournamentData';
 import { CABOR_MATCHES_DATA, CABOR_INFO_DATA } from '@/mocks/caborContentData';
 import { Match, SportCode } from '@/types';
+import { PublicPageHeader } from '../layout/PublicPageHeader';
 
 interface ScheduleTabProps {
   sportCode?: SportCode;
@@ -32,20 +33,12 @@ export const ScheduleTab: React.FC<ScheduleTabProps> = ({ sportCode = 'FUTSAL' }
   return (
     <div className="space-y-8 animate-fadeIn">
       {/* Public Page Header */}
-      <div className="space-y-1.5 pb-2">
-        <div className="flex items-center gap-2 text-[var(--color-arena-primary)]">
-          <Calendar className="w-4 h-4 shrink-0" />
-          <span className="text-xs font-barlow font-bold uppercase tracking-wider">
-            AGENDA &bull; {sportCode}
-          </span>
-        </div>
-        <h2 className="text-3xl sm:text-4xl text-[var(--text-main)] font-bebas uppercase tracking-wide">
-          Jadwal &amp; Skor Pertandingan
-        </h2>
-        <p className="text-xs sm:text-sm text-[var(--text-muted)] max-w-2xl leading-relaxed">
-          Pembaruan skor langsung babak per babak, hasil pertandingan terverifikasi berita acara juri, dan agenda pertandingan berikutnya.
-        </p>
-      </div>
+      <PublicPageHeader
+        icon={Calendar}
+        category={`AGENDA • ${sportCode}`}
+        title="Jadwal &amp; Skor Pertandingan"
+        description="Pembaruan skor langsung babak per babak, hasil pertandingan terverifikasi berita acara juri, dan agenda pertandingan berikutnya."
+      />
 
       {/* Top Filter Segmented Bar: Sedang Berlangsung | Akan Datang | Selesai */}
       <div className="flex flex-wrap items-center justify-between gap-4">

@@ -3,95 +3,103 @@ import { TournamentPartner, PartnerCategory } from '@/types';
 export const DEFAULT_TOURNAMENT_PARTNERS: TournamentPartner[] = [
   {
     id: 'partner-1',
-    name: 'Panitia Milad Matsanega',
-    role: 'Penyelenggara Utama',
-    category: 'ORGANIZER',
-    iconType: 'award',
-    websiteUrl: '',
+    name: 'Kemenpora RI',
+    role: 'Kementerian Pemuda & Olahraga',
+    category: 'GOVERNMENT',
+    iconType: 'custom',
+    logoUrl: '/partners/kemenpora.svg',
+    websiteUrl: 'https://www.kemenpora.go.id',
     isActive: true,
     order: 1,
-    description: 'Komite panitia pelaksana Milad Matsanega Futsal Competition',
+    description: 'Instansi pembina dan pengawas regulasi olahraga nasional Republik Indonesia',
   },
   {
     id: 'partner-2',
-    name: 'Kemenag Kota Malang',
-    role: 'Pelindung & Pembina',
-    category: 'GOVERNMENT',
-    iconType: 'shield',
-    websiteUrl: '',
+    name: 'KONI Pusat',
+    role: 'Komite Olahraga Nasional',
+    category: 'FEDERATION',
+    iconType: 'custom',
+    logoUrl: '/partners/koni.svg',
+    websiteUrl: 'https://koni.or.id',
     isActive: true,
     order: 2,
-    description: 'Kantor Kementerian Agama Kota Malang selaku instansi pembina madrasah',
+    description: 'Otoritas koordinasi dan pembinaan prestasi induk organisasi cabang olahraga',
   },
   {
     id: 'partner-3',
-    name: 'Komite MTsN 1 Malang',
-    role: 'Dewan Komite Sekolah',
-    category: 'COMMUNITY',
-    iconType: 'building',
-    websiteUrl: '',
+    name: 'FFI (Federasi Futsal Indonesia)',
+    role: 'Federasi Futsal Resmi',
+    category: 'FEDERATION',
+    iconType: 'custom',
+    logoUrl: '/partners/ffi.svg',
+    websiteUrl: 'https://federasifutsal.id',
     isActive: true,
     order: 3,
-    description: 'Dewan Komite Madrasah Tsanawiyah Negeri 1 Kota Malang',
+    description: 'Badan federasi resmi pengawas teknis, regulasi pertandingan, dan wasit lisensi',
   },
   {
     id: 'partner-4',
-    name: 'OSIS Matsanega',
-    role: 'Organisasi Siswa',
-    category: 'COMMUNITY',
-    iconType: 'flame',
-    websiteUrl: '',
+    name: 'Dispora',
+    role: 'Dinas Kepemudaan & Olahraga',
+    category: 'GOVERNMENT',
+    iconType: 'custom',
+    logoUrl: '/partners/dispora.svg',
+    websiteUrl: 'https://dispora.go.id',
     isActive: true,
     order: 4,
-    description: 'Organisasi Siswa Intra Sekolah MTsN 1 Kota Malang',
+    description: 'Instansi pemerintah daerah fasilitator sarana arena dan pembinaan atlet muda',
   },
   {
     id: 'partner-5',
-    name: 'Asosiasi Futsal / AFK',
-    role: 'Federasi & Juri Resmi',
-    category: 'FEDERATION',
-    iconType: 'futsal',
-    websiteUrl: '',
+    name: 'Palang Merah Indonesia (PMI)',
+    role: 'Tim Medis & Tanggap Darurat',
+    category: 'COMMUNITY',
+    iconType: 'custom',
+    logoUrl: '/partners/pmi.svg',
+    websiteUrl: 'https://pmi.or.id',
     isActive: true,
     order: 5,
-    description: 'Asosiasi Futsal Kota Malang - Pengawas & Wasit Berlisensi Resmi',
+    description: 'Lembaga pertolongan pertama dan tim medis siaga keselamatan atlet di arena',
   },
   {
     id: 'partner-6',
-    name: 'Dispora Kota Malang',
-    role: 'Dinas Olahraga Kota',
-    category: 'GOVERNMENT',
-    iconType: 'trophy',
-    websiteUrl: '',
+    name: 'Bank Mandiri',
+    role: 'Mitra Perbankan & Ticketing',
+    category: 'SPONSOR',
+    iconType: 'custom',
+    logoUrl: '/partners/mandiri.svg',
+    websiteUrl: 'https://www.bankmandiri.co.id',
     isActive: true,
     order: 6,
-    description: 'Dinas Kepemudaan, Olahraga, dan Pariwisata Pemerintah Kota Malang',
+    description: 'Mitra perbankan resmi dan gerbang pembayaran tiket turnamen digital terintegrasi',
   },
   {
     id: 'partner-7',
-    name: 'Sauma Arena Ecosystem',
-    role: 'Official Multi-Sport Platform',
+    name: 'Pocari Sweat',
+    role: 'Official Hydration Partner',
     category: 'SPONSOR',
-    iconType: 'logo',
-    websiteUrl: 'https://sauma.id',
+    iconType: 'custom',
+    logoUrl: '/partners/pocari.svg',
+    websiteUrl: 'https://pocarisweat.id',
     isActive: true,
     order: 7,
-    description: 'Platform digital manajemen kompetisi olahraga, bagan & live score',
+    description: 'Penyedia hidrasi ion resmi bagi seluruh atlet, wasit, dan perangkat pertandingan',
   },
   {
     id: 'partner-8',
-    name: 'Bank Jatim Syariah',
-    role: 'Mitra Perbankan & Tiket',
+    name: 'Specs Indonesia',
+    role: 'Official Match Ball & Apparel',
     category: 'SPONSOR',
-    iconType: 'bank',
-    websiteUrl: 'https://bankjatim.co.id',
+    iconType: 'custom',
+    logoUrl: '/partners/specs.svg',
+    websiteUrl: 'https://specs.id',
     isActive: true,
     order: 8,
-    description: 'Mitra perbankan resmi dan gerbang pembayaran tiket masuk turnamen',
+    description: 'Penyedia bola pertandingan resmi bersertifikasi dan apparel resmi turnamen',
   },
 ];
 
-export const STORAGE_KEY_PARTNERS = 'sauma_arena_tournament_partners';
+export const STORAGE_KEY_PARTNERS = 'sauma_arena_tournament_partners_v2';
 
 export const PARTNER_CATEGORY_LABELS: Record<PartnerCategory, { label: string; badgeClass: string }> = {
   ORGANIZER: {
@@ -111,7 +119,7 @@ export const PARTNER_CATEGORY_LABELS: Record<PartnerCategory, { label: string; b
     badgeClass: 'bg-amber-500/15 text-amber-700 dark:text-amber-400 border border-amber-500/30',
   },
   COMMUNITY: {
-    label: 'Komite & Siswa',
+    label: 'Komite & Tim Medis',
     badgeClass: 'bg-purple-500/15 text-purple-700 dark:text-purple-400 border border-purple-500/30',
   },
   MEDIA: {
@@ -124,9 +132,22 @@ export function getStoredPartners(): TournamentPartner[] {
   if (typeof window === 'undefined') return DEFAULT_TOURNAMENT_PARTNERS;
   try {
     const raw = localStorage.getItem(STORAGE_KEY_PARTNERS);
-    if (!raw) return DEFAULT_TOURNAMENT_PARTNERS;
+    if (!raw) {
+      // Clean legacy storage key if exists and save new defaults
+      localStorage.removeItem('sauma_arena_tournament_partners');
+      localStorage.setItem(STORAGE_KEY_PARTNERS, JSON.stringify(DEFAULT_TOURNAMENT_PARTNERS));
+      return DEFAULT_TOURNAMENT_PARTNERS;
+    }
     const parsed = JSON.parse(raw);
     if (Array.isArray(parsed) && parsed.length > 0) {
+      // Auto-migrate if stored array still holds old generic placeholders
+      const hasOldGenericNames = parsed.some(
+        (p) => p.name === 'Komite Pelaksana Turnamen' || p.name === 'Komite Disiplin & Etika'
+      );
+      if (hasOldGenericNames) {
+        localStorage.setItem(STORAGE_KEY_PARTNERS, JSON.stringify(DEFAULT_TOURNAMENT_PARTNERS));
+        return DEFAULT_TOURNAMENT_PARTNERS;
+      }
       return [...parsed].sort((a, b) => (a.order || 0) - (b.order || 0));
     }
   } catch {
@@ -149,6 +170,7 @@ export function resetStoredPartners(): TournamentPartner[] {
   if (typeof window !== 'undefined') {
     try {
       localStorage.removeItem(STORAGE_KEY_PARTNERS);
+      localStorage.removeItem('sauma_arena_tournament_partners');
       window.dispatchEvent(new CustomEvent('sauma_partners_updated', { detail: DEFAULT_TOURNAMENT_PARTNERS }));
     } catch (e) {
       console.error('Gagal mereset data mitra:', e);

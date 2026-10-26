@@ -1,20 +1,11 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import {
-  X,
-  Save,
-  Award,
-  ShieldCheck,
-  Building2,
-  Flame,
-  Trophy,
-  Landmark,
-  Globe,
-  Image as ImageIcon,
-} from 'lucide-react';
+import { X, Save } from 'lucide-react';
+import { ModalPortal } from '@/components/common/ModalPortal';
 import { TournamentPartner, PartnerCategory, PartnerIconType } from '@/types';
-import { SaumaArenaLogo } from '@/components/brand/SaumaArenaLogo';
+import { PartnerLogoUploader } from './PartnerLogoUploader';
+import { PartnerCard } from '@/components/public/PartnerCard';
 
 interface PartnerFormModalProps {
   isOpen: boolean;
@@ -23,60 +14,6 @@ interface PartnerFormModalProps {
   editingPartner: TournamentPartner | null;
   totalPartnersCount: number;
 }
-
-const ICON_OPTIONS: { id: PartnerIconType; label: string; iconComponent: React.ReactNode }[] = [
-  {
-    id: 'award',
-    label: 'Penyelenggara (Medali)',
-    iconComponent: <Award className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />,
-  },
-  {
-    id: 'shield',
-    label: 'Instansi (Perisai)',
-    iconComponent: <ShieldCheck className="w-4 h-4 text-green-700 dark:text-green-400" />,
-  },
-  {
-    id: 'building',
-    label: 'Komite/Sekolah (Gedung)',
-    iconComponent: <Building2 className="w-4 h-4 text-blue-600 dark:text-blue-400" />,
-  },
-  {
-    id: 'flame',
-    label: 'Siswa/OSIS (Api)',
-    iconComponent: <Flame className="w-4 h-4 text-amber-600 dark:text-amber-400" />,
-  },
-  {
-    id: 'futsal',
-    label: 'Federasi / Wasit (Bola)',
-    iconComponent: (
-      <svg className="w-4 h-4 text-sky-600 dark:text-sky-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="12" cy="12" r="10" />
-        <path d="m4.93 4.93 4.24 4.24m5.66 0 4.24-4.24M4.93 19.07l4.24-4.24m5.66 0 4.24 4.24" />
-        <circle cx="12" cy="12" r="4" />
-      </svg>
-    ),
-  },
-  {
-    id: 'trophy',
-    label: 'Dispora / Prestasi (Piala)',
-    iconComponent: <Trophy className="w-4 h-4 text-rose-600 dark:text-rose-400" />,
-  },
-  {
-    id: 'logo',
-    label: 'Logo Sauma Arena',
-    iconComponent: <SaumaArenaLogo size="xs" variant="auto" />,
-  },
-  {
-    id: 'bank',
-    label: 'Perbankan / Tiket (Bank)',
-    iconComponent: <Landmark className="w-4 h-4 text-teal-600 dark:text-teal-400" />,
-  },
-  {
-    id: 'custom',
-    label: 'URL Gambar Kustom',
-    iconComponent: <ImageIcon className="w-4 h-4 text-purple-600 dark:text-purple-400" />,
-  },
-];
 
 export const PartnerFormModal: React.FC<PartnerFormModalProps> = ({
   isOpen,
@@ -88,7 +25,7 @@ export const PartnerFormModal: React.FC<PartnerFormModalProps> = ({
   const [name, setName] = useState('');
   const [role, setRole] = useState('');
   const [category, setCategory] = useState<PartnerCategory>('SPONSOR');
-  const [iconType, setIconType] = useState<PartnerIconType>('award');
+  const [iconType, setIconType] = useState<PartnerIconType>('custom');
   const [logoUrl, setLogoUrl] = useState('');
   const [websiteUrl, setWebsiteUrl] = useState('');
   const [order, setOrder] = useState<number>(1);
@@ -101,7 +38,7 @@ export const PartnerFormModal: React.FC<PartnerFormModalProps> = ({
       setName(editingPartner.name);
       setRole(editingPartner.role);
       setCategory(editingPartner.category);
-      setIconType(editingPartner.iconType);
+      setIconType(editingPartner.iconType || 'custom');
       setLogoUrl(editingPartner.logoUrl || '');
       setWebsiteUrl(editingPartner.websiteUrl || '');
       setOrder(editingPartner.order || 1);
@@ -111,7 +48,7 @@ export const PartnerFormModal: React.FC<PartnerFormModalProps> = ({
       setName('');
       setRole('');
       setCategory('SPONSOR');
-      setIconType('award');
+      setIconType('custom');
       setLogoUrl('');
       setWebsiteUrl('');
       setOrder(totalPartnersCount + 1);
@@ -134,13 +71,14 @@ export const PartnerFormModal: React.FC<PartnerFormModalProps> = ({
       return;
     }
 
+    const trimmedLogo = logoUrl.trim();
     const payload: TournamentPartner = {
       id: editingPartner ? editingPartner.id : `partner-${Date.now()}`,
       name: name.trim(),
       role: role.trim(),
       category,
-      iconType,
-      logoUrl: iconType === 'custom' ? logoUrl.trim() : undefined,
+      iconType: trimmedLogo ? 'custom' : iconType,
+      logoUrl: trimmedLogo || undefined,
       websiteUrl: websiteUrl.trim() || undefined,
       order: Number(order) || 1,
       isActive,
@@ -151,13 +89,18 @@ export const PartnerFormModal: React.FC<PartnerFormModalProps> = ({
   };
 
   return (
-    <div
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="partner-modal-title"
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fadeIn"
-    >
-      <div className="w-full max-w-lg rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] shadow-xl overflow-hidden flex flex-col max-h-[90vh]">
+    <ModalPortal>
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="partner-modal-title"
+        className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/70 backdrop-blur-md animate-fadeIn"
+        onClick={onClose}
+      >
+        <div
+          className="w-full max-w-lg rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] shadow-xl overflow-hidden flex flex-col max-h-[90vh]"
+          onClick={(e) => e.stopPropagation()}
+        >
         {/* Modal Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--border-subtle)] bg-[var(--bg-muted)]/50">
           <div>
@@ -246,47 +189,35 @@ export const PartnerFormModal: React.FC<PartnerFormModalProps> = ({
             </div>
           </div>
 
-          {/* Pilihan Ikon */}
-          <div>
-            <label className="block font-bold text-[var(--text-main)] mb-1.5">
-              Pilihan Ikon Badge
-            </label>
-            <div className="grid grid-cols-3 gap-2">
-              {ICON_OPTIONS.map((opt) => (
-                <button
-                  key={opt.id}
-                  type="button"
-                  onClick={() => setIconType(opt.id)}
-                  className={`p-2 rounded-xl border text-left flex items-center gap-2 transition-all ${
-                    iconType === opt.id
-                      ? 'border-[var(--color-arena-primary)] bg-[var(--color-arena-primary-light)] dark:bg-blue-950/40'
-                      : 'border-[var(--border-subtle)] bg-[var(--bg-muted)]/60 hover:bg-[var(--bg-muted)]'
-                  }`}
-                >
-                  <div className="shrink-0">{opt.iconComponent}</div>
-                  <span className="text-[11px] font-medium text-[var(--text-main)] truncate">
-                    {opt.label.split(' ')[0]}
-                  </span>
-                </button>
-              ))}
-            </div>
-          </div>
+          {/* Atur Logo / Badge Mitra yang Diupload */}
+          <PartnerLogoUploader
+            iconType={iconType}
+            setIconType={setIconType}
+            logoUrl={logoUrl}
+            setLogoUrl={setLogoUrl}
+          />
 
-          {/* Logo URL jika Custom */}
-          {iconType === 'custom' && (
-            <div>
-              <label className="block font-bold text-[var(--text-main)] mb-1">
-                URL Gambar Logo (HTTPS)
-              </label>
-              <input
-                type="url"
-                value={logoUrl}
-                onChange={(e) => setLogoUrl(e.target.value)}
-                placeholder="https://example.com/logo.png"
-                className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)] focus:outline-none focus:border-[var(--color-arena-primary)]"
-              />
+          {/* Pratinjau Langsung Kartu Mitra Publik */}
+          <div className="p-3 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)]/40 space-y-1.5">
+            <div className="text-[10px] font-barlow font-bold uppercase tracking-wider text-[var(--text-muted)] flex items-center justify-between">
+              <span>Pratinjau Kartu Publik</span>
+              <span className="text-[9px] text-[var(--text-muted)]">Otomatis Terbarui</span>
             </div>
-          )}
+            <PartnerCard
+              partner={{
+                id: 'preview',
+                name: name.trim() || 'Nama Mitra / Instansi',
+                role: role.trim() || 'Peran Resmi Turnamen',
+                category,
+                iconType,
+                logoUrl: logoUrl.trim() || undefined,
+                websiteUrl: websiteUrl.trim() || undefined,
+                isActive,
+                order: Number(order) || 1,
+              }}
+              isInteractive={false}
+            />
+          </div>
 
           {/* Website / Tautan URL */}
           <div>
@@ -355,5 +286,6 @@ export const PartnerFormModal: React.FC<PartnerFormModalProps> = ({
         </form>
       </div>
     </div>
+  </ModalPortal>
   );
 };

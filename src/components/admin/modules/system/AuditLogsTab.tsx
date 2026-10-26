@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { History, ShieldCheck, Filter, Search, CheckCircle2, Clock, UserCheck, AlertTriangle } from 'lucide-react';
+import { AdminPageHeaderCard } from '@/components/admin/common/AdminPageHeaderCard';
 
 interface AuditLogEntry {
   id: string;
@@ -58,12 +59,12 @@ const INITIAL_LOGS: AuditLogEntry[] = [
   {
     id: 'LOG-05',
     timestamp: '23 Okt 2026, 16:20 WIB',
-    userName: 'Panitia ICT Matsanega',
+    userName: 'Tim Panitia Turnamen',
     userRole: 'Staff Admin',
     action: 'Pembaruan Banner & Regulasi',
     target: 'Profil Event',
     category: 'SYSTEM',
-    details: 'Pembaruan deskripsi dan tanggal turnamen MMFC I.',
+    details: 'Pembaruan deskripsi dan tanggal pelaksanaan turnamen.',
   },
 ];
 
@@ -82,30 +83,21 @@ export const AuditLogsTab: React.FC = () => {
   });
 
   return (
-    <div className="space-y-6 max-w-5xl mx-auto animate-fadeIn pb-12">
+    <div className="space-y-6 animate-fadeIn pb-12">
       {/* Header */}
-      <div className="p-5 sm:p-6 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2 text-[var(--color-arena-primary)]">
-            <History className="w-4 h-4 shrink-0" />
-            <span className="text-xs font-barlow font-bold uppercase tracking-wider">
-              PENGATURAN SISTEM &bull; AUDIT TRAIL
+      <AdminPageHeaderCard
+        icon={History}
+        category="PENGATURAN SISTEM • AUDIT TRAIL"
+        title="Riwayat Perubahan &amp; Log Aktivitas"
+        description="Catatan kronologis seluruh tindakan operator dan wasit: verifikasi berkas, pengesahan skor, perubahan jadwal, dan aturan turnamen."
+        action={
+          <div className="flex items-center gap-2">
+            <span className="px-3 py-1 rounded-xl bg-[var(--bg-muted)] border border-[var(--border-subtle)] text-xs font-mono font-bold text-[var(--text-muted)]">
+              Total {logs.length} Aktivitas
             </span>
           </div>
-          <h2 className="text-2xl sm:text-3xl font-bebas text-[var(--text-main)] uppercase tracking-wide mt-1">
-            Riwayat Perubahan &amp; Log Aktivitas
-          </h2>
-          <p className="text-xs text-[var(--text-muted)] mt-0.5 max-w-xl">
-            Catatan kronologis seluruh tindakan operator dan wasit: verifikasi berkas, pengesahan skor, perubahan jadwal, dan aturan turnamen.
-          </p>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <span className="px-3 py-1 rounded-xl bg-[var(--bg-muted)] border border-[var(--border-subtle)] text-xs font-mono font-bold text-[var(--text-muted)]">
-            Total {logs.length} Aktivitas
-          </span>
-        </div>
-      </div>
+        }
+      />
 
       {/* Filter Toolbar */}
       <div className="p-4 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] shadow-xs flex flex-col sm:flex-row items-center gap-3">

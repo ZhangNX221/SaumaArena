@@ -5,6 +5,7 @@ import {
   LayoutDashboard,
   ClipboardList,
   Activity,
+  UserCheck,
   FileText,
   BookOpen,
   User,
@@ -18,6 +19,7 @@ export type RefereeTabKey =
   | 'dashboard'
   | 'duty'
   | 'match_center'
+  | 'roster'
   | 'reports'
   | 'rulebook'
   | 'profile'
@@ -37,6 +39,7 @@ const REFEREE_ICON_MAP: Record<string, React.ComponentType<{ className?: string 
   LayoutDashboard,
   ClipboardList,
   Activity,
+  UserCheck,
   FileText,
   BookOpen,
   User,
@@ -54,7 +57,7 @@ export const RefereeSidebar: React.FC<RefereeSidebarProps> = ({
     <>
       {isOpenMobile && (
         <div
-          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-xs lg:hidden"
+          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm lg:hidden"
           onClick={onCloseMobile}
         />
       )}

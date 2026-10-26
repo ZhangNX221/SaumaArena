@@ -4,6 +4,7 @@ import React, { useEffect } from 'react';
 import { X, Award, ShieldAlert, Ticket } from 'lucide-react';
 import { Team, SupporterAssessment } from '@/types';
 import { getTeamLogoUrl } from '@/mocks/teamLogos';
+import { ModalPortal } from '@/components/common/ModalPortal';
 
 interface SupporterDetailModalProps {
   isOpen: boolean;
@@ -32,7 +33,8 @@ export const SupporterDetailModal: React.FC<SupporterDetailModalProps> = ({
   const teamAssessments = assessments.filter((a) => a.teamId === team.id);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fadeIn">
+    <ModalPortal>
+      <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/70 backdrop-blur-md animate-fadeIn">
       <div className="bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6 sm:p-7 shadow-2xl relative space-y-6 animate-modalEnter">
         <button
           onClick={onClose}
@@ -148,5 +150,6 @@ export const SupporterDetailModal: React.FC<SupporterDetailModalProps> = ({
         </div>
       </div>
     </div>
-  );
+  </ModalPortal>
+);
 };

@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { Plus, Search, Edit2, Trash2, X, Ticket, CheckCircle2 } from 'lucide-react';
 import { ConfirmModal } from '@/components/admin/common/ConfirmModal';
+import { ModalPortal } from '@/components/common/ModalPortal';
 
 export interface TicketCategory {
   id: string;
@@ -17,7 +18,7 @@ export interface TicketCategory {
 const INITIAL_CATEGORIES: TicketCategory[] = [
   { id: 'cat-1', name: 'Tribun Reguler', price: 10000, quota: 800, sold: 620, session: 'Seluruh Laga Hari Ini', status: 'ACTIVE' },
   { id: 'cat-2', name: 'Pelajar Berseragam', price: 5000, quota: 600, sold: 450, session: 'Tarif Khusus Siswa Berseragam', status: 'ACTIVE' },
-  { id: 'cat-3', name: 'Paket Suporter (5 Tiket)', price: 40000, quota: 300, sold: 210, session: 'Rombongan Suporter Madrasah', status: 'ACTIVE' },
+  { id: 'cat-3', name: 'Paket Suporter (5 Tiket)', price: 40000, quota: 300, sold: 210, session: 'Rombongan Suporter Tim', status: 'ACTIVE' },
   { id: 'cat-4', name: 'Tribun VIP Utama', price: 25000, quota: 150, sold: 125, session: 'Tribun Tengah Beratap Khusus', status: 'ACTIVE' },
 ];
 
@@ -113,20 +114,15 @@ export const TicketManagementTab: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      {/* Top Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 sm:p-7 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] shadow-xs">
-        <div>
-          <h3 className="font-bebas text-xl sm:text-2xl uppercase tracking-wide text-[var(--text-main)]">
-            Manajemen Kuota &amp; Kategori Tiket
-          </h3>
-          <p className="text-xs text-[var(--text-muted)] mt-1">
-            Atur kuota penjualan tiket, tarif presale/reguler, sesi tribun, dan batas penjualan.
-          </p>
-        </div>
+      {/* Action Bar */}
+      <div className="flex items-center justify-between gap-3 p-4 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] shadow-xs">
+        <span className="text-xs font-barlow font-bold uppercase tracking-wider text-[var(--text-muted)]">
+          Total {categories.length} Kategori Tiket Aktif
+        </span>
         <button
           type="button"
           onClick={handleOpenAdd}
-          className="btn-tactile px-4 py-2.5 rounded-xl bg-[var(--color-arena-primary)] hover:bg-[var(--color-arena-primary-hover)] text-white text-xs font-barlow font-bold uppercase tracking-wider flex items-center gap-2 shadow-xs shrink-0"
+          className="btn-tactile px-4 py-2 rounded-xl bg-[var(--color-arena-primary)] hover:bg-[var(--color-arena-primary-hover)] text-white text-xs font-barlow font-bold uppercase tracking-wider flex items-center gap-1.5 shadow-xs shrink-0 min-h-[38px]"
         >
           <Plus className="w-4 h-4" />
           <span>Tambah Kategori Tiket</span>
@@ -205,114 +201,116 @@ export const TicketManagementTab: React.FC = () => {
 
       {/* Modal CRUD (Create & Update) */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fadeIn">
-          <div className="bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
-            <div className="flex items-center justify-between pb-2 border-b border-[var(--border-subtle)]">
-              <h3 className="font-bebas text-xl uppercase tracking-wide text-[var(--text-main)]">
-                {editingCategory ? 'Edit Kategori Tiket' : 'Tambah Kategori Tiket Baru'}
-              </h3>
-              <button
-                type="button"
-                onClick={() => setIsModalOpen(false)}
-                className="p-1 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-main)]"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            <form onSubmit={handleSubmit} className="space-y-3 text-xs">
-              <div>
-                <label className="font-barlow font-bold uppercase tracking-wider text-[var(--text-main)] block mb-1">Nama Kategori Tiket</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="Contoh: Reguler Tribun Timur / VIP Utama"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)]"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="font-barlow font-bold uppercase tracking-wider text-[var(--text-main)] block mb-1">Harga Tiket (Rp)</label>
-                  <input
-                    type="number"
-                    min="0"
-                    step="5000"
-                    required
-                    value={formData.price}
-                    onChange={(e) => setFormData({ ...formData, price: Number(e.target.value) })}
-                    className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)] font-teko text-base font-bold"
-                  />
-                </div>
-                <div>
-                  <label className="font-barlow font-bold uppercase tracking-wider text-[var(--text-main)] block mb-1">Total Kuota Seat</label>
-                  <input
-                    type="number"
-                    min="1"
-                    required
-                    value={formData.quota}
-                    onChange={(e) => setFormData({ ...formData, quota: Number(e.target.value) })}
-                    className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)] font-teko text-base font-bold"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="font-barlow font-bold uppercase tracking-wider text-[var(--text-main)] block mb-1">Tiket Terjual</label>
-                  <input
-                    type="number"
-                    min="0"
-                    value={formData.sold}
-                    onChange={(e) => setFormData({ ...formData, sold: Number(e.target.value) })}
-                    className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)] font-teko text-base font-bold"
-                  />
-                </div>
-                <div>
-                  <label className="font-barlow font-bold uppercase tracking-wider text-[var(--text-main)] block mb-1">Status Penjualan</label>
-                  <select
-                    value={formData.status}
-                    onChange={(e) => setFormData({ ...formData, status: e.target.value as 'ACTIVE' | 'SOLDOUT' })}
-                    className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)] font-barlow font-bold uppercase text-xs"
-                  >
-                    <option value="ACTIVE">TERSEDIA (Buka)</option>
-                    <option value="SOLDOUT">HABIS (Tutup)</option>
-                  </select>
-                </div>
-              </div>
-
-              <div>
-                <label className="font-barlow font-bold uppercase tracking-wider text-[var(--text-main)] block mb-1">Sesi / Keterangan Masuk</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="Contoh: Penyisihan Grup (Pagi-Sore)"
-                  value={formData.session}
-                  onChange={(e) => setFormData({ ...formData, session: e.target.value })}
-                  className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)]"
-                />
-              </div>
-
-              <div className="flex gap-2 pt-3">
-                <button
-                  type="submit"
-                  className="btn-tactile flex-1 py-2.5 rounded-xl bg-[var(--color-arena-primary)] text-white font-barlow font-bold uppercase tracking-wider text-xs"
-                >
-                  {editingCategory ? 'Simpan Perubahan' : 'Tambahkan Tiket'}
-                </button>
+        <ModalPortal>
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/70 backdrop-blur-md animate-fadeIn" onClick={() => setIsModalOpen(false)}>
+            <div className="bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4" onClick={(e) => e.stopPropagation()}>
+              <div className="flex items-center justify-between pb-2 border-b border-[var(--border-subtle)]">
+                <h3 className="font-bebas text-xl uppercase tracking-wide text-[var(--text-main)]">
+                  {editingCategory ? 'Edit Kategori Tiket' : 'Tambah Kategori Tiket Baru'}
+                </h3>
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="btn-tactile px-4 py-2.5 rounded-xl border border-[var(--border-subtle)] text-xs font-barlow font-bold uppercase tracking-wider"
+                  className="p-1 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-main)]"
                 >
-                  Batal
+                  <X className="w-4 h-4" />
                 </button>
               </div>
-            </form>
+
+              <form onSubmit={handleSubmit} className="space-y-3 text-xs">
+                <div>
+                  <label className="font-barlow font-bold uppercase tracking-wider text-[var(--text-main)] block mb-1">Nama Kategori Tiket</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="Contoh: Reguler Tribun Timur / VIP Utama"
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)]"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="font-barlow font-bold uppercase tracking-wider text-[var(--text-main)] block mb-1">Harga Tiket (Rp)</label>
+                    <input
+                      type="number"
+                      min="0"
+                      step="5000"
+                      required
+                      value={formData.price}
+                      onChange={(e) => setFormData({ ...formData, price: Number(e.target.value) })}
+                      className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)] font-teko text-base font-bold"
+                    />
+                  </div>
+                  <div>
+                    <label className="font-barlow font-bold uppercase tracking-wider text-[var(--text-main)] block mb-1">Total Kuota Seat</label>
+                    <input
+                      type="number"
+                      min="1"
+                      required
+                      value={formData.quota}
+                      onChange={(e) => setFormData({ ...formData, quota: Number(e.target.value) })}
+                      className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)] font-teko text-base font-bold"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="font-barlow font-bold uppercase tracking-wider text-[var(--text-main)] block mb-1">Tiket Terjual</label>
+                    <input
+                      type="number"
+                      min="0"
+                      value={formData.sold}
+                      onChange={(e) => setFormData({ ...formData, sold: Number(e.target.value) })}
+                      className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)] font-teko text-base font-bold"
+                    />
+                  </div>
+                  <div>
+                    <label className="font-barlow font-bold uppercase tracking-wider text-[var(--text-main)] block mb-1">Status Penjualan</label>
+                    <select
+                      value={formData.status}
+                      onChange={(e) => setFormData({ ...formData, status: e.target.value as 'ACTIVE' | 'SOLDOUT' })}
+                      className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)] font-barlow font-bold uppercase text-xs"
+                    >
+                      <option value="ACTIVE">TERSEDIA (Buka)</option>
+                      <option value="SOLDOUT">HABIS (Tutup)</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="font-barlow font-bold uppercase tracking-wider text-[var(--text-main)] block mb-1">Sesi / Keterangan Masuk</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="Contoh: Penyisihan Grup (Pagi-Sore)"
+                    value={formData.session}
+                    onChange={(e) => setFormData({ ...formData, session: e.target.value })}
+                    className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)]"
+                  />
+                </div>
+
+                <div className="flex gap-2 pt-3">
+                  <button
+                    type="submit"
+                    className="btn-tactile flex-1 py-2.5 rounded-xl bg-[var(--color-arena-primary)] text-white font-barlow font-bold uppercase tracking-wider text-xs"
+                  >
+                    {editingCategory ? 'Simpan Perubahan' : 'Tambahkan Tiket'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setIsModalOpen(false)}
+                    className="btn-tactile px-4 py-2.5 rounded-xl border border-[var(--border-subtle)] text-xs font-barlow font-bold uppercase tracking-wider"
+                  >
+                    Batal
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
-        </div>
+        </ModalPortal>
       )}
 
       {/* Reusable Confirm Delete Modal */}

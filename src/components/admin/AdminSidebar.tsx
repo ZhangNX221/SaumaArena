@@ -188,7 +188,7 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
       {isOpenMobile && (
         <div
           onClick={onCloseMobile}
-          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-xs lg:hidden animate-fadeIn"
+          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm lg:hidden animate-fadeIn"
           aria-hidden="true"
         />
       )}
@@ -261,7 +261,7 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
                 <button
                   type="button"
                   onClick={() => toggleSection(section.id)}
-                  className={`btn-tactile w-full flex items-center justify-between px-3 py-2 rounded-xl text-left transition-colors ${
+                  className={`btn-tactile w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-left transition-colors ${
                     hasActiveChild
                       ? 'text-[var(--color-arena-primary)] font-bold'
                       : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'
@@ -269,24 +269,24 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
                 >
                   <div className="flex items-center gap-2.5 min-w-0">
                     <SectionIcon
-                      className={`w-4 h-4 shrink-0 ${
+                      className={`w-[18px] h-[18px] shrink-0 ${
                         hasActiveChild ? 'text-[var(--color-arena-primary)]' : 'text-[var(--text-muted)]'
                       }`}
                     />
-                    <span className="text-xs truncate font-barlow font-bold uppercase tracking-wider">
+                    <span className="text-[13px] truncate font-barlow font-extrabold uppercase tracking-wider">
                       {section.title}
                     </span>
                   </div>
                   {isExpanded ? (
-                    <ChevronDown className="w-3.5 h-3.5 text-[var(--text-faint)]" />
+                    <ChevronDown className="w-4 h-4 text-[var(--text-faint)] shrink-0" />
                   ) : (
-                    <ChevronRight className="w-3.5 h-3.5 text-[var(--text-faint)]" />
+                    <ChevronRight className="w-4 h-4 text-[var(--text-faint)] shrink-0" />
                   )}
                 </button>
 
                 {/* Submenu Items */}
                 {isExpanded && (
-                  <div className="pl-6 pr-1 py-0.5 space-y-0.5 mt-0.5">
+                  <div className="pl-5 pr-1 py-1 space-y-1 mt-0.5">
                     {section.items.map((sub) => {
                       const isActive = currentSubmenu === sub.id;
                       const isComingSoon = sub.status === 'coming_soon';
@@ -303,21 +303,21 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
                               onCloseMobile();
                             }
                           }}
-                          className={`btn-tactile w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-left transition-all ${
+                          className={`btn-tactile w-full flex items-center justify-between px-3 py-2 rounded-xl text-left transition-all ${
                             isComingSoon
                               ? 'opacity-40 cursor-not-allowed text-[var(--text-muted)]'
                               : isActive
-                              ? 'bg-[var(--color-arena-primary)] text-white font-bold shadow-2xs'
-                              : 'text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-muted)]'
+                              ? 'bg-[var(--color-arena-primary)] text-white font-bold shadow-xs'
+                              : 'text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-muted)] font-semibold'
                           }`}
                         >
-                          <span className="text-xs font-barlow font-bold tracking-wide truncate">
+                          <span className="text-sm font-barlow font-bold tracking-wide truncate">
                             {sub.label}
                           </span>
 
                           {sub.badge && (
                             <span
-                              className={`text-[9px] font-barlow font-bold px-1.5 py-0.2 rounded uppercase tracking-wider shrink-0 ${
+                              className={`text-[10px] font-barlow font-extrabold px-2 py-0.5 rounded-md uppercase tracking-wider shrink-0 ${
                                 isActive
                                   ? 'bg-white/25 text-white'
                                   : sub.badge.type === 'live'

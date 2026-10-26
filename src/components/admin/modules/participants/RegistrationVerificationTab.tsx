@@ -90,33 +90,13 @@ export const RegistrationVerificationTab: React.FC<RegistrationVerificationTabPr
 
   return (
     <div className="p-6 sm:p-7 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] shadow-xs space-y-6">
-      {/* Top Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[var(--border-subtle)]">
-        <div>
-          <h3 className="font-bebas text-xl sm:text-2xl uppercase tracking-wide text-[var(--text-main)]">
-            Verifikasi Berkas &amp; Dokumen Usia Siswa (NISN)
-          </h3>
-          <p className="text-xs text-[var(--text-muted)] mt-1">
-            Pemeriksaan keabsahan surat rekomendasi sekolah, NISN Kemdikbud, dan legalitas roster atlet.
-          </p>
-        </div>
-        <button
-          type="button"
-          onClick={handleOpenAdd}
-          className="btn-tactile px-4 py-2.5 rounded-xl bg-[var(--color-arena-primary)] hover:bg-[var(--color-arena-primary-hover)] text-white text-xs font-barlow font-bold uppercase tracking-wider flex items-center gap-2 shadow-xs shrink-0"
-        >
-          <Plus className="w-4 h-4" />
-          <span>Tambah Berkas Pendaftaran</span>
-        </button>
-      </div>
-
-      {/* Filter and Search */}
-      <div className="flex flex-col sm:flex-row items-center gap-3">
+      {/* Filter and Search Bar with Action Button */}
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
         <div className="relative flex-1 w-full">
           <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-faint)]" />
           <input
             type="text"
-            placeholder="Cari no. registrasi, sekolah, tim, atau pelatih..."
+            placeholder="Cari no. registrasi, kontingen, tim, atau pelatih..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="w-full pl-10 pr-4 py-2 text-xs rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] text-[var(--text-main)] focus:outline-none focus:border-[var(--color-arena-primary)]"
@@ -132,6 +112,14 @@ export const RegistrationVerificationTab: React.FC<RegistrationVerificationTabPr
           <option value="PENDING">Menunggu Verifikasi</option>
           <option value="REJECTED">Perlu Perbaikan</option>
         </select>
+        <button
+          type="button"
+          onClick={handleOpenAdd}
+          className="btn-tactile px-4 py-2 rounded-xl bg-[var(--color-arena-primary)] hover:bg-[var(--color-arena-primary-hover)] text-white text-xs font-barlow font-bold uppercase tracking-wider flex items-center gap-1.5 shadow-xs shrink-0 min-h-[38px]"
+        >
+          <Plus className="w-4 h-4" />
+          <span>Tambah Berkas</span>
+        </button>
       </div>
 
       {/* Table CRUD */}

@@ -171,28 +171,8 @@ export const SchedulePlottingTab: React.FC = () => {
         </div>
       )}
 
-      {/* Header Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[var(--border-subtle)]">
-        <div>
-          <h3 className="font-bebas text-xl sm:text-2xl uppercase tracking-wide text-[var(--text-main)] flex items-center gap-2">
-            <span>Plotting Jadwal &amp; Penugasan Lapangan</span>
-          </h3>
-          <p className="text-xs text-[var(--text-muted)] mt-0.5">
-            1-Ketukan ubah status pertandingan langsung di lapangan. Data otomatis tersimpan di cache perangkat.
-          </p>
-        </div>
-        <button
-          type="button"
-          onClick={handleOpenAdd}
-          className="btn-tactile px-4 py-2.5 rounded-xl bg-[var(--color-arena-primary)] hover:bg-[var(--color-arena-primary-hover)] text-white text-xs font-barlow font-bold uppercase tracking-wider flex items-center justify-center gap-2 shadow-xs shrink-0"
-        >
-          <Plus className="w-4 h-4" />
-          <span>Tambah Jadwal Laga</span>
-        </button>
-      </div>
-
-      {/* Filter and Quick Chips */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
+      {/* Filter and Actions Toolbar */}
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5">
         <div className="relative flex-1">
           <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-faint)]" />
           <input
@@ -233,6 +213,15 @@ export const SchedulePlottingTab: React.FC = () => {
           <option value="SEMI_FINAL">Semifinal</option>
           <option value="FINAL">Grand Final</option>
         </select>
+
+        <button
+          type="button"
+          onClick={handleOpenAdd}
+          className="btn-tactile px-4 py-2 rounded-xl bg-[var(--color-arena-primary)] hover:bg-[var(--color-arena-primary-hover)] text-white text-xs font-barlow font-bold uppercase tracking-wider flex items-center justify-center gap-1.5 shadow-xs shrink-0 min-h-[38px]"
+        >
+          <Plus className="w-4 h-4" />
+          <span>Tambah Jadwal</span>
+        </button>
       </div>
 
       {/* Table CRUD with 1-Tap Status Switcher */}

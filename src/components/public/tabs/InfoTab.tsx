@@ -6,7 +6,8 @@ import { tournamentMeta } from '@/mocks/tournamentData';
 import { CABOR_INFO_DATA } from '@/mocks/caborContentData';
 import { SportCode, TournamentPartner } from '@/types';
 import { getStoredPartners } from '@/mocks/partnersData';
-import { PartnerCard } from '@/components/public/PartnerCard';
+import { PartnersSliderSection } from '@/components/public/partners/PartnersSliderSection';
+import { PublicPageHeader } from '../layout/PublicPageHeader';
 
 interface InfoTabProps {
   sportCode?: SportCode;
@@ -41,20 +42,12 @@ export const InfoTab: React.FC<InfoTabProps> = ({ sportCode = 'FUTSAL' }) => {
   return (
     <div className="space-y-8 animate-fadeIn">
       {/* Public Page Header */}
-      <div className="space-y-1.5 pb-2">
-        <div className="flex items-center gap-2 text-[var(--color-arena-primary)]">
-          <Info className="w-4 h-4 shrink-0" />
-          <span className="text-xs font-barlow font-bold uppercase tracking-wider">
-            PANDUAN &amp; REGULASI RESMI &bull; {caborMeta.sportName.toUpperCase()}
-          </span>
-        </div>
-        <h2 className="text-3xl sm:text-4xl text-[var(--text-main)] font-bebas uppercase tracking-wide">
-          Informasi &amp; Petunjuk Teknis
-        </h2>
-        <p className="text-xs sm:text-sm text-[var(--text-muted)] max-w-2xl leading-relaxed">
-          Format kompetisi, durasi waktu pertandingan, jadwal verifikasi berkas kontingen, serta alur akses venue stadion.
-        </p>
-      </div>
+      <PublicPageHeader
+        icon={Info}
+        category={`PANDUAN & REGULASI RESMI • ${caborMeta.sportName.toUpperCase()}`}
+        title="Informasi &amp; Petunjuk Teknis"
+        description="Format kompetisi, durasi waktu pertandingan, jadwal verifikasi berkas kontingen, serta alur akses venue stadion."
+      />
 
       {downloadNotice && (
         <div className="p-3.5 rounded-xl bg-[var(--color-arena-primary-light)] text-[var(--color-arena-primary)] border border-[var(--color-arena-primary)]/20 text-xs font-semibold flex items-center justify-between gap-2 animate-fadeIn">
@@ -205,23 +198,7 @@ export const InfoTab: React.FC<InfoTabProps> = ({ sportCode = 'FUTSAL' }) => {
       </div>
 
       {/* Penyelenggara & Mitra Resmi Turnamen */}
-      {partners.some((p) => p.isActive) && (
-        <div className="pt-8 border-t border-[var(--border-subtle)] space-y-4">
-          <div className="text-center">
-            <span className="text-xs font-barlow uppercase font-bold tracking-wider text-[var(--text-faint)]">
-              PENYELENGGARA &amp; MITRA RESMI TURNAMEN
-            </span>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-            {partners
-              .filter((p) => p.isActive)
-              .map((partner) => (
-                <PartnerCard key={partner.id} partner={partner} isInteractive={true} />
-              ))}
-          </div>
-        </div>
-      )}
+      <PartnersSliderSection partners={partners} />
     </div>
   );
 };

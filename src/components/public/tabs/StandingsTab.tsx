@@ -5,6 +5,7 @@ import { HelpCircle, ChevronLeft, ChevronRight, ListOrdered, ShieldCheck } from 
 import { getTeamLogoUrl } from '@/mocks/teamLogos';
 import { CABOR_STANDINGS_DATA } from '@/mocks/caborStandingsAndStats';
 import { SportCode } from '@/types';
+import { PublicPageHeader } from '../layout/PublicPageHeader';
 
 interface StandingRow {
   rank: number;
@@ -87,20 +88,12 @@ export const StandingsTab: React.FC<StandingsTabProps> = ({ sportCode = 'FUTSAL'
   return (
     <div className="space-y-6 animate-fadeIn">
       {/* Public Page Header */}
-      <div className="space-y-1.5 pb-2">
-        <div className="flex items-center gap-2 text-[var(--color-arena-primary)]">
-          <ListOrdered className="w-4 h-4 shrink-0" />
-          <span className="text-xs font-barlow font-bold uppercase tracking-wider">
-            PERINGKAT FASE GRUP &bull; {sportCode}
-          </span>
-        </div>
-        <h2 className="text-3xl sm:text-4xl font-bebas text-[var(--text-main)] uppercase tracking-wide">
-          Klasemen &amp; Kualifikasi
-        </h2>
-        <p className="text-xs sm:text-sm text-[var(--text-muted)] max-w-2xl leading-relaxed">
-          Perolehan poin, selisih gol, rekor kemenangan, dan penentuan dua tim teratas yang melaju ke babak gugur.
-        </p>
-      </div>
+      <PublicPageHeader
+        icon={ListOrdered}
+        category={`PERINGKAT FASE GRUP • ${sportCode}`}
+        title="Klasemen &amp; Kualifikasi"
+        description="Perolehan poin, selisih gol, rekor kemenangan, dan penentuan dua tim teratas yang melaju ke babak gugur."
+      />
 
       {/* Two-Stage Verification Notice */}
       <div className="p-3.5 rounded-2xl bg-blue-500/10 border border-blue-500/20 text-blue-950 dark:text-blue-200 text-xs flex items-start gap-3">
@@ -190,7 +183,7 @@ export const StandingsTab: React.FC<StandingsTabProps> = ({ sportCode = 'FUTSAL'
             >
               <div className="px-5 py-3.5 bg-[var(--bg-muted)]/80 border-b border-[var(--border-subtle)] flex items-center justify-between">
                 <h3 className="font-bebas text-base text-[var(--text-main)] uppercase tracking-wider">
-                  Klasemen {grp.groupName} &bull; MMFC I
+                  Klasemen {grp.groupName} &bull; Turnamen
                 </h3>
                 <span className="text-[11px] text-[var(--text-muted)]">Peringkat 1 &amp; 2 Lolos Gugur</span>
               </div>

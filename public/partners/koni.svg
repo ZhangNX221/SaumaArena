@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <defs>
+    <linearGradient id="koniGold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FCD34D" />
+      <stop offset="50%" stop-color="#F59E0B" />
+      <stop offset="100%" stop-color="#D97706" />
+    </linearGradient>
+  </defs>
+  <!-- Background Badge -->
+  <circle cx="50" cy="50" r="46" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="2" />
+  
+  <!-- Outer Gold Border -->
+  <circle cx="50" cy="50" r="44" fill="none" stroke="url(#koniGold)" stroke-width="2.5" />
+  
+  <!-- Laurel Wreath -->
+  <path d="M22 55 C20 40 28 26 38 20 C36 30 35 42 40 50 M78 55 C80 40 72 26 62 20 C64 30 65 42 60 50" fill="none" stroke="#16A34A" stroke-width="2" stroke-linecap="round" />
+  
+  <!-- Star at Top -->
+  <polygon points="50,11 52.5,16.5 58,16.5 53.5,20 55,25.5 50,22 45,25.5 46.5,20 42,16.5 47.5,16.5" fill="url(#koniGold)" />
+  
+  <!-- Flaming Torch -->
+  <path d="M48 35 L52 35 L51 52 L49 52 Z" fill="url(#koniGold)" />
+  <!-- Flames -->
+  <path d="M50 20 C45 28 55 29 48 36 C55 33 56 26 50 20 Z" fill="#DC2626" />
+  <path d="M50 25 C47 29 53 30 50 34 C53 31 54 28 50 25 Z" fill="#F59E0B" />
+  
+  <!-- KONI Olympic Rings (Interlocking) -->
+  <circle cx="39" cy="58" r="7" fill="none" stroke="#0284C7" stroke-width="2" />
+  <circle cx="50" cy="58" r="7" fill="none" stroke="#1E293B" stroke-width="2" />
+  <circle cx="61" cy="58" r="7" fill="none" stroke="#DC2626" stroke-width="2" />
+  <circle cx="44.5" cy="64" r="7" fill="none" stroke="#EAB308" stroke-width="2" />
+  <circle cx="55.5" cy="64" r="7" fill="none" stroke="#16A34A" stroke-width="2" />
+  
+  <!-- KONI Typography Badge -->
+  <rect x="26" y="76" width="48" height="14" rx="4" fill="#DC2626" />
+  <text x="50" y="87" font-family="Arial, sans-serif" font-size="10" font-weight="900" fill="#FFFFFF" text-anchor="middle" letter-spacing="1.5">KONI</text>
+</svg>

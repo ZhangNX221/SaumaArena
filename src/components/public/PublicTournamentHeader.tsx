@@ -31,6 +31,7 @@ export const PublicTournamentHeader: React.FC<PublicTournamentHeaderProps> = ({
   const currentList = banners && banners.length > 0 ? banners : [config || DEFAULT_HEADER_CONFIG];
   const safeIndex = Math.min(Math.max(0, activeIndex), currentList.length - 1);
   const activeBanner = currentList[safeIndex] || DEFAULT_HEADER_CONFIG;
+  const bannerLogo = activeBanner.logoUrl || '/brand/matsanega-futsal-logo.png';
 
   const handlePrev = () => {
     if (!onSelectBanner) return;
@@ -189,25 +190,60 @@ export const PublicTournamentHeader: React.FC<PublicTournamentHeaderProps> = ({
               {activeBanner.categoryBadge}
             </span>
           </div>
-
-          <div className="text-xs text-slate-300 font-barlow font-semibold bg-black/30 backdrop-blur-xs px-3 py-1 rounded-lg border border-white/10">
-            {activeBanner.organizer}
-          </div>
         </div>
 
-        {/* Tournament Hero Title */}
-        <div className="space-y-3">
-          <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold uppercase text-white tracking-wide font-teko leading-tight sm:leading-snug max-w-4xl drop-shadow-sm">
-            {activeBanner.title}
-          </h1>
+        {/* Tournament Hero Title & Right Logo */}
+        <div className="flex flex-col md:flex-row items-center md:items-start justify-between gap-6 lg:gap-10 pt-1">
+          {/* Left Column: Hero Title, Line & Description */}
+          <div className="flex-1 space-y-3 min-w-0">
+            <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold uppercase text-white tracking-wide font-teko leading-tight sm:leading-snug max-w-3xl drop-shadow-sm">
+              {activeBanner.title}
+            </h1>
 
-          {/* Midfield Double Line */}
-          <div className="midfield-line pt-1 pb-1 opacity-70" aria-hidden="true" />
+            {/* Midfield Double Line */}
+            <div className="midfield-line pt-1 pb-1 opacity-70" aria-hidden="true" />
 
-          {/* Description */}
-          <p className="text-sm sm:text-base text-slate-200 max-w-3xl leading-relaxed font-normal">
-            {activeBanner.description}
-          </p>
+            {/* Description */}
+            <p className="text-sm sm:text-base text-slate-200 max-w-2xl leading-relaxed font-normal">
+              {activeBanner.description}
+            </p>
+          </div>
+
+          {/* Right Column: Logo Tanpa Background */}
+          {bannerLogo && activeBanner.logoVisible !== false && (() => {
+            const size = activeBanner.logoSize || 260;
+            const offsetX = activeBanner.logoOffsetX !== undefined ? activeBanner.logoOffsetX : -40;
+
+            return (
+              <div
+                className="shrink-0 flex items-center justify-center self-center md:self-start pt-1 md:pt-0 transition-transform duration-300"
+                style={
+                  {
+                    '--logo-offset-x': `${offsetX}px`,
+                  } as React.CSSProperties
+                }
+              >
+                <div className="relative group md:[transform:translateX(var(--logo-offset-x))] transition-transform duration-300">
+                  <div
+                    className="absolute inset-0 rounded-full bg-gradient-to-tr from-emerald-500/25 to-[var(--color-arena-accent)]/25 blur-2xl opacity-75 group-hover:opacity-100 transition-opacity pointer-events-none"
+                    aria-hidden="true"
+                  />
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={bannerLogo}
+                    alt={activeBanner.title}
+                    style={{
+                      width: `${size}px`,
+                      height: `${size}px`,
+                      maxWidth: '85vw',
+                      maxHeight: '85vw',
+                    }}
+                    className="relative z-10 object-contain aspect-square drop-shadow-[0_16px_36px_rgba(0,0,0,0.7)] transition-transform duration-300 group-hover:scale-105"
+                  />
+                </div>
+              </div>
+            );
+          })()}
         </div>
 
         {/* Tournament Facts */}

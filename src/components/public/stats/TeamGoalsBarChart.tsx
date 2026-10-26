@@ -37,18 +37,18 @@ export const TeamGoalsBarChart: React.FC = () => {
   const barWidth = 54;
 
   return (
-    <div className="p-5 sm:p-6 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] shadow-xs space-y-4">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-[var(--border-subtle)]">
+    <div className="p-4 sm:p-5 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] shadow-xs space-y-3.5 h-full flex flex-col justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 pb-2.5 border-b border-[var(--border-subtle)]">
         <div>
-          <span className="text-xs font-barlow font-bold uppercase tracking-wider text-[var(--color-arena-primary)] block">
+          <span className="text-[10px] font-barlow font-bold uppercase tracking-wider text-[var(--color-arena-primary)] block">
             Column Chart &bull; Produktivitas Tim
           </span>
-          <h3 className="font-bebas text-lg text-[var(--text-main)] uppercase tracking-wide flex items-center gap-2 mt-0.5">
-            <Trophy className="w-4 h-4 text-[var(--color-arena-accent)]" />
-            <span>Distribusi Total Gol per Kontingen Sekolah</span>
+          <h3 className="font-bebas text-base sm:text-lg text-[var(--text-main)] uppercase tracking-wide flex items-center gap-1.5 mt-0.5">
+            <Trophy className="w-4 h-4 text-[var(--color-arena-accent)] shrink-0" />
+            <span className="truncate">Distribusi Total Gol per Kontingen Sekolah</span>
           </h3>
         </div>
-        <div className="text-right sm:text-right">
+        <div className="text-left sm:text-right shrink-0">
           <span className="text-xs font-barlow font-bold uppercase tracking-wider text-[var(--color-arena-accent)]">
             Total 55 Gol Tercipta
           </span>
@@ -56,13 +56,13 @@ export const TeamGoalsBarChart: React.FC = () => {
         </div>
       </div>
 
-      {/* SVG Canvas with Horizontal Scroll Wrapper */}
+      {/* SVG Canvas */}
       <div className="overflow-x-auto w-full">
         <svg
           role="img"
           aria-labelledby="team-goals-title team-goals-desc"
           viewBox={`0 0 ${viewBoxWidth} ${viewBoxHeight}`}
-          className="w-full h-auto min-w-[560px] max-w-full font-sans select-none"
+          className="w-full h-auto max-w-full font-sans select-none"
         >
           <title id="team-goals-title">Distribusi Gol Kontingen Turnamen</title>
           <desc id="team-goals-desc">

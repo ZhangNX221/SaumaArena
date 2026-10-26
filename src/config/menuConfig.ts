@@ -120,15 +120,8 @@ export const getAdminMenuConfig = (counts?: {
       items: [
         {
           id: 'overview_stats',
-          label: 'Ringkasan Hari Ini',
+          label: 'Ringkasan Utama',
           icon: 'BarChart3',
-          status: 'active',
-        },
-        {
-          id: 'medal_tally',
-          label: 'Klasemen Medali',
-          icon: 'Trophy',
-          badge: { type: 'text', text: 'RESMI' },
           status: 'active',
         },
       ],
@@ -146,20 +139,20 @@ export const getAdminMenuConfig = (counts?: {
         },
         {
           id: 'sports_list',
-          label: 'Cabang Olahraga & Aturan',
+          label: 'Cabang Olahraga',
           icon: 'Boxes',
           status: 'active',
         },
         {
           id: 'categories_numbers',
-          label: 'Kategori & Kelas',
+          label: 'Kategori Kelas',
           icon: 'Layers',
           tooltip: 'Contoh: Putra U-15, kelas 55 kg',
           status: 'active',
         },
         {
           id: 'venues_courts',
-          label: 'Lokasi & Lapangan',
+          label: 'Lokasi Lapangan',
           icon: 'MapPin',
           status: 'active',
         },
@@ -181,13 +174,13 @@ export const getAdminMenuConfig = (counts?: {
         },
         {
           id: 'contingents_teams',
-          label: 'Tim',
+          label: 'Daftar Tim',
           icon: 'Users',
           status: 'active',
         },
         {
           id: 'athletes_players',
-          label: 'Pemain & Atlet',
+          label: 'Daftar Atlet',
           icon: 'UserCheck',
           status: 'active',
         },
@@ -207,7 +200,7 @@ export const getAdminMenuConfig = (counts?: {
       items: [
         {
           id: 'schedule_plotting',
-          label: 'Jadwal & Bagan',
+          label: 'Jadwal Bagan',
           subtitle: 'Jadwal pertandingan & bagan turnamen',
           icon: 'Calendar',
           status: 'active',
@@ -222,7 +215,7 @@ export const getAdminMenuConfig = (counts?: {
         },
         {
           id: 'results_verification',
-          label: 'Verifikasi Hasil & Sanksi',
+          label: 'Verifikasi Hasil',
           subtitle: 'Pengesahan BAP & sanksi',
           icon: 'FileCheck2',
           badge: counts?.unverifiedMatches && counts.unverifiedMatches > 0
@@ -260,7 +253,7 @@ export const getAdminMenuConfig = (counts?: {
         },
         {
           id: 'backup_restore',
-          label: 'Backup & Restore',
+          label: 'Pengaturan Database',
           subtitle: 'Cadangan database, impor & ekspor CSV/JSON',
           icon: 'Database',
           status: 'active',
@@ -337,6 +330,12 @@ export const getRefereeMenuConfig = (activeDutyCount: number = 1): MenuItemConfi
     label: 'Skor',
     icon: 'Activity',
     badge: { type: 'live', text: 'LIVE' },
+    status: 'active',
+  },
+  {
+    id: 'roster',
+    label: 'Pemain',
+    icon: 'UserCheck',
     status: 'active',
   },
   {

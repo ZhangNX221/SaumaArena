@@ -6,6 +6,8 @@ import { initialTeams } from '@/mocks/tournamentData';
 import { CABOR_TEAMS_DATA } from '@/mocks/caborContentData';
 import { getTeamLogoUrl } from '@/mocks/teamLogos';
 import { Team, SportCode } from '@/types';
+import { ModalPortal } from '@/components/common/ModalPortal';
+import { PublicPageHeader } from '../layout/PublicPageHeader';
 
 interface TeamsTabProps {
   sportCode?: SportCode;
@@ -51,20 +53,12 @@ export const TeamsTab: React.FC<TeamsTabProps> = ({ sportCode = 'FUTSAL' }) => {
   return (
     <div className="space-y-8 animate-fadeIn">
       {/* Public Page Header */}
-      <div className="space-y-1.5 pb-2">
-        <div className="flex items-center gap-2 text-[var(--color-arena-primary)]">
-          <Users className="w-3.5 h-3.5 shrink-0" />
-          <span className="text-[11px] font-black uppercase tracking-widest">
-            KONTINGEN SEKOLAH &bull; {sportCode}
-          </span>
-        </div>
-        <h2 className="text-2xl sm:text-3xl font-bebas text-[var(--text-main)] tracking-wide">
-          Daftar Tim &amp; Skuad Atlet
-        </h2>
-        <p className="text-xs sm:text-sm text-[var(--text-muted)] max-w-2xl leading-relaxed">
-          Daftar kontingen SD/MI terverifikasi, komposisi pemain resmi, serta susunan ofisial pelatih pada turnamen MMFC I.
-        </p>
-      </div>
+      <PublicPageHeader
+        icon={Users}
+        category={`KONTINGEN & TIM • ${sportCode}`}
+        title="Daftar Tim &amp; Skuad Atlet"
+        description="Daftar kontingen dan tim terverifikasi, komposisi pemain resmi, serta susunan ofisial pelatih turnamen."
+      />
 
       {/* Filter and Search Bar */}
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
@@ -222,72 +216,74 @@ export const TeamsTab: React.FC<TeamsTabProps> = ({ sportCode = 'FUTSAL' }) => {
 
       {/* Team Roster Modal for Futsal */}
       {selectedTeam && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fadeIn">
-          <div className="bg-[var(--bg-surface)] rounded-2xl border border-[var(--border-subtle)] max-w-2xl w-full p-6 sm:p-7 shadow-2xl space-y-6 max-h-[90vh] flex flex-col">
-            <div className="flex items-center justify-between pb-4 border-b border-[var(--border-subtle)] shrink-0">
-              <div className="flex items-center gap-3.5">
-                <div className="w-12 h-12 rounded-xl bg-white dark:bg-slate-800/80 border border-[var(--border-subtle)] p-2 flex items-center justify-center shadow-xs overflow-hidden shrink-0">
-                  <img
-                    src={selectedTeam.logoUrl || getTeamLogoUrl(selectedTeam.id)}
-                    alt={selectedTeam.name}
-                    className="w-full h-full object-contain"
-                    loading="lazy"
-                  />
-                </div>
-                <div>
-                  <h3 className="font-black text-lg text-[var(--text-main)] font-[var(--font-display)]">
-                    {selectedTeam.schoolName}
-                  </h3>
-                  <p className="text-xs text-[var(--text-muted)] font-medium">
-                    Pelatih: {selectedTeam.coachName} &bull; Grup {selectedTeam.group}
-                  </p>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => setSelectedTeam(null)}
-                className="p-2 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-muted)] transition-colors"
-                aria-label="Tutup roster modal"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="overflow-y-auto pr-1 space-y-3">
-              <div className="flex items-center justify-between text-xs font-bold text-[var(--text-muted)]">
-                <span>Daftar Pemain Terverifikasi ({selectedTeam.players.length})</span>
-                <span className="flex items-center gap-1.5 text-[var(--color-arena-primary)] dark:text-sky-400 font-bold">
-                  <ShieldCheck className="w-4 h-4" />
-                  <span>Roster Terkunci (Dispora Sah)</span>
-                </span>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {selectedTeam.players.map((player) => (
-                  <div
-                    key={player.id}
-                    className="p-3.5 rounded-xl bg-[var(--bg-muted)] border border-[var(--border-subtle)] flex items-center justify-between gap-3"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-lg bg-[var(--color-arena-dark)] text-white font-mono font-bold text-xs flex items-center justify-center shrink-0">
-                        {player.number}
-                      </div>
-                      <div>
-                        <div className="font-bold text-xs text-[var(--text-main)]">{player.name}</div>
-                        <div className="text-[11px] text-[var(--text-muted)] font-medium">{player.position}</div>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <span className="font-mono text-xs font-bold text-[var(--color-arena-primary)]">
-                        {player.goals} Gol
-                      </span>
-                    </div>
+        <ModalPortal>
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/70 backdrop-blur-md animate-fadeIn" onClick={() => setSelectedTeam(null)}>
+            <div className="bg-[var(--bg-surface)] rounded-2xl border border-[var(--border-subtle)] max-w-2xl w-full p-6 sm:p-7 shadow-2xl space-y-6 max-h-[90vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
+              <div className="flex items-center justify-between pb-4 border-b border-[var(--border-subtle)] shrink-0">
+                <div className="flex items-center gap-3.5">
+                  <div className="w-12 h-12 rounded-xl bg-white dark:bg-slate-800/80 border border-[var(--border-subtle)] p-2 flex items-center justify-center shadow-xs overflow-hidden shrink-0">
+                    <img
+                      src={selectedTeam.logoUrl || getTeamLogoUrl(selectedTeam.id)}
+                      alt={selectedTeam.name}
+                      className="w-full h-full object-contain"
+                      loading="lazy"
+                    />
                   </div>
-                ))}
+                  <div>
+                    <h3 className="font-black text-lg text-[var(--text-main)] font-[var(--font-display)]">
+                      {selectedTeam.schoolName}
+                    </h3>
+                    <p className="text-xs text-[var(--text-muted)] font-medium">
+                      Pelatih: {selectedTeam.coachName} &bull; Grup {selectedTeam.group}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setSelectedTeam(null)}
+                  className="p-2 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-muted)] transition-colors"
+                  aria-label="Tutup roster modal"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="overflow-y-auto pr-1 space-y-3">
+                <div className="flex items-center justify-between text-xs font-bold text-[var(--text-muted)]">
+                  <span>Daftar Pemain Terverifikasi ({selectedTeam.players.length})</span>
+                  <span className="flex items-center gap-1.5 text-[var(--color-arena-primary)] dark:text-sky-400 font-bold">
+                    <ShieldCheck className="w-4 h-4" />
+                    <span>Roster Terkunci (Dispora Sah)</span>
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {selectedTeam.players.map((player) => (
+                    <div
+                      key={player.id}
+                      className="p-3.5 rounded-xl bg-[var(--bg-muted)] border border-[var(--border-subtle)] flex items-center justify-between gap-3"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-lg bg-[var(--color-arena-dark)] text-white font-mono font-bold text-xs flex items-center justify-center shrink-0">
+                          {player.number}
+                        </div>
+                        <div>
+                          <div className="font-bold text-xs text-[var(--text-main)]">{player.name}</div>
+                          <div className="text-[11px] text-[var(--text-muted)] font-medium">{player.position}</div>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <span className="font-mono text-xs font-bold text-[var(--color-arena-primary)]">
+                          {player.goals} Gol
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
-        </div>
+        </ModalPortal>
       )}
     </div>
   );

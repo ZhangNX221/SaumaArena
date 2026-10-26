@@ -17,7 +17,7 @@ export const AdminPlaceholderModule: React.FC<AdminPlaceholderModuleProps> = ({
   isComingSoon = false,
 }) => {
   return (
-    <div className="space-y-6 max-w-4xl mx-auto py-8 animate-fadeIn">
+    <div className="space-y-6 py-8 animate-fadeIn">
       <div className="p-8 sm:p-12 rounded-3xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] text-center space-y-4 shadow-xs">
         <div className="inline-flex p-4 rounded-2xl bg-[var(--color-arena-primary-light)] dark:bg-sky-950/40 text-[var(--color-arena-primary)] mb-2 shadow-2xs">
           <Construction className="w-10 h-10" />

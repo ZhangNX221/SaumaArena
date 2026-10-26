@@ -9,6 +9,7 @@ import { StepRoster } from './StepRoster';
 import { StepDocuments } from './StepDocuments';
 import { StepRegistrationSlip } from './StepRegistrationSlip';
 import { SaumaArenaLogo } from '@/components/brand/SaumaArenaLogo';
+import { ModalPortal } from '@/components/common/ModalPortal';
 
 interface TeamRegistrationModalProps {
   isOpen: boolean;
@@ -182,7 +183,8 @@ export const TeamRegistrationModal: React.FC<TeamRegistrationModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/65 backdrop-blur-xs animate-fadeIn overflow-y-auto">
+    <ModalPortal>
+      <div className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-6 bg-black/70 backdrop-blur-md animate-fadeIn overflow-y-auto">
       <div className="bg-[var(--bg-surface)] rounded-3xl border border-[var(--border-subtle)] max-w-3xl w-full p-5 sm:p-8 shadow-2xl space-y-6 my-auto animate-modalEnter">
         {/* Header Modal */}
         <div className="flex items-center justify-between pb-4 border-b border-[var(--border-subtle)]">
@@ -316,5 +318,6 @@ export const TeamRegistrationModal: React.FC<TeamRegistrationModalProps> = ({
         )}
       </div>
     </div>
-  );
+  </ModalPortal>
+);
 };

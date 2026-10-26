@@ -5,6 +5,7 @@ import { Plus, Search, Edit2, Trash2, X, Users, CheckCircle2 } from 'lucide-reac
 import { initialTeams } from '@/mocks/tournamentData';
 import { Team } from '@/types';
 import { ConfirmModal } from '@/components/admin/common/ConfirmModal';
+import { ModalPortal } from '@/components/common/ModalPortal';
 
 export const TeamsManagementTab: React.FC = () => {
   const [teams, setTeams] = useState<Team[]>(initialTeams);
@@ -126,33 +127,13 @@ export const TeamsManagementTab: React.FC = () => {
 
   return (
     <div className="p-6 sm:p-7 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] shadow-xs space-y-6">
-      {/* Top Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[var(--border-subtle)]">
-        <div>
-          <h3 className="font-bebas text-xl sm:text-2xl uppercase tracking-wide text-[var(--text-main)]">
-            Data Kontingen &amp; Tim Sekolah
-          </h3>
-          <p className="text-xs text-[var(--text-muted)] mt-1">
-            Daftar resmi kontingen sekolah/klub terverifikasi yang berhak bertanding di arena.
-          </p>
-        </div>
-        <button
-          type="button"
-          onClick={handleOpenAdd}
-          className="btn-tactile px-4 py-2.5 rounded-xl bg-[var(--color-arena-primary)] hover:bg-[var(--color-arena-primary-hover)] text-white text-xs font-barlow font-bold uppercase tracking-wider flex items-center gap-2 shadow-xs shrink-0"
-        >
-          <Plus className="w-4 h-4" />
-          <span>Tambah Kontingen Tim</span>
-        </button>
-      </div>
-
-      {/* Filter and Search */}
-      <div className="flex flex-col sm:flex-row items-center gap-3">
+      {/* Filter and Search Bar with Action Button */}
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
         <div className="relative flex-1 w-full">
           <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-faint)]" />
           <input
             type="text"
-            placeholder="Cari nama tim, sekolah, kota, atau pelatih..."
+            placeholder="Cari nama tim, asal kontingen, kota, atau pelatih..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="w-full pl-10 pr-4 py-2 text-xs rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] text-[var(--text-main)] focus:outline-none focus:border-[var(--color-arena-primary)]"
@@ -167,6 +148,14 @@ export const TeamsManagementTab: React.FC = () => {
           <option value="A">Grup A</option>
           <option value="B">Grup B</option>
         </select>
+        <button
+          type="button"
+          onClick={handleOpenAdd}
+          className="btn-tactile px-4 py-2 rounded-xl bg-[var(--color-arena-primary)] hover:bg-[var(--color-arena-primary-hover)] text-white text-xs font-barlow font-bold uppercase tracking-wider flex items-center gap-1.5 shadow-xs shrink-0 min-h-[38px]"
+        >
+          <Plus className="w-4 h-4" />
+          <span>Tambah Kontingen Tim</span>
+        </button>
       </div>
 
       {/* Table CRUD */}
@@ -243,113 +232,115 @@ export const TeamsManagementTab: React.FC = () => {
 
       {/* Modal CRUD (Create & Update) */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fadeIn">
-          <div className="bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
-            <div className="flex items-center justify-between pb-2 border-b border-[var(--border-subtle)]">
-              <h3 className="font-bebas text-xl uppercase tracking-wide text-[var(--text-main)]">
-                {editingTeam ? 'Edit Data Kontingen Tim' : 'Tambah Kontingen Tim Baru'}
-              </h3>
-              <button
-                type="button"
-                onClick={() => setIsModalOpen(false)}
-                className="p-1 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-main)]"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            <form onSubmit={handleSubmit} className="space-y-3 text-xs">
-              <div>
-                <label className="font-barlow font-bold uppercase tracking-wider text-[11px] text-[var(--text-main)] block mb-1">Nama Kontingen / Sekolah</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="Contoh: MIN 1 Kota Malang"
-                  value={formData.schoolName}
-                  onChange={(e) => setFormData({ ...formData, schoolName: e.target.value })}
-                  className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)]"
-                />
-              </div>
-
-              <div>
-                <label className="font-barlow font-bold uppercase tracking-wider text-[11px] text-[var(--text-main)] block mb-1">Nama Tim / Klub</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="Contoh: Elang Muda Matsanega"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)]"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="font-barlow font-bold uppercase tracking-wider text-[11px] text-[var(--text-main)] block mb-1">Kota / Kabupaten</label>
-                  <input
-                    type="text"
-                    required
-                    value={formData.city}
-                    onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                    className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)]"
-                  />
-                </div>
-                <div>
-                  <label className="font-barlow font-bold uppercase tracking-wider text-[11px] text-[var(--text-main)] block mb-1">Plotting Grup</label>
-                  <select
-                    value={formData.group}
-                    onChange={(e) => setFormData({ ...formData, group: e.target.value as 'A' | 'B' })}
-                    className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)] font-barlow font-bold uppercase text-xs"
-                  >
-                    <option value="A">Grup A</option>
-                    <option value="B">Grup B</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="font-barlow font-bold uppercase tracking-wider text-[11px] text-[var(--text-main)] block mb-1">Pelatih Kepala</label>
-                  <input
-                    type="text"
-                    required
-                    value={formData.coachName}
-                    onChange={(e) => setFormData({ ...formData, coachName: e.target.value })}
-                    placeholder="Nama Pelatih"
-                    className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)]"
-                  />
-                </div>
-                <div>
-                  <label className="font-barlow font-bold uppercase tracking-wider text-[11px] text-[var(--text-main)] block mb-1">Kapasitas Roster</label>
-                  <input
-                    type="number"
-                    min="5"
-                    max="30"
-                    value={formData.rosterCount}
-                    onChange={(e) => setFormData({ ...formData, rosterCount: Number(e.target.value) })}
-                    className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)] font-teko font-bold text-base"
-                  />
-                </div>
-              </div>
-
-              <div className="flex gap-2 pt-3">
-                <button
-                  type="submit"
-                  className="btn-tactile flex-1 py-2.5 rounded-xl bg-[var(--color-arena-primary)] text-white font-barlow font-bold uppercase tracking-wider text-xs"
-                >
-                  {editingTeam ? 'Simpan Perubahan' : 'Tambahkan Tim'}
-                </button>
+        <ModalPortal>
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/70 backdrop-blur-md animate-fadeIn" onClick={() => setIsModalOpen(false)}>
+            <div className="bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4" onClick={(e) => e.stopPropagation()}>
+              <div className="flex items-center justify-between pb-2 border-b border-[var(--border-subtle)]">
+                <h3 className="font-bebas text-xl uppercase tracking-wide text-[var(--text-main)]">
+                  {editingTeam ? 'Edit Data Kontingen Tim' : 'Tambah Kontingen Tim Baru'}
+                </h3>
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="btn-tactile px-4 py-2.5 rounded-xl border border-[var(--border-subtle)] text-xs font-barlow font-bold uppercase tracking-wider"
+                  className="p-1 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-main)]"
                 >
-                  Batal
+                  <X className="w-4 h-4" />
                 </button>
               </div>
-            </form>
+
+              <form onSubmit={handleSubmit} className="space-y-3 text-xs">
+                <div>
+                  <label className="font-barlow font-bold uppercase tracking-wider text-[11px] text-[var(--text-main)] block mb-1">Nama Kontingen / Sekolah</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="Contoh: MIN 1 Kota Malang"
+                    value={formData.schoolName}
+                    onChange={(e) => setFormData({ ...formData, schoolName: e.target.value })}
+                    className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)]"
+                  />
+                </div>
+
+                <div>
+                  <label className="font-barlow font-bold uppercase tracking-wider text-[11px] text-[var(--text-main)] block mb-1">Nama Tim / Klub</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="Contoh: Elang Muda Matsanega"
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)]"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="font-barlow font-bold uppercase tracking-wider text-[11px] text-[var(--text-main)] block mb-1">Kota / Kabupaten</label>
+                    <input
+                      type="text"
+                      required
+                      value={formData.city}
+                      onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                      className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)]"
+                    />
+                  </div>
+                  <div>
+                    <label className="font-barlow font-bold uppercase tracking-wider text-[11px] text-[var(--text-main)] block mb-1">Plotting Grup</label>
+                    <select
+                      value={formData.group}
+                      onChange={(e) => setFormData({ ...formData, group: e.target.value as 'A' | 'B' })}
+                      className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)] font-barlow font-bold uppercase text-xs"
+                    >
+                      <option value="A">Grup A</option>
+                      <option value="B">Grup B</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="font-barlow font-bold uppercase tracking-wider text-[11px] text-[var(--text-main)] block mb-1">Pelatih Kepala</label>
+                    <input
+                      type="text"
+                      required
+                      value={formData.coachName}
+                      onChange={(e) => setFormData({ ...formData, coachName: e.target.value })}
+                      placeholder="Nama Pelatih"
+                      className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)]"
+                    />
+                  </div>
+                  <div>
+                    <label className="font-barlow font-bold uppercase tracking-wider text-[11px] text-[var(--text-main)] block mb-1">Kapasitas Roster</label>
+                    <input
+                      type="number"
+                      min="5"
+                      max="30"
+                      value={formData.rosterCount}
+                      onChange={(e) => setFormData({ ...formData, rosterCount: Number(e.target.value) })}
+                      className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)] font-teko font-bold text-base"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex gap-2 pt-3">
+                  <button
+                    type="submit"
+                    className="btn-tactile flex-1 py-2.5 rounded-xl bg-[var(--color-arena-primary)] text-white font-barlow font-bold uppercase tracking-wider text-xs"
+                  >
+                    {editingTeam ? 'Simpan Perubahan' : 'Tambahkan Tim'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setIsModalOpen(false)}
+                    className="btn-tactile px-4 py-2.5 rounded-xl border border-[var(--border-subtle)] text-xs font-barlow font-bold uppercase tracking-wider"
+                  >
+                    Batal
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
-        </div>
+        </ModalPortal>
       )}
 
       {/* Reusable Confirm Delete Modal */}

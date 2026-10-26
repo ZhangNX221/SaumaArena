@@ -9,6 +9,7 @@ import { AdminBannerConfig } from './AdminBannerConfig';
 import { ConfirmModal } from '@/components/admin/common/ConfirmModal';
 import { UserFormModal, UserFormData } from './system/UserFormModal';
 import { PublicPartnersTab } from './system/PublicPartnersTab';
+import { AdminPageHeaderCard } from '@/components/admin/common/AdminPageHeaderCard';
 
 interface AdminSystemModuleProps {
   subTab: 'referee_staff_accounts' | 'event_settings';
@@ -102,39 +103,51 @@ export const AdminSystemModule: React.FC<AdminSystemModuleProps> = ({
 
   return (
     <div className="space-y-8 animate-fadeIn">
-      {/* Module Sub-Tab Navigation & Description */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <p className="text-xs sm:text-sm text-[var(--text-muted)]">
-            Kustomisasi identitas publik turnamen, banner carousel, serta siaran pengumuman ke meja lapangan.
-          </p>
-        </div>
-
-        <div className="flex items-center gap-1 p-1.5 rounded-2xl bg-[var(--bg-muted)]/80 border border-[var(--border-subtle)] text-xs font-barlow font-bold uppercase tracking-wider w-fit">
-          <button
-            type="button"
-            onClick={() => onSelectSubTab('event_settings')}
-            className={`btn-tactile px-4 py-2 rounded-xl transition-all ${
-              subTab === 'event_settings'
-                ? 'bg-[var(--color-arena-primary)] text-white shadow-xs'
-                : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'
-            }`}
-          >
-            Pengaturan Publik
-          </button>
-          <button
-            type="button"
-            onClick={() => onSelectSubTab('referee_staff_accounts')}
-            className={`btn-tactile px-4 py-2 rounded-xl transition-all ${
-              subTab === 'referee_staff_accounts'
-                ? 'bg-[var(--color-arena-primary)] text-white shadow-xs'
-                : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'
-            }`}
-          >
-            Akun Juri &amp; Panitia ({users.length})
-          </button>
-        </div>
-      </div>
+      {/* Title Card */}
+      <AdminPageHeaderCard
+        icon={subTab === 'event_settings' ? Globe : Users}
+        category={
+          subTab === 'event_settings'
+            ? 'PENGATURAN SISTEM • INFORMASI PUBLIK'
+            : 'PENGATURAN SISTEM • AKUN PETUGAS'
+        }
+        title={
+          subTab === 'event_settings'
+            ? 'Pengaturan Portal & Informasi Publik'
+            : 'Akun Juri & Panitia Turnamen'
+        }
+        description={
+          subTab === 'event_settings'
+            ? 'Kustomisasi identitas publik turnamen, banner carousel, mitra pendukung, serta siaran pengumuman ke meja lapangan.'
+            : 'Kelola akun wasit dan pencatat meja, spesialisasi cabang olahraga, serta lisensi penugasan pertandingan.'
+        }
+        action={
+          <div className="flex items-center gap-1 p-1.5 rounded-2xl bg-[var(--bg-muted)]/80 border border-[var(--border-subtle)] text-xs font-barlow font-bold uppercase tracking-wider w-fit">
+            <button
+              type="button"
+              onClick={() => onSelectSubTab('event_settings')}
+              className={`btn-tactile px-3.5 py-2 rounded-xl transition-all ${
+                subTab === 'event_settings'
+                  ? 'bg-[var(--color-arena-primary)] text-white shadow-xs'
+                  : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'
+              }`}
+            >
+              Pengaturan Publik
+            </button>
+            <button
+              type="button"
+              onClick={() => onSelectSubTab('referee_staff_accounts')}
+              className={`btn-tactile px-3.5 py-2 rounded-xl transition-all ${
+                subTab === 'referee_staff_accounts'
+                  ? 'bg-[var(--color-arena-primary)] text-white shadow-xs'
+                  : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'
+              }`}
+            >
+              Akun Juri &amp; Panitia ({users.length})
+            </button>
+          </div>
+        }
+      />
 
       {/* Sub-tab 1: Referee & Staff Accounts */}
       {subTab === 'referee_staff_accounts' && (
@@ -266,47 +279,55 @@ export const AdminSystemModule: React.FC<AdminSystemModuleProps> = ({
       {/* Sub-tab 2: Event Settings & Public Configurations */}
       {subTab === 'event_settings' && (
         <div className="space-y-6">
-          {/* Public Sub-Navigation Tabs */}
-          <div className="flex items-center gap-2 border-b border-[var(--border-subtle)] pb-3 overflow-x-auto">
-            <button
-              type="button"
-              onClick={() => setPublicSection('partners')}
-              className={`btn-tactile flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-barlow font-bold uppercase tracking-wider transition-all shrink-0 ${
-                publicSection === 'partners'
-                  ? 'bg-[var(--color-arena-primary)] text-white shadow-xs'
-                  : 'bg-[var(--bg-surface)] text-[var(--text-muted)] hover:text-[var(--text-main)] border border-[var(--border-subtle)]'
-              }`}
-            >
-              <Award className="w-3.5 h-3.5" />
-              <span>Mitra &amp; Penyelenggara Resmi</span>
-            </button>
+          {/* Title Card */}
+          <AdminPageHeaderCard
+            icon={Globe}
+            category="PENGATURAN • KONFIGURASI PUBLIK"
+            title="Pengaturan Portal & Informasi Publik"
+            description="Kelola mitra dan sponsor resmi turnamen, konfigurasi banner header cabor, serta siaran pengumuman digital."
+            action={
+              <div className="flex flex-wrap items-center gap-1 p-1.5 rounded-2xl bg-[var(--bg-muted)]/80 border border-[var(--border-subtle)] text-xs font-barlow font-bold uppercase tracking-wider w-fit">
+                <button
+                  type="button"
+                  onClick={() => setPublicSection('partners')}
+                  className={`btn-tactile flex items-center gap-1.5 px-3.5 py-2 rounded-xl transition-all ${
+                    publicSection === 'partners'
+                      ? 'bg-[var(--color-arena-primary)] text-white shadow-xs'
+                      : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'
+                  }`}
+                >
+                  <Award className="w-3.5 h-3.5" />
+                  <span>Mitra &amp; Sponsor</span>
+                </button>
 
-            <button
-              type="button"
-              onClick={() => setPublicSection('banners')}
-              className={`btn-tactile flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-barlow font-bold uppercase tracking-wider transition-all shrink-0 ${
-                publicSection === 'banners'
-                  ? 'bg-[var(--color-arena-primary)] text-white shadow-xs'
-                  : 'bg-[var(--bg-surface)] text-[var(--text-muted)] hover:text-[var(--text-main)] border border-[var(--border-subtle)]'
-              }`}
-            >
-              <Globe className="w-3.5 h-3.5" />
-              <span>Banner &amp; Header Turnamen</span>
-            </button>
+                <button
+                  type="button"
+                  onClick={() => setPublicSection('banners')}
+                  className={`btn-tactile flex items-center gap-1.5 px-3.5 py-2 rounded-xl transition-all ${
+                    publicSection === 'banners'
+                      ? 'bg-[var(--color-arena-primary)] text-white shadow-xs'
+                      : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'
+                  }`}
+                >
+                  <Globe className="w-3.5 h-3.5" />
+                  <span>Banner Turnamen</span>
+                </button>
 
-            <button
-              type="button"
-              onClick={() => setPublicSection('broadcast')}
-              className={`btn-tactile flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-barlow font-bold uppercase tracking-wider transition-all shrink-0 ${
-                publicSection === 'broadcast'
-                  ? 'bg-[var(--color-arena-primary)] text-white shadow-xs'
-                  : 'bg-[var(--bg-surface)] text-[var(--text-muted)] hover:text-[var(--text-main)] border border-[var(--border-subtle)]'
-              }`}
-            >
-              <Megaphone className="w-3.5 h-3.5" />
-              <span>Siaran Pengumuman Meja</span>
-            </button>
-          </div>
+                <button
+                  type="button"
+                  onClick={() => setPublicSection('broadcast')}
+                  className={`btn-tactile flex items-center gap-1.5 px-3.5 py-2 rounded-xl transition-all ${
+                    publicSection === 'broadcast'
+                      ? 'bg-[var(--color-arena-primary)] text-white shadow-xs'
+                      : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'
+                  }`}
+                >
+                  <Megaphone className="w-3.5 h-3.5" />
+                  <span>Siaran Meja</span>
+                </button>
+              </div>
+            }
+          />
 
           {/* 1. Mitra & Sponsor Turnamen */}
           {publicSection === 'partners' && <PublicPartnersTab />}

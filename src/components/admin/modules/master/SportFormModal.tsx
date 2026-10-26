@@ -5,6 +5,7 @@ import { X, Plus, Trash2, CheckCircle2, Trophy, Clock, Layers } from 'lucide-rea
 import { SportConfig, ScoringType, SportCode } from '@/types';
 
 import { SPORT_TEMPLATES, SportTemplate } from './sportTemplates';
+import { ModalPortal } from '@/components/common/ModalPortal';
 
 interface SportFormModalProps {
   isOpen: boolean;
@@ -97,8 +98,15 @@ export const SportFormModal: React.FC<SportFormModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fadeIn overflow-y-auto">
-      <div className="bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-2xl max-w-2xl w-full p-6 sm:p-7 shadow-2xl relative space-y-6 my-8 animate-modalEnter max-h-[92vh] overflow-y-auto">
+    <ModalPortal>
+      <div
+        className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/70 backdrop-blur-md animate-fadeIn overflow-y-auto"
+        onClick={onClose}
+      >
+        <div
+          className="bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-2xl max-w-2xl w-full p-6 sm:p-7 shadow-2xl relative space-y-6 my-8 animate-modalEnter max-h-[92vh] overflow-y-auto"
+          onClick={(e) => e.stopPropagation()}
+        >
         {/* Header */}
         <div className="flex items-center justify-between pb-3.5 border-b border-[var(--border-subtle)]">
           <div className="flex items-center gap-2.5">
@@ -305,5 +313,6 @@ export const SportFormModal: React.FC<SportFormModalProps> = ({
         </form>
       </div>
     </div>
+  </ModalPortal>
   );
 };

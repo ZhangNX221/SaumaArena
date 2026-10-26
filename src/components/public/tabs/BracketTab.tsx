@@ -11,6 +11,7 @@ import {
   BRONZE_MATCH,
 } from '@/mocks/bracketData';
 import { SportCode } from '@/types';
+import { PublicPageHeader } from '../layout/PublicPageHeader';
 
 interface BracketTabProps {
   sportCode?: SportCode;
@@ -106,20 +107,12 @@ export const BracketTab: React.FC<BracketTabProps> = ({ sportCode = 'FUTSAL' }) 
   return (
     <div className="space-y-6 sm:space-y-8 animate-fadeIn pb-6">
       {/* Public Page Header */}
-      <div className="space-y-1.5 pb-2">
-        <div className="flex items-center gap-2 text-[var(--color-arena-primary)]">
-          <GitBranch className="w-3.5 h-3.5 shrink-0" />
-          <span className="text-[11px] font-black uppercase tracking-widest">
-            FASE GUGUR &bull; {caborLabel.toUpperCase()}
-          </span>
-        </div>
-        <h2 className="text-2xl sm:text-3xl font-bebas text-[var(--text-main)] tracking-wide">
-          Bagan Eliminasi Turnamen MMFC I
-        </h2>
-        <p className="text-xs sm:text-sm text-[var(--text-muted)] max-w-2xl leading-relaxed">
-          Alur gugur tunggal babak perempat final, semifinal, hingga laga penentuan juara utama MMFC I {caborLabel}.
-        </p>
-      </div>
+      <PublicPageHeader
+        icon={GitBranch}
+        category={`FASE GUGUR • ${caborLabel.toUpperCase()}`}
+        title="Bagan Gugur &amp; Fase Eliminasi"
+        description={`Alur gugur tunggal babak perempat final, semifinal, hingga laga penentuan juara utama turnamen ${caborLabel}.`}
+      />
 
       {/* Mobile Stage Selector Filter */}
       <div className="sm:hidden flex items-center justify-between gap-2">
@@ -348,7 +341,7 @@ export const BracketTab: React.FC<BracketTabProps> = ({ sportCode = 'FUTSAL' }) 
                 <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-center space-y-0.5">
                   <div className="text-[10px] uppercase font-black tracking-widest text-amber-600 dark:text-amber-400 flex items-center justify-center gap-1">
                     <Trophy className="w-3 h-3" />
-                    <span>Kampiun Trofi Bergilir MMFC I</span>
+                    <span>Kampiun Trofi Bergilir Arena</span>
                   </div>
                   <div className="text-sm font-teko font-bold uppercase tracking-wider text-[var(--text-main)] truncate">
                     {championTeamName}

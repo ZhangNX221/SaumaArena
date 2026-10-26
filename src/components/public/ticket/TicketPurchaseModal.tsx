@@ -10,6 +10,7 @@ import { PaymentMethodSelector } from './PaymentMethodSelector';
 import { PaymentCheckoutScreen } from './PaymentCheckoutScreen';
 import { TicketSuccessPass } from './TicketSuccessPass';
 import { SaumaArenaLogo } from '@/components/brand/SaumaArenaLogo';
+import { ModalPortal } from '@/components/common/ModalPortal';
 
 interface TicketPurchaseModalProps {
   isOpen: boolean;
@@ -59,22 +60,16 @@ export const TicketPurchaseModal: React.FC<TicketPurchaseModalProps> = ({
 
   const handleCategorySelect = (catId: TicketCategoryType) => {
     setSelectedCategory(catId);
-    if (catId === 'ROMBONGAN') {
-      setQuantity(5);
-    } else {
-      setQuantity(1);
-    }
+    setQuantity(catId === 'ROMBONGAN' ? 5 : 1);
     setValidationError(null);
   };
 
   const handleIncreaseQty = () => {
-    if (selectedCategory === 'ROMBONGAN') return;
-    if (quantity < 10) setQuantity((prev) => prev + 1);
+    if (selectedCategory !== 'ROMBONGAN' && quantity < 10) setQuantity((prev) => prev + 1);
   };
 
   const handleDecreaseQty = () => {
-    if (selectedCategory === 'ROMBONGAN') return;
-    if (quantity > 1) setQuantity((prev) => prev - 1);
+    if (selectedCategory !== 'ROMBONGAN' && quantity > 1) setQuantity((prev) => prev - 1);
   };
 
   const handleProceedToDetails = () => {
@@ -146,7 +141,8 @@ export const TicketPurchaseModal: React.FC<TicketPurchaseModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/65 backdrop-blur-xs animate-fadeIn overflow-y-auto">
+    <ModalPortal>
+      <div className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-6 bg-black/70 backdrop-blur-md animate-fadeIn overflow-y-auto">
       <div className="bg-[var(--bg-surface)] rounded-3xl border border-[var(--border-subtle)] max-w-3xl w-full p-5 sm:p-8 shadow-2xl space-y-6 my-auto animate-modalEnter">
         {/* Modal Top Header */}
         <div className="flex items-center justify-between pb-4 border-b border-[var(--border-subtle)]">
@@ -394,5 +390,6 @@ export const TicketPurchaseModal: React.FC<TicketPurchaseModalProps> = ({
         )}
       </div>
     </div>
-  );
+  </ModalPortal>
+);
 };

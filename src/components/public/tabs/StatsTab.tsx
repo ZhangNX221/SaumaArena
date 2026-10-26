@@ -14,6 +14,7 @@ import { CABOR_STATS_LEADERS } from '@/mocks/caborStandingsAndStats';
 import { TeamGoalsBarChart } from '../stats/TeamGoalsBarChart';
 import { DisciplineFairPlayChart } from '../stats/DisciplineFairPlayChart';
 import { SportCode } from '@/types';
+import { PublicPageHeader } from '../layout/PublicPageHeader';
 
 interface StatsTabProps {
   sportCode?: SportCode;
@@ -42,22 +43,16 @@ export const StatsTab: React.FC<StatsTabProps> = ({ sportCode = 'FUTSAL' }) => {
   return (
     <div className="space-y-8 animate-fadeIn pb-6">
       {/* Public Page Header */}
-      <div className="space-y-1.5 pb-2">
-        <div className="flex items-center gap-2 text-[var(--color-arena-primary)]">
-          <BarChart3 className="w-3.5 h-3.5 shrink-0" />
-          <span className="text-[11px] font-black uppercase tracking-widest">
-            INFOGRAFIS &amp; ANALISIS PERTANDINGAN &bull; {sportCode}
-          </span>
-        </div>
-        <h2 className="text-2xl sm:text-3xl font-bebas text-[var(--text-main)] tracking-wide">
-          {isCustomCabor && customStats ? customStats.title : `Statistik Turnamen MMFC I ${sportCode}`}
-        </h2>
-        <p className="text-xs sm:text-sm text-[var(--text-muted)] max-w-2xl leading-relaxed">
-          {isCustomCabor && customStats
+      <PublicPageHeader
+        icon={BarChart3}
+        category={`INFOGRAFIS & ANALISIS PERTANDINGAN • ${sportCode}`}
+        title={isCustomCabor && customStats ? customStats.title : `Statistik & Performa Turnamen ${sportCode}`}
+        description={
+          isCustomCabor && customStats
             ? customStats.subtitle
-            : 'Visualisasi data terstruktur perolehan gol tim, indeks sportivitas, serta peringkat performa individu atlet.'}
-        </p>
-      </div>
+            : 'Visualisasi data terstruktur perolehan gol tim, indeks sportivitas, serta peringkat performa individu atlet.'
+        }
+      />
 
       {/* Render Custom Cabor Stats (Voli / Esport) */}
       {isCustomCabor && customStats ? (

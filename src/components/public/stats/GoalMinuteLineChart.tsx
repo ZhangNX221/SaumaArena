@@ -39,20 +39,20 @@ export const GoalMinuteLineChart: React.FC = () => {
   const areaPolygonPoints = `${plotLeft},${plotBottom} ${polylinePoints} ${plotRight},${plotBottom}`;
 
   return (
-    <div className="p-5 sm:p-6 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] shadow-xs space-y-4">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-[var(--border-subtle)]">
+    <div className="p-4 sm:p-5 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] shadow-xs space-y-3.5 h-full flex flex-col justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 pb-2.5 border-b border-[var(--border-subtle)]">
         <div>
-          <span className="text-xs font-barlow font-bold uppercase tracking-wider text-[var(--color-arena-primary)] block">
+          <span className="text-[10px] font-barlow font-bold uppercase tracking-wider text-[var(--color-arena-primary)] block">
             Trend Line Chart &bull; Ritme Pertandingan
           </span>
-          <h3 className="font-bebas text-lg text-[var(--text-main)] uppercase tracking-wide flex items-center gap-2 mt-0.5">
-            <Activity className="w-4 h-4 text-emerald-500" />
-            <span>Distribusi Waktu &amp; Menit Terciptanya Gol</span>
+          <h3 className="font-bebas text-base sm:text-lg text-[var(--text-main)] uppercase tracking-wide flex items-center gap-1.5 mt-0.5">
+            <Activity className="w-4 h-4 text-emerald-500 shrink-0" />
+            <span className="truncate">Distribusi Waktu &amp; Menit Terciptanya Gol</span>
           </h3>
         </div>
-        <div className="text-right">
+        <div className="text-left sm:text-right shrink-0">
           <span className="text-xs font-barlow font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
-            Puncak: 21 Gol (Menit 31&apos; - 40&apos;)
+            Puncak: 21 Gol (31&apos; - 40&apos;)
           </span>
           <span className="text-[10px] text-[var(--text-muted)] block">38.2% Gol di Fase Akhir</span>
         </div>
@@ -63,7 +63,7 @@ export const GoalMinuteLineChart: React.FC = () => {
           role="img"
           aria-labelledby="goal-timing-title goal-timing-desc"
           viewBox={`0 0 ${viewBoxWidth} ${viewBoxHeight}`}
-          className="w-full h-auto min-w-[560px] max-w-full font-sans select-none"
+          className="w-full h-auto max-w-full font-sans select-none"
         >
           <title id="goal-timing-title">Distribusi Waktu Terjadinya Gol</title>
           <desc id="goal-timing-desc">

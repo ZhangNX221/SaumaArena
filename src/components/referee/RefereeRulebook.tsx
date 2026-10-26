@@ -1,21 +1,18 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import { 
-  Search, 
   ShieldCheck, 
-  ChevronDown, 
-  ChevronUp, 
   Zap,
-  HelpCircle, 
-  Scale,
-  AlertTriangle
+  Eye
 } from 'lucide-react';
 import { AppUser } from '@/types';
 import { 
   FUTSAL_CHEAT_SHEET, 
   FUTSAL_ARTICLES, 
+  RuleArticle
 } from '@/mocks/refereeRulebookData';
+import { RuleDetailModal } from './rules/RuleDetailModal';
 
 interface RefereeRulebookProps {
   user?: AppUser;
@@ -23,58 +20,15 @@ interface RefereeRulebookProps {
 }
 
 export const RefereeRulebook: React.FC<RefereeRulebookProps> = ({ user, sport }) => {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<string>('SEMUA');
-  const [expandedIds, setExpandedIds] = useState<string[]>(['pasal-1', 'pasal-2']);
+  const [selectedRuleForModal, setSelectedRuleForModal] = useState<RuleArticle | null>(null);
 
   // Tentukan cabor juri ini saja (spesialisasi juri atau cabor aktif)
   const activeSportCode = (sport || (user?.specialization && user.specialization !== 'ALL' ? user.specialization : 'FUTSAL')).toUpperCase();
   const sportDisplayName = activeSportCode === 'FUTSAL' ? 'Futsal' : activeSportCode;
 
-  // Kategori filter
-  const categories = [
-    'SEMUA',
-    'Waktu & Durasi',
-    'Akumulasi & Penalti',
-    'Regulasi Kiper',
-    'Kartu & Disiplin',
-    'Pergantian & Restart',
-    'Adu Penalti',
-    'Protes & Ofisial',
-  ];
-
-  // Filter artikel berdasarkan query pencarian dan kategori
-  const filteredArticles = useMemo(() => {
-    return FUTSAL_ARTICLES.filter((art) => {
-      const matchCat = selectedCategory === 'SEMUA' || art.category === selectedCategory;
-      const q = searchQuery.toLowerCase().trim();
-      if (!q) return matchCat;
-      const matchText = 
-        art.title.toLowerCase().includes(q) ||
-        art.summary.toLowerCase().includes(q) ||
-        art.points.some((p) => p.toLowerCase().includes(q)) ||
-        art.refereeTip.toLowerCase().includes(q);
-      return matchCat && matchText;
-    });
-  }, [searchQuery, selectedCategory]);
-
-  const toggleExpand = (id: string) => {
-    setExpandedIds((prev) =>
-      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
-    );
-  };
-
-  const handleExpandAll = () => {
-    setExpandedIds(FUTSAL_ARTICLES.map((a) => a.id));
-  };
-
-  const handleCollapseAll = () => {
-    setExpandedIds([]);
-  };
-
   return (
     <div className="space-y-6 max-w-5xl mx-auto pb-16 animate-fadeIn">
-      {/* 1. Header Banner - Quieter: Crisp 1px border, no loud gradients */}
+      {/* 1. Header Banner */}
       <div className="p-6 sm:p-7 rounded-2xl bg-[#0D1E30] text-white border border-[#1C3B5B] transition-all duration-200">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-5">
           <div className="space-y-1">
@@ -138,158 +92,81 @@ export const RefereeRulebook: React.FC<RefereeRulebookProps> = ({ user, sport })
         </div>
       </div>
 
-      {/* 3. Search Bar & Category Controls - Rapi & Fleksibel */}
-      <div className="space-y-3">
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5">
-          <div className="relative flex-1">
-            <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-faint)]" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Cari regulasi (contoh: backpass, 4 detik, akumulasi foul, 10 meter, kartu merah)..."
-              className="w-full pl-10 pr-4 py-2.5 text-xs sm:text-sm rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] text-[var(--text-main)] placeholder:text-[var(--text-faint)] focus:outline-none focus:border-[var(--color-arena-primary)] transition-all duration-150 font-sans shadow-xs"
-            />
-          </div>
-
-          <div className="flex items-center gap-2 shrink-0">
-            <button
-              type="button"
-              onClick={handleExpandAll}
-              className="btn-tactile px-3.5 py-2.5 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] text-xs font-barlow font-bold uppercase tracking-wider text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-muted)] active:scale-95 transition-all duration-150 shadow-xs"
-            >
-              Buka Semua
-            </button>
-            <button
-              type="button"
-              onClick={handleCollapseAll}
-              className="btn-tactile px-3.5 py-2.5 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] text-xs font-barlow font-bold uppercase tracking-wider text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-muted)] active:scale-95 transition-all duration-150 shadow-xs"
-            >
-              Tutup Semua
-            </button>
-          </div>
-        </div>
-
-        {/* Category Pills - Rapi & Responsive */}
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
-          {categories.map((cat) => (
-            <button
-              key={cat}
-              type="button"
-              onClick={() => setSelectedCategory(cat)}
-              className={`btn-tactile px-3.5 py-2 rounded-xl text-xs font-barlow font-bold uppercase tracking-wider whitespace-nowrap transition-all duration-150 active:scale-95 shadow-xs ${
-                selectedCategory === cat
-                  ? 'bg-[var(--color-arena-primary)] text-white'
-                  : 'bg-[var(--bg-surface)] border border-[var(--border-subtle)] text-[var(--text-muted)] hover:bg-[var(--bg-muted)] hover:text-[var(--text-main)]'
-              }`}
-            >
-              {cat}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* 4. Daftar Pasal Regulasi - Distilled & Clarified */}
+      {/* 3. Tabel Pasal Regulasi dengan Tombol Pop-up */}
       <div className="space-y-3">
         <div className="flex items-center justify-between text-xs text-[var(--text-muted)] px-1">
           <span className="font-sans">
-            Menampilkan <strong className="text-[var(--text-main)]">{filteredArticles.length}</strong> pasal regulasi {sportDisplayName}
+            Daftar <strong className="text-[var(--text-main)]">{FUTSAL_ARTICLES.length}</strong> pasal regulasi {sportDisplayName}
           </span>
-          {searchQuery && (
-            <button
-              type="button"
-              onClick={() => setSearchQuery('')}
-              className="text-[var(--color-arena-primary)] font-bold hover:underline transition-colors"
-            >
-              Reset pencarian
-            </button>
-          )}
         </div>
 
-        {filteredArticles.length === 0 ? (
-          <div className="p-10 text-center rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] space-y-2">
-            <HelpCircle className="w-7 h-7 text-[var(--text-faint)] mx-auto" />
-            <h3 className="font-bebas text-lg text-[var(--text-main)] uppercase tracking-wide">
-              Tidak Ada Pasal yang Cocok
-            </h3>
-            <p className="text-xs text-[var(--text-muted)] max-w-sm mx-auto font-sans">
-              Pastikan ejaan kata kunci sudah benar atau coba cari istilah umum seperti foul, kiper, atau time-out.
-            </p>
-          </div>
-        ) : (
-          filteredArticles.map((article) => {
-            const isExpanded = expandedIds.includes(article.id);
-            return (
-              <div
-                key={article.id}
-                className="rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] overflow-hidden transition-all duration-150 hover:border-[var(--color-arena-primary)]/40"
-              >
-                {/* Header Accordion */}
-                <button
-                  type="button"
-                  onClick={() => toggleExpand(article.id)}
-                  className="btn-tactile w-full p-4 sm:p-5 flex items-start sm:items-center justify-between gap-3 text-left hover:bg-[var(--bg-muted)]/40 transition-colors duration-150"
+        <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] overflow-x-auto shadow-xs">
+          <table className="w-full text-left text-xs min-w-[620px]">
+            <thead className="bg-[var(--bg-muted)]/70 text-[var(--text-muted)] uppercase text-[11px] font-barlow font-bold tracking-wider border-b border-[var(--border-subtle)]">
+              <tr>
+                <th className="py-3.5 px-4 w-28">Pasal</th>
+                <th className="py-3.5 px-4 w-44">Kategori</th>
+                <th className="py-3.5 px-4">Judul &amp; Ringkasan Regulasi</th>
+                <th className="py-3.5 px-4 w-32 hidden sm:table-cell">Klausul</th>
+                <th className="py-3.5 px-4 text-right w-36">Aksi</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-[var(--border-subtle)] font-medium text-[var(--text-main)]">
+              {FUTSAL_ARTICLES.map((article) => (
+                <tr
+                  key={article.id}
+                  onClick={() => setSelectedRuleForModal(article)}
+                  className="hover:bg-[var(--bg-muted)]/40 transition-colors group cursor-pointer"
                 >
-                  <div className="space-y-1">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="px-2 py-0.5 rounded-md bg-[var(--color-arena-primary)]/10 text-[var(--color-arena-primary)] text-[10px] font-barlow font-bold uppercase tracking-wider border border-[var(--color-arena-primary)]/20">
-                        Pasal {article.number} &bull; {article.category}
-                      </span>
-                    </div>
-                    <h3 className="font-bebas text-xl sm:text-2xl text-[var(--text-main)] uppercase tracking-wide">
-                      {article.title}
-                    </h3>
-                    <p className="text-xs text-[var(--text-muted)] line-clamp-1 font-sans">
-                      {article.summary}
-                    </p>
-                  </div>
-
-                  <div className="p-1.5 rounded-lg bg-[var(--bg-muted)] text-[var(--text-muted)] shrink-0 mt-1 sm:mt-0 transition-transform duration-200">
-                    {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-                  </div>
-                </button>
-
-                {/* Content Accordion Body */}
-                {isExpanded && (
-                  <div className="p-5 sm:p-6 border-t border-[var(--border-subtle)] bg-[var(--bg-page)]/40 space-y-4 animate-fadeIn font-sans">
-                    <div className="text-xs sm:text-sm text-[var(--text-main)] leading-relaxed">
-                      {article.summary}
-                    </div>
-
-                    <div className="space-y-2">
-                      <h4 className="text-xs font-barlow font-bold uppercase tracking-wider text-[var(--text-muted)] flex items-center gap-1.5">
-                        <Scale className="w-3.5 h-3.5 text-[var(--color-arena-primary)]" />
-                        <span>Klausul Regulasi:</span>
-                      </h4>
-                      <ul className="space-y-1.5">
-                        {article.points.map((pt, pIdx) => (
-                          <li
-                            key={pIdx}
-                            className="flex items-start gap-2 text-xs sm:text-sm text-[var(--text-main)] leading-relaxed pl-0.5"
-                          >
-                            <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-arena-primary)] mt-1.5 shrink-0" />
-                            <span>{pt}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-
-                    <div className="p-3.5 sm:p-4 rounded-xl bg-amber-500/10 border border-amber-500/25 text-amber-900 dark:text-amber-200 space-y-1">
-                      <div className="flex items-center gap-1.5 text-xs font-barlow font-bold uppercase tracking-wider text-amber-700 dark:text-amber-400">
-                        <AlertTriangle className="w-3.5 h-3.5 text-amber-500 shrink-0" />
-                        <span>Panduan Keputusan Wasit:</span>
+                  <td className="py-4 px-4 font-mono font-bold text-xs whitespace-nowrap">
+                    <span className="px-2.5 py-1 rounded-md bg-[var(--color-arena-primary)]/10 text-[var(--color-arena-primary)] border border-[var(--color-arena-primary)]/20">
+                      Pasal {article.number}
+                    </span>
+                  </td>
+                  <td className="py-4 px-4 whitespace-nowrap">
+                    <span className="px-2.5 py-1 rounded-lg text-[11px] font-barlow font-bold uppercase tracking-wider bg-[var(--bg-muted)] border border-[var(--border-subtle)] text-[var(--text-muted)]">
+                      {article.category}
+                    </span>
+                  </td>
+                  <td className="py-4 px-4">
+                    <div className="space-y-0.5 max-w-xl">
+                      <div className="font-bebas text-base sm:text-lg text-[var(--text-main)] uppercase tracking-wide group-hover:text-[var(--color-arena-primary)] transition-colors leading-tight">
+                        {article.title}
                       </div>
-                      <p className="text-xs sm:text-sm leading-relaxed pl-5">
-                        {article.refereeTip}
+                      <p className="text-xs text-[var(--text-muted)] line-clamp-1 font-sans">
+                        {article.summary}
                       </p>
                     </div>
-                  </div>
-                )}
-              </div>
-            );
-          })
-        )}
+                  </td>
+                  <td className="py-4 px-4 hidden sm:table-cell whitespace-nowrap">
+                    <span className="text-xs text-[var(--text-muted)] font-mono font-semibold">
+                      {article.points.length} Butir Ketentuan
+                    </span>
+                  </td>
+                  <td className="py-4 px-4 text-right whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedRuleForModal(article)}
+                      className="btn-tactile px-3.5 py-1.5 rounded-xl border border-[var(--border-subtle)] group-hover:border-[var(--color-arena-primary)] bg-[var(--bg-surface)] hover:bg-[var(--color-arena-primary)] hover:text-white text-[var(--text-main)] text-xs font-barlow font-bold uppercase tracking-wider inline-flex items-center gap-1.5 transition-all shadow-xs"
+                      aria-label={`Buka detail ${article.title}`}
+                    >
+                      <Eye className="w-3.5 h-3.5" />
+                      <span>Buka Aturan</span>
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
+
+      {/* 4. Pop-up Modal Detail Regulasi */}
+      <RuleDetailModal
+        rule={selectedRuleForModal}
+        sportDisplayName={sportDisplayName}
+        onClose={() => setSelectedRuleForModal(null)}
+      />
     </div>
   );
 };

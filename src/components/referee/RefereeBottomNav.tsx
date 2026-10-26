@@ -1,5 +1,5 @@
 import React from 'react';
-import { LayoutDashboard, ClipboardList, Activity, FileText, BookOpen, User } from 'lucide-react';
+import { LayoutDashboard, ClipboardList, Activity, UserCheck, FileText, BookOpen, User } from 'lucide-react';
 import { RefereeTabKey } from './RefereeSidebar';
 
 interface RefereeBottomNavProps {
@@ -9,9 +9,10 @@ interface RefereeBottomNavProps {
 
 export const RefereeBottomNav: React.FC<RefereeBottomNavProps> = ({ activeTab, onSelectTab }) => {
   const ITEMS = [
-    { id: 'dashboard' as RefereeTabKey, label: 'Dashboard', icon: LayoutDashboard },
+    { id: 'dashboard' as RefereeTabKey, label: 'Beranda', icon: LayoutDashboard },
     { id: 'duty' as RefereeTabKey, label: 'Tugas', icon: ClipboardList },
     { id: 'match_center' as RefereeTabKey, label: 'Skor', icon: Activity, isCenter: true },
+    { id: 'roster' as RefereeTabKey, label: 'Pemain', icon: UserCheck },
     { id: 'reports' as RefereeTabKey, label: 'Laporan', icon: FileText },
     { id: 'rulebook' as RefereeTabKey, label: 'Aturan', icon: BookOpen },
     { id: 'profile' as RefereeTabKey, label: 'Profil', icon: User },

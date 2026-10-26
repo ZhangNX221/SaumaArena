@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <!-- Container with subtle border -->
+  <rect x="4" y="4" width="92" height="92" rx="20" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="2" />
+  
+  <!-- Bank Mandiri Golden Ribbon Wave -->
+  <path d="M 46 22 C 60 16, 76 22, 86 34 C 74 36, 62 34, 52 38 C 58 30, 68 26, 78 28 C 66 22, 54 22, 46 22 Z" fill="#FDB913" />
+  <path d="M 52 28 C 64 22, 78 26, 88 38 C 76 40, 66 38, 56 42 C 64 34, 74 30, 84 32 C 72 26, 60 26, 52 28 Z" fill="#002D62" opacity="0.15" />
+  <path d="M 56 26 C 68 20, 82 24, 90 34 C 80 34, 70 32, 60 36 C 68 30, 78 26, 86 28 C 76 24, 66 24, 56 26 Z" fill="#FDB913" />
+
+  <!-- "mandiri" Typography -->
+  <g fill="#002D62">
+    <!-- m -->
+    <path d="M 12 50 L 17 50 L 17 54 C 18 51, 21 49, 25 49 C 28 49, 31 51, 32 54 C 34 51, 37 49, 41 49 C 46 49, 48 52, 48 57 L 48 68 L 43 68 L 43 58 C 43 55, 42 53, 39 53 C 36 53, 35 55, 35 58 L 35 68 L 30 68 L 30 58 C 30 55, 29 53, 26 53 C 23 53, 22 55, 22 58 L 22 68 L 17 68 L 17 50 Z" />
+    
+    <!-- a -->
+    <path d="M 50 58 C 50 53, 54 49, 59 49 C 64 49, 67 52, 67 56 L 67 68 L 63 68 L 63 65 C 61 67, 59 69, 56 69 C 52 69, 49 66, 49 62 C 49 57, 54 55, 63 55 L 63 54 C 63 52, 61 51, 58 51 C 55 51, 53 52, 52 54 L 50 51 Z M 63 58 C 57 58, 54 59, 54 62 C 54 64, 56 66, 58 66 C 61 66, 63 64, 63 61 L 63 58 Z" />
+    
+    <!-- n -->
+    <path d="M 70 50 L 75 50 L 75 54 C 77 51, 80 49, 84 49 C 89 49, 91 52, 91 57 L 91 68 L 86 68 L 86 58 C 86 55, 85 53, 82 53 C 79 53, 77 55, 77 58 L 77 68 L 72 68 L 72 50 Z" />
+  </g>
+  
+  <text x="50" y="82" font-family="'Arial Black', Arial, sans-serif" font-size="7" font-weight="900" fill="#002D62" text-anchor="middle" letter-spacing="1.5">BANK MANDIRI</text>
+</svg>

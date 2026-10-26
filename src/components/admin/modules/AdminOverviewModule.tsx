@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Trophy, Users, Ticket, Activity } from 'lucide-react';
+import { Trophy, Users, Ticket, Activity, BarChart3, Medal } from 'lucide-react';
 import { MEDAL_TALLY } from '@/mocks/multiSportData';
 import { initialTeams, initialMatches, initialTickets } from '@/mocks/tournamentData';
 import { SportCode } from '@/types';
@@ -9,6 +9,7 @@ import { TeamGoalsBarChart } from '@/components/public/stats/TeamGoalsBarChart';
 import { GoalMinuteLineChart } from '@/components/public/stats/GoalMinuteLineChart';
 import { MedalTallyCrudTab } from './overview/MedalTallyCrudTab';
 import { FEATURES } from '@/config/features';
+import { AdminPageHeaderCard } from '@/components/admin/common/AdminPageHeaderCard';
 
 export interface AdminOverviewModuleProps {
   selectedSport: SportCode;
@@ -19,9 +20,6 @@ export interface AdminOverviewModuleProps {
 
 export const AdminOverviewModule: React.FC<AdminOverviewModuleProps> = ({
   selectedSport,
-  onOpenMatchControl,
-  subTab = 'stats',
-  onSelectSubTab,
 }) => {
   const totalAthletes = initialTeams.reduce((sum, t) => sum + (t.players?.length || 0), 0);
   const totalTicketsSold = initialTickets.reduce((sum, t) => sum + t.quantity, 0);
@@ -33,41 +31,13 @@ export const AdminOverviewModule: React.FC<AdminOverviewModuleProps> = ({
 
   return (
     <div className="space-y-8 animate-fadeIn">
-      {/* Sub-Tab Navigation & Module Description */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <p className="text-xs sm:text-sm text-[var(--text-muted)]">
-            Pantauan metrik kontingen, analisis gol pertandingan, dan klasemen perolehan medali secara real-time.
-          </p>
-        </div>
-
-        {onSelectSubTab && (
-          <div className="flex items-center gap-1 p-1.5 rounded-2xl bg-[var(--bg-muted)]/80 border border-[var(--border-subtle)] text-xs font-bold font-barlow tracking-wider w-fit">
-            <button
-              type="button"
-              onClick={() => onSelectSubTab('stats')}
-              className={`btn-tactile px-4 py-2 rounded-xl uppercase transition-all ${
-                subTab === 'stats'
-                  ? 'bg-[var(--color-arena-primary)] text-white shadow-xs'
-                  : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'
-              }`}
-            >
-              Ringkasan Hari Ini
-            </button>
-            <button
-              type="button"
-              onClick={() => onSelectSubTab('medals')}
-              className={`btn-tactile px-4 py-2 rounded-xl uppercase transition-all ${
-                subTab === 'medals'
-                  ? 'bg-[var(--color-arena-primary)] text-white shadow-xs'
-                  : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'
-              }`}
-            >
-              Klasemen Medali
-            </button>
-          </div>
-        )}
-      </div>
+      {/* Title Card */}
+      <AdminPageHeaderCard
+        icon={BarChart3}
+        category="BERANDA • RINGKASAN HARI INI"
+        title="Ringkasan Turnamen & Klasemen Perolehan"
+        description="Pantauan metrik kontingen, analisis gol pertandingan, status tiket masuk, serta rekapitulasi klasemen perolehan medali seluruh kontingen."
+      />
 
       {/* Kartu Metrik Utama */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
@@ -78,7 +48,7 @@ export const AdminOverviewModule: React.FC<AdminOverviewModuleProps> = ({
               Total Kontingen
             </span>
             <div className="text-3xl sm:text-4xl font-teko font-bold tabular-nums text-[var(--text-main)] tracking-wide leading-none pt-1">
-              {initialTeams.length} <span className="text-sm font-semibold font-barlow text-[var(--text-muted)]">Sekolah</span>
+              {initialTeams.length} <span className="text-sm font-semibold font-barlow text-[var(--text-muted)]">Tim</span>
             </div>
             <span className="text-xs text-[var(--color-arena-primary)] font-bold font-barlow block pt-1">
               {totalAthletes} Atlet Terdaftar
@@ -166,15 +136,13 @@ export const AdminOverviewModule: React.FC<AdminOverviewModuleProps> = ({
         </div>
       </div>
 
-      {/* Visual Analytics Charts (Stats SubTab) */}
-      {subTab === 'stats' && (
-        <div className="space-y-8">
-          <TeamGoalsBarChart />
-          <GoalMinuteLineChart />
-        </div>
-      )}
+      {/* Visual Analytics Charts: Sejajar Kiri - Kanan */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
+        <TeamGoalsBarChart />
+        <GoalMinuteLineChart />
+      </div>
 
-      {/* Medal Tally with Full CRUD (Medals SubTab or Overview bottom) */}
+      {/* Klasemen Perolehan Medali Kontingen */}
       <MedalTallyCrudTab selectedSport={selectedSport} />
     </div>
   );

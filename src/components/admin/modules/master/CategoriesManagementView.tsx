@@ -1,9 +1,10 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Plus, Search, Edit2, Trash2, CheckCircle2, X } from 'lucide-react';
+import { Plus, Search, Edit2, Trash2, CheckCircle2, X, Layers } from 'lucide-react';
 import { SportConfig } from '@/types';
 import { ConfirmModal } from '@/components/admin/common/ConfirmModal';
+import { ModalPortal } from '@/components/common/ModalPortal';
 
 export interface CategoryItem {
   id: string;
@@ -126,29 +127,8 @@ export const CategoriesManagementView: React.FC<CategoriesManagementViewProps> =
 
   return (
     <div className="p-5 sm:p-6 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] shadow-xs space-y-4">
-      {/* Header & Actions */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[var(--border-subtle)]">
-        <div>
-          <h3 className="font-bebas text-xl sm:text-2xl uppercase tracking-wide text-[var(--text-main)]">
-            Daftar Kategori &amp; Kelas Resmi
-          </h3>
-          <p className="text-xs text-[var(--text-muted)] mt-0.5">
-            Kelola kategori dan kelas resmi turnamen, batas usia atlet, dan kuota tim per kelas.
-          </p>
-        </div>
-        <button
-          type="button"
-          onClick={handleOpenAdd}
-          title="Contoh: Putra U-15, kelas 55 kg"
-          className="btn-tactile px-3.5 py-2 rounded-xl bg-[var(--color-arena-primary)] hover:bg-[var(--color-arena-primary-hover)] text-white text-xs font-barlow font-bold uppercase tracking-wider flex items-center gap-1.5 shadow-xs shrink-0"
-        >
-          <Plus className="w-4 h-4" />
-          <span>Tambah Kategori &amp; Kelas</span>
-        </button>
-      </div>
-
-      {/* Filter and Search Bar */}
-      <div className="flex flex-col sm:flex-row items-center gap-3">
+      {/* Filter and Search Bar with Action Button */}
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
         <div className="relative flex-1 w-full">
           <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-faint)]" />
           <input
@@ -156,13 +136,13 @@ export const CategoriesManagementView: React.FC<CategoriesManagementViewProps> =
             placeholder="Cari nama kategori, kelas, atau cabang olahraga..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-9 pr-3 py-1.5 text-xs rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] text-[var(--text-main)] focus:outline-none focus:border-[var(--color-arena-primary)]"
+            className="w-full pl-9 pr-3 py-2 text-xs rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] text-[var(--text-main)] focus:outline-none focus:border-[var(--color-arena-primary)]"
           />
         </div>
         <select
           value={selectedSportFilter}
           onChange={(e) => setSelectedSportFilter(e.target.value)}
-          className="w-full sm:w-48 px-3 py-1.5 text-xs rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] text-[var(--text-main)] font-barlow font-bold uppercase tracking-wider"
+          className="w-full sm:w-48 px-3 py-2 text-xs rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] text-[var(--text-main)] font-barlow font-bold uppercase tracking-wider"
         >
           <option value="ALL">Semua Cabang Olahraga ({categories.length})</option>
           {sports.map((sp) => (
@@ -240,96 +220,98 @@ export const CategoriesManagementView: React.FC<CategoriesManagementViewProps> =
 
       {/* Modal CRUD (Create & Update) */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fadeIn">
-          <div className="bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
-            <div className="flex items-center justify-between pb-2 border-b border-[var(--border-subtle)]">
-              <h3 className="font-bebas text-xl uppercase tracking-wide text-[var(--text-main)]">
-                {editingItem ? 'Edit Kategori &amp; Kelas' : 'Tambah Kategori &amp; Kelas Baru'}
-              </h3>
-              <button
-                type="button"
-                onClick={() => setIsModalOpen(false)}
-                className="p-1 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-main)]"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            <form onSubmit={handleSubmit} className="space-y-3 text-xs">
-              <div>
-                <label className="font-barlow font-bold uppercase tracking-wider text-[11px] text-[var(--text-main)] block mb-1">Cabang Olahraga</label>
-                <select
-                  value={formData.sportCode}
-                  onChange={(e) => setFormData({ ...formData, sportCode: e.target.value })}
-                  className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)] font-medium"
-                >
-                  {sports.map((sp) => (
-                    <option key={sp.code} value={sp.code}>
-                      {sp.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label 
-                  title="Contoh: Putra U-15, kelas 55 kg"
-                  className="font-barlow font-bold uppercase tracking-wider text-[11px] text-[var(--text-main)] block mb-1"
-                >
-                  Nama Kategori &amp; Kelas <span className="text-[10px] font-normal text-[var(--text-muted)] lowercase">(contoh: Putra U-15, kelas 55 kg)</span>
-                </label>
-                <input
-                  type="text"
-                  required
-                  placeholder="Contoh: Putra U-15, kelas 55 kg"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)]"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="font-barlow font-bold uppercase tracking-wider text-[11px] text-[var(--text-main)] block mb-1">Batas Usia / Jenjang</label>
-                  <input
-                    type="text"
-                    value={formData.ageLimit}
-                    onChange={(e) => setFormData({ ...formData, ageLimit: e.target.value })}
-                    placeholder="Contoh: U-12 s.d U-17"
-                    className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)]"
-                  />
-                </div>
-                <div>
-                  <label className="font-barlow font-bold uppercase tracking-wider text-[11px] text-[var(--text-main)] block mb-1">Kuota Tim Maksimal</label>
-                  <input
-                    type="number"
-                    min="2"
-                    max="128"
-                    value={formData.quotaTeams}
-                    onChange={(e) => setFormData({ ...formData, quotaTeams: Number(e.target.value) })}
-                    className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)] font-teko font-bold text-base"
-                  />
-                </div>
-              </div>
-
-              <div className="flex gap-2 pt-3">
-                <button
-                  type="submit"
-                  className="btn-tactile flex-1 py-2.5 rounded-xl bg-[var(--color-arena-primary)] text-white font-barlow font-bold uppercase tracking-wider text-xs"
-                >
-                  {editingItem ? 'Simpan Perubahan' : 'Tambahkan Kategori'}
-                </button>
+        <ModalPortal>
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/70 backdrop-blur-md animate-fadeIn" onClick={() => setIsModalOpen(false)}>
+            <div className="bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4" onClick={(e) => e.stopPropagation()}>
+              <div className="flex items-center justify-between pb-2 border-b border-[var(--border-subtle)]">
+                <h3 className="font-bebas text-xl uppercase tracking-wide text-[var(--text-main)]">
+                  {editingItem ? 'Edit Kategori &amp; Kelas' : 'Tambah Kategori &amp; Kelas Baru'}
+                </h3>
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="btn-tactile px-4 py-2.5 rounded-xl border border-[var(--border-subtle)] text-xs font-barlow font-bold uppercase tracking-wider"
+                  className="p-1 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-main)]"
                 >
-                  Batal
+                  <X className="w-4 h-4" />
                 </button>
               </div>
-            </form>
+
+              <form onSubmit={handleSubmit} className="space-y-3 text-xs">
+                <div>
+                  <label className="font-barlow font-bold uppercase tracking-wider text-[11px] text-[var(--text-main)] block mb-1">Cabang Olahraga</label>
+                  <select
+                    value={formData.sportCode}
+                    onChange={(e) => setFormData({ ...formData, sportCode: e.target.value })}
+                    className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)] font-medium"
+                  >
+                    {sports.map((sp) => (
+                      <option key={sp.code} value={sp.code}>
+                        {sp.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label 
+                    title="Contoh: Putra U-15, kelas 55 kg"
+                    className="font-barlow font-bold uppercase tracking-wider text-[11px] text-[var(--text-main)] block mb-1"
+                  >
+                    Nama Kategori &amp; Kelas <span className="text-[10px] font-normal text-[var(--text-muted)] lowercase">(contoh: Putra U-15, kelas 55 kg)</span>
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="Contoh: Putra U-15, kelas 55 kg"
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)]"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="font-barlow font-bold uppercase tracking-wider text-[11px] text-[var(--text-main)] block mb-1">Batas Usia / Jenjang</label>
+                    <input
+                      type="text"
+                      value={formData.ageLimit}
+                      onChange={(e) => setFormData({ ...formData, ageLimit: e.target.value })}
+                      placeholder="Contoh: U-12 s.d U-17"
+                      className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)]"
+                    />
+                  </div>
+                  <div>
+                    <label className="font-barlow font-bold uppercase tracking-wider text-[11px] text-[var(--text-main)] block mb-1">Kuota Tim Maksimal</label>
+                    <input
+                      type="number"
+                      min="2"
+                      max="128"
+                      value={formData.quotaTeams}
+                      onChange={(e) => setFormData({ ...formData, quotaTeams: Number(e.target.value) })}
+                      className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)] font-teko font-bold text-base"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex gap-2 pt-3">
+                  <button
+                    type="submit"
+                    className="btn-tactile flex-1 py-2.5 rounded-xl bg-[var(--color-arena-primary)] text-white font-barlow font-bold uppercase tracking-wider text-xs"
+                  >
+                    {editingItem ? 'Simpan Perubahan' : 'Tambahkan Kategori'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setIsModalOpen(false)}
+                    className="btn-tactile px-4 py-2.5 rounded-xl border border-[var(--border-subtle)] text-xs font-barlow font-bold uppercase tracking-wider"
+                  >
+                    Batal
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
-        </div>
+        </ModalPortal>
       )}
 
       {/* Reusable Confirm Delete Modal */}

@@ -113,47 +113,36 @@ export const GroupStandingsTab: React.FC = () => {
 
   return (
     <div className="p-6 sm:p-7 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] shadow-xs space-y-6">
-      {/* Top Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[var(--border-subtle)]">
-        <div>
-          <h3 className="font-bebas text-xl sm:text-2xl uppercase tracking-wide text-[var(--text-main)] flex items-center gap-2">
-            <Trophy className="w-5 h-5 text-amber-500" />
-            <span>Klasemen Poin Babak Grup</span>
-          </h3>
-          <p className="text-xs text-[var(--text-muted)] mt-1">
-            Perhitungan otomatis menang (3 poin), seri (1 poin), kalah (0 poin), selisih gol, dan fair-play.
-          </p>
-        </div>
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="flex rounded-2xl bg-[var(--bg-muted)]/80 p-1.5 border border-[var(--border-subtle)] text-xs font-barlow font-bold uppercase tracking-wider">
-            <button
-              type="button"
-              onClick={() => setSelectedGroup('A')}
-              className={`px-4 py-1.5 rounded-xl transition-all ${
-                selectedGroup === 'A' ? 'bg-[var(--color-arena-primary)] text-white shadow-xs' : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'
-              }`}
-            >
-              Grup A ({groupA.length})
-            </button>
-            <button
-              type="button"
-              onClick={() => setSelectedGroup('B')}
-              className={`px-4 py-1.5 rounded-xl transition-all ${
-                selectedGroup === 'B' ? 'bg-[var(--color-arena-primary)] text-white shadow-xs' : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'
-              }`}
-            >
-              Grup B ({groupB.length})
-            </button>
-          </div>
+      {/* Group Selector & Action Toolbar */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[var(--border-subtle)]">
+        <div className="flex rounded-2xl bg-[var(--bg-muted)]/80 p-1.5 border border-[var(--border-subtle)] text-xs font-barlow font-bold uppercase tracking-wider w-fit">
           <button
             type="button"
-            onClick={handleOpenAdd}
-            className="btn-tactile px-4 py-2.5 rounded-xl bg-[var(--color-arena-primary)] hover:bg-[var(--color-arena-primary-hover)] text-white text-xs font-barlow font-bold uppercase tracking-wider flex items-center gap-2 shadow-xs shrink-0"
+            onClick={() => setSelectedGroup('A')}
+            className={`px-4 py-1.5 rounded-xl transition-all ${
+              selectedGroup === 'A' ? 'bg-[var(--color-arena-primary)] text-white shadow-xs' : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'
+            }`}
           >
-            <Plus className="w-4 h-4" />
-            <span>Tambah Tim Grup {selectedGroup}</span>
+            Grup A ({groupA.length})
+          </button>
+          <button
+            type="button"
+            onClick={() => setSelectedGroup('B')}
+            className={`px-4 py-1.5 rounded-xl transition-all ${
+              selectedGroup === 'B' ? 'bg-[var(--color-arena-primary)] text-white shadow-xs' : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'
+            }`}
+          >
+            Grup B ({groupB.length})
           </button>
         </div>
+        <button
+          type="button"
+          onClick={handleOpenAdd}
+          className="btn-tactile px-4 py-2 rounded-xl bg-[var(--color-arena-primary)] hover:bg-[var(--color-arena-primary-hover)] text-white text-xs font-barlow font-bold uppercase tracking-wider flex items-center gap-1.5 shadow-xs shrink-0 min-h-[38px]"
+        >
+          <Plus className="w-4 h-4" />
+          <span>Tambah Tim Grup {selectedGroup}</span>
+        </button>
       </div>
 
       {/* Table Standings CRUD */}

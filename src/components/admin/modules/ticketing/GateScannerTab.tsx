@@ -18,12 +18,12 @@ export const GateScannerTab: React.FC = () => {
     if (targetCode.includes('MIN1') || targetCode.includes('SMAN1') || targetCode.includes('0941')) {
       setScanFeedback({
         status: 'SUCCESS',
-        msg: 'Tiket terverifikasi atas nama Budi Santoso (MIN 1 Kota Malang). Akses masuk Gate Utama dibuka dan 1 poin suporter resmi tercatat.',
+        msg: 'Tiket terverifikasi atas nama Budi Santoso. Akses masuk Gate Utama dibuka dan 1 kehadiran suporter resmi tercatat.',
       });
     } else if (targetCode.includes('USED') || targetCode.includes('1024')) {
       setScanFeedback({
         status: 'REPLAY',
-        msg: 'Tiket ini telah digunakan sebelumnya pada pukul 09.30 WIB di Gate Masuk Matsanega. Silakan arahkan penonton ke meja bantuan panitia jika terjadi kekeliruan.',
+        msg: 'Tiket ini telah digunakan sebelumnya pada pukul 09.30 WIB di Gate Masuk Arena. Silakan arahkan penonton ke meja bantuan panitia jika terjadi kekeliruan.',
       });
     } else {
       setScanFeedback({
@@ -36,14 +36,6 @@ export const GateScannerTab: React.FC = () => {
 
   return (
     <div className="p-6 sm:p-8 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] space-y-6 shadow-xs max-w-xl mx-auto">
-      <div className="text-center space-y-2">
-        <h3 className="text-xl sm:text-2xl font-bebas uppercase tracking-wide text-[var(--text-main)]">
-          Pemindai Pintu Masuk Arena (Gate Scanner)
-        </h3>
-        <p className="text-xs text-[var(--text-muted)] max-w-md mx-auto leading-relaxed">
-          Pindai QR code e-tiket penonton untuk memberikan izin masuk dan mencatat poin kehadiran suporter sekolah secara otomatis.
-        </p>
-      </div>
 
       <div className="aspect-video bg-[var(--arena-dark)] rounded-2xl relative flex flex-col items-center justify-center p-6 overflow-hidden border-2 border-dashed border-[var(--color-arena-primary)]/70 shadow-inner">
         <div className="w-36 h-36 sm:w-40 sm:h-40 border-2 border-[var(--color-arena-primary)] rounded-2xl relative flex items-center justify-center shadow-lg">

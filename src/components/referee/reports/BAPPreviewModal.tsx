@@ -1,6 +1,7 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { X, CheckCircle2, Download, Printer } from 'lucide-react';
 import { BAPRecord } from '@/mocks/refereeReportsData';
 
@@ -10,11 +11,40 @@ interface BAPPreviewModalProps {
 }
 
 export const BAPPreviewModal: React.FC<BAPPreviewModalProps> = ({ bap, onClose }) => {
-  if (!bap) return null;
+  const [mounted, setMounted] = useState(false);
 
-  return (
-    <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-xs flex items-center justify-center p-4 transition-opacity duration-200">
-      <div className="w-full max-w-lg rounded-2xl bg-[#0D1E30] border border-[#1C3B5B] p-6 sm:p-7 space-y-4 text-white animate-scaleUp">
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onClose]);
+
+  useEffect(() => {
+    if (!bap) return;
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = originalOverflow;
+    };
+  }, [bap]);
+
+  if (!bap || !mounted) return null;
+
+  return createPortal(
+    <div
+      className="fixed inset-0 z-[100] bg-black/70 backdrop-blur-md flex items-center justify-center p-4 transition-all duration-200"
+      onClick={onClose}
+    >
+      <div
+        className="w-full max-w-lg rounded-2xl bg-[#0D1E30] border border-[#1C3B5B] p-6 sm:p-7 space-y-4 text-white shadow-2xl animate-scaleUp"
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Header */}
         <div className="flex items-start justify-between border-b border-[#1C3B5B] pb-3.5">
           <div className="space-y-0.5">
@@ -101,6 +131,7 @@ export const BAPPreviewModal: React.FC<BAPPreviewModalProps> = ({ bap, onClose }
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };

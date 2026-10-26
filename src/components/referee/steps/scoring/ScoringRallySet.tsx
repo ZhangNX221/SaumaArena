@@ -86,74 +86,74 @@ export const ScoringRallySet: React.FC<ScoringRallySetProps> = ({
   const rightTeamKey: 'A' | 'B' = isSwapped ? 'A' : 'B';
 
   return (
-    <div className="space-y-4 animate-fadeIn">
-      <div className="p-4 sm:p-6 rounded-2xl bg-[#0b1a28] text-white border border-[#1f374f] shadow-lg space-y-5">
+    <div className="space-y-3 animate-fadeIn">
+      <div className="p-4 sm:p-5 rounded-2xl bg-[#0b1a28] text-white border border-[#1f374f] shadow-md space-y-3.5">
         {/* Top Court Header */}
-        <div className="flex items-center justify-between text-xs pb-3 border-b border-white/10">
+        <div className="flex items-center justify-between text-xs pb-2.5 border-b border-white/10">
           <div className="flex items-center gap-2">
-            <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-600/30 text-emerald-400 font-barlow font-bold uppercase tracking-wider border border-emerald-500/40 text-[11px]">
-              <Radio className="w-3.5 h-3.5 text-emerald-400" />
-              <span>COURT 3 &bull; BULUTANGKIS / VOLI</span>
+            <span className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-600/30 text-emerald-400 font-barlow font-bold uppercase tracking-wider border border-emerald-500/40 text-[10px]">
+              <Radio className="w-3 h-3 text-emerald-400" />
+              <span>Court 3 &bull; Reli Poin</span>
             </span>
             <span className="text-slate-400 font-barlow font-bold uppercase tracking-wider text-xs">
               Laga #{currentMatch.matchNumber}
             </span>
           </div>
-          <span className="px-3 py-1 rounded-md bg-slate-800 text-[#f6ae2d] font-barlow font-bold uppercase tracking-wider text-xs">
+          <span className="px-2.5 py-0.5 rounded-md bg-slate-800 text-[#f6ae2d] font-barlow font-bold uppercase tracking-wider text-xs">
             GAME KE-{currentGame}
           </span>
         </div>
 
         {/* Interval Banner */}
         {intervalRemaining !== null && (
-          <div className="p-3 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-between text-amber-200">
+          <div className="p-2.5 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-between text-amber-200">
             <span className="font-barlow font-bold uppercase text-xs flex items-center gap-1.5">
-              <Timer className="w-4 h-4 text-amber-400 animate-spin" />
+              <Timer className="w-3.5 h-3.5 text-amber-400 animate-spin" />
               <span>Interval Resmi 60 Detik</span>
             </span>
-            <span className="text-xl font-scoreboard font-bold tabular-nums text-white">
+            <span className="text-lg font-scoreboard font-bold tabular-nums text-white">
               {intervalRemaining}s
             </span>
             <button
               type="button"
               onClick={() => setIntervalRemaining(null)}
-              className="px-2.5 py-1 rounded bg-amber-600 text-white font-barlow font-bold text-xs"
+              className="px-2 py-0.5 rounded bg-amber-600 text-white font-barlow font-bold text-xs"
             >
-              Lanjutkan Laga
+              Lanjutkan
             </button>
           </div>
         )}
 
         {/* Large Rally Scoreboard */}
-        <div className="text-center space-y-2">
+        <div className="text-center space-y-1.5">
           {/* Status Indicators */}
           <div className="flex items-center justify-center gap-2">
             {isMatchPoint && (
-              <span className="px-3 py-1 rounded-full bg-red-600/30 text-red-400 border border-red-500/40 text-[11px] font-barlow font-extrabold uppercase tracking-widest animate-pulse">
+              <span className="px-2.5 py-0.5 rounded-full bg-red-600/30 text-red-400 border border-red-500/40 text-[10px] font-barlow font-extrabold uppercase tracking-widest animate-pulse">
                 Game / Match Point
               </span>
             )}
             {isDeuce && (
-              <span className="px-3 py-1 rounded-full bg-amber-500/30 text-amber-300 border border-amber-500/40 text-[11px] font-barlow font-extrabold uppercase tracking-widest">
+              <span className="px-2.5 py-0.5 rounded-full bg-amber-500/30 text-amber-300 border border-amber-500/40 text-[10px] font-barlow font-extrabold uppercase tracking-widest">
                 Deuce (Selisih 2 Poin)
               </span>
             )}
           </div>
 
-          <div className="grid grid-cols-2 gap-4 items-center pt-1">
-            <div className="space-y-1">
-              <span className="font-bebas text-xl sm:text-2xl uppercase tracking-wide text-slate-300 block truncate">
+          <div className="grid grid-cols-2 gap-3 items-center">
+            <div className="space-y-0.5 bg-slate-900/60 p-3 rounded-xl border border-slate-800">
+              <span className="font-bebas text-lg sm:text-xl uppercase tracking-wide text-slate-300 block truncate">
                 {leftTeamName}
               </span>
-              <div className="text-7xl sm:text-9xl font-scoreboard font-bold text-[#f6ae2d] tabular-nums leading-none">
+              <div className="text-5xl sm:text-6xl font-scoreboard font-bold text-[#f6ae2d] tabular-nums leading-none">
                 {leftScore}
               </div>
             </div>
-            <div className="space-y-1">
-              <span className="font-bebas text-xl sm:text-2xl uppercase tracking-wide text-slate-300 block truncate">
+            <div className="space-y-0.5 bg-slate-900/60 p-3 rounded-xl border border-slate-800">
+              <span className="font-bebas text-lg sm:text-xl uppercase tracking-wide text-slate-300 block truncate">
                 {rightTeamName}
               </span>
-              <div className="text-7xl sm:text-9xl font-scoreboard font-bold text-[#f6ae2d] tabular-nums leading-none">
+              <div className="text-5xl sm:text-6xl font-scoreboard font-bold text-[#f6ae2d] tabular-nums leading-none">
                 {rightScore}
               </div>
             </div>
@@ -161,30 +161,30 @@ export const ScoringRallySet: React.FC<ScoringRallySetProps> = ({
         </div>
 
         {/* Giant Tactile Point Buttons */}
-        <div className="grid grid-cols-2 gap-3 sm:gap-4 pt-2">
+        <div className="grid grid-cols-2 gap-2.5">
           <button
             type="button"
             onClick={() => handleAddPoint(leftTeamKey)}
-            className="btn-tactile py-5 px-3 rounded-2xl bg-[var(--color-arena-primary)] hover:bg-[var(--color-arena-primary-hover)] text-white shadow-lg flex flex-col items-center justify-center gap-1 active:scale-95 transition-transform min-h-[72px]"
+            className="btn-tactile py-2.5 px-3 rounded-xl bg-[var(--color-arena-primary)] hover:bg-[#1D4ED8] text-white shadow-xs flex items-center justify-center gap-2 active:scale-95 transition-all"
           >
-            <span className="text-2xl sm:text-3xl font-scoreboard font-bold leading-none tracking-wider">
+            <span className="text-xl sm:text-2xl font-scoreboard font-bold leading-none tracking-wider">
               +1 POIN
             </span>
-            <span className="font-barlow font-bold text-xs uppercase tracking-wider text-white/90 truncate max-w-full px-2">
-              {leftTeamName.split(' ')[0]} (Sisi Kiri)
+            <span className="font-barlow font-bold text-xs uppercase tracking-wider text-white/90 truncate">
+              ({leftTeamName.split(' ')[0]})
             </span>
           </button>
 
           <button
             type="button"
             onClick={() => handleAddPoint(rightTeamKey)}
-            className="btn-tactile py-5 px-3 rounded-2xl bg-[var(--color-arena-primary)] hover:bg-[var(--color-arena-primary-hover)] text-white shadow-lg flex flex-col items-center justify-center gap-1 active:scale-95 transition-transform min-h-[72px]"
+            className="btn-tactile py-2.5 px-3 rounded-xl bg-[var(--color-arena-primary)] hover:bg-[#1D4ED8] text-white shadow-xs flex items-center justify-center gap-2 active:scale-95 transition-all"
           >
-            <span className="text-2xl sm:text-3xl font-scoreboard font-bold leading-none tracking-wider">
+            <span className="text-xl sm:text-2xl font-scoreboard font-bold leading-none tracking-wider">
               +1 POIN
             </span>
-            <span className="font-barlow font-bold text-xs uppercase tracking-wider text-white/90 truncate max-w-full px-2">
-              {rightTeamName.split(' ')[0]} (Sisi Kanan)
+            <span className="font-barlow font-bold text-xs uppercase tracking-wider text-white/90 truncate">
+              ({rightTeamName.split(' ')[0]})
             </span>
           </button>
         </div>

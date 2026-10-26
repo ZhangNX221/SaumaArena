@@ -1,12 +1,13 @@
 'use client';
 
 import React, { useState } from 'react';
-import { User, ShieldCheck, Plus, Search } from 'lucide-react';
+import { User, ShieldCheck, Plus, Search, UserCog } from 'lucide-react';
 import { AppUser } from '@/types';
 import { PRESET_USERS } from '@/mocks/multiSportData';
 import { AdminProfileTab } from './AdminProfileTab';
 import { UserFormModal, UserFormData } from './UserFormModal';
 import { ConfirmModal } from '@/components/admin/common/ConfirmModal';
+import { AdminPageHeaderCard } from '@/components/admin/common/AdminPageHeaderCard';
 
 interface AccountSettingsViewProps {
   initialSubTab?: 'admin_profile' | 'referee_staff_accounts';
@@ -108,41 +109,45 @@ export const AccountSettingsView: React.FC<AccountSettingsViewProps> = ({
 
   return (
     <div className="space-y-6 animate-fadeIn">
-      {/* Top Segmented Navigation & Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <p className="text-xs sm:text-sm text-[var(--text-muted)]">
-            Pengaturan profil administrator utama, kredensial login, dan akun juri/wasit lapangan.
-          </p>
-        </div>
-
-        <div className="flex items-center gap-1 p-1.5 rounded-2xl bg-[var(--bg-muted)]/80 border border-[var(--border-subtle)] text-xs font-barlow font-bold uppercase tracking-wider w-fit">
-          <button
-            type="button"
-            onClick={() => setActiveTab('ADMIN')}
-            className={`btn-tactile flex items-center gap-1.5 px-4 py-2 rounded-xl transition-all ${
-              activeTab === 'ADMIN'
-                ? 'bg-[var(--color-arena-primary)] text-white shadow-xs'
-                : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'
-            }`}
-          >
-            <User className="w-3.5 h-3.5" />
-            <span>Profil Admin</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveTab('OFFICIALS')}
-            className={`btn-tactile flex items-center gap-1.5 px-4 py-2 rounded-xl transition-all ${
-              activeTab === 'OFFICIALS'
-                ? 'bg-[var(--color-arena-primary)] text-white shadow-xs'
-                : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'
-            }`}
-          >
-            <ShieldCheck className="w-3.5 h-3.5" />
-            <span>Akun Petugas &amp; Juri ({officials.length})</span>
-          </button>
-        </div>
-      </div>
+      {/* Title Card */}
+      <AdminPageHeaderCard
+        icon={UserCog}
+        category={activeTab === 'ADMIN' ? 'PENGATURAN • PROFIL ADMIN' : 'PENGATURAN • AKUN PETUGAS'}
+        title={activeTab === 'ADMIN' ? 'Pengaturan Akun & Profil Admin' : 'Akun Petugas & Juri Lapangan'}
+        description={
+          activeTab === 'ADMIN'
+            ? 'Kelola kredensial administrator, kata sandi, preferensi tampilan gelap/terang, dan identitas panitia.'
+            : 'Kelola akun wasit dan pencatat meja, spesialisasi cabang olahraga, serta lisensi penugasan pertandingan.'
+        }
+        action={
+          <div className="flex items-center gap-1 p-1.5 rounded-2xl bg-[var(--bg-muted)]/80 border border-[var(--border-subtle)] text-xs font-barlow font-bold uppercase tracking-wider w-fit">
+            <button
+              type="button"
+              onClick={() => setActiveTab('ADMIN')}
+              className={`btn-tactile flex items-center gap-1.5 px-4 py-2 rounded-xl transition-all ${
+                activeTab === 'ADMIN'
+                  ? 'bg-[var(--color-arena-primary)] text-white shadow-xs'
+                  : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'
+              }`}
+            >
+              <User className="w-3.5 h-3.5" />
+              <span>Profil Admin</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab('OFFICIALS')}
+              className={`btn-tactile flex items-center gap-1.5 px-4 py-2 rounded-xl transition-all ${
+                activeTab === 'OFFICIALS'
+                  ? 'bg-[var(--color-arena-primary)] text-white shadow-xs'
+                  : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'
+              }`}
+            >
+              <ShieldCheck className="w-3.5 h-3.5" />
+              <span>Akun Petugas &amp; Juri ({officials.length})</span>
+            </button>
+          </div>
+        }
+      />
 
       {/* Sub-tab 1: Profil Admin */}
       {activeTab === 'ADMIN' && (

@@ -2,6 +2,7 @@
 
 import React, { useEffect } from 'react';
 import { AlertTriangle, Trash2, X } from 'lucide-react';
+import { ModalPortal } from '@/components/common/ModalPortal';
 
 export interface ConfirmModalProps {
   isOpen: boolean;
@@ -38,13 +39,15 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="confirm-modal-title"
-      aria-describedby="confirm-modal-description"
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fadeIn"
-    >
+    <ModalPortal>
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="confirm-modal-title"
+        aria-describedby="confirm-modal-description"
+        className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/70 backdrop-blur-md animate-fadeIn"
+        onClick={onCancel}
+      >
       <div
         className="relative w-full max-w-md rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] shadow-2xl p-6 overflow-hidden animate-scaleIn"
         onClick={(e) => e.stopPropagation()}
@@ -103,5 +106,6 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
         </div>
       </div>
     </div>
+  </ModalPortal>
   );
 };

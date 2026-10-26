@@ -20,6 +20,7 @@ interface RefereeScoringStepProps {
   onQuickIncident?: (type: EventType, team: 'A' | 'B', label: string) => void;
   events?: MatchEvent[];
   onUndoLastEvent?: () => void;
+  onUndoTeamGoal?: (team: 'A' | 'B', eventId?: string) => void;
 }
 
 export const RefereeScoringStep: React.FC<RefereeScoringStepProps> = ({
@@ -36,6 +37,7 @@ export const RefereeScoringStep: React.FC<RefereeScoringStepProps> = ({
   onQuickIncident,
   events,
   onUndoLastEvent,
+  onUndoTeamGoal,
 }) => {
   // Model skor ditentukan otomatis berdasarkan cabor penugasan juri
   const sport = selectedSport || 'FUTSAL';
@@ -67,6 +69,7 @@ export const RefereeScoringStep: React.FC<RefereeScoringStepProps> = ({
           onQuickIncident={onQuickIncident}
           events={events}
           onUndoLastEvent={onUndoLastEvent}
+          onUndoTeamGoal={onUndoTeamGoal}
         />
       )}
     </div>

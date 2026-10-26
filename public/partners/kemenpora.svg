@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <defs>
+    <linearGradient id="kemGold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FDE047" />
+      <stop offset="50%" stop-color="#EAB308" />
+      <stop offset="100%" stop-color="#CA8A04" />
+    </linearGradient>
+    <linearGradient id="kemRed" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#EF4444" />
+      <stop offset="100%" stop-color="#B91C1C" />
+    </linearGradient>
+  </defs>
+  <!-- Background Shield -->
+  <path d="M50 6 C74 6 86 16 86 38 C86 65 65 84 50 92 C35 84 14 65 14 38 C14 16 26 6 50 6 Z" fill="#0F172A" stroke="url(#kemGold)" stroke-width="3" />
+  
+  <!-- Laurel Leaves -->
+  <path d="M26 48 C24 38 30 28 36 24 C34 32 32 40 34 46 M74 48 C76 38 70 28 64 24 C66 32 68 40 66 46" fill="none" stroke="#22C55E" stroke-width="2.5" stroke-linecap="round" />
+  
+  <!-- Red & White Center Core -->
+  <path d="M50 20 C62 20 68 26 68 38 C68 54 50 66 50 66 C50 66 32 54 32 38 C32 26 38 20 50 20 Z" fill="url(#kemRed)" />
+  <path d="M50 38 C56 38 60 41 60 47 C60 55 50 62 50 62 C50 62 40 55 40 47 C40 41 44 38 50 38 Z" fill="#FFFFFF" />
+
+  <!-- Flaming Torch -->
+  <path d="M47 38 L53 38 L51 52 L49 52 Z" fill="url(#kemGold)" />
+  <path d="M50 14 C46 22 55 24 50 32 C54 28 56 22 50 14 Z" fill="#F97316" />
+  
+  <!-- Five-pointed Star -->
+  <polygon points="50,11 52,15 56,15 53,18 54,22 50,19 46,22 47,18 44,15 48,15" fill="url(#kemGold)" />
+  
+  <!-- Bottom Ribbon with KEMENPORA -->
+  <path d="M20 74 L80 74 L75 84 L25 84 Z" fill="#1E3A8A" stroke="url(#kemGold)" stroke-width="1.5" />
+  <text x="50" y="81.5" font-family="Arial, sans-serif" font-size="7.5" font-weight="900" fill="#FFFFFF" text-anchor="middle" letter-spacing="1">KEMENPORA</text>
+</svg>

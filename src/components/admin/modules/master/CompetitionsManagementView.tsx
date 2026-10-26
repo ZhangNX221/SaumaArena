@@ -2,6 +2,8 @@
 
 import React, { useState } from 'react';
 import { Trophy, Calendar, MapPin, Users, Plus, CheckCircle2, AlertCircle, Edit2, X, Sparkles } from 'lucide-react';
+import { CompetitionFormModal } from './CompetitionFormModal';
+import { AdminPageHeaderCard } from '@/components/admin/common/AdminPageHeaderCard';
 
 export interface CompetitionItem {
   id: string;
@@ -65,64 +67,28 @@ export const CompetitionsManagementView: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingComp, setEditingComp] = useState<CompetitionItem | null>(null);
 
-  // Form state
-  const [formData, setFormData] = useState<Omit<CompetitionItem, 'id' | 'registeredTeamsCount'>>({
-    name: '',
-    edition: '',
-    sportLabel: 'Futsal',
-    dates: '',
-    venue: '',
-    maxTeamsCount: 16,
-    status: 'OPEN_REGISTRATION',
-    organizer: '',
-    description: '',
-  });
-
   const handleOpenAdd = () => {
     setEditingComp(null);
-    setFormData({
-      name: '',
-      edition: 'Tahun 2026',
-      sportLabel: 'Futsal',
-      dates: '2026',
-      venue: 'Matsanega Arena Court',
-      maxTeamsCount: 16,
-      status: 'OPEN_REGISTRATION',
-      organizer: 'Panitia Pelaksana',
-      description: '',
-    });
     setIsModalOpen(true);
   };
 
   const handleOpenEdit = (comp: CompetitionItem) => {
     setEditingComp(comp);
-    setFormData({
-      name: comp.name,
-      edition: comp.edition,
-      sportLabel: comp.sportLabel,
-      dates: comp.dates,
-      venue: comp.venue,
-      maxTeamsCount: comp.maxTeamsCount,
-      status: comp.status,
-      organizer: comp.organizer,
-      description: comp.description,
-    });
     setIsModalOpen(true);
   };
 
-  const handleSave = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSave = (savedData: Omit<CompetitionItem, 'id' | 'registeredTeamsCount'>) => {
     if (editingComp) {
       setCompetitions((prev) =>
         prev.map((c) =>
           c.id === editingComp.id
-            ? { ...c, ...formData }
+            ? { ...c, ...savedData }
             : c
         )
       );
     } else {
       const newComp: CompetitionItem = {
-        ...formData,
+        ...savedData,
         id: `comp-${Date.now()}`,
         registeredTeamsCount: 0,
       };
@@ -132,33 +98,24 @@ export const CompetitionsManagementView: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6 max-w-5xl mx-auto animate-fadeIn pb-12">
+    <div className="space-y-6 animate-fadeIn pb-12">
       {/* Header and Toolbar */}
-      <div className="p-5 sm:p-6 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2 text-[var(--color-arena-primary)]">
-            <Trophy className="w-4 h-4 shrink-0" />
-            <span className="text-xs font-barlow font-bold uppercase tracking-wider">
-              PERSIAPAN KOMPETISI &bull; MULTI-EVENT
-            </span>
-          </div>
-          <h2 className="text-2xl sm:text-3xl font-bebas text-[var(--text-main)] uppercase tracking-wide mt-1">
-            Daftar Kompetisi &amp; Turnamen
-          </h2>
-          <p className="text-xs text-[var(--text-muted)] mt-0.5 max-w-xl">
-            Kelola edisi kejuaraan aktif, status pendaftaran kuota tim, venue pelaksanaan, dan ganti kompetisi aktif kerja panitia.
-          </p>
-        </div>
-
-        <button
-          type="button"
-          onClick={handleOpenAdd}
-          className="btn-tactile px-4 py-2.5 rounded-xl bg-[var(--color-arena-primary)] hover:bg-[var(--color-arena-primary-hover)] text-white text-xs font-barlow font-bold uppercase tracking-wider flex items-center justify-center gap-2 shadow-xs shrink-0"
-        >
-          <Plus className="w-4 h-4" />
-          <span>Tambah Kompetisi Baru</span>
-        </button>
-      </div>
+      <AdminPageHeaderCard
+        icon={Trophy}
+        category="PERSIAPAN KOMPETISI • MULTI-EVENT"
+        title="Daftar Kompetisi &amp; Turnamen"
+        description="Kelola edisi kejuaraan aktif, status pendaftaran kuota tim, venue pelaksanaan, dan ganti kompetisi aktif kerja panitia."
+        action={
+          <button
+            type="button"
+            onClick={handleOpenAdd}
+            className="btn-tactile px-4 py-2.5 rounded-xl bg-[var(--color-arena-primary)] hover:bg-[var(--color-arena-primary-hover)] text-white text-xs font-barlow font-bold uppercase tracking-wider flex items-center justify-center gap-2 shadow-xs shrink-0"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Tambah Kompetisi Baru</span>
+          </button>
+        }
+      />
 
       {/* Summary KPI Strip */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -292,134 +249,12 @@ export const CompetitionsManagementView: React.FC = () => {
       </div>
 
       {/* Modal Add / Edit */}
-      {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fadeIn">
-          <div className="bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4">
-            <div className="flex items-center justify-between pb-2 border-b border-[var(--border-subtle)]">
-              <h3 className="font-bebas text-xl uppercase tracking-wide text-[var(--text-main)]">
-                {editingComp ? 'Edit Detail Kompetisi' : 'Tambah Kompetisi Baru'}
-              </h3>
-              <button
-                type="button"
-                onClick={() => setIsModalOpen(false)}
-                className="p-1 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-main)]"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            <form onSubmit={handleSave} className="space-y-3 text-xs">
-              <div>
-                <label className="font-barlow font-bold uppercase tracking-wider text-[11px] text-[var(--text-main)] block mb-1">
-                  Nama Kompetisi / Turnamen
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  placeholder="Contoh: Piala Bergilir Matsanega 2026"
-                  className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)]"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="font-barlow font-bold uppercase tracking-wider text-[11px] text-[var(--text-main)] block mb-1">
-                    Edisi / Seri
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.edition}
-                    onChange={(e) => setFormData({ ...formData, edition: e.target.value })}
-                    className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)]"
-                  />
-                </div>
-                <div>
-                  <label className="font-barlow font-bold uppercase tracking-wider text-[11px] text-[var(--text-main)] block mb-1">
-                    Cabang Olahraga
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.sportLabel}
-                    onChange={(e) => setFormData({ ...formData, sportLabel: e.target.value })}
-                    className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)]"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="font-barlow font-bold uppercase tracking-wider text-[11px] text-[var(--text-main)] block mb-1">
-                    Tanggal Pelaksanaan
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.dates}
-                    onChange={(e) => setFormData({ ...formData, dates: e.target.value })}
-                    className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)]"
-                  />
-                </div>
-                <div>
-                  <label className="font-barlow font-bold uppercase tracking-wider text-[11px] text-[var(--text-main)] block mb-1">
-                    Status Kompetisi
-                  </label>
-                  <select
-                    value={formData.status}
-                    onChange={(e) => setFormData({ ...formData, status: e.target.value as any })}
-                    className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)]"
-                  >
-                    <option value="ACTIVE">Sedang Berjalan (Active)</option>
-                    <option value="OPEN_REGISTRATION">Pendaftaran Terbuka</option>
-                    <option value="UPCOMING">Akan Datang</option>
-                    <option value="COMPLETED">Selesai</option>
-                  </select>
-                </div>
-              </div>
-
-              <div>
-                <label className="font-barlow font-bold uppercase tracking-wider text-[11px] text-[var(--text-main)] block mb-1">
-                  Venue / Lapangan Utama
-                </label>
-                <input
-                  type="text"
-                  value={formData.venue}
-                  onChange={(e) => setFormData({ ...formData, venue: e.target.value })}
-                  className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)]"
-                />
-              </div>
-
-              <div>
-                <label className="font-barlow font-bold uppercase tracking-wider text-[11px] text-[var(--text-main)] block mb-1">
-                  Deskripsi / Keterangan
-                </label>
-                <textarea
-                  rows={2}
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)]"
-                />
-              </div>
-
-              <div className="pt-2 flex items-center justify-end gap-2">
-                <button
-                  type="button"
-                  onClick={() => setIsModalOpen(false)}
-                  className="btn-tactile px-4 py-2 rounded-xl border border-[var(--border-subtle)] font-barlow font-bold uppercase tracking-wider text-xs"
-                >
-                  Batal
-                </button>
-                <button
-                  type="submit"
-                  className="btn-tactile px-4 py-2 rounded-xl bg-[var(--color-arena-primary)] text-white font-barlow font-bold uppercase tracking-wider text-xs"
-                >
-                  Simpan Kompetisi
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      <CompetitionFormModal
+        isOpen={isModalOpen}
+        editingComp={editingComp}
+        onClose={() => setIsModalOpen(false)}
+        onSave={handleSave}
+      />
     </div>
   );
 };
