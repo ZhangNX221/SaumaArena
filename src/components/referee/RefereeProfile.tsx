@@ -56,6 +56,22 @@ export const RefereeProfile: React.FC<RefereeProfileProps> = ({
   const [confirmPassword, setConfirmPassword] = useState('');
   const [deskPin, setDeskPin] = useState('2026');
 
+  // Load PIN meja dari localStorage
+  React.useEffect(() => {
+    try {
+      const savedPin = localStorage.getItem('sauma_desk_pin');
+      if (savedPin) setDeskPin(savedPin);
+    } catch {}
+  }, []);
+
+  const handleSetDeskPin = (val: string) => {
+    const cleaned = val.replace(/\D/g, '').slice(0, 4);
+    setDeskPin(cleaned);
+    try {
+      localStorage.setItem('sauma_desk_pin', cleaned);
+    } catch {}
+  };
+
   // Toast / Save State
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [saveMessage, setSaveMessage] = useState('');
@@ -77,8 +93,71 @@ export const RefereeProfile: React.FC<RefereeProfileProps> = ({
     setTimeout(() => setSaveSuccess(false), 3500);
   };
 
-  const handleSaveProfile = (e?: React.FormEvent) => {
+  const handleSaveProfile = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
+
+    // Jika pengguna mengisi sandi baru, validasi dan panggil backend change-password
+    if (newPassword) {
+      if (!oldPassword) {
+        showToast('Masukkan kata sandi saat ini untuk konfirmasi.');
+        return;
+      }
+      if (newPassword.length < 6) {
+        showToast('Kata sandi baru minimal 6 karakter.');
+        return;
+      }
+      if (newPassword !== confirmPassword) {
+        showToast('Konfirmasi kata sandi baru tidak cocok.');
+        return;
+      }
+
+      try {
+        let token: string | null = null;
+        try {
+          token = localStorage.getItem('sauma_auth_token');
+        } catch {}
+
+        const res = await fetch('/api/auth/change-password', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
+          credentials: 'include',
+          body: JSON.stringify({
+            currentPassword: oldPassword,
+            newPassword,
+            confirmPassword,
+            userId: user.id,
+            username: user.username,
+          }),
+        });
+
+        const data = await res.json();
+        if (!res.ok || !data.success) {
+          showToast(data.error || 'Gagal mengubah kata sandi.');
+          return;
+        }
+
+        if (data.token) {
+          try {
+            localStorage.setItem('sauma_auth_token', data.token);
+            if (data.user) {
+              localStorage.setItem('sauma_auth_user', JSON.stringify(data.user));
+            }
+          } catch {}
+        }
+
+        setOldPassword('');
+        setNewPassword('');
+        setConfirmPassword('');
+      } catch (err) {
+        console.error('Password change error:', err);
+        showToast('Gagal menghubungi server untuk update sandi.');
+        return;
+      }
+    }
+
     const avatarInitials = name
       .split(' ')
       .filter(Boolean)
@@ -226,7 +305,7 @@ export const RefereeProfile: React.FC<RefereeProfileProps> = ({
       <section id="section-security" className="scroll-mt-20">
         <ProfileSecurityTab
           deskPin={deskPin}
-          setDeskPin={setDeskPin}
+          setDeskPin={handleSetDeskPin}
           oldPassword={oldPassword}
           setOldPassword={setOldPassword}
           newPassword={newPassword}

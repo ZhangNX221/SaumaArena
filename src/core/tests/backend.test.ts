@@ -10,7 +10,7 @@ import { reduceMatchEvents } from '../events';
 import { validateMatchTransition } from '../statemachine';
 import { calculateStandings } from '../standings';
 import { generateRoundRobin, generateSingleElimination } from '../scheduling';
-import { signToken, verifyToken, requireAuth, hashPassword, verifyPassword } from '../../lib/auth';
+import { signToken, verifyToken, requireAuth, hashPassword, verifyPassword, changeUserPassword, authenticateUser } from '../../lib/auth';
 import { NextResponse } from 'next/server';
 import footballTemplate from '../../sports/football/template.json';
 import futsalTemplate from '../../sports/futsal/template.json';
@@ -259,4 +259,38 @@ test('Security & Auth: requireAuth access control and role gating', () => {
     assert.equal(resAdmin.user.role, 'ADMIN');
     assert.equal(resAdmin.user.id, 'USR-ADMIN');
   }
+});
+
+test('Security & Auth: changeUserPassword verification and SQLite persistence', () => {
+  // 1. Gagal jika kata sandi lama salah
+  const failWrongOld = changeUserPassword('USR-ADMIN', 'salahPass', 'baru12345');
+  assert.equal(failWrongOld.success, false);
+  assert.equal(failWrongOld.statusCode, 400);
+
+  // 2. Gagal jika kata sandi baru < 6 karakter
+  const failShort = changeUserPassword('USR-ADMIN', 'pass1234', '123');
+  assert.equal(failShort.success, false);
+  assert.equal(failShort.statusCode, 400);
+
+  // 3. Gagal jika kata sandi baru identik dengan kata sandi lama
+  const failSame = changeUserPassword('USR-ADMIN', 'pass1234', 'pass1234');
+  assert.equal(failSame.success, false);
+  assert.equal(failSame.statusCode, 400);
+
+  // 4. Sukses update kata sandi
+  const successChange = changeUserPassword('USR-ADMIN', 'pass1234', 'rahasiaBaru2026');
+  assert.equal(successChange.success, true);
+  assert.equal(successChange.user?.id, 'USR-ADMIN');
+
+  // Verifikasi login dengan kata sandi baru berhasil
+  const authNew = authenticateUser('admin', 'rahasiaBaru2026');
+  assert.equal(authNew.success, true);
+
+  // Verifikasi login dengan kata sandi lama sekarang gagal
+  const authOld = authenticateUser('admin', 'pass1234');
+  assert.equal(authOld.success, false);
+
+  // Kembalikan ke pass1234 agar konsisten untuk environment pengujian berikutnya
+  const revert = changeUserPassword('USR-ADMIN', 'rahasiaBaru2026', 'pass1234');
+  assert.equal(revert.success, true);
 });

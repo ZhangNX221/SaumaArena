@@ -257,6 +257,91 @@ export function authenticateUser(
 }
 
 /**
+ * Ubah kata sandi pengguna dengan memverifikasi kata sandi lama,
+ * menghasilkan hash baru dengan salt acak (PBKDF2), dan memperbarui data di SQLite.
+ */
+export function changeUserPassword(
+  userIdOrUsername: string,
+  currentPasswordAttempt: string,
+  newPassword: string
+): { success: boolean; user?: AppUser; error?: string; statusCode?: number } {
+  ensureAuthUsersSeeded();
+
+  if (!currentPasswordAttempt || !newPassword) {
+    return {
+      success: false,
+      error: 'Kata sandi saat ini dan kata sandi baru wajib diisi.',
+      statusCode: 400,
+    };
+  }
+
+  if (newPassword.length < 6) {
+    return {
+      success: false,
+      error: 'Kata sandi baru minimal harus 6 karakter.',
+      statusCode: 400,
+    };
+  }
+
+  const cleanIdentifier = userIdOrUsername.trim().toLowerCase();
+  let dbUser = queryOne<DbAuthUser>(
+    'SELECT * FROM auth_users WHERE id = ? OR LOWER(username) = ? OR LOWER(email) = ?',
+    [userIdOrUsername.trim(), cleanIdentifier, cleanIdentifier]
+  );
+
+  if (!dbUser && (cleanIdentifier === 'juri' || cleanIdentifier === 'juri1')) {
+    dbUser = queryOne<DbAuthUser>('SELECT * FROM auth_users WHERE id = ?', ['USR-JURI-1']);
+  }
+
+  if (!dbUser) {
+    return {
+      success: false,
+      error: 'Pengguna tidak ditemukan dalam sistem.',
+      statusCode: 404,
+    };
+  }
+
+  if (dbUser.is_active === 0) {
+    return {
+      success: false,
+      error: 'Akun Anda dinonaktifkan oleh administrator.',
+      statusCode: 403,
+    };
+  }
+
+  const isCurrentValid = verifyPassword(currentPasswordAttempt, dbUser.password_hash, dbUser.salt);
+  if (!isCurrentValid) {
+    return {
+      success: false,
+      error: 'Kata sandi saat ini salah. Pastikan Anda memasukkan kata sandi yang benar.',
+      statusCode: 400,
+    };
+  }
+
+  const isSamePassword = verifyPassword(newPassword, dbUser.password_hash, dbUser.salt);
+  if (isSamePassword) {
+    return {
+      success: false,
+      error: 'Kata sandi baru tidak boleh sama dengan kata sandi saat ini.',
+      statusCode: 400,
+    };
+  }
+
+  const { hash: newHash, salt: newSalt } = hashPassword(newPassword);
+
+  run(
+    'UPDATE auth_users SET password_hash = ?, salt = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
+    [newHash, newSalt, dbUser.id]
+  );
+
+  const updatedDbUser = queryOne<DbAuthUser>('SELECT * FROM auth_users WHERE id = ?', [dbUser.id]) || dbUser;
+  return {
+    success: true,
+    user: formatDbUserToAppUser(updatedDbUser),
+  };
+}
+
+/**
  * Ambil data AppUser berdasarkan ID pengguna.
  */
 export function getUserById(userId: string): AppUser | null {
