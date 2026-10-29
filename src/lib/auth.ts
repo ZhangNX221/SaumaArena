@@ -132,18 +132,23 @@ export function ensureAuthUsersSeeded(): void {
       );
     }
 
-    const countRow = queryOne<{ count: number }>('SELECT COUNT(*) as count FROM auth_users');
-    if (countRow && countRow.count > 0) {
-      return; // Sudah ada akun
-    }
+    // Pastikan hanya akun juri tunggal (USR-JURI-1) yang ada, bersihkan juri lain jika ada
+    run("DELETE FROM auth_users WHERE role = 'REFEREE' AND id != 'USR-JURI-1'");
 
-    // Seed preset accounts dengan default password 'pass1234'
+    // Seed atau update preset accounts dengan default password 'pass1234'
     const defaultPassword = 'pass1234';
     const insertStmt = `
       INSERT INTO auth_users (
         id, username, email, password_hash, salt, role, name,
         role_label, avatar_text, specialization, license_level, assigned_match_ids, is_active
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ON CONFLICT(id) DO UPDATE SET
+        username = excluded.username,
+        email = excluded.email,
+        name = excluded.name,
+        role_label = excluded.role_label,
+        assigned_match_ids = excluded.assigned_match_ids,
+        is_active = 1
     `;
 
     for (const preset of PRESET_USERS) {
@@ -208,10 +213,15 @@ export function authenticateUser(
   ensureAuthUsersSeeded();
 
   const cleanIdentifier = identifier.trim().toLowerCase();
-  const dbUser = queryOne<DbAuthUser>(
+  let dbUser = queryOne<DbAuthUser>(
     'SELECT * FROM auth_users WHERE LOWER(username) = ? OR LOWER(email) = ?',
     [cleanIdentifier, cleanIdentifier]
   );
+
+  // Kompatibilitas juri tunggal: izinkan login via username 'juri' maupun 'juri1'
+  if (!dbUser && (cleanIdentifier === 'juri' || cleanIdentifier === 'juri1')) {
+    dbUser = queryOne<DbAuthUser>('SELECT * FROM auth_users WHERE id = ?', ['USR-JURI-1']);
+  }
 
   // Mencegah username enumeration: gunakan pesan kegagalan generik
   if (!dbUser) {

@@ -93,6 +93,15 @@ const createMatch = (
   status: 'UPCOMING',
   venueName: 'Lapangan Futsal Seabless Srengat',
   courtName: 'Lapangan Futsal Seabless',
+  refereeIds: ['USR-JURI-1'],
+  assignedReferees: [
+    {
+      refereeId: 'USR-JURI-1',
+      refereeName: 'Juri M. Irfan, S.Pd',
+      role: 'WASIT_1',
+      licenseLevel: 'Lisensi 2 Nasional FFI',
+    },
+  ],
   scheduledTime,
   events: [],
   ...extra,

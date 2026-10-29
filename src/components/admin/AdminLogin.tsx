@@ -41,7 +41,7 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({
     if (role === 'ADMIN') {
       setUsername('admin');
     } else {
-      setUsername('juri1');
+      setUsername('juri');
     }
   };
 
