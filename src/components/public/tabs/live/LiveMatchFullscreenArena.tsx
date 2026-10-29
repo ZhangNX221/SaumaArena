@@ -207,16 +207,33 @@ export const LiveMatchFullscreenArena: React.FC<LiveMatchFullscreenArenaProps> =
           </div>
 
           {/* Huge Digital Stopwatch Display */}
-          <div className="w-full flex-1 flex items-center justify-center my-3 sm:my-4 rounded-2xl bg-black/85 border-2 border-slate-800 shadow-2xl p-4 relative overflow-hidden ring-1 ring-white/10">
+          <div
+            className={`w-full flex-1 flex items-center justify-center my-3 sm:my-4 rounded-2xl bg-black/85 border-2 shadow-2xl p-4 relative overflow-hidden ring-1 ${
+              timerSeconds === 0
+                ? 'border-red-500 ring-red-500/50 shadow-[0_0_30px_rgba(239,68,68,0.4)]'
+                : 'border-slate-800 ring-white/10'
+            }`}
+          >
             <div className="absolute inset-0 bg-radial from-white/5 via-transparent to-transparent pointer-events-none" />
-            <div className="font-scoreboard font-black text-6xl sm:text-7xl md:text-8xl lg:text-[8.5rem] xl:text-[10.5rem] 2xl:text-[12rem] text-white tracking-widest tabular-nums leading-none drop-shadow-[0_0_35px_rgba(255,255,255,0.45)] select-none">
+            <div
+              className={`font-scoreboard font-black text-6xl sm:text-7xl md:text-8xl lg:text-[8.5rem] xl:text-[10.5rem] 2xl:text-[12rem] tracking-widest tabular-nums leading-none select-none ${
+                timerSeconds === 0
+                  ? 'text-red-400 drop-shadow-[0_0_35px_rgba(239,68,68,0.8)]'
+                  : 'text-white drop-shadow-[0_0_35px_rgba(255,255,255,0.45)]'
+              }`}
+            >
               {formatTime(timerSeconds)}
             </div>
           </div>
 
           {/* High-Contrast Match Status Pill - BESAR & JELAS */}
           <div className="w-full flex flex-col items-center gap-2.5 sm:gap-3">
-            {isMatchUpcoming ? (
+            {timerSeconds === 0 ? (
+              <div className="flex items-center gap-2.5 px-6 sm:px-8 py-2.5 sm:py-3.5 rounded-full bg-red-600/30 border-2 border-red-500 text-red-200 text-sm sm:text-base lg:text-xl font-barlow font-black uppercase tracking-wider shadow-[0_0_25px_rgba(239,68,68,0.7)] animate-pulse">
+                <span className="w-4 h-4 rounded-full bg-red-500 shadow-[0_0_12px_rgba(239,68,68,1)]" />
+                <span>WAKTU HABIS &bull; INTERVAL / SELESAI</span>
+              </div>
+            ) : isMatchUpcoming ? (
               <div className="flex items-center gap-2.5 px-6 sm:px-8 py-2.5 sm:py-3.5 rounded-full bg-amber-500/25 border-2 border-amber-500/60 text-amber-300 text-sm sm:text-base lg:text-xl font-barlow font-black uppercase tracking-wider shadow-2xl">
                 <span className="w-4 h-4 rounded-full bg-amber-400 animate-pulse shadow-[0_0_12px_rgba(251,191,36,0.9)]" />
                 <span>BELUM DIMULAI &bull; MENUNGGU KICK-OFF</span>

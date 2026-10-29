@@ -5,7 +5,7 @@ import { Play, Pause, RotateCcw, BellRing, Sliders, Clock, X, Check, ChevronDown
 import { Match, MatchEvent, EventType } from '@/types';
 import { MatchGoalsTable } from './MatchGoalsTable';
 import { TeamScoreFoulCard } from './TeamScoreFoulCard';
-import { playMatchStartBell } from '@/utils/arenaSound';
+import { playMatchStartBell, playDoubleAlarmBuzzer } from '@/utils/arenaSound';
 
 interface ScoringTimedGoalsProps {
   currentMatch: Match;
@@ -97,7 +97,7 @@ export const ScoringTimedGoals: React.FC<ScoringTimedGoalsProps> = ({
 
   const handleRingBell = () => {
     setIsBellRinging(true);
-    playMatchStartBell(1.4);
+    playDoubleAlarmBuzzer();
     setTimeout(() => setIsBellRinging(false), 2400);
   };
 

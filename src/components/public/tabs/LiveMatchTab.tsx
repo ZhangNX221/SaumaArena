@@ -9,6 +9,7 @@ import { LiveMatchHeader } from './live/LiveMatchHeader';
 import { LiveMatchScoreboard } from './live/LiveMatchScoreboard';
 import { LiveMatchGoalHistory } from './live/LiveMatchGoalHistory';
 import { LiveMatchFullscreenArena } from './live/LiveMatchFullscreenArena';
+import { playStadiumAlarm } from '@/lib/soundEffects';
 
 interface LiveMatchTabProps {
   sportCode?: SportCode;
@@ -60,6 +61,22 @@ export const LiveMatchTab: React.FC<LiveMatchTabProps> = ({
   const scoreA = selectedMatch.scoreA ?? 0;
   const scoreB = selectedMatch.scoreB ?? 0;
   const events = selectedMatch.events || [];
+
+  // Alarm otomatis berbunyi 2 kali saat timer pertandingan habis (mencapai 0)
+  const prevSecondsRef = useRef<number>(timerSeconds);
+  const hasTriggeredAlarmRef = useRef<boolean>(false);
+
+  useEffect(() => {
+    if (prevSecondsRef.current > 0 && timerSeconds === 0) {
+      if (!hasTriggeredAlarmRef.current) {
+        playStadiumAlarm(2);
+        hasTriggeredAlarmRef.current = true;
+      }
+    } else if (timerSeconds > 0) {
+      hasTriggeredAlarmRef.current = false;
+    }
+    prevSecondsRef.current = timerSeconds;
+  }, [timerSeconds]);
 
   // Listener fullscreen change dari browser (misal user tekan ESC)
   useEffect(() => {

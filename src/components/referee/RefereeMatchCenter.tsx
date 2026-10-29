@@ -9,6 +9,7 @@ import { SportRuleSettings, DEFAULT_SPORT_RULES } from '@/config/sportRules';
 import { AdminPageHeaderCard } from '@/components/admin/common/AdminPageHeaderCard';
 import { initialMatches } from '@/mocks/tournamentData';
 import { pushMatchToBackend } from '@/lib/apiSync';
+import { playDoubleAlarmBuzzer } from '@/utils/arenaSound';
 
 interface RefereeMatchCenterProps {
   currentMatch: Match;
@@ -85,11 +86,16 @@ export const RefereeMatchCenter: React.FC<RefereeMatchCenterProps> = ({
         setTelemetryMap((prev) => {
           const cur = prev[currentMatch.id] || defaultTelemetry;
           if (!cur.isTimerRunning || cur.timerSeconds <= 0) return prev;
+          const nextSecs = Math.max(0, cur.timerSeconds - 1);
+          if (nextSecs === 0 && cur.timerSeconds > 0) {
+            playDoubleAlarmBuzzer();
+          }
           return {
             ...prev,
             [currentMatch.id]: {
               ...cur,
-              timerSeconds: Math.max(0, cur.timerSeconds - 1),
+              timerSeconds: nextSecs,
+              isTimerRunning: nextSecs > 0,
               updatedAt: Date.now(),
             },
           };
