@@ -83,7 +83,7 @@ export const ScheduleTab: React.FC<ScheduleTabProps> = ({ sportCode = 'FUTSAL' }
                 </span>
               </div>
               <p className="text-[11px] text-[var(--text-muted)] mt-0.5 font-medium">
-                Waktu Sistem: <strong>{calendarData.current.formattedIndonesian}</strong> ({calendarData.current.currentTimeWib}) &bull; Kalender Hijriyah: <strong className="text-emerald-700 dark:text-emerald-400">{calendarData.current.hijri}</strong>
+                Waktu Sistem: <strong>{calendarData.current.formattedIndonesian}</strong> ({calendarData.current.currentTimeWib})
               </p>
             </div>
           </div>
