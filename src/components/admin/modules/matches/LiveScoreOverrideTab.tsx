@@ -13,6 +13,7 @@ import {
 import { initialMatches } from '@/mocks/tournamentData';
 import { Match, MatchStatus, SportCode, MatchLiveTelemetry } from '@/types';
 import { LiveScoreOverrideModal } from './LiveScoreOverrideModal';
+import { ConfirmModal } from '@/components/admin/common/ConfirmModal';
 import { usePersistentState } from '@/hooks/usePersistentState';
 import { pushMatchToBackend } from '@/lib/apiSync';
 
@@ -36,6 +37,7 @@ export const LiveScoreOverrideTab: React.FC<LiveScoreOverrideTabProps> = ({
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [scoreFlashId, setScoreFlashId] = useState<string | null>(null);
   const [overrideModalMatch, setOverrideModalMatch] = useState<Match | null>(null);
+  const [isResetConfirmOpen, setIsResetConfirmOpen] = useState(false);
 
   const saveMatches = (newMatches: Match[], feedbackMessage?: string, updatedMatch?: Match) => {
     setMatches(newMatches);
@@ -89,9 +91,12 @@ export const LiveScoreOverrideTab: React.FC<LiveScoreOverrideTabProps> = ({
 
   // Quick reset to initial mock
   const handleResetData = () => {
-    if (confirm('Kembalikan semua skor dan status ke data awal turnamen?')) {
-      saveMatches(initialMatches, 'Data laga dikembalikan ke pengaturan awal');
-    }
+    setIsResetConfirmOpen(true);
+  };
+
+  const handleExecuteResetData = () => {
+    setIsResetConfirmOpen(false);
+    saveMatches(initialMatches, 'Data laga dikembalikan ke pengaturan awal');
   };
 
   const handleSaveModalOverride = (newScoreA: number, newScoreB: number) => {
@@ -386,6 +391,18 @@ export const LiveScoreOverrideTab: React.FC<LiveScoreOverrideTabProps> = ({
         match={overrideModalMatch}
         onClose={() => setOverrideModalMatch(null)}
         onSave={handleSaveModalOverride}
+      />
+
+      <ConfirmModal
+        isOpen={isResetConfirmOpen}
+        title="Reset Data Pertandingan"
+        message="Apakah Anda yakin ingin mengembalikan semua skor dan status pertandingan ke pengaturan awal turnamen?"
+        confirmLabel="Ya, Kembalikan Data Awal"
+        cancelLabel="Batal"
+        isDanger={true}
+        icon={<RotateCcw className="w-5 h-5 text-red-600 dark:text-red-400" />}
+        onConfirm={handleExecuteResetData}
+        onCancel={() => setIsResetConfirmOpen(false)}
       />
     </div>
   );

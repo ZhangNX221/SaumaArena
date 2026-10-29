@@ -7,6 +7,7 @@ import { RefereeScoringStep } from './steps/RefereeScoringStep';
 import { usePersistentState } from '@/hooks/usePersistentState';
 import { SportRuleSettings, DEFAULT_SPORT_RULES } from '@/config/sportRules';
 import { AdminPageHeaderCard } from '@/components/admin/common/AdminPageHeaderCard';
+import { ConfirmModal } from '@/components/admin/common/ConfirmModal';
 import { initialMatches } from '@/mocks/tournamentData';
 import { pushMatchToBackend } from '@/lib/apiSync';
 import { playTimerStartSound, playTimerEndSound } from '@/utils/arenaSound';
@@ -45,6 +46,7 @@ export const RefereeMatchCenter: React.FC<RefereeMatchCenterProps> = ({
 
   // State ID laga yang dipilih (bisa dari luar atau diganti langsung via dropdown)
   const [selectedMatchId, setSelectedMatchId] = useState<string>(initialMatchProp.id);
+  const [isResetConfirmOpen, setIsResetConfirmOpen] = useState<boolean>(false);
 
   // Perbarui jika prop berganti dari induk
   useEffect(() => {
@@ -132,12 +134,11 @@ export const RefereeMatchCenter: React.FC<RefereeMatchCenterProps> = ({
   };
 
   const handleResetMatch = () => {
-    const isConfirmed = typeof window !== 'undefined'
-      ? window.confirm(
-          `Apakah Anda yakin ingin me-reset Laga #${currentMatch.matchNumber} (${currentMatch.teamAName} vs ${currentMatch.teamBName})?\nSkor akan kembali ke 0 - 0, timer ke ${adminDurationMinutes} menit, dan seluruh catatan babak ini dikembalikan ke awal.`
-        )
-      : true;
-    if (!isConfirmed) return;
+    setIsResetConfirmOpen(true);
+  };
+
+  const handleConfirmReset = () => {
+    setIsResetConfirmOpen(false);
 
     // 1. Reset skor, status, dan riwayat gol di daftar pertandingan
     setMatches((prev) =>
@@ -416,6 +417,54 @@ export const RefereeMatchCenter: React.FC<RefereeMatchCenterProps> = ({
         onSelectMatch={handleSelectMatch}
         onResetMatch={handleResetMatch}
       />
+
+      {/* Modal Dialog Konfirmasi Reset Laga yang Proper */}
+      <ConfirmModal
+        isOpen={isResetConfirmOpen}
+        title="Konfirmasi Reset Laga"
+        confirmLabel="Ya, Reset Laga"
+        cancelLabel="Batal"
+        isDanger={true}
+        icon={<RotateCcw className="w-5 h-5 text-red-600 dark:text-red-400" />}
+        onConfirm={handleConfirmReset}
+        onCancel={() => setIsResetConfirmOpen(false)}
+      >
+        <div className="space-y-3 mt-2.5">
+          <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-xs">
+            <div className="font-barlow font-bold uppercase tracking-wider text-red-700 dark:text-red-400 text-[11px] flex items-center gap-1.5">
+              <span>Laga #{currentMatch.matchNumber}</span>
+              <span>&bull;</span>
+              <span>{currentMatch.courtName || 'Lapangan Futsal Seabless'}</span>
+            </div>
+            <div className="text-sm font-bebas tracking-wide uppercase text-[var(--text-main)] mt-0.5">
+              {currentMatch.teamAName} <span className="text-[var(--color-arena-accent)]">VS</span> {currentMatch.teamBName}
+            </div>
+          </div>
+
+          <p className="text-xs text-[var(--text-muted)] leading-relaxed">
+            Apakah Anda yakin ingin me-reset Laga ini? Seluruh data pertandingan babak ini akan dikembalikan ke kondisi awal:
+          </p>
+
+          <ul className="text-xs text-[var(--text-muted)] space-y-1.5 pl-0.5">
+            <li className="flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-red-500 shrink-0" />
+              <span>Skor kembali ke <strong className="text-[var(--text-main)] font-mono font-bold">0 - 0</strong></span>
+            </li>
+            <li className="flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-red-500 shrink-0" />
+              <span>Timer kembali ke <strong className="text-[var(--text-main)] font-mono font-bold">{adminDurationMinutes} Menit</strong></span>
+            </li>
+            <li className="flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-red-500 shrink-0" />
+              <span>Seluruh riwayat gol, kartu, dan pelanggaran dibersihkan</span>
+            </li>
+            <li className="flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-red-500 shrink-0" />
+              <span>Status laga dikembalikan ke <strong className="text-[var(--text-main)] font-bold">BELUM DIMULAI (UPCOMING)</strong></span>
+            </li>
+          </ul>
+        </div>
+      </ConfirmModal>
     </div>
   );
 };
