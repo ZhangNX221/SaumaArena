@@ -61,7 +61,11 @@ export type AdminSubmenuId =
   | 'reports_export'
   | 'ticket_management'
   | 'transaction_history'
-  | 'qr_scanner_gate';
+  | 'qr_scanner_gate'
+  | 'schedule_plotting'
+  | 'live_score_override'
+  | 'group_standings'
+  | 'drawing_bracket';
 
 export type AdminTab = AdminSubmenuId;
 

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Play, Pause, RotateCcw, BellRing, Sliders, Clock, X, Check } from 'lucide-react';
+import { Play, Pause, RotateCcw, BellRing, Sliders, Clock, X, Check, ChevronDown } from 'lucide-react';
 import { Match, MatchEvent, EventType } from '@/types';
 import { MatchGoalsTable } from './MatchGoalsTable';
 import { TeamScoreFoulCard } from './TeamScoreFoulCard';
@@ -25,6 +25,15 @@ interface ScoringTimedGoalsProps {
   events?: MatchEvent[];
   onUndoLastEvent?: () => void;
   onUndoTeamGoal?: (team: 'A' | 'B', eventId?: string) => void;
+  foulsA?: number;
+  foulsB?: number;
+  timeoutsA?: number;
+  timeoutsB?: number;
+  onUpdateFouls?: (team: 'A' | 'B', delta: number) => void;
+  onUpdateTimeouts?: (team: 'A' | 'B', delta: number) => void;
+  matches?: Match[];
+  onSelectMatch?: (matchId: string) => void;
+  onResetMatch?: () => void;
 }
 
 export const ScoringTimedGoals: React.FC<ScoringTimedGoalsProps> = ({
@@ -45,11 +54,26 @@ export const ScoringTimedGoals: React.FC<ScoringTimedGoalsProps> = ({
   events = [],
   onUndoLastEvent,
   onUndoTeamGoal,
+  foulsA: foulsAProp,
+  foulsB: foulsBProp,
+  timeoutsA: timeoutsAProp,
+  timeoutsB: timeoutsBProp,
+  onUpdateFouls,
+  onUpdateTimeouts,
+  matches,
+  onSelectMatch,
+  onResetMatch,
 }) => {
-  const [foulsA, setFoulsA] = useState(3);
-  const [foulsB, setFoulsB] = useState(5);
-  const [timeoutsA, setTimeoutsA] = useState(1);
-  const [timeoutsB, setTimeoutsB] = useState(0);
+  const [localFoulsA, setLocalFoulsA] = useState(0);
+  const [localFoulsB, setLocalFoulsB] = useState(0);
+  const [localTimeoutsA, setLocalTimeoutsA] = useState(1);
+  const [localTimeoutsB, setLocalTimeoutsB] = useState(1);
+
+  const foulsA = foulsAProp !== undefined ? foulsAProp : localFoulsA;
+  const foulsB = foulsBProp !== undefined ? foulsBProp : localFoulsB;
+  const timeoutsA = timeoutsAProp !== undefined ? timeoutsAProp : localTimeoutsA;
+  const timeoutsB = timeoutsBProp !== undefined ? timeoutsBProp : localTimeoutsB;
+
   const [isBellRinging, setIsBellRinging] = useState(false);
 
   // Modal Atur Waktu
@@ -78,20 +102,25 @@ export const ScoringTimedGoals: React.FC<ScoringTimedGoalsProps> = ({
   };
 
   const handleFoulChange = (team: 'A' | 'B', delta: number) => {
-    const isA = team === 'A';
-    const current = isA ? foulsA : foulsB;
+    if (onUpdateFouls) {
+      onUpdateFouls(team, delta);
+    } else {
+      if (team === 'A') setLocalFoulsA((prev) => Math.max(0, prev + delta));
+      else setLocalFoulsB((prev) => Math.max(0, prev + delta));
+    }
+    const current = team === 'A' ? foulsA : foulsB;
     const next = Math.max(0, current + delta);
-    if (isA) setFoulsA(next);
-    else setFoulsB(next);
     if (delta > 0 && onQuickIncident) onQuickIncident('FOUL', team, `Foul ke-${next}`);
   };
 
   const handleTimeout = (team: 'A' | 'B') => {
     if (team === 'A' && timeoutsA > 0) {
-      setTimeoutsA((prev) => prev - 1);
+      if (onUpdateTimeouts) onUpdateTimeouts('A', -1);
+      else setLocalTimeoutsA((prev) => prev - 1);
       onQuickIncident?.('TIMEOUT', 'A', 'Time Out Babak Ini');
     } else if (team === 'B' && timeoutsB > 0) {
-      setTimeoutsB((prev) => prev - 1);
+      if (onUpdateTimeouts) onUpdateTimeouts('B', -1);
+      else setLocalTimeoutsB((prev) => prev - 1);
       onQuickIncident?.('TIMEOUT', 'B', 'Time Out Babak Ini');
     }
   };
@@ -133,21 +162,65 @@ export const ScoringTimedGoals: React.FC<ScoringTimedGoalsProps> = ({
 
   return (
     <div className="rounded-xl bg-[var(--bg-surface)] text-[var(--text-main)] border-2 border-slate-300 dark:border-slate-800 p-4 sm:p-5 shadow-sm space-y-3.5 animate-fadeIn">
-      {/* 1. Top Compact Meta Bar */}
-      <div className="flex items-center justify-between text-xs pb-2.5 border-b border-slate-200 dark:border-slate-800">
+      {/* 1. Top Meta Bar: Papan Skor & Stopwatch Lapangan + Selector Laga Dropdown + Babak + Tombol Reset + Bel */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 text-xs pb-3 border-b border-slate-200 dark:border-slate-800">
         <div className="flex items-center gap-2">
           <span className="font-bebas text-base sm:text-lg uppercase tracking-wider text-[var(--text-main)] leading-none">
             Papan Skor &amp; Stopwatch Lapangan
           </span>
           <span className="hidden sm:inline-flex text-[10px] text-[var(--text-muted)] font-mono px-2 py-0.5 rounded bg-[var(--bg-muted)] border border-slate-300 dark:border-slate-700">
-            Default Admin: {adminDurationMinutes} Menit
+            Admin: {adminDurationMinutes} Menit
           </span>
         </div>
-        <div className="flex items-center gap-2">
+
+        <div className="flex flex-wrap items-center gap-2">
+          {/* Selector Laga Meja Wasit Dropdown */}
+          {matches && matches.length > 0 && onSelectMatch && (
+            <div className="relative">
+              <select
+                value={currentMatch.id}
+                onChange={(e) => onSelectMatch(e.target.value)}
+                className="appearance-none pl-3 pr-8 py-2 rounded-xl bg-[var(--bg-muted)] hover:bg-[var(--bg-muted)]/80 border border-slate-300 dark:border-slate-700 text-[var(--text-main)] font-barlow font-bold text-xs uppercase tracking-wider cursor-pointer focus:outline-none transition-colors"
+                aria-label="Pilih laga meja wasit"
+              >
+                {matches.map((m) => (
+                  <option key={m.id} value={m.id} className="bg-[var(--bg-surface)] text-[var(--text-main)]">
+                    Laga #{m.matchNumber}: {m.teamAName} vs {m.teamBName} ({m.scoreA} - {m.scoreB})
+                  </option>
+                ))}
+              </select>
+              <ChevronDown className="w-3.5 h-3.5 text-[var(--text-muted)] absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+            </div>
+          )}
+
+          {/* Tombol Babak (Clickable untuk ganti babak) */}
+          <button
+            type="button"
+            onClick={handleCyclePeriod}
+            className="btn-tactile px-3 py-2 rounded-xl bg-[var(--bg-muted)] hover:bg-slate-200 dark:hover:bg-slate-700 text-[var(--color-arena-accent)] font-barlow font-bold uppercase tracking-wider text-xs border border-slate-300 dark:border-slate-700 transition-colors cursor-pointer"
+            title="Klik untuk Ganti Babak Pertandingan"
+          >
+            {currentPeriod}
+          </button>
+
+          {/* Tombol Reset Pertandingan Laga Ini */}
+          {onResetMatch && (
+            <button
+              type="button"
+              onClick={onResetMatch}
+              className="btn-tactile px-3 py-2 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-600 dark:text-red-400 font-barlow font-bold uppercase tracking-wider text-xs border border-red-500/30 flex items-center gap-1.5 transition-colors cursor-pointer"
+              title="Reset Skor, Waktu, dan Pelanggaran Laga Ini ke 0-0"
+            >
+              <RotateCcw className="w-3.5 h-3.5" />
+              <span>Reset</span>
+            </button>
+          )}
+
+          {/* Tombol Bel Kick-off */}
           <button
             type="button"
             onClick={handleRingBell}
-            className={`btn-tactile px-2.5 py-1 rounded-md font-barlow font-bold uppercase text-[11px] border flex items-center gap-1.5 transition-all shadow-xs cursor-pointer ${
+            className={`btn-tactile px-2.5 py-2 rounded-xl font-barlow font-bold uppercase text-xs border flex items-center gap-1.5 transition-all shadow-xs cursor-pointer ${
               isBellRinging
                 ? 'bg-red-600 text-white border-red-400 animate-pulse ring-2 ring-red-400'
                 : 'bg-amber-50 dark:bg-amber-950/40 hover:bg-amber-100 text-amber-800 dark:text-amber-300 border-amber-300 dark:border-amber-800'
@@ -155,15 +228,7 @@ export const ScoringTimedGoals: React.FC<ScoringTimedGoalsProps> = ({
             title="Bunyikan Bel Kick-off / Mulai Pertandingan"
           >
             <BellRing className={`w-3.5 h-3.5 ${isBellRinging ? 'animate-bounce text-white' : 'text-amber-500'}`} />
-            <span>{isBellRinging ? 'Bel Berbunyi!' : 'Bel Kick-off'}</span>
-          </button>
-          <button
-            type="button"
-            onClick={handleCyclePeriod}
-            className="btn-tactile px-2.5 py-1 rounded-md bg-[var(--bg-muted)] hover:bg-slate-200 dark:hover:bg-slate-700 text-[var(--color-arena-accent)] font-barlow font-bold uppercase tracking-wider text-xs border border-slate-300 dark:border-slate-700 transition-colors cursor-pointer"
-            title="Klik untuk Ganti Babak"
-          >
-            {currentPeriod}
+            <span className="hidden sm:inline">{isBellRinging ? 'Bel Berbunyi!' : 'Bel Kick-off'}</span>
           </button>
         </div>
       </div>
@@ -211,7 +276,7 @@ export const ScoringTimedGoals: React.FC<ScoringTimedGoalsProps> = ({
               className="p-1 rounded text-[var(--text-muted)] hover:text-amber-500 transition-all text-[10px] flex items-center gap-0.5 font-bold uppercase cursor-pointer"
               title="Atur Waktu Pertandingan"
             >
-              <Sliders className="w-3 h-3" />
+              <Sliders className="w-3.5 h-3.5" />
               <span>Atur</span>
             </button>
           </div>
@@ -278,18 +343,17 @@ export const ScoringTimedGoals: React.FC<ScoringTimedGoalsProps> = ({
                 type="button"
                 onClick={handleOpenTimeModal}
                 className="btn-tactile py-1 px-1 rounded-md bg-[var(--bg-surface)] hover:bg-slate-200 dark:hover:bg-slate-700 text-amber-600 dark:text-amber-400 font-barlow font-bold uppercase text-[10px] border border-slate-300 dark:border-slate-600 flex items-center justify-center cursor-pointer"
-                title="Atur Waktu Presisi"
+                title="Set Waktu Manual"
               >
-                <Sliders className="w-3 h-3" />
+                Set
               </button>
               <button
                 type="button"
                 onClick={onResetTimer}
-                className="btn-tactile py-1 px-1 rounded-md bg-[var(--bg-surface)] hover:bg-slate-200 dark:hover:bg-slate-700 text-[var(--text-muted)] hover:text-[var(--text-main)] border border-slate-300 dark:border-slate-600 flex items-center justify-center cursor-pointer"
-                aria-label="Reset Timer"
-                title={`Reset ke ${adminDurationMinutes} Menit (Default Admin)`}
+                className="btn-tactile py-1 px-1 rounded-md bg-[var(--bg-surface)] hover:bg-slate-200 dark:hover:bg-slate-700 text-red-600 dark:text-red-400 font-barlow font-bold uppercase text-[10px] border border-slate-300 dark:border-slate-600 flex items-center justify-center cursor-pointer"
+                title="Reset Waktu ke Default"
               >
-                <RotateCcw className="w-3 h-3" />
+                <RotateCcw className="w-2.5 h-2.5" />
               </button>
             </div>
           </div>

@@ -15,6 +15,7 @@ import { ReportsExportTab } from './modules/system/ReportsExportTab';
 import { AccountSettingsView } from './modules/system/AccountSettingsView';
 import { BackupRestoreTab } from './modules/system/BackupRestoreTab';
 import { MatchSettingsView } from './modules/system/MatchSettingsView';
+import { AdminMatchOpsModule } from './modules/AdminMatchOpsModule';
 import { FEATURES } from '@/config/features';
 
 interface AdminDashboardProps {
@@ -49,6 +50,11 @@ const MENU_LABELS: Record<AdminSubmenuId, { category: string; title: string }> =
   ticket_management: { category: 'TIKET MASUK', title: 'Kuota Tiket' },
   transaction_history: { category: 'TIKET MASUK', title: 'Riwayat Transaksi' },
   qr_scanner_gate: { category: 'TIKET MASUK', title: 'Pindai Tiket' },
+  schedule_plotting: { category: 'PERTANDINGAN', title: 'Jadwal & Hasil Laga' },
+  live_score_override: { category: 'PERTANDINGAN', title: 'Live Score Lapangan' },
+  group_standings: { category: 'PERTANDINGAN', title: 'Klasemen Grup' },
+  drawing_bracket: { category: 'PERTANDINGAN', title: 'Bagan Babak Gugur' },
+
 };
 
 export const AdminDashboard: React.FC<AdminDashboardProps> = ({
@@ -182,6 +188,77 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               <AthletesPlayersTab />
             )}
 
+
+            
+            {/* 4. Pertandingan & Operasional Lapangan */}
+            {activeSubmenu === 'schedule_plotting' && (
+              <AdminMatchOpsModule
+                selectedSport={selectedSport}
+                subTab="schedule"
+                onSelectSubTab={(t) =>
+                  setActiveSubmenu(
+                    t === 'schedule'
+                      ? 'schedule_plotting'
+                      : t === 'override'
+                      ? 'live_score_override'
+                      : t === 'standings'
+                      ? 'group_standings'
+                      : 'drawing_bracket'
+                  )
+                }
+              />
+            )}
+            {activeSubmenu === 'live_score_override' && (
+              <AdminMatchOpsModule
+                selectedSport={selectedSport}
+                subTab="override"
+                onSelectSubTab={(t) =>
+                  setActiveSubmenu(
+                    t === 'schedule'
+                      ? 'schedule_plotting'
+                      : t === 'override'
+                      ? 'live_score_override'
+                      : t === 'standings'
+                      ? 'group_standings'
+                      : 'drawing_bracket'
+                  )
+                }
+              />
+            )}
+            {activeSubmenu === 'group_standings' && (
+              <AdminMatchOpsModule
+                selectedSport={selectedSport}
+                subTab="standings"
+                onSelectSubTab={(t) =>
+                  setActiveSubmenu(
+                    t === 'schedule'
+                      ? 'schedule_plotting'
+                      : t === 'override'
+                      ? 'live_score_override'
+                      : t === 'standings'
+                      ? 'group_standings'
+                      : 'drawing_bracket'
+                  )
+                }
+              />
+            )}
+            {activeSubmenu === 'drawing_bracket' && (
+              <AdminMatchOpsModule
+                selectedSport={selectedSport}
+                subTab="brackets"
+                onSelectSubTab={(t) =>
+                  setActiveSubmenu(
+                    t === 'schedule'
+                      ? 'schedule_plotting'
+                      : t === 'override'
+                      ? 'live_score_override'
+                      : t === 'standings'
+                      ? 'group_standings'
+                      : 'drawing_bracket'
+                  )
+                }
+              />
+            )}
 
             {/* 5. Pengaturan & Akun */}
             {(activeSubmenu === 'account_settings' || activeSubmenu === 'referee_staff_accounts') && (

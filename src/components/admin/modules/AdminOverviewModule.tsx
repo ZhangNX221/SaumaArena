@@ -7,7 +7,7 @@ import { initialTeams, initialMatches, initialTickets } from '@/mocks/tournament
 import { SportCode } from '@/types';
 import { TeamGoalsBarChart } from '@/components/public/stats/TeamGoalsBarChart';
 import { GoalMinuteLineChart } from '@/components/public/stats/GoalMinuteLineChart';
-import { MedalTallyCrudTab } from './overview/MedalTallyCrudTab';
+
 import { FEATURES } from '@/config/features';
 import { AdminPageHeaderCard } from '@/components/admin/common/AdminPageHeaderCard';
 
@@ -35,8 +35,8 @@ export const AdminOverviewModule: React.FC<AdminOverviewModuleProps> = ({
       <AdminPageHeaderCard
         icon={BarChart3}
         category="BERANDA • RINGKASAN HARI INI"
-        title="Ringkasan Turnamen & Klasemen Perolehan"
-        description="Pantauan metrik kontingen, analisis gol pertandingan, status tiket masuk, serta rekapitulasi klasemen perolehan medali seluruh kontingen."
+        title="Ringkasan Turnamen & Analisis Laga"
+        description="Pantauan metrik kontingen, analisis gol pertandingan, serta status tiket masuk turnamen."
       />
 
       {/* Kartu Metrik Utama */}
@@ -142,8 +142,8 @@ export const AdminOverviewModule: React.FC<AdminOverviewModuleProps> = ({
         <GoalMinuteLineChart />
       </div>
 
-      {/* Klasemen Perolehan Medali Kontingen */}
-      <MedalTallyCrudTab selectedSport={selectedSport} />
+
+
     </div>
   );
 };

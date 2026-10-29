@@ -12,7 +12,7 @@ interface RefereeBottomNavProps {
 export const RefereeBottomNav: React.FC<RefereeBottomNavProps> = ({ activeTab, onSelectTab }) => {
   const ITEMS = [
     { id: 'dashboard' as RefereeTabKey, label: 'Beranda', icon: LayoutDashboard },
-    { id: 'duty' as RefereeTabKey, label: 'Tugas', icon: ClipboardList },
+    { id: 'duty' as RefereeTabKey, label: 'Laga', icon: ClipboardList },
     { id: 'match_center' as RefereeTabKey, label: 'Skor', icon: Activity, isCenter: true },
     { id: 'standings' as RefereeTabKey, label: 'Bagan', icon: ListOrdered },
     { id: 'reports' as RefereeTabKey, label: 'BAP', icon: FileText },
@@ -22,7 +22,7 @@ export const RefereeBottomNav: React.FC<RefereeBottomNavProps> = ({ activeTab, o
   return (
     <nav
       aria-label="Navigasi Bawah Juri"
-      className="fixed bottom-0 left-0 right-0 z-40 bg-[#071F14] border-t border-emerald-900/40 px-2 py-1.5 flex items-center justify-around lg:hidden text-white shadow-lg"
+      className="fixed bottom-0 left-0 right-0 z-40 bg-[var(--bg-surface)]/95 backdrop-blur-md border-t border-[var(--border-subtle)] px-2 py-1.5 flex items-center justify-around lg:hidden text-[var(--text-main)] shadow-lg"
     >
       {ITEMS.map((item) => {
         const Icon = item.icon;
@@ -54,7 +54,7 @@ export const RefereeBottomNav: React.FC<RefereeBottomNavProps> = ({ activeTab, o
             type="button"
             onClick={() => onSelectTab(item.id)}
             className={`btn-tactile flex flex-col items-center justify-center py-1 px-2.5 rounded-lg text-center transition-colors min-w-[50px] cursor-pointer ${
-              isActive ? 'text-[var(--color-arena-accent)] font-bold' : 'text-slate-400 hover:text-white'
+              isActive ? 'text-[var(--color-arena-primary)] font-bold' : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'
             }`}
           >
             <Icon className="w-4 h-4 mb-0.5" />

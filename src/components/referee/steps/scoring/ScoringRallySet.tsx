@@ -87,7 +87,7 @@ export const ScoringRallySet: React.FC<ScoringRallySetProps> = ({
 
   return (
     <div className="space-y-3 animate-fadeIn">
-      <div className="p-4 sm:p-5 rounded-2xl bg-[#0b1a28] text-white border border-[#1f374f] shadow-md space-y-3.5">
+      <div className="p-4 sm:p-5 rounded-2xl bg-[var(--bg-surface)] text-[var(--text-main)] border border-[var(--border-subtle)] shadow-xs space-y-3.5">
         {/* Top Court Header */}
         <div className="flex items-center justify-between text-xs pb-2.5 border-b border-white/10">
           <div className="flex items-center gap-2">

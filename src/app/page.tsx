@@ -30,13 +30,25 @@ export default function Home() {
   const [activeTab, setActiveTab] = useState<PublicTabKey>('info');
   const [isTicketModalOpen, setIsTicketModalOpen] = useState(false);
   const [isRegModalOpen, setIsRegModalOpen] = useState(false);
-  const [darkMode, setDarkMode] = useState(false);
+  const [darkMode, setDarkMode] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [currentUser, setCurrentUser] = useState<AppUser | null>(null);
   const [banners, setBanners] = useState<PublicHeaderConfig[]>(DEFAULT_CABOR_BANNERS);
   const [activeBannerIndex, setActiveBannerIndex] = useState<number>(0);
 
-  // Load persisted banners from localStorage on mount
+  // Load persisted theme and banners from localStorage on mount
+  useEffect(() => {
+    try {
+      const savedTheme = localStorage.getItem('sauma_theme');
+      if (savedTheme === 'light') {
+        setDarkMode(false);
+      } else if (savedTheme === 'dark') {
+        setDarkMode(true);
+      }
+    } catch {
+      // ignore
+    }
+  }, []);
   useEffect(() => {
     try {
       const savedBanners = localStorage.getItem('sauma_arena_cabor_banners');
@@ -71,7 +83,17 @@ export default function Home() {
     }
   }, [darkMode]);
 
-  const toggleDarkMode = () => setDarkMode((prev) => !prev);
+  const toggleDarkMode = () => {
+    setDarkMode((prev) => {
+      const next = !prev;
+      try {
+        localStorage.setItem('sauma_theme', next ? 'dark' : 'light');
+      } catch {
+        // ignore
+      }
+      return next;
+    });
+  };
 
   const handleViewChange = (view: 'public' | 'admin' | 'referee') => {
     setCurrentView(view);

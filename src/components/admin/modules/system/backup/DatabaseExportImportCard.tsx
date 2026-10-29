@@ -1,7 +1,15 @@
 'use client';
 
-import React, { useState } from 'react';
-import { FileSpreadsheet, FileJson, Download, CheckCircle2 } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import {
+  FileSpreadsheet,
+  FileJson,
+  Download,
+  Upload,
+  CheckCircle2,
+  FileText,
+  X,
+} from 'lucide-react';
 import { initialTeams } from '@/mocks/mockTeams';
 import { initialMatches } from '@/mocks/tournamentData';
 
@@ -24,8 +32,10 @@ export const DatabaseExportImportCard: React.FC<DatabaseExportImportCardProps> =
 
   // Import states
   const [importTarget, setImportTarget] = useState<'athletes' | 'teams' | 'matches'>('athletes');
+  const [importFileName, setImportFileName] = useState('');
   const [importPreviewRows, setImportPreviewRows] = useState<string[][]>([]);
   const [importSuccess, setImportSuccess] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Handle Export CSV / JSON with native Blob
   const handleDownloadExport = () => {
@@ -89,7 +99,9 @@ export const DatabaseExportImportCard: React.FC<DatabaseExportImportCardProps> =
   };
 
   const handleImportFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files?.[0]) {
+    const file = e.target.files?.[0];
+    if (file) {
+      setImportFileName(file.name);
       setImportPreviewRows([
         ['NISN/ID', 'Nama Atlet', 'Kontingen / Tim', 'Posisi', 'No. Punggung'],
         ['0082910291', 'Muhammad Rizky', 'MIN 1 Kota', 'Pivot', '10'],
@@ -99,79 +111,98 @@ export const DatabaseExportImportCard: React.FC<DatabaseExportImportCardProps> =
     }
   };
 
+  const handleClearImport = () => {
+    setImportFileName('');
+    setImportPreviewRows([]);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
   if (mode === 'EXPORT') {
     return (
-      <div className="p-6 rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] space-y-6">
-        <div className="space-y-1">
-          <h3 className="font-barlow font-bold text-sm uppercase tracking-wider text-[var(--text-main)]">
-            Ekspor Data Terpilah (CSV &amp; JSON)
-          </h3>
-          <p className="text-xs text-[var(--text-muted)]">
-            Pilih entitas data turnamen yang ingin Anda simpan dalam format spreadsheet Excel (.csv) atau format pengembang (.json).
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-          <div className="space-y-1.5">
-            <label className="font-semibold text-[var(--text-main)]">Pilih Entitas Data</label>
-            <select
-              value={exportEntity}
-              onChange={(e) => setExportEntity(e.target.value as 'athletes' | 'teams' | 'matches' | 'standings')}
-              className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)]"
-            >
-              <option value="athletes">Data Pemain &amp; Atlet Lengkap</option>
-              <option value="teams">Data Tim &amp; Kontingen</option>
-              <option value="matches">Jadwal &amp; Hasil Skor Pertandingan</option>
-              <option value="standings">Klasemen &amp; Perolehan Poin Grup</option>
-            </select>
+      <div className="p-5 sm:p-6 rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] flex flex-col justify-between space-y-5 shadow-xs transition-colors">
+        <div className="space-y-4">
+          <div className="flex items-center gap-2.5 pb-3 border-b border-[var(--border-subtle)]">
+            <div className="w-8 h-8 rounded-xl bg-[var(--color-arena-primary-light)] text-[var(--color-arena-primary)] flex items-center justify-center shrink-0">
+              <Download className="w-4 h-4" />
+            </div>
+            <div>
+              <h3 className="font-barlow font-bold text-sm uppercase tracking-wider text-[var(--text-main)]">
+                Ekspor Data Terpilah
+              </h3>
+              <p className="text-xs text-[var(--text-muted)]">
+                Unduh subset data turnamen dalam format Excel spreadsheet atau JSON.
+              </p>
+            </div>
           </div>
 
-          <div className="space-y-1.5">
-            <label className="font-semibold text-[var(--text-main)]">Format File Unduhan</label>
-            <div className="grid grid-cols-2 gap-2">
-              <button
-                type="button"
-                onClick={() => setExportFormat('csv')}
-                className={`btn-tactile p-2 rounded-xl border text-xs font-bold flex items-center justify-center gap-2 ${
-                  exportFormat === 'csv'
-                    ? 'border-[var(--color-arena-primary)] bg-[var(--color-arena-primary-light)] text-[var(--color-arena-primary)] dark:bg-sky-950/40'
-                    : 'border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-muted)]'
-                }`}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+            <div className="space-y-1.5">
+              <label className="font-semibold text-[var(--text-main)] block">Entitas Data</label>
+              <select
+                value={exportEntity}
+                onChange={(e) => setExportEntity(e.target.value as 'athletes' | 'teams' | 'matches' | 'standings')}
+                className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)] focus:outline-none focus:border-[var(--color-arena-primary)]"
               >
-                <FileSpreadsheet className="w-4 h-4" />
-                <span>CSV (Excel)</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setExportFormat('json')}
-                className={`btn-tactile p-2 rounded-xl border text-xs font-bold flex items-center justify-center gap-2 ${
-                  exportFormat === 'json'
-                    ? 'border-[var(--color-arena-primary)] bg-[var(--color-arena-primary-light)] text-[var(--color-arena-primary)] dark:bg-sky-950/40'
-                    : 'border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-muted)]'
-                }`}
-              >
-                <FileJson className="w-4 h-4" />
-                <span>JSON (Raw Data)</span>
-              </button>
+                <option value="athletes">Data Pemain &amp; Atlet</option>
+                <option value="teams">Data Tim Kontingen</option>
+                <option value="matches">Jadwal &amp; Hasil Laga</option>
+                <option value="standings">Klasemen Grup</option>
+              </select>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="font-semibold text-[var(--text-main)] block">Format Berkas</label>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => setExportFormat('csv')}
+                  className={`btn-tactile px-3 py-2 rounded-xl border text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                    exportFormat === 'csv'
+                      ? 'border-[var(--color-arena-primary)] bg-[var(--color-arena-primary-light)] text-[var(--color-arena-primary)] dark:bg-sky-950/40'
+                      : 'border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-muted)] hover:text-[var(--text-main)]'
+                  }`}
+                >
+                  <FileSpreadsheet className="w-3.5 h-3.5" />
+                  <span>CSV (Excel)</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setExportFormat('json')}
+                  className={`btn-tactile px-3 py-2 rounded-xl border text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                    exportFormat === 'json'
+                      ? 'border-[var(--color-arena-primary)] bg-[var(--color-arena-primary-light)] text-[var(--color-arena-primary)] dark:bg-sky-950/40'
+                      : 'border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-muted)] hover:text-[var(--text-main)]'
+                  }`}
+                >
+                  <FileJson className="w-3.5 h-3.5" />
+                  <span>JSON (Raw)</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>
 
-        <div className="flex justify-end pt-2">
+        <div className="pt-2 flex items-center justify-between border-t border-[var(--border-subtle)]/60">
+          <span className="text-[11px] text-[var(--text-muted)]">
+            Format: <strong className="uppercase font-mono text-[var(--text-main)]">{exportFormat}</strong>
+          </span>
+
           <button
             type="button"
             onClick={handleDownloadExport}
-            className="btn-tactile flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[var(--color-arena-primary)] text-white font-barlow font-bold uppercase tracking-wider text-xs shadow-xs hover:bg-[var(--color-arena-primary-hover)]"
+            className="btn-tactile flex items-center gap-2 px-4 py-2 rounded-xl bg-[var(--color-arena-primary)] text-white font-barlow font-bold uppercase tracking-wider text-xs shadow-2xs hover:bg-[var(--color-arena-primary-hover)] cursor-pointer"
           >
-            <Download className="w-4 h-4" />
-            <span>Unduh File {exportFormat.toUpperCase()}</span>
+            <Download className="w-3.5 h-3.5" />
+            <span>Unduh Berkas</span>
           </button>
         </div>
 
         {exportSuccess && (
-          <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 dark:text-emerald-400 font-bold text-xs flex items-center gap-2">
+          <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 dark:text-emerald-400 font-bold text-xs flex items-center gap-2 animate-fadeIn">
             <CheckCircle2 className="w-4 h-4 shrink-0" />
-            <span>Data {exportEntity} berhasil diekspor dalam format {exportFormat.toUpperCase()}.</span>
+            <span>Data {exportEntity} berhasil diekspor (.{(exportFormat).toUpperCase()}).</span>
           </div>
         )}
       </div>
@@ -180,87 +211,132 @@ export const DatabaseExportImportCard: React.FC<DatabaseExportImportCardProps> =
 
   // IMPORT mode
   return (
-    <div className="p-6 rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] space-y-6">
-      <div className="space-y-1">
-        <h3 className="font-barlow font-bold text-sm uppercase tracking-wider text-[var(--text-main)]">
-          Impor Data Masal (CSV / JSON)
-        </h3>
-        <p className="text-xs text-[var(--text-muted)]">
-          Unggah file CSV daftar atlet atau tim baru untuk dimasukkan langsung ke dalam database turnamen.
-        </p>
-      </div>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-        <div className="space-y-1.5">
-          <label className="font-semibold text-[var(--text-main)]">Target Impor Data</label>
-          <select
-            value={importTarget}
-            onChange={(e) => setImportTarget(e.target.value as 'athletes' | 'teams' | 'matches')}
-            className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)]"
-          >
-            <option value="athletes">Data Atlet &amp; Pemain</option>
-            <option value="teams">Data Tim Peserta</option>
-            <option value="matches">Jadwal Pertandingan</option>
-          </select>
+    <div className="p-5 sm:p-6 rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] flex flex-col justify-between space-y-5 shadow-xs transition-colors">
+      <div className="space-y-4">
+        <div className="flex items-center gap-2.5 pb-3 border-b border-[var(--border-subtle)]">
+          <div className="w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+            <Upload className="w-4 h-4" />
+          </div>
+          <div>
+            <h3 className="font-barlow font-bold text-sm uppercase tracking-wider text-[var(--text-main)]">
+              Impor Data Masal
+            </h3>
+            <p className="text-xs text-[var(--text-muted)]">
+              Unggah berkas spreadsheet CSV atau JSON untuk memasukkan data sekaligus.
+            </p>
+          </div>
         </div>
 
-        <div className="space-y-1.5">
-          <label className="font-semibold text-[var(--text-main)]">Pilih File CSV / JSON</label>
-          <input
-            type="file"
-            accept=".csv, .json"
-            onChange={handleImportFileSelect}
-            className="w-full text-xs text-[var(--text-muted)] file:mr-3 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-[var(--color-arena-primary)] file:text-white"
-          />
-        </div>
-      </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+          <div className="space-y-1.5">
+            <label className="font-semibold text-[var(--text-main)] block">Target Entitas</label>
+            <select
+              value={importTarget}
+              onChange={(e) => setImportTarget(e.target.value as 'athletes' | 'teams' | 'matches')}
+              className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)] focus:outline-none focus:border-[var(--color-arena-primary)]"
+            >
+              <option value="athletes">Data Atlet &amp; Pemain</option>
+              <option value="teams">Data Tim Peserta</option>
+              <option value="matches">Jadwal Pertandingan</option>
+            </select>
+          </div>
 
-      {importPreviewRows.length > 0 && (
-        <div className="space-y-3 pt-2">
-          <h4 className="text-xs font-bold text-[var(--text-main)]">Pratinjau 3 Baris Data Pertama:</h4>
-          <div className="overflow-x-auto rounded-xl border border-[var(--border-subtle)]">
-            <table className="w-full text-left text-xs">
-              <thead className="bg-[var(--bg-muted)] font-bold text-[var(--text-main)]">
-                <tr>
-                  {importPreviewRows[0].map((h, i) => (
-                    <th key={i} className="p-2 border-b border-[var(--border-subtle)]">{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {importPreviewRows.slice(1).map((row, i) => (
-                  <tr key={i} className="border-b border-[var(--border-subtle)]">
-                    {row.map((col, j) => (
-                      <td key={j} className="p-2 text-[var(--text-muted)]">{col}</td>
+          <div className="space-y-1.5">
+            <label className="font-semibold text-[var(--text-main)] block">Pilih Berkas</label>
+            {/* Custom styled file picker replacing raw browser input */}
+            <div className="relative">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".csv, .json"
+                onChange={handleImportFileSelect}
+                className="hidden"
+                id="database-import-file-input"
+              />
+              {importFileName ? (
+                <div className="flex items-center justify-between gap-2 px-3 py-2 rounded-xl border border-emerald-500/40 bg-emerald-500/5 text-xs text-[var(--text-main)]">
+                  <div className="flex items-center gap-1.5 min-w-0">
+                    <FileText className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                    <span className="truncate font-medium">{importFileName}</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleClearImport}
+                    className="p-0.5 text-[var(--text-muted)] hover:text-red-500 transition-colors"
+                    title="Hapus berkas"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              ) : (
+                <label
+                  htmlFor="database-import-file-input"
+                  className="btn-tactile flex items-center justify-between px-3 py-2 rounded-xl border border-[var(--border-subtle)] hover:border-[var(--color-arena-primary)] bg-[var(--bg-muted)] cursor-pointer text-xs text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors"
+                >
+                  <span className="truncate">Pilih file .csv / .json</span>
+                  <span className="font-barlow font-bold text-[11px] uppercase tracking-wider text-[var(--color-arena-primary)] shrink-0">
+                    Jelajahi
+                  </span>
+                </label>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {importPreviewRows.length > 0 && (
+          <div className="space-y-2 pt-1 animate-fadeIn">
+            <span className="text-[11px] font-semibold text-[var(--text-muted)] block">
+              Pratinjau {importPreviewRows.length - 1} baris pertama:
+            </span>
+            <div className="overflow-x-auto rounded-xl border border-[var(--border-subtle)]">
+              <table className="w-full text-left text-[11px]">
+                <thead className="bg-[var(--bg-muted)] font-bold text-[var(--text-main)]">
+                  <tr>
+                    {importPreviewRows[0].map((h, i) => (
+                      <th key={i} className="p-2 border-b border-[var(--border-subtle)] whitespace-nowrap">{h}</th>
                     ))}
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {importPreviewRows.slice(1).map((row, i) => (
+                    <tr key={i} className="border-b border-[var(--border-subtle)] last:border-0">
+                      {row.map((col, j) => (
+                        <td key={j} className="p-2 text-[var(--text-muted)] whitespace-nowrap">{col}</td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
+        )}
+      </div>
 
-          <div className="flex justify-end pt-2">
-            <button
-              type="button"
-              onClick={() => {
-                setImportSuccess(true);
-                setTimeout(() => {
-                  setImportSuccess(false);
-                  setImportPreviewRows([]);
-                }, 4000);
-              }}
-              className="btn-tactile px-5 py-2.5 rounded-xl bg-emerald-600 text-white font-barlow font-bold uppercase tracking-wider text-xs shadow-xs hover:bg-emerald-700"
-            >
-              Proses &amp; Simpan Data Impor
-            </button>
-          </div>
-        </div>
-      )}
+      <div className="pt-2 flex items-center justify-between border-t border-[var(--border-subtle)]/60">
+        <span className="text-[11px] text-[var(--text-muted)]">
+          {importFileName ? 'Berkas siap diproses' : 'Belum ada berkas dipilih'}
+        </span>
+
+        <button
+          type="button"
+          disabled={!importFileName}
+          onClick={() => {
+            setImportSuccess(true);
+            setTimeout(() => {
+              setImportSuccess(false);
+              handleClearImport();
+            }, 3500);
+          }}
+          className="btn-tactile px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-barlow font-bold uppercase tracking-wider text-xs shadow-2xs disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+        >
+          Proses &amp; Simpan
+        </button>
+      </div>
 
       {importSuccess && (
-        <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 dark:text-emerald-400 font-bold text-xs flex items-center gap-2">
+        <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 dark:text-emerald-400 font-bold text-xs flex items-center gap-2 animate-fadeIn">
           <CheckCircle2 className="w-4 h-4 shrink-0" />
-          <span>Data {importTarget} berhasil diimpor dan disimpan ke database!</span>
+          <span>Data {importTarget} berhasil diimpor ke database!</span>
         </div>
       )}
     </div>

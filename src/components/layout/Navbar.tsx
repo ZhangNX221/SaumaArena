@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { LogIn, Users, Moon, Sun, Search, X } from 'lucide-react';
+import { LogIn, Moon, Sun, Search, X } from 'lucide-react';
 import { SaumaArenaLogo } from '@/components/brand/SaumaArenaLogo';
 import { initialTeams } from '@/mocks/tournamentData';
 
@@ -18,7 +18,6 @@ export const Navbar: React.FC<NavbarProps> = ({
   onViewChange,
   darkMode,
   onToggleDarkMode,
-  onOpenRegModal,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchActive, setIsSearchActive] = useState(false);
@@ -83,7 +82,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                   <button
                     type="button"
                     onClick={() => setSearchQuery('')}
-                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-main)]"
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-main)] cursor-pointer"
                     aria-label="Hapus pencarian"
                   >
                     <X className="w-3 h-3" />
@@ -143,9 +142,20 @@ export const Navbar: React.FC<NavbarProps> = ({
             </div>
           )}
 
-          {/* Right Controls: Tombol Login, Tombol Pendaftaran & Theme Toggle */}
+          {/* Right Controls: Theme Toggle & Tombol Login (Dibalik posisinya) */}
           <div className="flex items-center gap-2 shrink-0">
-            {/* Tombol Login */}
+            {/* Dark / Light Mode Toggle */}
+            <button
+              type="button"
+              onClick={onToggleDarkMode}
+              className="btn-tactile flex items-center justify-center w-10 h-10 rounded-lg border border-slate-300 dark:border-slate-700 bg-[var(--bg-surface)] text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-muted)] active:scale-95 transition-colors shrink-0 cursor-pointer shadow-2xs"
+              title={darkMode ? 'Beralih ke Mode Terang' : 'Beralih ke Mode Gelap'}
+              aria-label="Toggle tema gelap atau terang"
+            >
+              {darkMode ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-slate-700" />}
+            </button>
+
+            {/* Tombol Login (Bentuk Ikon Saja) */}
             <button
               type="button"
               onClick={() => {
@@ -155,36 +165,11 @@ export const Navbar: React.FC<NavbarProps> = ({
                   onViewChange('public');
                 }
               }}
-              className="btn-tactile flex items-center gap-1.5 px-3 sm:px-3.5 py-2 rounded-lg font-barlow font-bold uppercase tracking-wider text-xs bg-[var(--bg-muted)] hover:bg-[var(--bg-surface)] active:scale-95 text-[var(--text-main)] border border-slate-300 dark:border-slate-700 transition-all min-h-[40px] shadow-2xs shrink-0 cursor-pointer"
+              className="btn-tactile flex items-center justify-center w-10 h-10 rounded-lg border border-slate-300 dark:border-slate-700 bg-[var(--bg-surface)] text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-muted)] active:scale-95 transition-colors shrink-0 cursor-pointer shadow-2xs"
               title={currentView === 'public' ? 'Login ke Portal Admin / Juri' : 'Kembali ke Tampilan Publik'}
+              aria-label={currentView === 'public' ? 'Login Portal Admin & Juri' : 'Kembali ke Tampilan Publik'}
             >
-              <LogIn className="w-3.5 h-3.5 text-[#1D63B8] dark:text-sky-400 shrink-0" />
-              <span>{currentView === 'public' ? 'Login Portal' : 'Tampilan Publik'}</span>
-            </button>
-
-            {/* Tombol Pendaftaran Tim */}
-            <button
-              type="button"
-              onClick={onOpenRegModal}
-              className="btn-tactile flex items-center gap-1.5 px-3.5 sm:px-4 py-2 rounded-lg font-barlow font-bold uppercase tracking-wider text-xs bg-[#1D63B8] hover:bg-[#154D92] active:scale-95 text-white shadow-xs transition-all min-h-[40px] shrink-0 cursor-pointer"
-              title="Daftarkan Tim Peserta Turnamen"
-            >
-              <Users className="w-3.5 h-3.5 shrink-0" />
-              <span>
-                <span className="inline sm:hidden">Daftar</span>
-                <span className="hidden sm:inline">Pendaftaran Tim</span>
-              </span>
-            </button>
-
-            {/* Dark / Light Mode Toggle */}
-            <button
-              type="button"
-              onClick={onToggleDarkMode}
-              className="btn-tactile flex items-center justify-center w-10 h-10 rounded-lg border border-slate-300 dark:border-slate-700 bg-[var(--bg-surface)] text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-muted)] transition-colors shrink-0 cursor-pointer"
-              title={darkMode ? 'Beralih ke Mode Terang' : 'Beralih ke Mode Gelap'}
-              aria-label="Toggle tema gelap atau terang"
-            >
-              {darkMode ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-slate-700" />}
+              <LogIn className="w-4 h-4 text-[#1D63B8] dark:text-sky-400" />
             </button>
           </div>
         </div>

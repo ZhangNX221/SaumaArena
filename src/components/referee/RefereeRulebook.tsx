@@ -13,6 +13,7 @@ import {
   RuleArticle
 } from '@/mocks/refereeRulebookData';
 import { RuleDetailModal } from './rules/RuleDetailModal';
+import { AdminPageHeaderCard } from '@/components/admin/common/AdminPageHeaderCard';
 
 interface RefereeRulebookProps {
   user?: AppUser;
@@ -27,34 +28,25 @@ export const RefereeRulebook: React.FC<RefereeRulebookProps> = ({ user, sport })
   const sportDisplayName = activeSportCode === 'FUTSAL' ? 'Futsal' : activeSportCode;
 
   return (
-    <div className="space-y-6 max-w-5xl mx-auto pb-16 animate-fadeIn">
-      {/* 1. Header Banner */}
-      <div className="p-6 sm:p-7 rounded-2xl bg-[#071F14] text-white border border-emerald-900/40 shadow-xs transition-all duration-200">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-5">
-          <div className="space-y-1">
-            <h1 className="font-bebas text-3xl sm:text-4xl tracking-wide uppercase text-white leading-none">
-              REGULASI TEKNIS {sportDisplayName.toUpperCase()}
-            </h1>
-            <p className="text-xs sm:text-sm text-slate-300 max-w-2xl font-sans">
-              Rujukan hukum pertandingan dan panduan keputusan wasit resmi di lapangan untuk{' '}
-              <strong className="text-white">{user?.name || 'Wasit Utama'}</strong>{' '}
-              ({user?.licenseLevel || 'Lisensi 2 Nasional FFI'}).
-            </p>
-          </div>
-
-          <div className="flex items-center gap-3 shrink-0">
-            <div className="px-3.5 py-2 rounded-xl bg-[#04120C] border border-[#143D28] text-left">
-              <div className="text-[10px] font-barlow font-bold uppercase tracking-wider text-[var(--color-arena-accent)] flex items-center gap-1.5">
-                <ShieldCheck className="w-3.5 h-3.5 text-[var(--color-arena-accent)]" />
-                <span>Spesialisasi Lapangan</span>
-              </div>
-              <div className="text-xs font-mono font-bold text-white mt-0.5">
-                {sportDisplayName} &bull; FFI 2026
-              </div>
+    <div className="space-y-6 w-full pb-16 animate-fadeIn">
+      {/* 1. Header Card Seragam */}
+      <AdminPageHeaderCard
+        icon={ShieldCheck}
+        category="MEJA LAPANGAN • REGULASI TEKNIS"
+        title={`Regulasi Teknis ${sportDisplayName}`}
+        description={`Rujukan hukum pertandingan dan panduan keputusan wasit resmi di lapangan untuk ${user?.name || 'Wasit Utama'} (${user?.licenseLevel || 'Lisensi 2 Nasional FFI'}).`}
+        action={
+          <div className="px-3.5 py-2 rounded-xl bg-[var(--bg-muted)] border border-[var(--border-subtle)] text-left min-w-[150px]">
+            <div className="text-[10px] font-barlow font-bold uppercase tracking-wider text-[var(--color-arena-accent)] flex items-center gap-1.5">
+              <ShieldCheck className="w-3.5 h-3.5 text-[var(--color-arena-accent)]" />
+              <span>Spesialisasi Lapangan</span>
+            </div>
+            <div className="text-xs font-mono font-bold text-[var(--text-main)] mt-0.5">
+              {sportDisplayName} &bull; FFI 2026
             </div>
           </div>
-        </div>
-      </div>
+        }
+      />
 
       {/* 2. Kartu Cepat Meja Wasit */}
       <div className="space-y-3.5">

@@ -28,6 +28,7 @@ import { RefereeSchedule } from './RefereeSchedule';
 import { RefereeRulebook } from './RefereeRulebook';
 import { RefereeProfile } from './RefereeProfile';
 import { RefereeDashboardHome } from './RefereeDashboardHome';
+import { pushMatchToBackend } from '@/lib/apiSync';
 import { RefereeReportsView } from './RefereeReportsView';
 import { RefereeStandingsView } from './RefereeStandingsView';
 import { RefereeSupporterScoringView } from './RefereeSupporterScoringView';
@@ -46,7 +47,7 @@ export const RefereeDashboard: React.FC<RefereeDashboardProps> = ({
   onLogout,
   onBackToPublic,
   onGoToAdmin,
-  darkMode = false,
+  darkMode = true,
   onToggleDarkMode,
 }) => {
   const [currentUser, setCurrentUser] = useState<AppUser>(initialUser);
@@ -98,12 +99,14 @@ export const RefereeDashboard: React.FC<RefereeDashboardProps> = ({
         if (m.id !== liveMatch.id) return m;
         const newScoreA = team === 'A' ? Math.max(0, m.scoreA + delta) : m.scoreA;
         const newScoreB = team === 'B' ? Math.max(0, m.scoreB + delta) : m.scoreB;
-        return {
+        const updated = {
           ...m,
           scoreA: newScoreA,
           scoreB: newScoreB,
           status: 'LIVE' as const,
         };
+        pushMatchToBackend(updated);
+        return updated;
       })
     );
   };
@@ -125,12 +128,15 @@ export const RefereeDashboard: React.FC<RefereeDashboardProps> = ({
     setMatches((prev) =>
       prev.map((m) => {
         if (m.id !== liveMatch.id) return m;
-        return {
+        const updated = {
           ...m,
           status: 'COMPLETED' as const,
           bapSigned: true,
           bapSigner: currentUser.name,
+          winnerTeamId: bapData.winner,
         };
+        pushMatchToBackend(updated);
+        return updated;
       })
     );
   };
@@ -267,13 +273,16 @@ export const RefereeDashboard: React.FC<RefereeDashboardProps> = ({
         </header>
 
         {/* Dynamic Juri Views */}
-        <main className="flex-1 p-4 sm:p-6 lg:p-8">
+        <main className="w-full px-6 sm:px-10 lg:px-12 pt-7 pb-24 max-w-7xl mx-auto flex-1">
           {/* TAB 0: DASHBOARD JURI */}
           {activeTab === 'dashboard' && (
             <RefereeDashboardHome
               user={currentUser}
               liveMatch={liveMatch}
-              onGoToMatchCenter={() => setActiveTab('match_center')}
+              onGoToMatchCenter={(matchId) => {
+                if (matchId) setSelectedMatchId(matchId);
+                setActiveTab('match_center');
+              }}
               onGoToSchedule={() => setActiveTab('duty')}
               onGoToReports={() => setActiveTab('reports')}
             />
@@ -311,6 +320,8 @@ export const RefereeDashboard: React.FC<RefereeDashboardProps> = ({
               onUpdateScore={handleUpdateScore}
               onAddIncident={handleAddIncident}
               onFinalizeBAP={handleFinalizeBAP}
+              matches={matches}
+              onSelectMatch={(matchId) => setSelectedMatchId(matchId)}
             />
           )}
 

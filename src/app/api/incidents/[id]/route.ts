@@ -8,6 +8,10 @@ export async function GET(
   context: { params: Promise<{ id: string }> }
 ) {
   try {
+    // 1. Otorisasi ketat: Hanya ADMIN atau REFEREE yang berhak melihat berkas insiden Komdis
+    const auth = requireAuth(request, ['ADMIN', 'REFEREE']);
+    if (auth instanceof NextResponse) return auth;
+
     const { id } = await context.params;
     const r = queryOne<any>(
       `SELECT 
@@ -125,4 +129,3 @@ export async function PATCH(
     );
   }
 }
-

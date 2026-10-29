@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { query, queryOne } from '@/db/sqlite';
+import { query, queryOne, run } from '@/db/sqlite';
 import { calculateStandings, TeamInfo, VerifiedMatchSummary } from '@/core/standings';
 
 export async function GET(request: Request) {
@@ -8,8 +8,12 @@ export async function GET(request: Request) {
     const competitionId = searchParams.get('competitionId') || 'comp_futsal_2026';
     const groupId = searchParams.get('groupId');
 
-    const comp = queryOne<any>('SELECT rules_snapshot FROM competitions WHERE id = ?', [competitionId]);
+    const comp = queryOne<any>(
+      'SELECT rules_snapshot, rules_overrides FROM competitions WHERE id = ?',
+      [competitionId]
+    );
     const rules = comp?.rules_snapshot ? JSON.parse(comp.rules_snapshot) : {};
+    const overrides = comp?.rules_overrides ? JSON.parse(comp.rules_overrides) : {};
     const tiebreakers = rules.tiebreakers || [
       'points',
       'goal_difference',
@@ -121,7 +125,37 @@ export async function GET(request: Request) {
         tiebreakers,
         verifiedMatchesCount: verifiedMatches.length,
         standings,
+        groupStandingsSnapshot: overrides.standings_override || null,
       },
+    });
+  } catch (error: any) {
+    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  }
+}
+
+export async function POST(request: Request) {
+  try {
+    const body = await request.json();
+    const competitionId = body.competitionId || 'comp_futsal_2026';
+    const groups = body.groups;
+
+    if (!groups) {
+      return NextResponse.json({ success: false, error: 'Missing groups payload' }, { status: 400 });
+    }
+
+    const comp = queryOne<any>('SELECT rules_overrides FROM competitions WHERE id = ?', [competitionId]);
+    const currentOverrides = comp?.rules_overrides ? JSON.parse(comp.rules_overrides) : {};
+    currentOverrides.standings_override = groups;
+
+    run('UPDATE competitions SET rules_overrides = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?', [
+      JSON.stringify(currentOverrides),
+      competitionId,
+    ]);
+
+    return NextResponse.json({
+      success: true,
+      message: 'Klasemen grup berhasil disimpan ke database SQLite',
+      data: groups,
     });
   } catch (error: any) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });

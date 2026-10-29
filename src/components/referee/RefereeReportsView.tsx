@@ -13,6 +13,7 @@ import { AppUser } from '@/types';
 import { BAPRecord, IncidentReport, INITIAL_BAPS, INITIAL_INCIDENTS } from '@/mocks/refereeReportsData';
 import { usePersistentState } from '@/hooks/usePersistentState';
 import { BAPPreviewModal } from './reports/BAPPreviewModal';
+import { AdminPageHeaderCard } from '@/components/admin/common/AdminPageHeaderCard';
 
 interface RefereeReportsViewProps {
   user: AppUser;
@@ -59,28 +60,22 @@ export const RefereeReportsView: React.FC<RefereeReportsViewProps> = ({ user }) 
   };
 
   return (
-    <div className="space-y-6 max-w-5xl mx-auto pb-16 animate-fadeIn">
-      {/* 1. Header Banner */}
-      <div className="p-6 sm:p-7 rounded-2xl bg-[#071F14] text-white border border-emerald-900/40 shadow-xs transition-all duration-200">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-5">
-          <div className="space-y-1">
-            <h1 className="font-bebas text-3xl sm:text-4xl tracking-wide uppercase text-white leading-none">
-              BERITA ACARA &amp; INSIDEN
-            </h1>
-            <p className="text-xs sm:text-sm text-slate-300 max-w-xl font-sans">
-              Arsip Berita Acara Pertandingan (BAP) yang telah sah serta formulir pelaporan kejadian khusus ke komisi disiplin.
-            </p>
-          </div>
-
-          {/* Segmented Mode Selector */}
-          <div className="flex items-center gap-1 p-1 rounded-xl bg-[#04120C] border border-[#143D28] shrink-0">
+    <div className="space-y-6 w-full pb-16 animate-fadeIn">
+      {/* 1. Header Card Seragam */}
+      <AdminPageHeaderCard
+        icon={FileCheck}
+        category="MEJA LAPANGAN • BERITA ACARA & INSIDEN"
+        title="Berita Acara & Insiden"
+        description="Arsip Berita Acara Pertandingan (BAP) yang telah sah serta formulir pelaporan kejadian khusus ke komisi disiplin."
+        action={
+          <div className="flex items-center gap-1 p-1 rounded-xl bg-[var(--bg-muted)] border border-[var(--border-subtle)] shrink-0">
             <button
               type="button"
               onClick={() => setActiveTab('BAP_LIST')}
-              className={`btn-tactile px-4 py-2 rounded-lg font-barlow font-bold uppercase tracking-wider text-xs transition-all duration-150 active:scale-[0.98] cursor-pointer ${
+              className={`btn-tactile px-3.5 py-1.5 rounded-lg font-barlow font-bold uppercase tracking-wider text-xs transition-all duration-150 active:scale-[0.98] cursor-pointer ${
                 activeTab === 'BAP_LIST'
                   ? 'bg-[var(--color-arena-primary)] text-white shadow-xs'
-                  : 'text-slate-400 hover:text-white'
+                  : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'
               }`}
             >
               Rekap BAP ({bapList.length})
@@ -88,17 +83,17 @@ export const RefereeReportsView: React.FC<RefereeReportsViewProps> = ({ user }) 
             <button
               type="button"
               onClick={() => setActiveTab('INCIDENT_FORM')}
-              className={`btn-tactile px-4 py-2 rounded-lg font-barlow font-bold uppercase tracking-wider text-xs transition-all duration-150 active:scale-[0.98] cursor-pointer ${
+              className={`btn-tactile px-3.5 py-1.5 rounded-lg font-barlow font-bold uppercase tracking-wider text-xs transition-all duration-150 active:scale-[0.98] cursor-pointer ${
                 activeTab === 'INCIDENT_FORM'
                   ? 'bg-[var(--color-arena-primary)] text-white shadow-xs'
-                  : 'text-slate-400 hover:text-white'
+                  : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'
               }`}
             >
               Lapor Insiden
             </button>
           </div>
-        </div>
-      </div>
+        }
+      />
 
       {/* 2. Sub-tab 1: Rekap BAP Selesai - Card Tabel */}
       {activeTab === 'BAP_LIST' && (

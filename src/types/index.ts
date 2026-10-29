@@ -120,8 +120,20 @@ export interface Match {
   bapSigned?: boolean;
   bapSigner?: string;
   isVerified?: boolean;
+  winnerTeamId?: string;
   refereeIds?: string[];
   assignedReferees?: MatchRefereeAssignment[];
+}
+
+export interface MatchLiveTelemetry {
+  timerSeconds: number;
+  isTimerRunning: boolean;
+  currentPeriod: string;
+  foulsA: number;
+  foulsB: number;
+  timeoutsA: number;
+  timeoutsB: number;
+  updatedAt?: number;
 }
 
 export interface StandingRow {

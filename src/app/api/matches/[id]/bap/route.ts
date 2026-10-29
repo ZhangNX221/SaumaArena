@@ -223,7 +223,36 @@ export async function POST(
     // Otorisasi ketat: Hanya ADMIN atau REFEREE yang berhak membubuhkan tanda tangan BAP
     const auth = requireAuth(request, ['ADMIN', 'REFEREE']);
     if (auth instanceof NextResponse) return auth;
-    const userId = auth.user.id;
+    const { user } = auth;
+    const userId = user.id;
+
+    // Validasi wewenang penandatanganan sesuai peran pengguna
+    if (user.role === 'REFEREE') {
+      if (role === 'commissioner') {
+        return NextResponse.json(
+          {
+            success: false,
+            error: 'Akses ditolak: Hanya Admin/Komisioner yang dapat menandatangani sebagai Pengawas Pertandingan.',
+          },
+          { status: 403 }
+        );
+      }
+      const isAssigned = user.assignedMatchIds?.includes(matchId);
+      const officialRow = queryOne<any>(
+        'SELECT id FROM match_officials WHERE match_id = ? AND profile_id = ?',
+        [matchId, user.id]
+      );
+      if (!isAssigned && !officialRow && user.assignedMatchIds && user.assignedMatchIds.length > 0) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: 'Akses ditolak: Anda tidak memiliki penugasan resmi untuk pertandingan ini.',
+          },
+          { status: 403 }
+        );
+      }
+    }
+
     const cleanSigner = signerName.trim();
     const token = signatureToken || `SIG_${role.toUpperCase()}_${Date.now()}_${randomUUID().slice(0, 6)}`;
 

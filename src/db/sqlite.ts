@@ -26,6 +26,21 @@ export function getDatabase(): DatabaseSync {
   // Initialize schema
   db.exec(SCHEMA_SQL);
 
+  // Normalize match IDs if existing database has legacy m_ prefix
+  try {
+    db.exec(`
+      PRAGMA foreign_keys = OFF;
+      UPDATE matches SET id = REPLACE(id, 'm_match-', 'match-') WHERE id LIKE 'm_match-%';
+      UPDATE match_officials SET match_id = REPLACE(match_id, 'm_match-', 'match-') WHERE match_id LIKE 'm_match-%';
+      UPDATE match_events SET match_id = REPLACE(match_id, 'm_match-', 'match-') WHERE match_id LIKE 'm_match-%';
+      UPDATE match_lineups SET match_id = REPLACE(match_id, 'm_match-', 'match-') WHERE match_id LIKE 'm_match-%';
+      UPDATE match_bap SET match_id = REPLACE(match_id, 'm_match-', 'match-') WHERE match_id LIKE 'm_match-%';
+      PRAGMA foreign_keys = ON;
+    `);
+  } catch {
+    // ignore
+  }
+
   // Seed default data if sports table is empty
   seedDatabase(db);
 
@@ -49,4 +64,17 @@ export function run(sql: string, params: unknown[] = []) {
   const db = getDatabase();
   const stmt = db.prepare(sql);
   return stmt.run(...params);
+}
+
+export function transaction<T>(fn: () => T): T {
+  const db = getDatabase();
+  db.exec('BEGIN IMMEDIATE');
+  try {
+    const result = fn();
+    db.exec('COMMIT');
+    return result;
+  } catch (error) {
+    db.exec('ROLLBACK');
+    throw error;
+  }
 }

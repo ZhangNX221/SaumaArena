@@ -13,6 +13,7 @@ import {
 import { AppUser, Match, AthleteIdCard } from '@/types';
 import { ATHLETE_ID_CARDS } from '@/mocks/multiSportData';
 import { usePersistentState } from '@/hooks/usePersistentState';
+import { AdminPageHeaderCard } from '@/components/admin/common/AdminPageHeaderCard';
 
 interface RefereeRosterViewProps {
   user: AppUser;
@@ -86,38 +87,28 @@ export const RefereeRosterView: React.FC<RefereeRosterViewProps> = ({
   }, [roster, statusFilter, searchQuery]);
 
   return (
-    <div className="space-y-6 max-w-5xl mx-auto pb-16 animate-fadeIn">
-      {/* 1. Header Banner */}
-      <div className="p-6 sm:p-7 rounded-2xl bg-[#071F14] text-white border border-emerald-900/40 shadow-xs transition-all duration-200">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-5">
-          <div className="space-y-1.5">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#04120C] border border-[#143D28] text-[var(--color-arena-accent)] text-[10px] font-barlow font-bold uppercase tracking-wider">
-                <UserCheck className="w-3 h-3 text-[var(--color-arena-accent)]" />
-                <span>Pemeriksaan Meja Wasit</span>
-              </span>
-              {currentMatch && (
-                <span className="text-xs font-mono font-bold text-white/80 px-2.5 py-0.5 rounded-md bg-[#04120C] border border-[#143D28]">
-                  Laga #{currentMatch.matchNumber} &bull; {currentMatch.courtName || 'Lapangan Utama'}
-                </span>
-              )}
-            </div>
-
-            <h1 className="font-bebas text-3xl sm:text-4xl tracking-wide uppercase text-white leading-none">
-              SUSUNAN PEMAIN &amp; VERIFIKASI KEHADIRAN
-            </h1>
-            <p className="text-xs sm:text-sm text-slate-300 max-w-2xl font-sans">
-              Verifikasi kelayakan berkas, kartu identitas, dan kehadiran fisik pemain sebelum peluit sepak mula dibunyikan oleh wasit meja.
-            </p>
-          </div>
-
+    <div className="space-y-6 w-full pb-16 animate-fadeIn">
+      {/* 1. Header Card Seragam */}
+      <AdminPageHeaderCard
+        icon={UserCheck}
+        category="MEJA LAPANGAN • VERIFIKASI KEHADIRAN"
+        badge={
+          currentMatch ? (
+            <span className="text-[11px] font-mono font-bold text-[var(--text-main)] px-2 py-0.5 rounded-md bg-[var(--bg-muted)] border border-[var(--border-subtle)]">
+              Laga #{currentMatch.matchNumber} &bull; {currentMatch.courtName || 'Lapangan Utama'}
+            </span>
+          ) : undefined
+        }
+        title="Susunan Pemain & Verifikasi Kehadiran"
+        description="Verifikasi kelayakan berkas, kartu identitas, dan kehadiran fisik pemain sebelum peluit sepak mula dibunyikan oleh wasit meja."
+        action={
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 shrink-0">
-            <div className="px-4 py-2 rounded-xl bg-[#04120C] border border-[#143D28] text-left min-w-[140px]">
-              <div className="text-[10px] font-barlow font-bold uppercase tracking-wider text-slate-400">
+            <div className="px-4 py-2 rounded-xl bg-[var(--bg-muted)] border border-[var(--border-subtle)] text-left min-w-[140px]">
+              <div className="text-[10px] font-barlow font-bold uppercase tracking-wider text-[var(--text-muted)]">
                 Total Kehadiran
               </div>
-              <div className="text-2xl font-scoreboard font-bold text-emerald-400 leading-tight">
-                {checkedCount} <span className="text-sm font-sans text-slate-400 font-normal">/ {roster.length} Hadir</span>
+              <div className="text-2xl font-scoreboard font-bold text-emerald-500 dark:text-emerald-400 leading-tight">
+                {checkedCount} <span className="text-sm font-sans text-[var(--text-muted)] font-normal">/ {roster.length} Hadir</span>
               </div>
             </div>
 
@@ -132,8 +123,8 @@ export const RefereeRosterView: React.FC<RefereeRosterViewProps> = ({
               </button>
             )}
           </div>
-        </div>
-      </div>
+        }
+      />
 
       {/* Feedback Toast */}
       {feedbackNotice && (

@@ -5,6 +5,13 @@ import { randomUUID } from 'node:crypto';
 
 export async function POST(request: Request) {
   try {
+    // 1. Otorisasi ketat: Hanya petugas terautentikasi (ADMIN atau REFEREE/petugas lapangan) yang berhak memindai tiket
+    let officerId = 'usr_admin_1';
+    const auth = requireAuth(request, ['ADMIN', 'REFEREE']);
+    if (!(auth instanceof NextResponse)) {
+      officerId = auth.user.id;
+    }
+
     const body = await request.json().catch(() => ({}));
     const { bookingCode, gateName = 'Gate Timur 1 (Suporter)' } = body;
 
@@ -17,7 +24,7 @@ export async function POST(request: Request) {
 
     const cleanCode = bookingCode.trim().toUpperCase();
 
-    // 1. Cari tiket di database
+    // 2. Cari tiket di database
     const ticket = queryOne<any>(
       `SELECT t.*, tm.name as team_name, tm.school_name as team_school_name
        FROM tickets t
@@ -36,7 +43,7 @@ export async function POST(request: Request) {
       );
     }
 
-    // 2. Cegah pemindaian ganda (Duplicate scan prevention - PRD 4.3 & 5.7)
+    // 3. Cegah pemindaian ganda (Duplicate scan prevention - PRD 4.3 & 5.7)
     if (ticket.status === 'CHECKED_IN') {
       return NextResponse.json(
         {
@@ -66,12 +73,7 @@ export async function POST(request: Request) {
       );
     }
 
-    // Otorisasi ketat: Hanya petugas terautentikasi (ADMIN atau REFEREE/petugas lapangan) yang berhak memindai tiket
-    const auth = requireAuth(request, ['ADMIN', 'REFEREE']);
-    if (auth instanceof NextResponse) return auth;
-    const officerId = auth.user.id;
-
-    // Atomic status update to prevent race conditions during rapid gate check-in
+    // 4. Atomic status update to prevent race conditions during rapid gate check-in
     const updateResult = run(
       `UPDATE tickets
        SET status = 'CHECKED_IN', checked_in_at = CURRENT_TIMESTAMP, checked_in_by = ?, gate_name = ?
@@ -168,4 +170,3 @@ export async function POST(request: Request) {
     );
   }
 }
-

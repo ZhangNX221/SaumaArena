@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { query, queryOne, run } from '@/db/sqlite';
+import { query, queryOne, run, transaction } from '@/db/sqlite';
 import { requireAuth } from '@/lib/auth';
 import { randomUUID } from 'node:crypto';
 
@@ -128,44 +128,62 @@ export async function POST(request: Request) {
 
     const pricePerTicket = validCategory === 'VIP' ? 35000 : validCategory === 'SUPPORTER' ? 12000 : 15000;
 
-    // Periksa sisa kuota
-    const statsRow = queryOne<any>(`
-      SELECT SUM(CASE WHEN status != 'CANCELLED' THEN quantity ELSE 0 END) as active_qty
-      FROM tickets
-    `);
-    const activeQty = statsRow?.active_qty || 0;
-    if (activeQty + qty > TOTAL_VENUE_QUOTA) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: `Kuota tiket stadion telah habis atau tidak mencukupi untuk ${qty} tiket (Tersisa: ${Math.max(0, TOTAL_VENUE_QUOTA - activeQty)} kursi).`,
-        },
-        { status: 400 }
-      );
+    // Periksa kuota dan terbitkan tiket secara atomik (mencegah TOCTOU overbooking race condition)
+    let ticketId = '';
+    let bookingCode = '';
+
+    try {
+      const issued = transaction(() => {
+        const statsRow = queryOne<any>(`
+          SELECT SUM(CASE WHEN status != 'CANCELLED' THEN quantity ELSE 0 END) as active_qty
+          FROM tickets
+        `);
+        const activeQty = statsRow?.active_qty || 0;
+        if (activeQty + qty > TOTAL_VENUE_QUOTA) {
+          throw new Error(`QUOTA_EXCEEDED:${Math.max(0, TOTAL_VENUE_QUOTA - activeQty)}`);
+        }
+
+        const tid = `tkt_${Date.now()}_${randomUUID().slice(0, 6)}`;
+        const randomHex = randomUUID().slice(0, 6).toUpperCase();
+        const prefix = validCategory === 'VIP' ? 'VIP' : validCategory === 'SUPPORTER' ? 'SUP' : 'REG';
+        const bCode = `MMFC-${prefix}-${randomHex}`;
+
+        run(
+          `INSERT INTO tickets (
+            id, booking_code, buyer_name, buyer_phone, buyer_email, team_id,
+            category, quantity, price, status
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'ISSUED')`,
+          [
+            tid,
+            bCode,
+            buyerName.trim(),
+            buyerPhone.trim(),
+            buyerEmail.trim(),
+            teamId,
+            validCategory,
+            qty,
+            pricePerTicket,
+          ]
+        );
+
+        return { ticketId: tid, bookingCode: bCode };
+      });
+
+      ticketId = issued.ticketId;
+      bookingCode = issued.bookingCode;
+    } catch (err: any) {
+      if (err.message && err.message.startsWith('QUOTA_EXCEEDED:')) {
+        const remaining = err.message.split(':')[1];
+        return NextResponse.json(
+          {
+            success: false,
+            error: `Kuota tiket stadion telah habis atau tidak mencukupi untuk ${qty} tiket (Tersisa: ${remaining} kursi).`,
+          },
+          { status: 400 }
+        );
+      }
+      throw err;
     }
-
-    const ticketId = `tkt_${Date.now()}_${randomUUID().slice(0, 6)}`;
-    const randomHex = randomUUID().slice(0, 6).toUpperCase();
-    const prefix = validCategory === 'VIP' ? 'VIP' : validCategory === 'SUPPORTER' ? 'SUP' : 'REG';
-    const bookingCode = `MMFC-${prefix}-${randomHex}`;
-
-    run(
-      `INSERT INTO tickets (
-        id, booking_code, buyer_name, buyer_phone, buyer_email, team_id,
-        category, quantity, price, status
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'ISSUED')`,
-      [
-        ticketId,
-        bookingCode,
-        buyerName.trim(),
-        buyerPhone.trim(),
-        buyerEmail.trim(),
-        teamId,
-        validCategory,
-        qty,
-        pricePerTicket,
-      ]
-    );
 
     return NextResponse.json(
       {

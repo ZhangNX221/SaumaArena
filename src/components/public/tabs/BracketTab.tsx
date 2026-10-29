@@ -10,8 +10,10 @@ import {
   GRAND_FINAL,
   BRONZE_MATCH,
 } from '@/mocks/bracketData';
+import { initialTeams } from '@/mocks/tournamentData';
 import { SportCode } from '@/types';
 import { PublicPageHeader } from '../layout/PublicPageHeader';
+import { usePersistentState } from '@/hooks/usePersistentState';
 
 interface BracketTabProps {
   sportCode?: SportCode;
@@ -22,8 +24,22 @@ type StageFilter = 'ALL' | 'QF' | 'SF' | 'FINAL';
 export const BracketTab: React.FC<BracketTabProps> = ({ sportCode = 'FUTSAL' }) => {
   const [activeStageFilter, setActiveStageFilter] = useState<StageFilter>('ALL');
 
+  // Akses state tersinkronisasi bagan dari Admin & Meja Juri
+  const [qf] = usePersistentState<BracketMatch[]>('sauma_arena_bracket_qf', QUARTER_FINALS);
+  const [sf] = usePersistentState<BracketMatch[]>('sauma_arena_bracket_sf', SEMI_FINALS);
+  const [gf] = usePersistentState<BracketMatch>('sauma_arena_bracket_gf', GRAND_FINAL);
+  const [championId] = usePersistentState<string>('sauma_arena_bracket_champ', '');
+
   const caborLabel = 'Futsal';
-  const championTeamName = 'Menunggu Pemenang Laga Final (P17)';
+
+  const championTeam = initialTeams.find((t) => t.id === championId);
+  const championTeamName = championTeam
+    ? `${championTeam.name} (${championTeam.schoolName || ''})`
+    : gf.teamA.isWinner
+    ? gf.teamA.name
+    : gf.teamB.isWinner
+    ? gf.teamB.name
+    : 'Menunggu Pemenang Laga Final (P17)';
 
   const renderMatchCard = (m: BracketMatch, isHighlighted = false) => (
     <div
@@ -58,12 +74,10 @@ export const BracketTab: React.FC<BracketTabProps> = ({ sportCode = 'FUTSAL' }) 
               <img
                 src={getTeamLogoUrl(m.teamA.id)}
                 alt={m.teamA.name}
-                className="w-5 h-5 rounded-sm object-contain shrink-0"
-                loading="lazy"
+                className="w-5 h-5 object-contain shrink-0 rounded-xs"
               />
             )}
-            <span className="truncate font-barlow font-bold text-sm tracking-wide">{m.teamA.name}</span>
-            {m.teamA.isWinner && <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" />}
+            <span className="truncate">{m.teamA.name}</span>
           </div>
           <span
             className={`font-teko font-bold text-lg tabular-nums leading-none ${
@@ -90,12 +104,10 @@ export const BracketTab: React.FC<BracketTabProps> = ({ sportCode = 'FUTSAL' }) 
               <img
                 src={getTeamLogoUrl(m.teamB.id)}
                 alt={m.teamB.name}
-                className="w-5 h-5 rounded-sm object-contain shrink-0"
-                loading="lazy"
+                className="w-5 h-5 object-contain shrink-0 rounded-xs"
               />
             )}
-            <span className="truncate font-barlow font-bold text-sm tracking-wide">{m.teamB.name}</span>
-            {m.teamB.isWinner && <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" />}
+            <span className="truncate">{m.teamB.name}</span>
           </div>
           <span
             className={`font-teko font-bold text-lg tabular-nums leading-none ${
@@ -119,22 +131,22 @@ export const BracketTab: React.FC<BracketTabProps> = ({ sportCode = 'FUTSAL' }) 
         description={`Alur gugur tunggal babak perempat final, semifinal, hingga laga penentuan juara utama turnamen ${caborLabel}.`}
       />
 
-      {/* Notice Bagan Menunggu Rekapitulasi Grup */}
+      {/* Notice Bagan Tersinkronisasi */}
       <div className="p-4 rounded-xl bg-[var(--bg-surface)] border-2 border-slate-300 dark:border-slate-800 flex items-start sm:items-center gap-3 text-xs shadow-xs">
         <div className="w-8 h-8 rounded-lg bg-blue-50 dark:bg-sky-950/40 text-[#1D63B8] dark:text-sky-400 flex items-center justify-center shrink-0 mt-0.5 sm:mt-0">
           <GitBranch className="w-4 h-4" />
         </div>
         <div className="space-y-0.5">
           <span className="font-barlow font-bold uppercase tracking-wide text-[var(--text-main)] block">
-            Bagan Fase Eliminasi &bull; Diisi Sesuai Rekapitulasi Klasemen Grup
+            Bagan Fase Eliminasi &bull; Tersinkron Real-Time dengan Meja Wasit &amp; Panitia
           </span>
           <p className="text-[11px] text-[var(--text-muted)] leading-relaxed font-sans">
-            Slot babak semifinal (4 besar) dan final saat ini dikosongkan dan akan diperbarui oleh juri/panitia setelah babak penyisihan 4 grup (A, B, C, D) selesai dipertandingkan pada Hari ke-2 turnamen.
+            Slot babak perempat final (8 besar), semifinal (4 besar), dan partai final diperbarui langsung oleh panitia &amp; juri turnamen MMFC I.
           </p>
         </div>
       </div>
 
-      {/* Stage Selector Filter (Active on both Mobile and Desktop) */}
+      {/* Stage Selector Filter */}
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-1 p-1 rounded-lg bg-[var(--bg-muted)] border-2 border-slate-300 dark:border-slate-800 text-xs font-semibold w-full sm:w-auto">
           {[
@@ -164,7 +176,7 @@ export const BracketTab: React.FC<BracketTabProps> = ({ sportCode = 'FUTSAL' }) 
         </div>
       </div>
 
-      {/* 1. ADAPTIVE MOBILE ROUND VIEW (block sm:hidden) */}
+      {/* 1. ADAPTIVE MOBILE ROUND VIEW */}
       <div className="block sm:hidden space-y-6">
         {/* QF Section */}
         {(activeStageFilter === 'ALL' || activeStageFilter === 'QF') && (
@@ -174,11 +186,11 @@ export const BracketTab: React.FC<BracketTabProps> = ({ sportCode = 'FUTSAL' }) 
                 Babak 8 Besar (Quarter Finals)
               </span>
               <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-[var(--bg-muted)] text-[var(--text-muted)]">
-                4 Pertandingan
+                {qf.length} Pertandingan
               </span>
             </div>
             <div className="grid grid-cols-1 gap-2.5">
-              {QUARTER_FINALS.map((m) => renderMatchCard(m))}
+              {qf.map((m) => renderMatchCard(m))}
             </div>
           </div>
         )}
@@ -191,11 +203,11 @@ export const BracketTab: React.FC<BracketTabProps> = ({ sportCode = 'FUTSAL' }) 
                 Babak Semifinal (4 Besar)
               </span>
               <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-blue-50 dark:bg-sky-950/40 text-[#1D63B8] dark:text-sky-300">
-                2 Pertandingan
+                {sf.length} Pertandingan
               </span>
             </div>
             <div className="grid grid-cols-1 gap-2.5">
-              {SEMI_FINALS.map((m) => renderMatchCard(m, true))}
+              {sf.map((m) => renderMatchCard(m, true))}
             </div>
           </div>
         )}
@@ -216,34 +228,55 @@ export const BracketTab: React.FC<BracketTabProps> = ({ sportCode = 'FUTSAL' }) 
               </div>
               <div className="rounded-xl border-2 border-[var(--color-arena-accent)] bg-[var(--bg-surface)] p-4 space-y-3 shadow-sm">
                 <div className="flex items-center justify-between text-[11px] font-mono text-[var(--text-muted)] pb-2 border-b border-slate-200 dark:border-slate-800">
-                  <span>{GRAND_FINAL.schedule}</span>
+                  <span>{gf.schedule}</span>
                   <span className="font-bold text-amber-600 dark:text-amber-400">CHAMPION MATCH</span>
                 </div>
                 <div className="space-y-2">
-                  <div className="flex items-center justify-between p-2 rounded-lg bg-[var(--bg-muted)] border border-slate-200 dark:border-slate-700">
+                  <div className={`flex items-center justify-between p-2 rounded-lg border transition-colors ${
+                    gf.teamA.isWinner
+                      ? 'bg-amber-500/10 border-amber-500/30 font-bold text-[var(--text-main)]'
+                      : 'bg-[var(--bg-muted)] border-slate-200 dark:border-slate-700 text-[var(--text-muted)]'
+                  }`}>
                     <div className="flex items-center gap-2">
-                      <img src={getTeamLogoUrl(GRAND_FINAL.teamA.id)} alt={GRAND_FINAL.teamA.name} className="w-5 h-5 rounded-xs object-contain" />
-                      <span className="font-barlow font-bold text-sm text-[var(--text-main)]">{GRAND_FINAL.teamA.name}</span>
+                      <img src={getTeamLogoUrl(gf.teamA.id)} alt={gf.teamA.name} className="w-5 h-5 rounded-xs object-contain" />
+                      <span className="font-barlow font-bold text-sm text-[var(--text-main)]">{gf.teamA.name}</span>
                     </div>
-                    <span className="font-teko font-bold text-xl text-[var(--color-arena-accent)]">-</span>
+                    <span className="font-teko font-bold text-xl text-[var(--color-arena-accent)]">{gf.status === 'COMPLETED' ? gf.teamA.score : '-'}</span>
                   </div>
-                  <div className="flex items-center justify-between p-2 rounded-lg bg-[var(--bg-muted)] border border-slate-200 dark:border-slate-700">
+                  <div className={`flex items-center justify-between p-2 rounded-lg border transition-colors ${
+                    gf.teamB.isWinner
+                      ? 'bg-amber-500/10 border-amber-500/30 font-bold text-[var(--text-main)]'
+                      : 'bg-[var(--bg-muted)] border-slate-200 dark:border-slate-700 text-[var(--text-muted)]'
+                  }`}>
                     <div className="flex items-center gap-2">
-                      <img src={getTeamLogoUrl(GRAND_FINAL.teamB.id)} alt={GRAND_FINAL.teamB.name} className="w-5 h-5 rounded-xs object-contain" />
-                      <span className="font-barlow font-bold text-sm text-[var(--text-main)]">{GRAND_FINAL.teamB.name}</span>
+                      <img src={getTeamLogoUrl(gf.teamB.id)} alt={gf.teamB.name} className="w-5 h-5 rounded-xs object-contain" />
+                      <span className="font-barlow font-bold text-sm text-[var(--text-main)]">{gf.teamB.name}</span>
                     </div>
-                    <span className="font-teko font-bold text-xl text-[var(--text-muted)]">-</span>
+                    <span className="font-teko font-bold text-xl text-[var(--color-arena-accent)]">{gf.status === 'COMPLETED' ? gf.teamB.score : '-'}</span>
+                  </div>
+                </div>
+                {/* Winner Callout */}
+                <div className="p-2.5 rounded-lg bg-amber-500/10 border border-amber-500/30 text-center">
+                  <div className="text-[10px] uppercase font-bold tracking-wider text-amber-600 dark:text-amber-400 flex items-center justify-center gap-1">
+                    <Trophy className="w-3.5 h-3.5" />
+                    <span>Kampiun Juara MMFC I</span>
+                  </div>
+                  <div className="font-teko text-lg uppercase font-bold text-[var(--text-main)]">
+                    {championTeamName}
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Bronze Match */}
+            {/* Bronze Match Card */}
             <div className="space-y-2">
               <div className="flex items-center justify-between pb-1.5 border-b border-slate-200 dark:border-slate-800">
                 <span className="font-bebas text-base uppercase tracking-wider text-amber-700 dark:text-amber-500 flex items-center gap-1.5">
                   <Medal className="w-4 h-4" />
                   <span>Perebutan Juara 3 (Bronze Final)</span>
+                </span>
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-amber-500/10 text-amber-700 dark:text-amber-300">
+                  Podium 3
                 </span>
               </div>
               {renderMatchCard(BRONZE_MATCH)}
@@ -252,44 +285,39 @@ export const BracketTab: React.FC<BracketTabProps> = ({ sportCode = 'FUTSAL' }) 
         )}
       </div>
 
-      {/* 2. DESKTOP TREE BOARD (hidden sm:block) */}
-      <div className="hidden sm:block p-6 rounded-xl bg-[var(--bg-surface)] border-2 border-slate-300 dark:border-slate-800 overflow-x-auto shadow-sm">
-        {/* Diagram-Design Tree Board: Robust Flex Column Structure */}
-        <div className="min-w-[960px] flex items-stretch select-none">
-          {/* KOLOM 1: PEREMPAT FINAL */}
+      {/* 2. DESKTOP INTERACTIVE BRACKET (hidden sm:block) */}
+      <div className="hidden sm:block overflow-x-auto pb-4">
+        <div className="min-w-[960px] flex items-stretch gap-0">
+          {/* KOLOM 1: BABAK 8 BESAR (QUARTER FINALS) */}
           <div
             className={`w-[240px] shrink-0 flex flex-col transition-opacity ${
               activeStageFilter !== 'ALL' && activeStageFilter !== 'QF' ? 'opacity-30' : ''
             }`}
           >
-            {/* Stage Header 1 */}
-            <div className="h-[42px] flex items-center justify-between pb-3 mb-4 border-b-2 border-slate-200 dark:border-slate-800 text-xs font-black uppercase tracking-wider text-[var(--text-muted)]">
-              <span>Slot Juara Grup</span>
-              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-[var(--bg-muted)] border border-slate-300 dark:border-slate-700">
-                4 Grup (A-D)
+            <div className="h-[42px] flex items-center justify-between pb-3 mb-4 border-b-2 border-slate-200 dark:border-slate-800 text-xs font-black uppercase tracking-wider text-[var(--text-main)]">
+              <span>8 Besar (Perempat Final)</span>
+              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-[var(--bg-muted)] text-[var(--text-muted)] border border-slate-200 dark:border-slate-800">
+                {qf.length} Laga
               </span>
             </div>
-            {/* 4 Quarter Final Cards (height 480px, evenly spaced) */}
-            <div className="h-[480px] flex flex-col justify-between">
-              <div className="h-[90px]">{renderMatchCard(QUARTER_FINALS[0])}</div>
-              <div className="h-[90px]">{renderMatchCard(QUARTER_FINALS[1])}</div>
-              <div className="h-[90px]">{renderMatchCard(QUARTER_FINALS[2])}</div>
-              <div className="h-[90px]">{renderMatchCard(QUARTER_FINALS[3])}</div>
+            <div className="h-[480px] flex flex-col justify-between py-1">
+              {qf.map((m) => (
+                <div key={m.id} className="h-[90px] w-full">
+                  {renderMatchCard(m)}
+                </div>
+              ))}
             </div>
           </div>
 
-          {/* CONNECTOR 1: QF -> SF (Orthogonal Elbow Lines) */}
+          {/* CONNECTOR 1: QF -> SF */}
           <div className="w-[60px] shrink-0 flex flex-col pointer-events-none">
-            {/* Continuous Header Border Spacer */}
             <div className="h-[42px] pb-3 mb-4 border-b-2 border-slate-200 dark:border-slate-800" aria-hidden="true" />
-            {/* Full Height Connector SVG */}
             <div className="h-[480px] relative">
               <svg
                 className="w-full h-full text-[#1D63B8]/60 dark:text-sky-400/50"
                 viewBox="0 0 60 480"
                 preserveAspectRatio="none"
               >
-                {/* Upper Fork (QF1 y=45, QF2 y=175 -> SF1 y=110) */}
                 <path
                   d="M 0,45 H 30 V 175 H 0 M 30,110 H 60"
                   fill="none"
@@ -299,8 +327,6 @@ export const BracketTab: React.FC<BracketTabProps> = ({ sportCode = 'FUTSAL' }) 
                   strokeLinejoin="round"
                 />
                 <circle cx="60" cy="110" r="3.5" fill="currentColor" />
-
-                {/* Lower Fork (QF3 y=305, QF4 y=435 -> SF2 y=370) */}
                 <path
                   d="M 0,305 H 30 V 435 H 0 M 30,370 H 60"
                   fill="none"
@@ -320,36 +346,31 @@ export const BracketTab: React.FC<BracketTabProps> = ({ sportCode = 'FUTSAL' }) 
               activeStageFilter !== 'ALL' && activeStageFilter !== 'SF' ? 'opacity-30' : ''
             }`}
           >
-            {/* Stage Header 2 */}
             <div className="h-[42px] flex items-center justify-between pb-3 mb-4 border-b-2 border-slate-200 dark:border-slate-800 text-xs font-black uppercase tracking-wider text-[#1D63B8] dark:text-sky-300">
               <span>Babak Semifinal</span>
               <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-blue-50 dark:bg-sky-950/40 text-[#1D63B8] dark:text-sky-300 border border-blue-200 dark:border-sky-800">
-                2 Laga
+                {sf.length} Laga
               </span>
             </div>
-            {/* 2 Semifinal Cards centered between QF pairs */}
             <div className="h-[480px] relative">
               <div className="absolute top-[65px] w-full h-[90px]">
-                {renderMatchCard(SEMI_FINALS[0], true)}
+                {sf[0] && renderMatchCard(sf[0], true)}
               </div>
               <div className="absolute top-[325px] w-full h-[90px]">
-                {renderMatchCard(SEMI_FINALS[1], true)}
+                {sf[1] && renderMatchCard(sf[1], true)}
               </div>
             </div>
           </div>
 
-          {/* CONNECTOR 2: SF -> GRAND FINAL (Orthogonal Gold Elbow) */}
+          {/* CONNECTOR 2: SF -> GRAND FINAL */}
           <div className="w-[60px] shrink-0 flex flex-col pointer-events-none">
-            {/* Continuous Header Border Spacer */}
             <div className="h-[42px] pb-3 mb-4 border-b-2 border-slate-200 dark:border-slate-800" aria-hidden="true" />
-            {/* Full Height Connector SVG */}
             <div className="h-[480px] relative">
               <svg
                 className="w-full h-full text-[var(--color-arena-accent)]/80"
                 viewBox="0 0 60 480"
                 preserveAspectRatio="none"
               >
-                {/* Merging Fork (SF1 y=110, SF2 y=370 -> Final y=240) */}
                 <path
                   d="M 0,110 H 30 V 370 H 0 M 30,240 H 60"
                   fill="none"
@@ -369,7 +390,6 @@ export const BracketTab: React.FC<BracketTabProps> = ({ sportCode = 'FUTSAL' }) 
               activeStageFilter !== 'ALL' && activeStageFilter !== 'FINAL' ? 'opacity-30' : ''
             }`}
           >
-            {/* Stage Header 3 */}
             <div className="h-[42px] flex items-center justify-between pb-3 mb-4 border-b-2 border-slate-200 dark:border-slate-800 text-xs font-black uppercase tracking-wider text-[var(--color-arena-accent)]">
               <span className="flex items-center gap-1.5">
                 <Trophy className="w-3.5 h-3.5" />
@@ -379,96 +399,90 @@ export const BracketTab: React.FC<BracketTabProps> = ({ sportCode = 'FUTSAL' }) 
                 Perebutan Juara 1
               </span>
             </div>
-            {/* Grand Final Champion Card (Centered at Y=240, top=135px) */}
             <div className="h-[480px] relative">
               <div className="absolute top-[135px] w-full rounded-xl bg-[var(--bg-surface)] border-2 border-[var(--color-arena-accent)] shadow-md overflow-hidden space-y-3 p-4">
-                {/* Champion Match Badge Header */}
                 <div className="flex items-center justify-between text-[11px] font-mono font-bold text-amber-700 dark:text-amber-300 pb-2 border-b border-slate-200 dark:border-slate-800">
-                  <span>{GRAND_FINAL.schedule}</span>
+                  <span>{gf.schedule}</span>
                   <span className="px-2 py-0.5 rounded-sm bg-[var(--color-arena-accent)] text-slate-950 font-black text-[9px] flex items-center gap-1 shadow-2xs">
                     <Trophy className="w-3 h-3" />
                     <span>CHAMPION MATCH</span>
                   </span>
                 </div>
 
-                {/* Finalists Rows */}
                 <div className="space-y-2 text-xs">
-                  {/* Finalist A */}
                   <div className={`flex items-center justify-between p-2.5 rounded-lg border transition-colors ${
-                    GRAND_FINAL.teamA.isWinner
-                      ? 'bg-amber-500/10 border-amber-500/30 text-[var(--text-main)]'
+                    gf.teamA.isWinner
+                      ? 'bg-amber-500/10 border-amber-500/30 text-[var(--text-main)] font-bold'
                       : 'bg-[var(--bg-muted)]/60 text-[var(--text-muted)] border-slate-200 dark:border-slate-700'
                   }`}>
                     <div className="flex items-center gap-2.5 min-w-0">
                       <div className="relative shrink-0">
-                        {GRAND_FINAL.teamA.id.startsWith('tbd') ? (
+                        {gf.teamA.id.startsWith('tbd') ? (
                           <div className="w-6 h-6 rounded-md bg-[var(--bg-surface)] border border-slate-300 dark:border-slate-700 flex items-center justify-center text-xs font-mono font-bold text-[var(--text-muted)]">
                             -
                           </div>
                         ) : (
                           <img
-                            src={getTeamLogoUrl(GRAND_FINAL.teamA.id)}
-                            alt={GRAND_FINAL.teamA.name}
-                            className="w-6 h-6 rounded-md object-contain"
+                            src={getTeamLogoUrl(gf.teamA.id)}
+                            alt={gf.teamA.name}
+                            className="w-6 h-6 rounded-xs object-contain"
                           />
                         )}
-                        {GRAND_FINAL.teamA.isWinner && (
-                          <Crown className="w-3.5 h-3.5 text-amber-500 absolute -top-2 -right-1.5" />
-                        )}
-                      </div>
-                      <div className="truncate">
-                        <span className="font-barlow font-bold text-sm block truncate text-[var(--text-main)]">
-                          {GRAND_FINAL.teamA.name}
-                        </span>
-                        <span className="text-[10px] font-bold text-[var(--text-muted)]">
-                          {GRAND_FINAL.teamA.isWinner ? 'Juara 1 Turnamen' : 'Finalis 1 (Pemenang P15)'}
-                        </span>
-                      </div>
-                    </div>
-                    <span className="font-teko font-bold text-2xl text-[var(--color-arena-accent)] tabular-nums leading-none">
-                      {GRAND_FINAL.status === 'COMPLETED' ? GRAND_FINAL.teamA.score : '-'}
-                    </span>
-                  </div>
-
-                  {/* Finalist B */}
-                  <div className={`flex items-center justify-between p-2.5 rounded-lg border transition-colors ${
-                    GRAND_FINAL.teamB.isWinner
-                      ? 'bg-amber-500/10 border-amber-500/30 text-[var(--text-main)]'
-                      : 'bg-[var(--bg-muted)]/60 text-[var(--text-muted)] border-slate-200 dark:border-slate-700'
-                  }`}>
-                    <div className="flex items-center gap-2.5 min-w-0">
-                      <div className="relative shrink-0">
-                        {GRAND_FINAL.teamB.id.startsWith('tbd') ? (
-                          <div className="w-6 h-6 rounded-md bg-[var(--bg-surface)] border border-slate-300 dark:border-slate-700 flex items-center justify-center text-xs font-mono font-bold text-[var(--text-muted)]">
-                            -
-                          </div>
-                        ) : (
-                          <img
-                            src={getTeamLogoUrl(GRAND_FINAL.teamB.id)}
-                            alt={GRAND_FINAL.teamB.name}
-                            className="w-5 h-5 rounded-md object-contain shrink-0"
-                          />
-                        )}
-                        {GRAND_FINAL.teamB.isWinner && (
+                        {gf.teamA.isWinner && (
                           <Crown className="w-3.5 h-3.5 text-amber-500 absolute -top-2 -right-1.5" />
                         )}
                       </div>
                       <div className="truncate">
                         <span className="font-barlow font-bold text-sm text-[var(--text-main)] block truncate">
-                          {GRAND_FINAL.teamB.name}
+                          {gf.teamA.name}
                         </span>
                         <span className="text-[10px] text-[var(--text-muted)]">
-                          {GRAND_FINAL.teamB.isWinner ? 'Juara 1 Turnamen' : 'Finalis 2 (Pemenang P16)'}
+                          {gf.teamA.isWinner ? 'Juara 1 Turnamen' : 'Finalis 1 (Pemenang P15)'}
+                        </span>
+                      </div>
+                    </div>
+                    <span className="font-teko font-bold text-xl tabular-nums leading-none text-[var(--color-arena-accent)]">
+                      {gf.status === 'COMPLETED' ? gf.teamA.score : '-'}
+                    </span>
+                  </div>
+
+                  <div className={`flex items-center justify-between p-2.5 rounded-lg border transition-colors ${
+                    gf.teamB.isWinner
+                      ? 'bg-amber-500/10 border-amber-500/30 text-[var(--text-main)] font-bold'
+                      : 'bg-[var(--bg-muted)]/60 text-[var(--text-muted)] border-slate-200 dark:border-slate-700'
+                  }`}>
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <div className="relative shrink-0">
+                        {gf.teamB.id.startsWith('tbd') ? (
+                          <div className="w-6 h-6 rounded-md bg-[var(--bg-surface)] border border-slate-300 dark:border-slate-700 flex items-center justify-center text-xs font-mono font-bold text-[var(--text-muted)]">
+                            -
+                          </div>
+                        ) : (
+                          <img
+                            src={getTeamLogoUrl(gf.teamB.id)}
+                            alt={gf.teamB.name}
+                            className="w-6 h-6 rounded-xs object-contain"
+                          />
+                        )}
+                        {gf.teamB.isWinner && (
+                          <Crown className="w-3.5 h-3.5 text-amber-500 absolute -top-2 -right-1.5" />
+                        )}
+                      </div>
+                      <div className="truncate">
+                        <span className="font-barlow font-bold text-sm text-[var(--text-main)] block truncate">
+                          {gf.teamB.name}
+                        </span>
+                        <span className="text-[10px] text-[var(--text-muted)]">
+                          {gf.teamB.isWinner ? 'Juara 1 Turnamen' : 'Finalis 2 (Pemenang P16)'}
                         </span>
                       </div>
                     </div>
                     <span className="font-teko font-bold text-xl tabular-nums leading-none text-[var(--text-muted)]">
-                      {GRAND_FINAL.status === 'COMPLETED' ? GRAND_FINAL.teamB.score : '-'}
+                      {gf.status === 'COMPLETED' ? gf.teamB.score : '-'}
                     </span>
                   </div>
                 </div>
 
-                {/* Trophy Winner Callout Banner */}
                 <div className="p-2.5 rounded-lg bg-amber-500/10 border border-amber-500/25 text-center space-y-0.5">
                   <div className="text-[10px] uppercase font-barlow font-bold tracking-widest text-amber-600 dark:text-amber-400 flex items-center justify-center gap-1">
                     <Trophy className="w-3 h-3" />
@@ -483,7 +497,7 @@ export const BracketTab: React.FC<BracketTabProps> = ({ sportCode = 'FUTSAL' }) 
           </div>
         </div>
 
-        {/* Bronze Match Section (Perebutan Juara 3) */}
+        {/* Bronze Match Section */}
         <div className="mt-8 pt-5 border-t-2 border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="space-y-0.5">
             <div className="flex items-center gap-1.5 text-xs font-bold text-amber-700 dark:text-amber-400">

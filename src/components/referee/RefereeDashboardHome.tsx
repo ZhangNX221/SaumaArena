@@ -7,22 +7,23 @@ import {
   Shield,
   UserCheck,
 } from 'lucide-react';
-import { AppUser, Match, RefereeMatchDuty } from '@/types';
+import { AppUser, Match, RefereeMatchDuty, MatchLiveTelemetry } from '@/types';
 import { REFEREE_DUTIES } from '@/mocks/multiSportData';
 import { initialMatches } from '@/mocks/tournamentData';
 import { usePersistentState } from '@/hooks/usePersistentState';
+import { AdminPageHeaderCard } from '@/components/admin/common/AdminPageHeaderCard';
+import { formatIndonesianFullDate } from '@/lib/calendar';
 
 interface RefereeDashboardHomeProps {
   user: AppUser;
   liveMatch: Match;
-  onGoToMatchCenter: () => void;
+  onGoToMatchCenter: (matchId?: string) => void;
   onGoToSchedule: () => void;
   onGoToReports: () => void;
 }
 
 export const RefereeDashboardHome: React.FC<RefereeDashboardHomeProps> = ({
   user,
-  liveMatch,
   onGoToMatchCenter,
   onGoToSchedule,
 }) => {
@@ -30,65 +31,109 @@ export const RefereeDashboardHome: React.FC<RefereeDashboardHomeProps> = ({
 
   const [duties] = usePersistentState<RefereeMatchDuty[]>('sauma_arena_duties', REFEREE_DUTIES);
   const [matches] = usePersistentState<Match[]>('sauma_arena_matches', initialMatches);
+  const [telemetryMap] = usePersistentState<Record<string, MatchLiveTelemetry>>(
+    'sauma_arena_live_telemetry',
+    {}
+  );
+
+  // 1. Identifikasi tanggal dan hari saat ini secara dinamis
+  const now = new Date();
+  const daysId = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+  const monthsShort = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+  const monthsLong = [
+    'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+    'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+  ];
+
+  const currentDayName = daysId[now.getDay()];
+  const currentDateNum = now.getDate();
+  const currentMonthShort = monthsShort[now.getMonth()];
+  const currentMonthLong = monthsLong[now.getMonth()];
+  const currentYear = now.getFullYear();
+  const todayFormattedStr = formatIndonesianFullDate(now);
+
+  const isDutyToday = (timeStr: string): boolean => {
+    if (!timeStr) return false;
+    if (timeStr.toLowerCase().includes('hari ini')) return true;
+    const hasDay = timeStr.includes(currentDayName);
+    const hasDate = timeStr.includes(String(currentDateNum));
+    const hasMonth = timeStr.includes(currentMonthShort) || timeStr.includes(currentMonthLong);
+    const hasYear = timeStr.includes(String(currentYear));
+    return hasDay && hasDate && hasMonth && hasYear;
+  };
 
   const userDuties = duties.filter(
     (d) => d.refereeId === user.id || user.assignedMatchIds?.includes(d.matchId)
   );
   const activeDuties = userDuties.length > 0 ? userDuties : duties.slice(0, 3);
 
-  const todayAssignments = activeDuties.map((d) => {
+  // Penugasan hari ini milik wasit (hanya jika tanggal sesuai atau timer sedang berjalan aktif)
+  const todayDuties = activeDuties.filter((d) => {
+    const isLive = Boolean(telemetryMap[d.matchId]?.isTimerRunning);
+    return isDutyToday(d.time) || isLive;
+  });
+
+  const displayDuties = todayDuties.length > 0 ? todayDuties : activeDuties;
+
+  const assignmentCards = displayDuties.map((d) => {
     const linkedMatch = matches.find((m) => m.id === d.matchId);
+    const telemetry = telemetryMap[d.matchId];
+
+    // Status hanya benar-benar LIVE jika timer sedang aktif berjalan oleh juri
+    const isLive = linkedMatch?.status === 'LIVE' && Boolean(telemetry?.isTimerRunning);
+    const isCompleted = linkedMatch?.status === 'COMPLETED' || d.status === 'COMPLETED';
+    const computedStatus: Match['status'] = isLive ? 'LIVE' : isCompleted ? 'COMPLETED' : 'UPCOMING';
+
     return {
       id: d.matchId,
       matchNumber: d.matchNumber,
+      stage: linkedMatch?.stage || 'GROUP',
+      group: linkedMatch?.group || 'A',
       court: d.courtName,
       time: d.time,
       teamA: d.teamA,
       teamB: d.teamB,
-      role: d.roleInMatch || 'Wasit Pertandingan',
-      status: (linkedMatch?.status || d.status || 'UPCOMING') as Match['status'],
+      role: d.roleInMatch || 'Wasit Utama (Wasit 1)',
+      status: computedStatus,
+      scoreA: linkedMatch?.scoreA ?? 0,
+      scoreB: linkedMatch?.scoreB ?? 0,
     };
   });
 
   return (
-    <div className="space-y-6 max-w-5xl mx-auto pb-16 animate-fadeIn">
-      {/* 1. Header Banner - Crisp border, athletic pitch green header */}
-      <div className="p-6 sm:p-7 rounded-2xl bg-[#071F14] text-white border border-emerald-900/40 shadow-xs relative overflow-hidden transition-all duration-200">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-5 relative z-10">
-          <div className="space-y-1">
-            <h1 className="font-bebas text-3xl sm:text-4xl tracking-wide uppercase text-white leading-none">
-              KONSOL JURI LAPANGAN
-            </h1>
-            <p className="text-xs sm:text-sm text-slate-300 max-w-xl font-sans">
-              Pantau jadwal laga Anda, catat skor langsung di meja lapangan, dan sahkan Berita Acara Pertandingan (BAP).
-            </p>
-          </div>
+    <div className="space-y-6 w-full pb-16 animate-fadeIn">
+      {/* 1. Header Card Seragam */}
+      <AdminPageHeaderCard
+        icon={Shield}
+        category="MEJA LAPANGAN • KONSOL PETUGAS"
+        title="Konsol Juri Lapangan"
+        description="Pantau jadwal laga Anda, catat skor langsung di meja lapangan, dan sahkan Berita Acara Pertandingan (BAP)."
+        action={
+          <button
+            type="button"
+            onClick={() => onGoToMatchCenter()}
+            className="btn-tactile flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[var(--color-arena-primary)] hover:bg-[var(--color-arena-primary-hover)] active:scale-[0.98] text-white font-barlow font-bold text-xs uppercase tracking-wider transition-all duration-150 min-h-[42px] cursor-pointer shadow-xs"
+          >
+            <Play className="w-4 h-4 fill-current" />
+            <span>Buka Catat Skor</span>
+          </button>
+        }
+      />
 
-          <div className="flex items-center gap-3 shrink-0">
-            <button
-              type="button"
-              onClick={onGoToMatchCenter}
-              className="btn-tactile flex items-center gap-2 px-5 py-3 rounded-xl bg-[var(--color-arena-primary)] hover:bg-[var(--color-arena-primary-hover)] active:scale-[0.98] text-white font-barlow font-bold text-xs uppercase tracking-wider transition-all duration-150 min-h-[46px] cursor-pointer shadow-xs"
-            >
-              <Play className="w-4 h-4 fill-current" />
-              <span>Buka Catat Skor</span>
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* 2. Matchday Telemetry Strip - Quieter & Distilled: Clean horizontal data bar */}
+      {/* 2. Matchday Telemetry Strip */}
       <div className="p-4 sm:p-5 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-subtle)]">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 divide-y md:divide-y-0 md:divide-x divide-[var(--border-subtle)]">
           <div className="px-2 py-0.5 space-y-0.5">
             <span className="text-[10px] font-barlow font-bold uppercase tracking-wider text-[var(--text-muted)] block">
-              Tugas Hari Ini
+              Laga Hari Ini
             </span>
             <div className="flex items-baseline gap-1.5">
               <span className="text-2xl sm:text-3xl font-scoreboard font-bold text-[var(--color-arena-primary)] leading-none">
-                2
+                {todayDuties.length}
               </span>
-              <span className="text-xs text-[var(--text-muted)] font-sans">Pertandingan</span>
+              <span className="text-xs text-[var(--text-muted)] font-sans">
+                {todayDuties.length > 0 ? 'Pertandingan' : 'Laga (Berikutnya: 3 Nov)'}
+              </span>
             </div>
           </div>
 
@@ -98,7 +143,7 @@ export const RefereeDashboardHome: React.FC<RefereeDashboardHomeProps> = ({
             </span>
             <div className="flex items-baseline gap-1.5">
               <span className="text-2xl sm:text-3xl font-scoreboard font-bold text-emerald-500 leading-none">
-                3
+                0
               </span>
               <span className="text-xs text-[var(--text-muted)] font-sans">Dokumen Sah</span>
             </div>
@@ -110,7 +155,7 @@ export const RefereeDashboardHome: React.FC<RefereeDashboardHomeProps> = ({
             </span>
             <div className="flex items-baseline gap-1.5">
               <span className="text-2xl sm:text-3xl font-scoreboard font-bold text-[var(--color-arena-accent)] leading-none">
-                6 / 1
+                0 / 0
               </span>
               <span className="text-xs text-[var(--text-muted)] font-sans">Kuning / Merah</span>
             </div>
@@ -127,29 +172,32 @@ export const RefereeDashboardHome: React.FC<RefereeDashboardHomeProps> = ({
         </div>
       </div>
 
-      {/* 4. Asymmetrical Layout: Jadwal Hari Ini (2/3) vs Kesiapan & Pengawas (1/3) */}
+      {/* 3. Asymmetrical Layout: Jadwal Tugas vs Kesiapan */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Kolom 1 & 2: Penugasan Hari Ini */}
+        {/* Kolom 1 & 2: Penugasan Laga */}
         <div className="lg:col-span-2 p-5 sm:p-6 rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] space-y-4">
           <div className="flex items-center justify-between border-b border-[var(--border-subtle)] pb-3">
             <div>
               <h2 className="font-bebas text-xl sm:text-2xl text-[var(--text-main)] uppercase tracking-wide">
-                Jadwal Tugas Hari Ini
+                {todayDuties.length > 0 ? 'Jadwal Laga Hari Ini' : 'Jadwal Laga Terdekat'}
               </h2>
-              <p className="text-xs text-[var(--text-muted)] font-sans">Selasa, 3 November 2026</p>
+              <p className="text-xs text-[var(--text-muted)] font-sans">
+                Hari ini: <strong className="text-[var(--text-main)]">{todayFormattedStr}</strong>
+                {todayDuties.length === 0 && ' • Kickoff Laga: Selasa, 3 November 2026'}
+              </p>
             </div>
             <button
               type="button"
               onClick={onGoToSchedule}
               className="text-xs text-[var(--color-arena-primary)] hover:underline font-barlow font-bold uppercase tracking-wider flex items-center gap-1 transition-colors cursor-pointer"
             >
-              <span>Semua Jadwal</span>
+              <span>Semua Jadwal Laga</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </button>
           </div>
 
           <div className="space-y-3">
-            {todayAssignments.map((m) => (
+            {assignmentCards.map((m) => (
               <div
                 key={m.id}
                 className="p-4 sm:p-5 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)]/50 hover:bg-[var(--bg-muted)] hover:border-[var(--color-arena-primary)]/30 transition-all duration-150 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
@@ -162,12 +210,17 @@ export const RefereeDashboardHome: React.FC<RefereeDashboardHomeProps> = ({
                     <span className="text-[var(--text-faint)]">&bull;</span>
                     <span className="text-xs text-[var(--text-muted)]">{m.court}</span>
                     {m.status === 'LIVE' ? (
-                      <span className="px-2 py-0.5 rounded-full bg-red-500/15 text-red-600 dark:text-red-400 text-[9px] font-barlow font-bold uppercase tracking-wider">
-                        Sedang Berjalan
+                      <span className="px-2 py-0.5 rounded-full bg-red-500/15 text-red-600 dark:text-red-400 text-[9px] font-barlow font-bold uppercase tracking-wider animate-pulse flex items-center gap-1">
+                        <span className="w-1.5 h-1.5 rounded-full bg-red-500" />
+                        <span>Sedang Berjalan</span>
+                      </span>
+                    ) : m.status === 'COMPLETED' ? (
+                      <span className="px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 text-[9px] font-barlow font-bold uppercase tracking-wider">
+                        Selesai ({m.scoreA} - {m.scoreB})
                       </span>
                     ) : (
                       <span className="px-2 py-0.5 rounded-full bg-slate-500/15 text-slate-600 dark:text-slate-400 text-[9px] font-barlow font-bold uppercase tracking-wider">
-                        Terjadwal
+                        Terjadwal (3 Nov 2026)
                       </span>
                     )}
                   </div>
@@ -182,23 +235,15 @@ export const RefereeDashboardHome: React.FC<RefereeDashboardHomeProps> = ({
                 </div>
 
                 <div className="shrink-0 pt-1 sm:pt-0">
-                  {m.status === 'LIVE' ? (
-                    <button
-                      type="button"
-                      onClick={onGoToMatchCenter}
-                      className="btn-tactile px-4 py-2 rounded-xl bg-[var(--color-arena-primary)] hover:bg-[var(--color-arena-primary-hover)] active:scale-[0.98] text-white text-xs font-barlow font-bold uppercase tracking-wider transition-all duration-150 cursor-pointer"
-                    >
-                      Buka Meja Laga
-                    </button>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={onGoToSchedule}
-                      className="btn-tactile px-4 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] text-[var(--text-main)] text-xs font-barlow font-bold uppercase tracking-wider hover:bg-[var(--bg-muted)] active:scale-[0.98] transition-all duration-150 cursor-pointer"
-                    >
-                      Rincian Laga
-                    </button>
-                  )}
+                  <button
+                    type="button"
+                    onClick={() => onGoToMatchCenter(m.id)}
+                    className="btn-tactile px-4 py-2 rounded-xl bg-[var(--color-arena-primary)] hover:bg-[var(--color-arena-primary-hover)] active:scale-[0.98] text-white text-xs font-barlow font-bold uppercase tracking-wider transition-all duration-150 flex items-center gap-1.5 cursor-pointer shadow-xs"
+                    title={`Buka Meja Lapangan Laga #${m.matchNumber}`}
+                  >
+                    <Play className="w-3.5 h-3.5 fill-current" />
+                    <span>Buka Meja Laga</span>
+                  </button>
                 </div>
               </div>
             ))}
@@ -226,7 +271,7 @@ export const RefereeDashboardHome: React.FC<RefereeDashboardHomeProps> = ({
                     {isReady ? 'Siap di Lapangan' : 'Sedang Istirahat'}
                   </div>
                   <div className="text-[11px] text-[var(--text-muted)] mt-0.5">
-                    {isReady ? 'Tersedia untuk memimpin laga hari ini' : 'Off-duty sementara'}
+                    {isReady ? 'Tersedia untuk memimpin laga turnamen' : 'Off-duty sementara'}
                   </div>
                 </div>
                 <input
@@ -248,7 +293,7 @@ export const RefereeDashboardHome: React.FC<RefereeDashboardHomeProps> = ({
             </div>
           </div>
 
-          {/* Hotline Pengawas Pertandingan - Clarified copy */}
+          {/* Hotline Pengawas Pertandingan */}
           <div className="p-5 rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] space-y-2.5">
             <div className="flex items-center gap-2">
               <Shield className="w-4 h-4 text-[var(--color-arena-primary)]" />

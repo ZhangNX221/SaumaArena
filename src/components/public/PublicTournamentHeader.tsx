@@ -237,37 +237,61 @@ export const PublicTournamentHeader: React.FC<PublicTournamentHeaderProps> = ({
         </div>
 
         {/* Consolidated Scoreboard Metadata Bar */}
-        <div className="pt-3 border-t border-white/15">
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 text-xs font-barlow text-slate-200">
-            <div className="flex items-center gap-2 p-2 rounded-lg bg-black/25 border border-white/10">
-              <Calendar className="w-4 h-4 text-sky-400 shrink-0" />
-              <div>
-                <span className="text-[10px] text-slate-400 block uppercase">Jadwal Turnamen</span>
-                <span className="font-bold text-white tracking-wide">{activeBanner.dates}</span>
+        <div className="pt-4 sm:pt-6 border-t border-white/15">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 font-barlow text-slate-200">
+            <div className="flex items-center gap-2.5 sm:gap-3.5 p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-black/40 backdrop-blur-md border border-white/15 hover:border-white/25 transition-all shadow-xs">
+              <div className="w-9 sm:w-11 h-9 sm:h-11 rounded-lg sm:rounded-xl bg-sky-500/10 border border-sky-400/25 flex items-center justify-center shrink-0">
+                <Calendar className="w-5 sm:w-5.5 h-5 sm:h-5.5 text-sky-400" />
+              </div>
+              <div className="min-w-0">
+                <span className="text-[10px] sm:text-xs text-slate-400 block uppercase font-bold tracking-wider leading-none mb-1">
+                  Jadwal Turnamen
+                </span>
+                <span className="font-bold text-xs sm:text-sm lg:text-base text-white tracking-wide block truncate leading-tight">
+                  {activeBanner.dates}
+                </span>
               </div>
             </div>
 
-            <div className="flex items-center gap-2 p-2 rounded-lg bg-black/25 border border-white/10">
-              <MapPin className="w-4 h-4 text-sky-400 shrink-0" />
-              <div>
-                <span className="text-[10px] text-slate-400 block uppercase">Lokasi Pertandingan</span>
-                <span className="font-bold text-white tracking-wide">{activeBanner.venue}</span>
+            <div className="flex items-center gap-2.5 sm:gap-3.5 p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-black/40 backdrop-blur-md border border-white/15 hover:border-white/25 transition-all shadow-xs">
+              <div className="w-9 sm:w-11 h-9 sm:h-11 rounded-lg sm:rounded-xl bg-sky-500/10 border border-sky-400/25 flex items-center justify-center shrink-0">
+                <MapPin className="w-5 sm:w-5.5 h-5 sm:h-5.5 text-sky-400" />
+              </div>
+              <div className="min-w-0">
+                <span className="text-[10px] sm:text-xs text-slate-400 block uppercase font-bold tracking-wider leading-none mb-1">
+                  Lokasi Pertandingan
+                </span>
+                <span className="font-bold text-xs sm:text-sm lg:text-base text-white tracking-wide block truncate leading-tight">
+                  {activeBanner.venue}
+                </span>
               </div>
             </div>
 
-            <div className="flex items-center gap-2 p-2 rounded-lg bg-black/25 border border-white/10">
-              <Trophy className="w-4 h-4 text-amber-400 shrink-0" />
-              <div>
-                <span className="text-[10px] text-slate-400 block uppercase">Kontingen Sekolah</span>
-                <span className="font-bold text-white tracking-wide">{activeBanner.contingentInfo}</span>
+            <div className="flex items-center gap-2.5 sm:gap-3.5 p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-black/40 backdrop-blur-md border border-white/15 hover:border-white/25 transition-all shadow-xs">
+              <div className="w-9 sm:w-11 h-9 sm:h-11 rounded-lg sm:rounded-xl bg-amber-500/10 border border-amber-400/25 flex items-center justify-center shrink-0">
+                <Trophy className="w-5 sm:w-5.5 h-5 sm:h-5.5 text-amber-400" />
+              </div>
+              <div className="min-w-0">
+                <span className="text-[10px] sm:text-xs text-slate-400 block uppercase font-bold tracking-wider leading-none mb-1">
+                  Kontingen Sekolah
+                </span>
+                <span className="font-bold text-xs sm:text-sm lg:text-base text-white tracking-wide block truncate leading-tight">
+                  {activeBanner.contingentInfo}
+                </span>
               </div>
             </div>
 
-            <div className="flex items-center gap-2 p-2 rounded-lg bg-black/25 border border-white/10">
-              <Clock className="w-4 h-4 text-sky-400 shrink-0" />
-              <div>
-                <span className="text-[10px] text-slate-400 block uppercase">Format Waktu</span>
-                <span className="font-bold text-white tracking-wide">2 × 15 Menit per Laga</span>
+            <div className="flex items-center gap-2.5 sm:gap-3.5 p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-black/40 backdrop-blur-md border border-white/15 hover:border-white/25 transition-all shadow-xs">
+              <div className="w-9 sm:w-11 h-9 sm:h-11 rounded-lg sm:rounded-xl bg-sky-500/10 border border-sky-400/25 flex items-center justify-center shrink-0">
+                <Clock className="w-5 sm:w-5.5 h-5 sm:h-5.5 text-sky-400" />
+              </div>
+              <div className="min-w-0">
+                <span className="text-[10px] sm:text-xs text-slate-400 block uppercase font-bold tracking-wider leading-none mb-1">
+                  Format Waktu
+                </span>
+                <span className="font-bold text-xs sm:text-sm lg:text-base text-white tracking-wide block truncate leading-tight">
+                  2 × 15 Menit per Laga
+                </span>
               </div>
             </div>
           </div>

@@ -25,6 +25,15 @@ interface RefereeScoringStepProps {
   events?: MatchEvent[];
   onUndoLastEvent?: () => void;
   onUndoTeamGoal?: (team: 'A' | 'B', eventId?: string) => void;
+  foulsA?: number;
+  foulsB?: number;
+  timeoutsA?: number;
+  timeoutsB?: number;
+  onUpdateFouls?: (team: 'A' | 'B', delta: number) => void;
+  onUpdateTimeouts?: (team: 'A' | 'B', delta: number) => void;
+  matches?: Match[];
+  onSelectMatch?: (matchId: string) => void;
+  onResetMatch?: () => void;
 }
 
 export const RefereeScoringStep: React.FC<RefereeScoringStepProps> = ({
@@ -46,6 +55,15 @@ export const RefereeScoringStep: React.FC<RefereeScoringStepProps> = ({
   events,
   onUndoLastEvent,
   onUndoTeamGoal,
+  foulsA,
+  foulsB,
+  timeoutsA,
+  timeoutsB,
+  onUpdateFouls,
+  onUpdateTimeouts,
+  matches,
+  onSelectMatch,
+  onResetMatch,
 }) => {
   // Model skor ditentukan otomatis berdasarkan cabor penugasan juri
   const sport = selectedSport || 'FUTSAL';
@@ -82,6 +100,15 @@ export const RefereeScoringStep: React.FC<RefereeScoringStepProps> = ({
           events={events}
           onUndoLastEvent={onUndoLastEvent}
           onUndoTeamGoal={onUndoTeamGoal}
+          foulsA={foulsA}
+          foulsB={foulsB}
+          timeoutsA={timeoutsA}
+          timeoutsB={timeoutsB}
+          onUpdateFouls={onUpdateFouls}
+          onUpdateTimeouts={onUpdateTimeouts}
+          matches={matches}
+          onSelectMatch={onSelectMatch}
+          onResetMatch={onResetMatch}
         />
       )}
     </div>

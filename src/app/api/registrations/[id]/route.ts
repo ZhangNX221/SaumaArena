@@ -8,6 +8,10 @@ export async function GET(
   context: { params: Promise<{ id: string }> }
 ) {
   try {
+    // 1. Otorisasi ketat: Hanya ADMIN yang berhak melihat rincian pendaftaran kontingen (termasuk kontak pelatih & NISN atlet)
+    const auth = requireAuth(request, ['ADMIN']);
+    if (auth instanceof NextResponse) return auth;
+
     const { id } = await context.params;
     const row = queryOne<any>('SELECT * FROM registrations WHERE id = ?', [id]);
 
@@ -168,4 +172,3 @@ export async function PATCH(
     );
   }
 }
-

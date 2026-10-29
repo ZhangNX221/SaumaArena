@@ -42,23 +42,23 @@ export const BAPPreviewModal: React.FC<BAPPreviewModalProps> = ({ bap, onClose }
       onClick={onClose}
     >
       <div
-        className="w-full max-w-lg rounded-2xl bg-[#071F14] border border-[#143D28] p-6 sm:p-7 space-y-4 text-white shadow-2xl animate-scaleUp"
+        className="w-full max-w-lg rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] p-6 sm:p-7 space-y-4 text-[var(--text-main)] shadow-2xl animate-scaleUp"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-start justify-between border-b border-[#143D28] pb-3.5">
+        <div className="flex items-start justify-between border-b border-[var(--border-subtle)] pb-3.5">
           <div className="space-y-0.5">
-            <h3 className="font-bebas text-2xl text-white tracking-wide uppercase leading-none">
+            <h3 className="font-bebas text-2xl text-[var(--text-main)] tracking-wide uppercase leading-none">
               Salinan Berita Acara Pertandingan
             </h3>
-            <p className="text-xs text-slate-400 font-sans">
+            <p className="text-xs text-[var(--text-muted)] font-sans">
               Dokumen resmi tervalidasi &bull; {bap.id.toUpperCase()}
             </p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-all duration-150 active:scale-95"
+            className="p-1.5 rounded-xl bg-[var(--bg-muted)] text-[var(--text-muted)] hover:text-[var(--text-main)] transition-all duration-150 active:scale-95"
             aria-label="Tutup salinan BAP"
           >
             <X className="w-4 h-4" />
@@ -66,32 +66,32 @@ export const BAPPreviewModal: React.FC<BAPPreviewModalProps> = ({ bap, onClose }
         </div>
 
         {/* Match Details */}
-        <div className="p-4 rounded-xl bg-[#04120C] border border-[#143D28] space-y-1.5 text-center">
-          <span className="text-[10px] font-barlow font-bold uppercase tracking-wider text-slate-400 block">
+        <div className="p-4 rounded-xl bg-[var(--bg-muted)] border border-[var(--border-subtle)] space-y-1.5 text-center">
+          <span className="text-[10px] font-barlow font-bold uppercase tracking-wider text-[var(--text-muted)] block">
             Laga #{bap.matchNumber} &bull; {bap.sport}
           </span>
-          <div className="font-barlow font-bold text-lg text-white">{bap.teams}</div>
+          <div className="font-barlow font-bold text-lg text-[var(--text-main)]">{bap.teams}</div>
           <div className="text-4xl font-scoreboard font-bold text-[var(--color-arena-accent)] tabular-nums leading-none">
             {bap.score}
           </div>
-          <div className="text-xs text-slate-400 font-sans pt-0.5">
+          <div className="text-xs text-[var(--text-muted)] font-sans pt-0.5">
             {bap.court} &bull; {bap.date}
           </div>
         </div>
 
         {/* Referee Certification Details */}
         <div className="grid grid-cols-2 gap-3 text-xs font-sans">
-          <div className="p-3 rounded-xl bg-[#0B2618] border border-[#143D28] space-y-1">
-            <span className="text-slate-400 text-[10px] uppercase font-barlow font-bold">Wasit 1 (Utama)</span>
-            <div className="font-bold text-white truncate">{bap.referee1}</div>
+          <div className="p-3 rounded-xl bg-[var(--bg-muted)] border border-[var(--border-subtle)] space-y-1">
+            <span className="text-[var(--text-muted)] text-[10px] uppercase font-barlow font-bold">Wasit 1 (Utama)</span>
+            <div className="font-bold truncate text-[var(--text-main)]">{bap.referee1}</div>
             <div className="flex items-center gap-1 text-[11px] text-emerald-400 font-medium pt-0.5">
               <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
               <span>Tanda Tangan Sah</span>
             </div>
           </div>
-          <div className="p-3 rounded-xl bg-[#0B2618] border border-[#143D28] space-y-1">
-            <span className="text-slate-400 text-[10px] uppercase font-barlow font-bold">Wasit 2 (Meja)</span>
-            <div className="font-bold text-white truncate">{bap.referee2}</div>
+          <div className="p-3 rounded-xl bg-[var(--bg-muted)] border border-[var(--border-subtle)] space-y-1">
+            <span className="text-[var(--text-muted)] text-[10px] uppercase font-barlow font-bold">Wasit 2 (Meja)</span>
+            <div className="font-bold truncate text-[var(--text-main)]">{bap.referee2}</div>
             <div className="flex items-center gap-1 text-[11px] text-emerald-400 font-medium pt-0.5">
               <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
               <span>Tanda Tangan Sah</span>
@@ -100,8 +100,8 @@ export const BAPPreviewModal: React.FC<BAPPreviewModalProps> = ({ bap, onClose }
         </div>
 
         {/* Discipline Summary */}
-        <div className="p-3 rounded-xl bg-[#0B2618] border border-[#143D28] flex items-center justify-between text-xs font-sans">
-          <span className="text-slate-300">Catatan Disiplin Lapangan:</span>
+        <div className="p-3 rounded-xl bg-[var(--bg-muted)] border border-[var(--border-subtle)] flex items-center justify-between text-xs font-sans">
+          <span className="text-[var(--text-muted)]">Catatan Disiplin Lapangan:</span>
           <div className="flex items-center gap-3 font-bold">
             <span className="text-amber-400">{bap.yellowCards} Kuning</span>
             <span className="text-red-400">{bap.redCards} Merah</span>

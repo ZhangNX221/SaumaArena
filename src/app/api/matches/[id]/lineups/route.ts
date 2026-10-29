@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { query, run } from '@/db/sqlite';
+import { query, run, transaction } from '@/db/sqlite';
 import { requireAuth } from '@/lib/auth';
 import { randomUUID } from 'node:crypto';
 
@@ -31,31 +31,33 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
     const body = await request.json().catch(() => ({}));
     const { lineups = [] } = body; // Array of { teamId, playerId, isStarter, jerseyNumber, position }
 
-    // Clear existing lineups for this match
-    run('DELETE FROM match_lineups WHERE match_id = ?', [id]);
+    // Atomic replacement: Delete old lineups, insert new items, and advance status in a single transaction
+    transaction(() => {
+      run('DELETE FROM match_lineups WHERE match_id = ?', [id]);
 
-    for (const item of lineups) {
-      const lineupId = `ml_${randomUUID().slice(0, 8)}`;
+      for (const item of lineups) {
+        const lineupId = `ml_${randomUUID().slice(0, 8)}`;
+        run(
+          `INSERT INTO match_lineups (id, match_id, team_id, player_id, is_starter, position, jersey_number)
+           VALUES (?, ?, ?, ?, ?, ?, ?)`,
+          [
+            lineupId,
+            id,
+            item.teamId,
+            item.playerId,
+            item.isStarter ? 1 : 0,
+            item.position || '',
+            item.jerseyNumber || 0,
+          ]
+        );
+      }
+
+      // Automatically advance match status to lineup_confirmed if currently scheduled
       run(
-        `INSERT INTO match_lineups (id, match_id, team_id, player_id, is_starter, position, jersey_number)
-         VALUES (?, ?, ?, ?, ?, ?, ?)`,
-        [
-          lineupId,
-          id,
-          item.teamId,
-          item.playerId,
-          item.isStarter ? 1 : 0,
-          item.position || '',
-          item.jerseyNumber || 0,
-        ]
+        "UPDATE matches SET status = 'lineup_confirmed' WHERE id = ? AND status = 'scheduled'",
+        [id]
       );
-    }
-
-    // Automatically advance match status to lineup_confirmed if currently scheduled
-    run(
-      "UPDATE matches SET status = 'lineup_confirmed' WHERE id = ? AND status = 'scheduled'",
-      [id]
-    );
+    });
 
     return NextResponse.json({ success: true, count: lineups.length }, { status: 201 });
   } catch (error: any) {

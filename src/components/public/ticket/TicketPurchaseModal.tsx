@@ -11,6 +11,7 @@ import { PaymentCheckoutScreen } from './PaymentCheckoutScreen';
 import { TicketSuccessPass } from './TicketSuccessPass';
 import { SaumaArenaLogo } from '@/components/brand/SaumaArenaLogo';
 import { ModalPortal } from '@/components/common/ModalPortal';
+import { pushTicketOrderToBackend } from '@/lib/apiSync';
 
 interface TicketPurchaseModalProps {
   isOpen: boolean;
@@ -116,6 +117,7 @@ export const TicketPurchaseModal: React.FC<TicketPurchaseModalProps> = ({
     const team = initialTeams.find((t) => t.id === createdOrder.supportedTeamId);
     const code = `SA-TIK-${team?.shortName || 'GEN'}-${Math.floor(1000 + Math.random() * 9000)}`;
     setTicketCode(code);
+    pushTicketOrderToBackend(createdOrder, code);
 
     if (onTicketGenerated) {
       onTicketGenerated(code, createdOrder.supportedTeamName);

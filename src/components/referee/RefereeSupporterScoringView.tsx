@@ -16,6 +16,8 @@ import { Match, AppUser, SupporterAssessment, Team } from '@/types';
 import { initialTeams, initialSupporterAssessments } from '@/mocks/tournamentData';
 import { getTeamLogoUrl } from '@/mocks/teamLogos';
 import { usePersistentState } from '@/hooks/usePersistentState';
+import { AdminPageHeaderCard } from '@/components/admin/common/AdminPageHeaderCard';
+import { pushSupporterScoreToBackend } from '@/lib/apiSync';
 
 interface RefereeSupporterScoringViewProps {
   user?: AppUser;
@@ -32,11 +34,11 @@ export const RefereeSupporterScoringView: React.FC<RefereeSupporterScoringViewPr
   const [searchFilter, setSearchFilter] = useState('');
 
   // Form Kriteria Positif
-  const [choreography, setChoreography] = useState<boolean>(true);
-  const [schoolMascot, setSchoolMascot] = useState<boolean>(true);
-  const [supporterUniform, setSupporterUniform] = useState<boolean>(true);
-  const [cheerMin3Chants, setCheerMin3Chants] = useState<boolean>(true);
-  const [checkedInTickets, setCheckedInTickets] = useState<number>(35);
+  const [choreography, setChoreography] = useState<boolean>(false);
+  const [schoolMascot, setSchoolMascot] = useState<boolean>(false);
+  const [supporterUniform, setSupporterUniform] = useState<boolean>(false);
+  const [cheerMin3Chants, setCheerMin3Chants] = useState<boolean>(false);
+  const [checkedInTickets, setCheckedInTickets] = useState<number>(0);
 
   // Form Kriteria Penalti
   const [incidentViolentChaos, setIncidentViolentChaos] = useState<boolean>(false);
@@ -106,6 +108,7 @@ export const RefereeSupporterScoringView: React.FC<RefereeSupporterScoringViewPr
 
     setAssessments((prev) => [newAssessment, ...prev]);
     initialSupporterAssessments.unshift(newAssessment);
+    pushSupporterScoreToBackend(newAssessment);
 
     setNotice(`Skor suporter untuk ${teamMeta.name} berhasil disimpan (${totalScore} Poin)!`);
     setTimeout(() => setNotice(null), 4000);
@@ -122,36 +125,24 @@ export const RefereeSupporterScoringView: React.FC<RefereeSupporterScoringViewPr
   );
 
   return (
-    <div className="space-y-6 max-w-6xl mx-auto pb-16 animate-fadeIn select-none">
-      {/* 1. Header Banner */}
-      <div className="p-6 sm:p-7 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] shadow-xs relative overflow-hidden">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 relative z-10">
-          <div className="space-y-1.5">
-            <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/25 text-amber-600 dark:text-amber-400 text-xs font-barlow font-bold uppercase tracking-wider">
-              <Megaphone className="w-3.5 h-3.5" />
-              <span>Konsol Juri &bull; Penilaian Tribun Suporter</span>
-            </div>
-            <h1 className="font-bebas text-2xl sm:text-3xl text-[var(--text-main)] uppercase tracking-wide leading-none">
-              Form Penilaian &amp; Skor Suporter Madrasah
-            </h1>
-            <p className="text-xs text-[var(--text-muted)] font-sans max-w-2xl">
-              Catat poin sportivitas, maskot, atribut, yel-yel, dan sanksi pelanggaran suporter tiap tim sekolah
-              untuk menentukan predikat Best Supporter MMFC I.
-            </p>
+    <div className="space-y-6 w-full pb-16 animate-fadeIn select-none">
+      {/* 1. Header Card Seragam */}
+      <AdminPageHeaderCard
+        icon={Megaphone}
+        category="MEJA LAPANGAN • PENILAIAN TRIBUN SUPORTER"
+        title="Form Penilaian & Skor Suporter Madrasah"
+        description="Catat poin sportivitas, maskot, atribut, yel-yel, dan sanksi pelanggaran suporter tiap tim sekolah untuk menentukan predikat Best Supporter MMFC I."
+        action={
+          <div className="p-3 rounded-xl bg-[var(--bg-muted)] border border-[var(--border-subtle)] text-center min-w-[100px]">
+            <span className="text-[10px] text-[var(--text-muted)] font-barlow font-bold uppercase block">
+              Total Penilaian
+            </span>
+            <span className="font-teko text-2xl font-bold text-[var(--color-arena-primary)] leading-none">
+              {assessments.length} <span className="text-xs font-sans font-normal text-[var(--text-muted)]">Data</span>
+            </span>
           </div>
-
-          <div className="flex items-center gap-2.5 shrink-0">
-            <div className="p-3 rounded-xl bg-[var(--bg-muted)] border border-[var(--border-subtle)] text-center">
-              <span className="text-[10px] text-[var(--text-muted)] font-barlow font-bold uppercase block">
-                Total Penilaian
-              </span>
-              <span className="font-teko text-2xl font-bold text-[var(--color-arena-primary)] leading-none">
-                {assessments.length} <span className="text-xs font-sans font-normal text-[var(--text-muted)]">Data</span>
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
+        }
+      />
 
       {notice && (
         <div className="p-4 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-800 dark:text-emerald-300 text-xs font-barlow font-bold uppercase tracking-wide flex items-center justify-between shadow-xs animate-fadeIn">
@@ -187,7 +178,7 @@ export const RefereeSupporterScoringView: React.FC<RefereeSupporterScoringViewPr
               </label>
               <select
                 value={selectedTeamId}
-                onChange={(e) => setSelectedTeamId(e.target.value)}
+                onChange={(e) => { setSelectedTeamId(e.target.value); handleResetForm(); }}
                 className="w-full px-3.5 py-2.5 rounded-xl bg-[var(--bg-muted)] border border-[var(--border-subtle)] text-xs font-bold text-[var(--text-main)] cursor-pointer focus:outline-none focus:border-[var(--color-arena-primary)]"
               >
                 {teams.map((t) => (
