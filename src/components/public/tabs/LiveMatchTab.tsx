@@ -8,6 +8,7 @@ import { SportRuleSettings, DEFAULT_SPORT_RULES } from '@/config/sportRules';
 import { LiveMatchHeader } from './live/LiveMatchHeader';
 import { LiveMatchScoreboard } from './live/LiveMatchScoreboard';
 import { LiveMatchGoalHistory } from './live/LiveMatchGoalHistory';
+import { LiveMatchFullscreenArena } from './live/LiveMatchFullscreenArena';
 
 interface LiveMatchTabProps {
   sportCode?: SportCode;
@@ -107,49 +108,75 @@ export const LiveMatchTab: React.FC<LiveMatchTabProps> = ({
       ref={containerRef}
       className={`transition-colors duration-200 ${
         isFullscreen
-          ? 'fixed inset-0 z-50 overflow-y-auto bg-[var(--bg-page)] text-[var(--text-main)] p-4 sm:p-8 flex flex-col justify-start space-y-4'
+          ? 'fixed inset-0 z-[9999] bg-[#040812] w-screen h-screen overflow-hidden flex items-center justify-center p-0'
           : 'space-y-4 max-w-5xl mx-auto pb-10 animate-fadeIn'
       }`}
     >
-      {/* 1. Header Card (Judul Laga, Informasi Lapangan & Skor Saat Ini) */}
-      <LiveMatchHeader
-        match={selectedMatch}
-        scoreA={scoreA}
-        scoreB={scoreB}
-      />
+      {isFullscreen ? (
+        <LiveMatchFullscreenArena
+          match={selectedMatch}
+          scoreA={scoreA}
+          scoreB={scoreB}
+          timerSeconds={timerSeconds}
+          isTimerRunning={isTimerRunning}
+          currentPeriod={currentPeriod}
+          foulsA={foulsA}
+          foulsB={foulsB}
+          timeoutsA={timeoutsA}
+          timeoutsB={timeoutsB}
+          yellowCardsA={yellowCardsA}
+          redCardsA={redCardsA}
+          yellowCardsB={yellowCardsB}
+          redCardsB={redCardsB}
+          formatTime={formatTime}
+          onExitFullscreen={handleToggleFullscreen}
+          matches={availableMatches}
+          selectedMatchId={selectedMatchId}
+          onSelectMatch={setSelectedMatchId}
+        />
+      ) : (
+        <>
+          {/* 1. Header Card (Judul Laga, Informasi Lapangan & Skor Saat Ini) */}
+          <LiveMatchHeader
+            match={selectedMatch}
+            scoreA={scoreA}
+            scoreB={scoreB}
+          />
 
-      {/* 2. Papan Skor & Stopwatch Lapangan Publik Real-time (Dengan Selector Laga Tayang & Tombol Layar Penuh) */}
-      <LiveMatchScoreboard
-        match={selectedMatch}
-        scoreA={scoreA}
-        scoreB={scoreB}
-        timerSeconds={timerSeconds}
-        isTimerRunning={isTimerRunning}
-        currentPeriod={currentPeriod}
-        foulsA={foulsA}
-        foulsB={foulsB}
-        timeoutsA={timeoutsA}
-        timeoutsB={timeoutsB}
-        yellowCardsA={yellowCardsA}
-        redCardsA={redCardsA}
-        yellowCardsB={yellowCardsB}
-        redCardsB={redCardsB}
-        formatTime={formatTime}
-        isFullscreen={isFullscreen}
-        onToggleFullscreen={handleToggleFullscreen}
-        matches={availableMatches}
-        selectedMatchId={selectedMatchId}
-        onSelectMatch={setSelectedMatchId}
-      />
+          {/* 2. Papan Skor & Stopwatch Lapangan Publik Real-time (Dengan Selector Laga Tayang & Tombol Layar Penuh) */}
+          <LiveMatchScoreboard
+            match={selectedMatch}
+            scoreA={scoreA}
+            scoreB={scoreB}
+            timerSeconds={timerSeconds}
+            isTimerRunning={isTimerRunning}
+            currentPeriod={currentPeriod}
+            foulsA={foulsA}
+            foulsB={foulsB}
+            timeoutsA={timeoutsA}
+            timeoutsB={timeoutsB}
+            yellowCardsA={yellowCardsA}
+            redCardsA={redCardsA}
+            yellowCardsB={yellowCardsB}
+            redCardsB={redCardsB}
+            formatTime={formatTime}
+            isFullscreen={false}
+            onToggleFullscreen={handleToggleFullscreen}
+            matches={availableMatches}
+            selectedMatchId={selectedMatchId}
+            onSelectMatch={setSelectedMatchId}
+          />
 
-      {/* 3. Riwayat Gol Pertandingan (Tampilan Publik Murni) */}
-      <LiveMatchGoalHistory
-        match={selectedMatch}
-        scoreA={scoreA}
-        scoreB={scoreB}
-        totalGoals={scoreA + scoreB}
-        events={events}
-      />
+          {/* 3. Riwayat Gol Pertandingan (Tampilan Publik Murni) */}
+          <LiveMatchGoalHistory
+            match={selectedMatch}
+            scoreA={scoreA}
+            scoreB={scoreB}
+            totalGoals={scoreA + scoreB}
+            events={events}
+          />
+        </>
+      )}
     </div>
   );
 };
