@@ -4,19 +4,16 @@ import React, { useState } from 'react';
 import {
   Megaphone,
   CheckCircle2,
-  AlertTriangle,
   RotateCcw,
-  Plus,
   Trash2,
   Save,
-  Trophy,
-  Ticket,
   Search,
   ShieldAlert,
   Sparkles,
+  Users,
 } from 'lucide-react';
 import { Match, AppUser, SupporterAssessment, Team } from '@/types';
-import { initialMatches, initialTeams, initialSupporterAssessments } from '@/mocks/tournamentData';
+import { initialTeams, initialSupporterAssessments } from '@/mocks/tournamentData';
 import { getTeamLogoUrl } from '@/mocks/teamLogos';
 import { usePersistentState } from '@/hooks/usePersistentState';
 
@@ -27,13 +24,10 @@ interface RefereeSupporterScoringViewProps {
 
 export const RefereeSupporterScoringView: React.FC<RefereeSupporterScoringViewProps> = ({
   user,
-  currentMatch,
 }) => {
   const [assessments, setAssessments] = usePersistentState<SupporterAssessment[]>('sauma_arena_supporter_scores', initialSupporterAssessments);
-  const [matches] = usePersistentState<Match[]>('sauma_arena_matches', initialMatches);
   const [teams] = usePersistentState<Team[]>('sauma_arena_teams', initialTeams);
-  const [selectedMatchId, setSelectedMatchId] = useState<string>(currentMatch?.id || 'match-1');
-  const [selectedTeamId, setSelectedTeamId] = useState<string>('team-sdi-kardina');
+  const [selectedTeamId, setSelectedTeamId] = useState<string>(teams[0]?.id || 'team-sdi-kardina');
   const [notice, setNotice] = useState<string | null>(null);
   const [searchFilter, setSearchFilter] = useState('');
 
@@ -52,14 +46,8 @@ export const RefereeSupporterScoringView: React.FC<RefereeSupporterScoringViewPr
   const [incidentLitteringTribun, setIncidentLitteringTribun] = useState<boolean>(false);
   const [notes, setNotes] = useState<string>('');
 
-  // Data match terpilih
-  const activeMatch = matches.find((m) => m.id === selectedMatchId) || matches[0];
-
-  // Tim yang bertanding pada match terpilih
-  const matchTeams = [
-    { id: activeMatch.teamAId, name: activeMatch.teamAName },
-    { id: activeMatch.teamBId, name: activeMatch.teamBName },
-  ];
+  // Tim suporter terpilih
+  const selectedTeam = teams.find((t) => t.id === selectedTeamId) || teams[0];
 
   // Kalkulasi Skor Real-Time
   const positiveScore =
@@ -94,11 +82,11 @@ export const RefereeSupporterScoringView: React.FC<RefereeSupporterScoringViewPr
 
   const handleSaveAssessment = (e: React.FormEvent) => {
     e.preventDefault();
-    const teamMeta = teams.find((t) => t.id === selectedTeamId) || teams[0];
+    const teamMeta = selectedTeam;
 
     const newAssessment: SupporterAssessment = {
       id: `SUP-${Date.now()}`,
-      matchId: selectedMatchId,
+      matchId: 'TRIBUN',
       teamId: selectedTeamId,
       schoolName: teamMeta.schoolName || teamMeta.name,
       choreography,
@@ -167,11 +155,11 @@ export const RefereeSupporterScoringView: React.FC<RefereeSupporterScoringViewPr
 
       {notice && (
         <div className="p-4 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-800 dark:text-emerald-300 text-xs font-barlow font-bold uppercase tracking-wide flex items-center justify-between shadow-xs animate-fadeIn">
-          <span className="flex items-center gap-2">
+          <div className="flex items-center gap-2">
             <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
             <span>{notice}</span>
-          </span>
-          <button type="button" onClick={() => setNotice(null)} className="text-xs underline hover:no-underline">
+          </div>
+          <button type="button" onClick={() => setNotice(null)} className="text-xs underline hover:no-underline cursor-pointer">
             Tutup
           </button>
         </div>
@@ -181,57 +169,73 @@ export const RefereeSupporterScoringView: React.FC<RefereeSupporterScoringViewPr
       <form onSubmit={handleSaveAssessment} className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Kolom Kiri: Form Input Kriteria (8 cols) */}
         <div className="lg:col-span-8 space-y-5">
-          {/* Selector Laga & Tim */}
+          {/* Selector Suporter Madrasah */}
           <div className="p-5 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] space-y-4 shadow-xs">
-            <div className="text-xs font-barlow font-bold uppercase tracking-wider text-[var(--text-muted)] flex items-center gap-2">
-              <Trophy className="w-4 h-4 text-[var(--color-arena-accent)]" />
-              <span>1. Pilih Laga &amp; Tim Kontingen</span>
+            <div className="flex items-center justify-between">
+              <div className="text-xs font-barlow font-bold uppercase tracking-wider text-[var(--text-muted)] flex items-center gap-2">
+                <Users className="w-4 h-4 text-[var(--color-arena-primary)]" />
+                <span>1. Pilih Kontingen Suporter Madrasah</span>
+              </div>
+              <span className="text-[10px] font-barlow font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-[var(--color-arena-primary-light)] text-[var(--color-arena-primary)] border border-[var(--color-arena-primary)]/20">
+                Penilaian Mandiri Berbasis Kontingen
+              </span>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div>
-                <label className="text-[11px] font-barlow font-bold uppercase text-[var(--text-muted)] block mb-1">
-                  Pilih Pertandingan:
-                </label>
-                <select
-                  value={selectedMatchId}
-                  onChange={(e) => setSelectedMatchId(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl bg-[var(--bg-muted)] border border-[var(--border-subtle)] text-xs font-bold text-[var(--text-main)] cursor-pointer focus:outline-none"
-                >
-                  {matches.map((m) => (
-                    <option key={m.id} value={m.id}>
-                      Laga #{m.matchNumber}: {m.teamAName} vs {m.teamBName}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="text-[11px] font-barlow font-bold uppercase text-[var(--text-muted)] block mb-1">
-                  Pilih Suporter Sekolah:
-                </label>
-                <select
-                  value={selectedTeamId}
-                  onChange={(e) => setSelectedTeamId(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl bg-[var(--bg-muted)] border border-[var(--border-subtle)] text-xs font-bold text-[var(--text-main)] cursor-pointer focus:outline-none"
-                >
-                  <optgroup label="Tim pada Laga Terpilih">
-                    {matchTeams.map((t) => (
-                      <option key={t.id} value={t.id}>
-                        {t.name}
-                      </option>
-                    ))}
-                  </optgroup>
-                  <optgroup label="Seluruh Kontingen Turnamen">
-                    {teams.map((t) => (
-                      <option key={t.id} value={t.id}>
-                        {t.name} ({t.schoolName})
-                      </option>
-                    ))}
-                  </optgroup>
-                </select>
-              </div>
+            <div>
+              <label className="text-[11px] font-barlow font-bold uppercase text-[var(--text-muted)] block mb-1">
+                Pilih Suporter Sekolah / Madrasah:
+              </label>
+              <select
+                value={selectedTeamId}
+                onChange={(e) => setSelectedTeamId(e.target.value)}
+                className="w-full px-3.5 py-2.5 rounded-xl bg-[var(--bg-muted)] border border-[var(--border-subtle)] text-xs font-bold text-[var(--text-main)] cursor-pointer focus:outline-none focus:border-[var(--color-arena-primary)]"
+              >
+                {teams.map((t) => (
+                  <option key={t.id} value={t.id}>
+                    {t.name} — {t.schoolName} ({t.city})
+                  </option>
+                ))}
+              </select>
+              <p className="text-[10px] text-[var(--text-muted)] mt-1">
+                Poin dinilai dan diakumulasikan langsung untuk kontingen suporter madrasah ini.
+              </p>
             </div>
+
+            {/* Kartu Profil Suporter Terpilih */}
+            {selectedTeam && (
+              <div className="p-3.5 rounded-xl bg-[var(--bg-muted)]/70 border border-[var(--border-subtle)] flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] p-1.5 flex items-center justify-center shrink-0">
+                    <img
+                      src={selectedTeam.logoUrl || getTeamLogoUrl(selectedTeam.id)}
+                      alt={selectedTeam.name}
+                      className="w-full h-full object-contain"
+                    />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="font-barlow font-bold text-sm uppercase text-[var(--text-main)]">
+                        {selectedTeam.name}
+                      </span>
+                      <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-[var(--color-arena-primary-light)] text-[var(--color-arena-primary)] font-bold">
+                        Grup {selectedTeam.group || '-'}
+                      </span>
+                    </div>
+                    <div className="text-xs text-[var(--text-muted)]">
+                      {selectedTeam.schoolName} &bull; {selectedTeam.city}
+                    </div>
+                  </div>
+                </div>
+                <div className="text-right shrink-0 hidden sm:block">
+                  <span className="text-[10px] font-barlow font-bold uppercase text-[var(--text-muted)] block">
+                    Penilaian Tercatat
+                  </span>
+                  <span className="font-mono text-xs font-bold text-[var(--text-main)]">
+                    {assessments.filter((a) => a.teamId === selectedTeam.id).length} Sesi Masuk
+                  </span>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Kriteria Positif (Bonus Poin) */}
@@ -339,7 +343,7 @@ export const RefereeSupporterScoringView: React.FC<RefereeSupporterScoringViewPr
                   <button
                     type="button"
                     onClick={() => setCheckedInTickets((v) => Math.max(0, v - 5))}
-                    className="w-7 h-7 rounded-lg bg-[var(--bg-surface)] border border-[var(--border-subtle)] font-bold text-xs hover:bg-[var(--bg-muted)] active:scale-95"
+                    className="w-7 h-7 rounded-lg bg-[var(--bg-surface)] border border-[var(--border-subtle)] font-bold text-xs hover:bg-[var(--bg-muted)] active:scale-95 cursor-pointer"
                   >
                     -
                   </button>
@@ -353,7 +357,7 @@ export const RefereeSupporterScoringView: React.FC<RefereeSupporterScoringViewPr
                   <button
                     type="button"
                     onClick={() => setCheckedInTickets((v) => v + 5)}
-                    className="w-7 h-7 rounded-lg bg-[var(--bg-surface)] border border-[var(--border-subtle)] font-bold text-xs hover:bg-[var(--bg-muted)] active:scale-95"
+                    className="w-7 h-7 rounded-lg bg-[var(--bg-surface)] border border-[var(--border-subtle)] font-bold text-xs hover:bg-[var(--bg-muted)] active:scale-95 cursor-pointer"
                   >
                     +
                   </button>
@@ -479,7 +483,7 @@ export const RefereeSupporterScoringView: React.FC<RefereeSupporterScoringViewPr
 
             <div className="p-4 rounded-xl bg-[var(--bg-muted)] border border-[var(--border-subtle)] text-center space-y-1">
               <span className="text-[11px] font-barlow font-bold uppercase text-[var(--text-muted)]">
-                Skor Akhir Laga Ini
+                Skor Sesi Suporter
               </span>
               <div className="font-teko text-5xl font-bold text-[var(--color-arena-primary)] leading-none">
                 {totalScore}
@@ -519,7 +523,7 @@ export const RefereeSupporterScoringView: React.FC<RefereeSupporterScoringViewPr
             <div className="pt-2 space-y-2">
               <button
                 type="submit"
-                className="btn-tactile w-full py-3 rounded-xl bg-[var(--color-arena-primary)] hover:bg-[var(--color-arena-primary-hover)] active:scale-95 text-white font-barlow font-bold uppercase tracking-wider text-xs flex items-center justify-center gap-2 shadow-xs transition-all"
+                className="btn-tactile w-full py-3 rounded-xl bg-[var(--color-arena-primary)] hover:bg-[var(--color-arena-primary-hover)] active:scale-95 text-white font-barlow font-bold uppercase tracking-wider text-xs flex items-center justify-center gap-2 shadow-xs transition-all cursor-pointer"
               >
                 <Save className="w-4 h-4" />
                 <span>Simpan Skor Suporter</span>
@@ -527,7 +531,7 @@ export const RefereeSupporterScoringView: React.FC<RefereeSupporterScoringViewPr
               <button
                 type="button"
                 onClick={handleResetForm}
-                className="btn-tactile w-full py-2 rounded-xl bg-[var(--bg-muted)] hover:bg-[var(--bg-surface)] text-[var(--text-muted)] border border-[var(--border-subtle)] font-barlow font-bold uppercase tracking-wider text-[11px] flex items-center justify-center gap-1.5 transition-all"
+                className="btn-tactile w-full py-2 rounded-xl bg-[var(--bg-muted)] hover:bg-[var(--bg-surface)] text-[var(--text-muted)] border border-[var(--border-subtle)] font-barlow font-bold uppercase tracking-wider text-[11px] flex items-center justify-center gap-1.5 transition-all cursor-pointer"
               >
                 <RotateCcw className="w-3.5 h-3.5" />
                 <span>Reset Isian Form</span>
@@ -565,15 +569,14 @@ export const RefereeSupporterScoringView: React.FC<RefereeSupporterScoringViewPr
           <div className="p-8 text-center rounded-xl bg-[var(--bg-muted)]/40 border border-dashed border-[var(--border-subtle)] text-[var(--text-muted)] space-y-1">
             <Megaphone className="w-8 h-8 text-[var(--text-faint)] mx-auto mb-2" />
             <span className="font-barlow font-bold text-xs uppercase block">Belum Ada Penilaian Suporter Masuk</span>
-            <p className="text-[11px]">Gunakan formulir di atas untuk mencatat poin suporter saat laga berlangsung.</p>
+            <p className="text-[11px]">Gunakan formulir di atas untuk mencatat poin suporter kontingen madrasah.</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-xs text-left">
               <thead>
                 <tr className="border-b border-[var(--border-subtle)] text-[10px] font-barlow font-bold uppercase tracking-wider text-[var(--text-muted)]">
-                  <th className="py-2.5 px-3">Madrasah / Tim</th>
-                  <th className="py-2.5 px-3">Laga</th>
+                  <th className="py-2.5 px-3">Madrasah / Tim Suporter</th>
                   <th className="py-2.5 px-3 text-center">Bonus (+Poin)</th>
                   <th className="py-2.5 px-3 text-center">Sanksi (-Poin)</th>
                   <th className="py-2.5 px-3 text-center">Total Skor</th>
@@ -613,9 +616,6 @@ export const RefereeSupporterScoringView: React.FC<RefereeSupporterScoringViewPr
                           </span>
                         </div>
                       </td>
-                      <td className="py-3 px-3 font-mono text-[11px] text-[var(--text-muted)]">
-                        {a.matchId.toUpperCase()}
-                      </td>
                       <td className="py-3 px-3 text-center font-mono font-bold text-emerald-600">
                         +{bonus}
                       </td>
@@ -633,7 +633,7 @@ export const RefereeSupporterScoringView: React.FC<RefereeSupporterScoringViewPr
                         <button
                           type="button"
                           onClick={() => handleDeleteAssessment(a.id)}
-                          className="p-1 rounded-lg text-red-500 hover:bg-red-500/10 active:scale-90 transition-all"
+                          className="p-1 rounded-lg text-red-500 hover:bg-red-500/10 active:scale-90 transition-all cursor-pointer"
                           title="Hapus penilaian"
                         >
                           <Trash2 className="w-3.5 h-3.5" />

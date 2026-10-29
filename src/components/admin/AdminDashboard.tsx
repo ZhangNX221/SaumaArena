@@ -122,7 +122,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
         {/* Viewport Content */}
         <div className="flex-1 overflow-y-auto">
-          <main className="w-full px-6 sm:px-10 lg:px-12 pt-7 pb-24 max-w-7xl">
+          <main className="w-full px-6 sm:px-10 lg:px-12 pt-7 pb-24 max-w-7xl mx-auto">
             {/* 1. Beranda */}
             {(activeSubmenu === 'overview_stats' || activeSubmenu === 'medal_tally') && (
               <AdminOverviewModule

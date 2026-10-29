@@ -7,6 +7,8 @@ import {
   Trophy,
   ChevronLeft,
   ChevronRight,
+  Clock,
+  Sparkles,
 } from 'lucide-react';
 import { PublicHeaderConfig } from '@/types';
 import { DEFAULT_CABOR_BANNERS, DEFAULT_HEADER_CONFIG } from '@/mocks/headerConfig';
@@ -17,7 +19,7 @@ interface PublicTournamentHeaderProps {
   onSelectBanner?: (index: number) => void;
   onOpenTicketModal: () => void;
   onOpenRegModal: () => void;
-  config?: PublicHeaderConfig; // Fallback backward compatibility
+  config?: PublicHeaderConfig;
 }
 
 export const PublicTournamentHeader: React.FC<PublicTournamentHeaderProps> = ({
@@ -58,7 +60,7 @@ export const PublicTournamentHeader: React.FC<PublicTournamentHeaderProps> = ({
   const currentComp = selectedCompBySport[sportKey] || matchedCompetitions[0] || activeBanner.title;
 
   return (
-    <section className="relative overflow-hidden border-b border-[var(--border-subtle)] pt-6 pb-10 sm:pb-12 px-4 sm:px-6 lg:px-8 text-white transition-colors">
+    <section className="relative overflow-hidden border-b border-[var(--border-subtle)] pt-6 pb-8 sm:pb-10 px-4 sm:px-6 lg:px-8 text-white transition-colors bg-[#07131F]">
       {/* Background Banner Image with smooth cross-fade */}
       <div
         className="absolute inset-0 z-0 bg-cover bg-center transition-all duration-500 transform scale-100 ease-out"
@@ -68,18 +70,18 @@ export const PublicTournamentHeader: React.FC<PublicTournamentHeaderProps> = ({
         aria-hidden="true"
       />
 
-      {/* Dark Tactical Sport Gradient Overlay (Guarantees WCAG AA Contrast) */}
+      {/* Dark Tactical Pitch Gradient Overlay (Guarantees WCAG AA Contrast) */}
       <div
-        className="absolute inset-0 z-0 bg-gradient-to-r from-[#0b1a28] via-[#0b1a28]/95 to-[#0b1a28]/80 transition-opacity duration-500"
+        className="absolute inset-0 z-0 bg-gradient-to-r from-[#07131F] via-[#07131F]/95 to-[#0B1E32]/85 transition-opacity duration-500"
         style={{
-          opacity: activeBanner.bannerOverlayOpacity,
+          opacity: activeBanner.bannerOverlayOpacity || 0.9,
         }}
         aria-hidden="true"
       />
 
-      {/* Subtle Gold / Royal Blue Stadium Glow Accent */}
+      {/* Stadium Spotlight & Championship Glow Accent */}
       <div
-        className="absolute inset-0 z-0 bg-radial-[at_top_right] from-[var(--color-arena-accent)]/25 via-[var(--color-arena-primary)]/15 to-transparent pointer-events-none"
+        className="absolute inset-0 z-0 bg-radial-[at_top_right] from-sky-500/20 via-[#1D63B8]/20 to-transparent pointer-events-none"
         aria-hidden="true"
       />
 
@@ -89,9 +91,9 @@ export const PublicTournamentHeader: React.FC<PublicTournamentHeaderProps> = ({
           type="button"
           onClick={handlePrev}
           aria-label="Cabang Olahraga Sebelumnya"
-          className="btn-tactile absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-black/40 hover:bg-black/75 border border-white/20 text-white flex items-center justify-center backdrop-blur-md shadow-lg transition-transform hover:scale-105"
+          className="btn-tactile absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-black/50 hover:bg-black/80 border border-white/20 text-white flex items-center justify-center backdrop-blur-md shadow-lg transition-transform hover:scale-105"
         >
-          <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+          <ChevronLeft className="w-5 h-5 text-white" />
         </button>
       )}
 
@@ -101,21 +103,21 @@ export const PublicTournamentHeader: React.FC<PublicTournamentHeaderProps> = ({
           type="button"
           onClick={handleNext}
           aria-label="Cabang Olahraga Berikutnya"
-          className="btn-tactile absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-black/40 hover:bg-black/75 border border-white/20 text-white flex items-center justify-center backdrop-blur-md shadow-lg transition-transform hover:scale-105"
+          className="btn-tactile absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-black/50 hover:bg-black/80 border border-white/20 text-white flex items-center justify-center backdrop-blur-md shadow-lg transition-transform hover:scale-105"
         >
-          <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+          <ChevronRight className="w-5 h-5 text-white" />
         </button>
       )}
 
       {/* Main Header Content */}
-      <div className="relative z-10 max-w-7xl mx-auto space-y-5 px-6 sm:px-10">
-        {/* Multi-Cabor Quick Selector Pills */}
+      <div className="relative z-10 max-w-7xl mx-auto space-y-4 px-4 sm:px-8">
+        {/* Multi-Cabor Quick Selector */}
         {currentList.length > 1 && (() => {
           const enableScroll = currentList.length > 5;
           return (
-            <div className="flex flex-wrap items-center justify-between gap-3 pb-2 border-b border-white/10">
+            <div className="flex flex-wrap items-center justify-between gap-3 pb-2.5 border-b border-white/10">
               <div
-                className={`flex items-center gap-2 max-w-full ${
+                className={`flex items-center gap-1.5 max-w-full ${
                   enableScroll
                     ? 'overflow-x-auto pb-1.5'
                     : 'flex-wrap overflow-visible'
@@ -128,9 +130,9 @@ export const PublicTournamentHeader: React.FC<PublicTournamentHeaderProps> = ({
                       key={cabor.id || idx}
                       type="button"
                       onClick={() => onSelectBanner && onSelectBanner(idx)}
-                      className={`btn-tactile px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 flex items-center justify-center ${
+                      className={`btn-tactile px-3 py-1 rounded-lg text-xs font-barlow font-bold uppercase tracking-wider transition-all shrink-0 flex items-center justify-center ${
                         isActive
-                          ? 'bg-[var(--color-arena-accent)] text-slate-950 shadow-md ring-2 ring-[var(--color-arena-accent)]/50 scale-105'
+                          ? 'bg-[var(--color-arena-accent)] text-slate-950 shadow-sm ring-1 ring-[var(--color-arena-accent)]/60'
                           : 'bg-white/10 text-slate-200 hover:bg-white/20 border border-white/10'
                       }`}
                     >
@@ -165,7 +167,7 @@ export const PublicTournamentHeader: React.FC<PublicTournamentHeaderProps> = ({
                   </div>
                 )}
 
-                {/* Counter: {jumlah} Cabang Olahraga */}
+                {/* Counter */}
                 <div className="text-[11px] font-mono text-slate-300 bg-black/40 backdrop-blur-xs px-2.5 py-1 rounded-lg border border-white/10 shrink-0">
                   <strong className="text-white">{currentList.length}</strong> Cabang Olahraga
                 </div>
@@ -174,88 +176,99 @@ export const PublicTournamentHeader: React.FC<PublicTournamentHeaderProps> = ({
           );
         })()}
 
-        {/* Eyebrow & Status Strip */}
+        {/* Eyebrow & Status Strip: Minimalist, crisp, no AI-slop stacked pills */}
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center gap-2.5">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-barlow font-bold uppercase tracking-wider bg-[var(--color-arena-accent)]/20 text-[var(--color-arena-accent)] border border-[var(--color-arena-accent)]/35 backdrop-blur-xs">
-              <span className="w-2 h-2 rounded-full bg-red-500" />
-              <span>{activeBanner.statusBadge}</span>
-            </span>
-            <span className="px-2.5 py-1 rounded-md text-xs font-barlow font-bold uppercase tracking-wider bg-white/10 text-slate-200 border border-white/15 backdrop-blur-xs">
-              {activeBanner.categoryBadge}
-            </span>
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-black/40 backdrop-blur-md border border-white/15 text-xs font-barlow font-bold uppercase tracking-wider text-slate-200">
+            <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+            <span>{activeBanner.statusBadge || 'HARI-1 • SELASA, 3 NOVEMBER 2026'}</span>
+            <span className="text-white/30">&bull;</span>
+            <span className="text-[var(--color-arena-accent)]">{activeBanner.categoryBadge}</span>
+          </div>
+
+          <div className="hidden sm:inline-flex items-center gap-1.5 text-xs font-barlow font-bold uppercase tracking-wider text-emerald-400">
+            <Sparkles className="w-3.5 h-3.5" />
+            <span>Official Match Center MMFC I MTsN 3 Blitar</span>
           </div>
         </div>
 
-        {/* Tournament Hero Title & Right Logo */}
-        <div className="flex flex-col md:flex-row items-center md:items-start justify-between gap-6 lg:gap-10 pt-1">
+        {/* Asymmetrical Hero Section: Dominant Title + Atmospheric Logo */}
+        <div className="flex flex-col md:flex-row items-center md:items-center justify-between gap-6 lg:gap-10 pt-1">
           {/* Left Column: Hero Title, Line & Description */}
           <div className="flex-1 space-y-3 min-w-0">
-            <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold uppercase text-white tracking-wide font-teko leading-tight sm:leading-snug max-w-3xl drop-shadow-sm">
+            <h1 className="text-4xl sm:text-6xl lg:text-7xl font-bold uppercase text-white tracking-wide font-teko leading-none drop-shadow-md">
               {activeBanner.title}
             </h1>
 
             {/* Midfield Double Line */}
-            <div className="midfield-line pt-1 pb-1 opacity-70" aria-hidden="true" />
+            <div className="midfield-line pt-0.5 pb-0.5 opacity-80" aria-hidden="true" />
 
-            {/* Description */}
-            <p className="text-sm sm:text-base text-slate-200 max-w-2xl leading-relaxed font-normal">
-              {activeBanner.description}
+            {/* Description (Consolidated, no duplicate 14 Tim text) */}
+            <p className="text-xs sm:text-sm text-slate-300 max-w-2xl leading-relaxed font-normal">
+              Turnamen futsal antarpelajar tingkat SD/MI se-derajat di Blitar Raya, memperebutkan Piala Bergilir MMFC I dan predikat Best Supporter Madrasah dengan live scoring terintegrasi.
             </p>
           </div>
 
-          {/* Right Column: Logo Tanpa Background */}
+          {/* Right Column: Prominent Logo with Stadium Spotlight illumination */}
           {bannerLogo && activeBanner.logoVisible !== false && (() => {
-            const size = activeBanner.logoSize || 260;
-            const offsetX = activeBanner.logoOffsetX !== undefined ? activeBanner.logoOffsetX : -40;
+            const size = activeBanner.logoSize || 240;
 
             return (
-              <div
-                className="shrink-0 flex items-center justify-center self-center md:self-start pt-1 md:pt-0 transition-transform duration-300"
-                style={
-                  {
-                    '--logo-offset-x': `${offsetX}px`,
-                  } as React.CSSProperties
-                }
-              >
-                <div className="relative group md:[transform:translateX(var(--logo-offset-x))] transition-transform duration-300">
-                  <div
-                    className="absolute inset-0 rounded-full bg-gradient-to-tr from-emerald-500/25 to-[var(--color-arena-accent)]/25 blur-2xl opacity-75 group-hover:opacity-100 transition-opacity pointer-events-none"
-                    aria-hidden="true"
-                  />
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={bannerLogo}
-                    alt={activeBanner.title}
-                    style={{
-                      width: `${size}px`,
-                      height: `${size}px`,
-                      maxWidth: '85vw',
-                      maxHeight: '85vw',
-                    }}
-                    className="relative z-10 object-contain aspect-square drop-shadow-[0_16px_36px_rgba(0,0,0,0.7)] transition-transform duration-300 group-hover:scale-105"
-                  />
-                </div>
+              <div className="shrink-0 flex items-center justify-center relative">
+                {/* Stadium Spotlight Glow */}
+                <div
+                  className="absolute inset-0 rounded-full bg-gradient-to-tr from-sky-500/30 via-[#1D63B8]/25 to-transparent blur-3xl opacity-80 pointer-events-none"
+                  aria-hidden="true"
+                />
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={bannerLogo}
+                  alt={activeBanner.title}
+                  style={{
+                    width: `${size}px`,
+                    height: `${size}px`,
+                    maxWidth: '75vw',
+                    maxHeight: '75vw',
+                  }}
+                  className="relative z-10 object-contain aspect-square filter drop-shadow-[0_16px_36px_rgba(0,0,0,0.8)] transition-transform duration-300 hover:scale-105"
+                />
               </div>
             );
           })()}
         </div>
 
-        {/* Tournament Facts */}
-        <div className="pt-4 border-t border-white/15">
-          {/* Metadata Badges */}
-          <div className="flex flex-wrap items-center gap-4 sm:gap-6 text-xs sm:text-sm font-barlow text-slate-200">
-            <div className="flex items-center gap-2">
-              <Calendar className="w-4 h-4 text-[var(--color-arena-accent)] shrink-0" />
-              <span className="font-bold text-white tracking-wide">{activeBanner.dates}</span>
+        {/* Consolidated Scoreboard Metadata Bar */}
+        <div className="pt-3 border-t border-white/15">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 text-xs font-barlow text-slate-200">
+            <div className="flex items-center gap-2 p-2 rounded-lg bg-black/25 border border-white/10">
+              <Calendar className="w-4 h-4 text-sky-400 shrink-0" />
+              <div>
+                <span className="text-[10px] text-slate-400 block uppercase">Jadwal Turnamen</span>
+                <span className="font-bold text-white tracking-wide">{activeBanner.dates}</span>
+              </div>
             </div>
-            <div className="flex items-center gap-2">
-              <MapPin className="w-4 h-4 text-[var(--color-arena-accent)] shrink-0" />
-              <span className="font-bold text-white tracking-wide">{activeBanner.venue}</span>
+
+            <div className="flex items-center gap-2 p-2 rounded-lg bg-black/25 border border-white/10">
+              <MapPin className="w-4 h-4 text-sky-400 shrink-0" />
+              <div>
+                <span className="text-[10px] text-slate-400 block uppercase">Lokasi Pertandingan</span>
+                <span className="font-bold text-white tracking-wide">{activeBanner.venue}</span>
+              </div>
             </div>
-            <div className="flex items-center gap-2">
-              <Trophy className="w-4 h-4 text-[var(--color-arena-accent)] shrink-0" />
-              <span className="font-bold text-white tracking-wide">{activeBanner.contingentInfo}</span>
+
+            <div className="flex items-center gap-2 p-2 rounded-lg bg-black/25 border border-white/10">
+              <Trophy className="w-4 h-4 text-amber-400 shrink-0" />
+              <div>
+                <span className="text-[10px] text-slate-400 block uppercase">Kontingen Sekolah</span>
+                <span className="font-bold text-white tracking-wide">{activeBanner.contingentInfo}</span>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 p-2 rounded-lg bg-black/25 border border-white/10">
+              <Clock className="w-4 h-4 text-sky-400 shrink-0" />
+              <div>
+                <span className="text-[10px] text-slate-400 block uppercase">Format Waktu</span>
+                <span className="font-bold text-white tracking-wide">2 × 15 Menit per Laga</span>
+              </div>
             </div>
           </div>
         </div>

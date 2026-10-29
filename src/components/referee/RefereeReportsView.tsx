@@ -8,8 +8,6 @@ import {
   Send,
   Download,
   Eye,
-  Clock,
-  Radio,
 } from 'lucide-react';
 import { AppUser } from '@/types';
 import { BAPRecord, IncidentReport, INITIAL_BAPS, INITIAL_INCIDENTS } from '@/mocks/refereeReportsData';
@@ -62,8 +60,8 @@ export const RefereeReportsView: React.FC<RefereeReportsViewProps> = ({ user }) 
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto pb-16 animate-fadeIn">
-      {/* 1. Header Banner - Quieter: Subtle 1px border, calm background */}
-      <div className="p-6 sm:p-7 rounded-2xl bg-[#0D1E30] text-white border border-[#1C3B5B] transition-all duration-200">
+      {/* 1. Header Banner */}
+      <div className="p-6 sm:p-7 rounded-2xl bg-[#071F14] text-white border border-emerald-900/40 shadow-xs transition-all duration-200">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-5">
           <div className="space-y-1">
             <h1 className="font-bebas text-3xl sm:text-4xl tracking-wide uppercase text-white leading-none">
@@ -74,14 +72,14 @@ export const RefereeReportsView: React.FC<RefereeReportsViewProps> = ({ user }) 
             </p>
           </div>
 
-          {/* Segmented Mode Selector - Animate */}
-          <div className="flex items-center gap-1 p-1 rounded-xl bg-[#07131F] border border-[#1C3B5B] shrink-0">
+          {/* Segmented Mode Selector */}
+          <div className="flex items-center gap-1 p-1 rounded-xl bg-[#04120C] border border-[#143D28] shrink-0">
             <button
               type="button"
               onClick={() => setActiveTab('BAP_LIST')}
-              className={`btn-tactile px-4 py-2 rounded-lg font-barlow font-bold uppercase tracking-wider text-xs transition-all duration-150 active:scale-[0.98] ${
+              className={`btn-tactile px-4 py-2 rounded-lg font-barlow font-bold uppercase tracking-wider text-xs transition-all duration-150 active:scale-[0.98] cursor-pointer ${
                 activeTab === 'BAP_LIST'
-                  ? 'bg-[#2563EB] text-white'
+                  ? 'bg-[var(--color-arena-primary)] text-white shadow-xs'
                   : 'text-slate-400 hover:text-white'
               }`}
             >
@@ -90,9 +88,9 @@ export const RefereeReportsView: React.FC<RefereeReportsViewProps> = ({ user }) 
             <button
               type="button"
               onClick={() => setActiveTab('INCIDENT_FORM')}
-              className={`btn-tactile px-4 py-2 rounded-lg font-barlow font-bold uppercase tracking-wider text-xs transition-all duration-150 active:scale-[0.98] ${
+              className={`btn-tactile px-4 py-2 rounded-lg font-barlow font-bold uppercase tracking-wider text-xs transition-all duration-150 active:scale-[0.98] cursor-pointer ${
                 activeTab === 'INCIDENT_FORM'
-                  ? 'bg-[#2563EB] text-white'
+                  ? 'bg-[var(--color-arena-primary)] text-white shadow-xs'
                   : 'text-slate-400 hover:text-white'
               }`}
             >
@@ -102,7 +100,7 @@ export const RefereeReportsView: React.FC<RefereeReportsViewProps> = ({ user }) 
         </div>
       </div>
 
-      {/* 2. Sub-tab 1: Rekap BAP Selesai - Distilled */}
+      {/* 2. Sub-tab 1: Rekap BAP Selesai - Card Tabel */}
       {activeTab === 'BAP_LIST' && (
         <div className="space-y-3.5">
           <div className="flex items-center justify-between px-1">
@@ -114,69 +112,111 @@ export const RefereeReportsView: React.FC<RefereeReportsViewProps> = ({ user }) 
             </span>
           </div>
 
-          <div className="space-y-3">
-            {bapList.map((b) => (
-              <div
-                key={b.id}
-                className="p-5 sm:p-6 rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] hover:border-[var(--color-arena-primary)]/40 hover:-translate-y-0.5 transition-all duration-200 flex flex-col md:flex-row md:items-center justify-between gap-4"
-              >
-                <div className="space-y-1.5">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="font-mono text-xs font-bold text-[var(--color-arena-primary)] px-2 py-0.5 rounded-md bg-[var(--color-arena-primary)]/10">
-                      Laga #{b.matchNumber}
-                    </span>
-                    <span className="text-xs text-[var(--text-muted)] font-barlow font-bold uppercase tracking-wider">
-                      {b.sport}
-                    </span>
-                    <span className="text-[var(--text-faint)]">&bull;</span>
-                    <span className="text-xs text-[var(--text-muted)]">{b.court}</span>
-                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 text-[10px] font-bold">
-                      <CheckCircle2 className="w-3 h-3" />
-                      <span>BAP Sah &amp; Tersumpah</span>
-                    </span>
-                  </div>
-
-                  <h3 className="font-bebas text-2xl text-[var(--text-main)] uppercase tracking-wide">
-                    {b.teams}
-                  </h3>
-
-                  <div className="flex flex-wrap items-center gap-3 text-xs text-[var(--text-muted)] font-sans">
-                    <span>
-                      Skor Akhir:{' '}
-                      <strong className="font-scoreboard text-base text-[var(--color-arena-accent)]">
-                        {b.score}
-                      </strong>
-                    </span>
-                    <span>&bull;</span>
-                    <span>{b.date}</span>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2.5 shrink-0 pt-1 md:pt-0">
-                  <button
-                    type="button"
-                    onClick={() => setPreviewBapModal(b)}
-                    className="btn-tactile flex items-center gap-1.5 px-4 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)] text-xs font-barlow font-bold uppercase tracking-wider hover:bg-[var(--bg-surface)] active:scale-[0.98] transition-all duration-150 min-h-[40px]"
-                  >
-                    <Eye className="w-3.5 h-3.5 text-[var(--color-arena-primary)]" />
-                    <span>Lihat Salinan</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => alert(`Mengunduh dokumen BAP resmi ${b.id}.pdf`)}
-                    className="btn-tactile flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[var(--color-arena-primary)] hover:bg-[var(--color-arena-primary-hover)] active:scale-[0.98] text-white text-xs font-barlow font-bold uppercase tracking-wider transition-all duration-150 min-h-[40px]"
-                  >
-                    <Download className="w-3.5 h-3.5" />
-                    <span>Unduh PDF</span>
-                  </button>
-                </div>
-              </div>
-            ))}
+          {/* Card Tabel BAP */}
+          <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] overflow-hidden shadow-xs">
+            <div className="overflow-x-auto">
+              <table className="w-full text-xs text-left">
+                <thead className="bg-[var(--bg-muted)]/70 text-[var(--text-muted)] uppercase text-[11px] font-barlow font-bold tracking-wider border-b border-[var(--border-subtle)]">
+                  <tr>
+                    <th className="py-3.5 px-4">Laga</th>
+                    <th className="py-3.5 px-4">Cabang &amp; Lapangan</th>
+                    <th className="py-3.5 px-4">Pertandingan / Tim</th>
+                    <th className="py-3.5 px-4 text-center">Skor Akhir</th>
+                    <th className="py-3.5 px-4">Tanggal &amp; Waktu</th>
+                    <th className="py-3.5 px-4 text-center">Status BAP</th>
+                    <th className="py-3.5 px-4 text-right">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[var(--border-subtle)] font-medium text-[var(--text-main)]">
+                  {bapList.length === 0 ? (
+                    <tr>
+                      <td colSpan={7} className="py-16 px-4 text-center">
+                        <div className="max-w-md mx-auto space-y-3 flex flex-col items-center">
+                          <div className="w-14 h-14 rounded-2xl bg-[var(--bg-muted)] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--text-muted)]">
+                            <FileCheck className="w-7 h-7 text-[var(--color-arena-primary)]" />
+                          </div>
+                          <div className="space-y-1">
+                            <h4 className="font-bebas text-xl text-[var(--text-main)] uppercase tracking-wide">
+                              Belum Ada Berita Acara Pertandingan
+                            </h4>
+                            <p className="text-xs text-[var(--text-muted)] font-sans leading-relaxed">
+                              Tabel Berita Acara Pertandingan (BAP) masih kosong. Dokumen sah akan tercatat dan tersinkronisasi otomatis di sini setelah pertandingan disahkan oleh wasit.
+                            </p>
+                          </div>
+                          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[var(--color-arena-primary-light)] text-[var(--color-arena-primary)] text-[11px] font-barlow font-bold uppercase tracking-wider">
+                            <span className="w-2 h-2 rounded-full bg-[var(--color-arena-primary)] animate-pulse" />
+                            <span>Menunggu Pengesahan Laga Wasit</span>
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                  ) : (
+                    bapList.map((b) => (
+                      <tr key={b.id} className="hover:bg-[var(--bg-muted)]/30 transition-colors">
+                        <td className="py-4 px-4 font-mono">
+                          <span className="font-mono text-xs font-bold text-[var(--color-arena-primary)] px-2.5 py-1 rounded-md bg-[var(--color-arena-primary-light)]">
+                            #{b.matchNumber}
+                          </span>
+                        </td>
+                        <td className="py-4 px-4">
+                          <div className="font-barlow font-bold uppercase tracking-wider text-xs text-[var(--text-main)]">
+                            {b.sport}
+                          </div>
+                          <div className="text-[11px] text-[var(--text-muted)]">{b.court}</div>
+                        </td>
+                        <td className="py-4 px-4">
+                          <div className="font-bebas text-lg text-[var(--text-main)] uppercase tracking-wide">
+                            {b.teams}
+                          </div>
+                          <div className="text-[11px] text-[var(--text-muted)]">
+                            Wasit: {b.referee1} {b.referee2 ? `& ${b.referee2}` : ''}
+                          </div>
+                        </td>
+                        <td className="py-4 px-4 text-center">
+                          <span className="font-scoreboard text-lg text-[var(--color-arena-accent)] font-bold">
+                            {b.score}
+                          </span>
+                        </td>
+                        <td className="py-4 px-4">
+                          <div className="text-xs text-[var(--text-muted)] font-mono">{b.date}</div>
+                        </td>
+                        <td className="py-4 px-4 text-center">
+                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 text-[10px] font-bold">
+                            <CheckCircle2 className="w-3 h-3" />
+                            <span>BAP Sah</span>
+                          </span>
+                        </td>
+                        <td className="py-4 px-4 text-right">
+                          <div className="flex items-center justify-end gap-2">
+                            <button
+                              type="button"
+                              onClick={() => setPreviewBapModal(b)}
+                              className="btn-tactile flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)] text-xs font-barlow font-bold uppercase tracking-wider hover:bg-[var(--bg-surface)] active:scale-[0.98] transition-all cursor-pointer"
+                            >
+                              <Eye className="w-3.5 h-3.5 text-[var(--color-arena-primary)]" />
+                              <span>Salinan</span>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => alert(`Mengunduh dokumen BAP resmi ${b.id}.pdf`)}
+                              className="btn-tactile flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[var(--color-arena-primary)] hover:bg-[var(--color-arena-primary-hover)] active:scale-[0.98] text-white text-xs font-barlow font-bold uppercase tracking-wider transition-all cursor-pointer"
+                            >
+                              <Download className="w-3.5 h-3.5" />
+                              <span>PDF</span>
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       )}
 
-      {/* 3. Sub-tab 2: Form Catatan Insiden Khusus - Clarified UX Copy */}
+      {/* 3. Sub-tab 2: Form Catatan Insiden Khusus */}
       {activeTab === 'INCIDENT_FORM' && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Form Input */}
@@ -199,10 +239,10 @@ export const RefereeReportsView: React.FC<RefereeReportsViewProps> = ({ user }) 
                   <select
                     value={selectedMatch}
                     onChange={(e) => setSelectedMatch(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)] transition-colors focus:border-[var(--color-arena-primary)]"
+                    className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)] transition-colors focus:border-[var(--color-arena-primary)] cursor-pointer"
                   >
-                    <option value="match-101">Laga #1: MIN 1 Kota vs MIS Al-Hidayah</option>
-                    <option value="match-102">Laga #2: SDN Percobaan 1 vs SDIT Bina Insani</option>
+                    <option value="match-101">Laga #1: SDI KARDINA MASSA vs MIN 7 BLITAR</option>
+                    <option value="match-102">Laga #2: UPT SDN 1 SRENGAT vs MIN 14 BLITAR</option>
                   </select>
                 </div>
 
@@ -213,7 +253,7 @@ export const RefereeReportsView: React.FC<RefereeReportsViewProps> = ({ user }) 
                   <select
                     value={incidentType}
                     onChange={(e) => setIncidentType(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)] transition-colors focus:border-[var(--color-arena-primary)]"
+                    className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)] transition-colors focus:border-[var(--color-arena-primary)] cursor-pointer"
                   >
                     <option value="PROTES_OFFICIAL">Protes Keras Pelatih / Ofisial</option>
                     <option value="CEDERA_PARAH">Cedera Berat Pemain (Rujuk Medis)</option>
@@ -264,7 +304,7 @@ export const RefereeReportsView: React.FC<RefereeReportsViewProps> = ({ user }) 
               <div className="flex justify-end pt-1">
                 <button
                   type="submit"
-                  className="btn-tactile flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[var(--color-arena-primary)] hover:bg-[var(--color-arena-primary-hover)] active:scale-[0.98] text-white font-barlow font-bold uppercase tracking-wider text-xs transition-all duration-150 min-h-[44px]"
+                  className="btn-tactile flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[var(--color-arena-primary)] hover:bg-[var(--color-arena-primary-hover)] active:scale-[0.98] text-white font-barlow font-bold uppercase tracking-wider text-xs transition-all duration-150 min-h-[44px] cursor-pointer"
                 >
                   <Send className="w-3.5 h-3.5" />
                   <span>Kirim ke Panitia</span>
@@ -273,7 +313,7 @@ export const RefereeReportsView: React.FC<RefereeReportsViewProps> = ({ user }) 
             </form>
           </div>
 
-          {/* Riwayat Catatan Insiden - Clarified */}
+          {/* Riwayat Catatan Insiden */}
           <div className="p-5 rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] space-y-3.5">
             <div className="border-b border-[var(--border-subtle)] pb-2.5">
               <h3 className="font-bebas text-lg text-[var(--text-main)] uppercase tracking-wide">
@@ -282,31 +322,40 @@ export const RefereeReportsView: React.FC<RefereeReportsViewProps> = ({ user }) 
             </div>
 
             <div className="space-y-2.5">
-              {incidentReports.map((r) => (
-                <div
-                  key={r.id}
-                  className="p-3 rounded-xl bg-[var(--bg-muted)] text-xs space-y-1.5 border border-[var(--border-subtle)]"
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="font-barlow font-bold uppercase tracking-wider text-red-500">
-                      {r.incidentType}
-                    </span>
-                    <span className="font-mono text-[10px] text-[var(--text-muted)]">
-                      Menit ke-{r.minute}
-                    </span>
-                  </div>
-                  <div className="font-semibold text-[var(--text-main)] text-xs">{r.matchTitle}</div>
-                  <p className="text-[11px] text-[var(--text-muted)] line-clamp-3 leading-relaxed font-sans">
-                    {r.details}
+              {incidentReports.length === 0 ? (
+                <div className="py-8 px-4 text-center rounded-xl bg-[var(--bg-muted)]/50 border border-dashed border-[var(--border-subtle)]">
+                  <AlertTriangle className="w-6 h-6 text-[var(--text-muted)] mx-auto mb-2 opacity-50" />
+                  <p className="text-xs text-[var(--text-muted)] font-medium">
+                    Belum ada laporan insiden khusus yang dikirimkan.
                   </p>
-                  <div className="flex items-center justify-between pt-1 text-[10px] text-[var(--text-muted)]">
-                    <span className="font-mono">{r.timestamp}</span>
-                    <span className="px-2 py-0.5 rounded-md bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 font-bold uppercase">
-                      {r.status === 'REVIEWED' ? 'Ditinjau Panitia' : 'Terkirim'}
-                    </span>
-                  </div>
                 </div>
-              ))}
+              ) : (
+                incidentReports.map((r) => (
+                  <div
+                    key={r.id}
+                    className="p-3 rounded-xl bg-[var(--bg-muted)] text-xs space-y-1.5 border border-[var(--border-subtle)]"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="font-barlow font-bold uppercase tracking-wider text-red-500">
+                        {r.incidentType}
+                      </span>
+                      <span className="font-mono text-[10px] text-[var(--text-muted)]">
+                        Menit ke-{r.minute}
+                      </span>
+                    </div>
+                    <div className="font-semibold text-[var(--text-main)] text-xs">{r.matchTitle}</div>
+                    <p className="text-[11px] text-[var(--text-muted)] line-clamp-3 leading-relaxed font-sans">
+                      {r.details}
+                    </p>
+                    <div className="flex items-center justify-between pt-1 text-[10px] text-[var(--text-muted)]">
+                      <span className="font-mono">{r.timestamp}</span>
+                      <span className="px-2 py-0.5 rounded-md bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 font-bold uppercase">
+                        {r.status === 'REVIEWED' ? 'Ditinjau Panitia' : 'Terkirim'}
+                      </span>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           </div>
         </div>

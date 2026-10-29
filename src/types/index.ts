@@ -314,4 +314,118 @@ export interface PublicHeaderConfig {
   registerButtonText: string;
 }
 
+// PRD Expanded Contracts (Backend Entities)
+export interface PlayerRegistration {
+  fullName: string;
+  nisn: string;
+  jerseyNumber: number;
+  position: string;
+  birthDate: string;
+  isCaptain?: boolean;
+}
+
+export interface ContingentRegistration {
+  id: string;
+  teamName: string;
+  schoolName: string;
+  city: string;
+  coachName: string;
+  coachPhone: string;
+  coachEmail?: string;
+  players: PlayerRegistration[];
+  recommendationDocUrl?: string;
+  status: 'PENDING' | 'VERIFIED' | 'REJECTED';
+  notes?: string;
+  verifiedBy?: string;
+  verifiedAt?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface MatchSettingsConfig {
+  id: string;
+  sportCode: string;
+  periodCount: number;
+  periodMinutesGroup: number;
+  periodMinutesKnockout: number;
+  clockGroup: 'running_clock' | 'stop_clock';
+  clockKnockout: 'running_clock' | 'stop_clock';
+  halfTimeMinutes: number;
+  foulsLimit: number;
+  timeoutDurationSeconds: number;
+  allowDrawGroup: boolean;
+  penaltyShootoutEnabled: boolean;
+  penaltyShootoutKicks: number;
+  updatedAt: string;
+}
+
+export interface KomdisIncident {
+  id: string;
+  matchId?: string;
+  teamId?: string;
+  reportedBy?: string;
+  reporterName: string;
+  classification: 'RINGAN' | 'SEDANG' | 'BERAT' | 'FORCE_MAJEURE';
+  title: string;
+  description: string;
+  evidenceUrl?: string;
+  recommendation?: string;
+  status: 'OPEN' | 'INVESTIGATING' | 'RESOLVED' | 'DISMISSED';
+  sanction?: string;
+  resolutionNotes?: string;
+  resolvedBy?: string;
+  resolvedAt?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface OfficialMatchBAP {
+  id: string;
+  matchId: string;
+  finalScoreHome: number;
+  finalScoreAway: number;
+  periodScores: {
+    firstHalf: [number, number];
+    secondHalf: [number, number];
+    penalty?: [number, number];
+  };
+  goals: Array<{
+    minute: number;
+    teamId: string;
+    teamName: string;
+    playerId?: string;
+    playerName: string;
+    jerseyNumber?: number;
+    type?: string;
+  }>;
+  cards: Array<{
+    minute: number;
+    teamId: string;
+    playerName: string;
+    cardType: 'YELLOW' | 'RED';
+  }>;
+  fouls: {
+    home: number;
+    away: number;
+  };
+  timeouts: {
+    home: number;
+    away: number;
+  };
+  referee1Name?: string;
+  referee1Sig?: string;
+  referee1SignedAt?: string;
+  referee2Name?: string;
+  referee2Sig?: string;
+  referee2SignedAt?: string;
+  commissionerName?: string;
+  commissionerSig?: string;
+  commissionerSignedAt?: string;
+  verificationCode: string;
+  status: 'DRAFT' | 'BAP_SIGNED' | 'VERIFIED';
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export * from './partner';

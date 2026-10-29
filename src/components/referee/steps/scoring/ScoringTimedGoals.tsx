@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Play, Pause, RotateCcw, BellRing } from 'lucide-react';
+import { Play, Pause, RotateCcw, BellRing, Sliders, Clock, X, Check } from 'lucide-react';
 import { Match, MatchEvent, EventType } from '@/types';
 import { MatchGoalsTable } from './MatchGoalsTable';
 import { TeamScoreFoulCard } from './TeamScoreFoulCard';
@@ -16,6 +16,10 @@ interface ScoringTimedGoalsProps {
   onToggleTimer: () => void;
   onResetTimer: () => void;
   onAddMinute?: () => void;
+  onSubtractMinute?: () => void;
+  onSetTimerSeconds?: (seconds: number) => void;
+  onChangePeriod?: (period: string) => void;
+  adminDurationMinutes?: number;
   onUpdateScore: (team: 'A' | 'B', delta: number) => void;
   onQuickIncident?: (type: EventType, team: 'A' | 'B', label: string) => void;
   events?: MatchEvent[];
@@ -24,15 +28,34 @@ interface ScoringTimedGoalsProps {
 }
 
 export const ScoringTimedGoals: React.FC<ScoringTimedGoalsProps> = ({
-  currentMatch, timerSeconds, isTimerRunning, currentPeriod, formatTime,
-  onToggleTimer, onResetTimer, onAddMinute, onUpdateScore, onQuickIncident,
-  events = [], onUndoLastEvent, onUndoTeamGoal,
+  currentMatch,
+  timerSeconds,
+  isTimerRunning,
+  currentPeriod,
+  formatTime,
+  onToggleTimer,
+  onResetTimer,
+  onAddMinute,
+  onSubtractMinute,
+  onSetTimerSeconds,
+  onChangePeriod,
+  adminDurationMinutes = 20,
+  onUpdateScore,
+  onQuickIncident,
+  events = [],
+  onUndoLastEvent,
+  onUndoTeamGoal,
 }) => {
   const [foulsA, setFoulsA] = useState(3);
   const [foulsB, setFoulsB] = useState(5);
   const [timeoutsA, setTimeoutsA] = useState(1);
   const [timeoutsB, setTimeoutsB] = useState(0);
   const [isBellRinging, setIsBellRinging] = useState(false);
+
+  // Modal Atur Waktu
+  const [showTimeModal, setShowTimeModal] = useState(false);
+  const [inputMinutes, setInputMinutes] = useState(Math.floor(timerSeconds / 60));
+  const [inputSeconds, setInputSeconds] = useState(timerSeconds % 60);
 
   // Hitung jumlah kartu Tim A dan Tim B dari events laga
   const yellowCardsA = (events || []).filter(
@@ -73,38 +96,81 @@ export const ScoringTimedGoals: React.FC<ScoringTimedGoalsProps> = ({
     }
   };
 
+  const handleOpenTimeModal = () => {
+    setInputMinutes(Math.floor(timerSeconds / 60));
+    setInputSeconds(timerSeconds % 60);
+    setShowTimeModal(true);
+  };
+
+  const handleApplyCustomTime = (e: React.FormEvent) => {
+    e.preventDefault();
+    const totalSecs = Math.max(0, Number(inputMinutes) * 60 + Number(inputSeconds));
+    if (onSetTimerSeconds) {
+      onSetTimerSeconds(totalSecs);
+    }
+    setShowTimeModal(false);
+  };
+
+  const handleQuickPreset = (minutes: number) => {
+    setInputMinutes(minutes);
+    setInputSeconds(0);
+    if (onSetTimerSeconds) {
+      onSetTimerSeconds(minutes * 60);
+    }
+    setShowTimeModal(false);
+  };
+
+  const handleCyclePeriod = () => {
+    if (!onChangePeriod) return;
+    const next =
+      currentPeriod === 'Babak 1'
+        ? 'Babak 2'
+        : currentPeriod === 'Babak 2'
+        ? 'Perpanjangan'
+        : 'Babak 1';
+    onChangePeriod(next);
+  };
+
   return (
-    <div className="rounded-2xl bg-[#0D1E30] text-white border border-[#1C3B5B] p-4 sm:p-5 shadow-xs space-y-3.5 animate-fadeIn">
+    <div className="rounded-xl bg-[var(--bg-surface)] text-[var(--text-main)] border-2 border-slate-300 dark:border-slate-800 p-4 sm:p-5 shadow-sm space-y-3.5 animate-fadeIn">
       {/* 1. Top Compact Meta Bar */}
-      <div className="flex items-center justify-between text-xs pb-2.5 border-b border-[#1C3B5B]">
+      <div className="flex items-center justify-between text-xs pb-2.5 border-b border-slate-200 dark:border-slate-800">
         <div className="flex items-center gap-2">
-          <span className="font-bebas text-base sm:text-lg uppercase tracking-wider text-white leading-none">
+          <span className="font-bebas text-base sm:text-lg uppercase tracking-wider text-[var(--text-main)] leading-none">
             Papan Skor &amp; Stopwatch Lapangan
+          </span>
+          <span className="hidden sm:inline-flex text-[10px] text-[var(--text-muted)] font-mono px-2 py-0.5 rounded bg-[var(--bg-muted)] border border-slate-300 dark:border-slate-700">
+            Default Admin: {adminDurationMinutes} Menit
           </span>
         </div>
         <div className="flex items-center gap-2">
           <button
             type="button"
             onClick={handleRingBell}
-            className={`px-2.5 py-1 rounded-md font-barlow font-bold uppercase text-[11px] border flex items-center gap-1.5 transition-all shadow-xs ${
+            className={`btn-tactile px-2.5 py-1 rounded-md font-barlow font-bold uppercase text-[11px] border flex items-center gap-1.5 transition-all shadow-xs cursor-pointer ${
               isBellRinging
                 ? 'bg-red-600 text-white border-red-400 animate-pulse ring-2 ring-red-400'
-                : 'bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border-amber-500/30'
+                : 'bg-amber-50 dark:bg-amber-950/40 hover:bg-amber-100 text-amber-800 dark:text-amber-300 border-amber-300 dark:border-amber-800'
             }`}
             title="Bunyikan Bel Kick-off / Mulai Pertandingan"
           >
-            <BellRing className={`w-3.5 h-3.5 ${isBellRinging ? 'animate-bounce text-white' : 'text-amber-400'}`} />
+            <BellRing className={`w-3.5 h-3.5 ${isBellRinging ? 'animate-bounce text-white' : 'text-amber-500'}`} />
             <span>{isBellRinging ? 'Bel Berbunyi!' : 'Bel Kick-off'}</span>
           </button>
-          <span className="px-2.5 py-0.5 rounded-md bg-[#07131F] text-[#F6AE2D] font-barlow font-bold uppercase tracking-wider text-xs border border-[#1C3B5B]">
+          <button
+            type="button"
+            onClick={handleCyclePeriod}
+            className="btn-tactile px-2.5 py-1 rounded-md bg-[var(--bg-muted)] hover:bg-slate-200 dark:hover:bg-slate-700 text-[var(--color-arena-accent)] font-barlow font-bold uppercase tracking-wider text-xs border border-slate-300 dark:border-slate-700 transition-colors cursor-pointer"
+            title="Klik untuk Ganti Babak"
+          >
             {currentPeriod}
-          </span>
+          </button>
         </div>
       </div>
 
       {/* Visual Kickoff Banner when Bell Rings */}
       {isBellRinging && (
-        <div className="p-2.5 rounded-xl bg-gradient-to-r from-red-600 via-amber-600 to-red-600 text-white font-barlow font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg animate-pulse border border-amber-300">
+        <div className="p-2.5 rounded-lg bg-red-600 text-white font-barlow font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg animate-pulse border border-amber-300">
           <BellRing className="w-4 h-4 animate-bounce" />
           <span>🚨 BEL PERTANDINGAN DIBUNYIKAN: KICK-OFF / PERTANDINGAN DIMULAI!</span>
         </div>
@@ -134,11 +200,28 @@ export const ScoringTimedGoals: React.FC<ScoringTimedGoalsProps> = ({
         />
 
         {/* TIMER & PUSAT KENDALI (Tengah) */}
-        <div className="md:col-span-2 rounded-xl bg-[#07131F] border border-[#1C3B5B] p-3 flex flex-col items-center justify-center space-y-2 text-center">
-          <span className="text-[10px] font-barlow font-bold tracking-widest text-slate-400 uppercase">
-            Waktu Pertandingan
-          </span>
-          <div className="text-4xl sm:text-5xl font-scoreboard font-bold tracking-wider text-white tabular-nums leading-none">
+        <div className="md:col-span-2 rounded-xl bg-[var(--bg-muted)] border-2 border-slate-300 dark:border-slate-800 p-3 flex flex-col items-center justify-center space-y-2 text-center relative shadow-xs">
+          <div className="flex items-center justify-between w-full px-0.5">
+            <span className="text-[10px] font-barlow font-bold tracking-widest text-[var(--text-muted)] uppercase">
+              Waktu Laga
+            </span>
+            <button
+              type="button"
+              onClick={handleOpenTimeModal}
+              className="p-1 rounded text-[var(--text-muted)] hover:text-amber-500 transition-all text-[10px] flex items-center gap-0.5 font-bold uppercase cursor-pointer"
+              title="Atur Waktu Pertandingan"
+            >
+              <Sliders className="w-3 h-3" />
+              <span>Atur</span>
+            </button>
+          </div>
+
+          {/* Display Timer (Clickable to edit) */}
+          <div
+            onClick={handleOpenTimeModal}
+            className="text-4xl sm:text-5xl font-teko font-bold tracking-wider text-[var(--text-main)] tabular-nums leading-none cursor-pointer hover:text-amber-500 transition-colors py-0.5 select-none"
+            title="Klik untuk Mengatur Waktu Pertandingan"
+          >
             {formatTime(timerSeconds)}
           </div>
 
@@ -149,7 +232,7 @@ export const ScoringTimedGoals: React.FC<ScoringTimedGoalsProps> = ({
                 if (!isTimerRunning) handleRingBell();
                 onToggleTimer();
               }}
-              className={`btn-tactile w-full py-2 px-2.5 rounded-lg font-barlow font-bold uppercase tracking-wider text-xs flex items-center justify-center gap-1.5 transition-all shadow-xs ${
+              className={`btn-tactile w-full py-2 px-2.5 rounded-lg font-barlow font-bold uppercase tracking-wider text-xs flex items-center justify-center gap-1.5 transition-all shadow-xs cursor-pointer min-h-[38px] ${
                 isTimerRunning
                   ? 'bg-amber-600 hover:bg-amber-700 text-white'
                   : 'bg-emerald-600 hover:bg-emerald-700 text-white'
@@ -162,34 +245,49 @@ export const ScoringTimedGoals: React.FC<ScoringTimedGoalsProps> = ({
             <button
               type="button"
               onClick={handleRingBell}
-              className={`btn-tactile w-full py-1 px-1.5 rounded-md text-[10px] font-barlow font-bold uppercase tracking-wider flex items-center justify-center gap-1 border transition-all ${
+              className={`btn-tactile w-full py-1.5 px-1.5 rounded-md text-[10px] font-barlow font-bold uppercase tracking-wider flex items-center justify-center gap-1 border transition-all cursor-pointer ${
                 isBellRinging
                   ? 'bg-red-600 text-white border-red-400 animate-pulse'
-                  : 'bg-white/5 hover:bg-white/10 text-amber-300 border-amber-500/30'
+                  : 'bg-[var(--bg-surface)] hover:bg-slate-200 dark:hover:bg-slate-700 text-amber-700 dark:text-amber-300 border-slate-300 dark:border-slate-700'
               }`}
               title="Bunyikan Bel / Buzzer Kick-off"
             >
-              <BellRing className="w-3 h-3 text-amber-400" />
+              <BellRing className="w-3 h-3 text-amber-500" />
               <span>Bunyikan Bel</span>
             </button>
 
-            <div className="flex items-center gap-1.5 w-full">
-              {onAddMinute && (
-                <button
-                  type="button"
-                  onClick={onAddMinute}
-                  className="btn-tactile flex-1 py-1 px-1.5 rounded-md bg-white/5 hover:bg-white/10 text-slate-300 font-barlow font-bold uppercase text-[10px] border border-white/10"
-                  title="Tambah 1 Menit"
-                >
-                  +1m
-                </button>
-              )}
+            {/* Tombol Pengatur Waktu Cepat */}
+            <div className="grid grid-cols-4 gap-1 w-full pt-0.5">
+              <button
+                type="button"
+                onClick={onSubtractMinute}
+                className="btn-tactile py-1 px-1 rounded-md bg-[var(--bg-surface)] hover:bg-slate-200 dark:hover:bg-slate-700 text-[var(--text-main)] font-barlow font-bold uppercase text-[10px] border border-slate-300 dark:border-slate-600 cursor-pointer"
+                title="Kurangi 1 Menit (-1m)"
+              >
+                -1m
+              </button>
+              <button
+                type="button"
+                onClick={onAddMinute}
+                className="btn-tactile py-1 px-1 rounded-md bg-[var(--bg-surface)] hover:bg-slate-200 dark:hover:bg-slate-700 text-[var(--text-main)] font-barlow font-bold uppercase text-[10px] border border-slate-300 dark:border-slate-600 cursor-pointer"
+                title="Tambah 1 Menit (+1m)"
+              >
+                +1m
+              </button>
+              <button
+                type="button"
+                onClick={handleOpenTimeModal}
+                className="btn-tactile py-1 px-1 rounded-md bg-[var(--bg-surface)] hover:bg-slate-200 dark:hover:bg-slate-700 text-amber-600 dark:text-amber-400 font-barlow font-bold uppercase text-[10px] border border-slate-300 dark:border-slate-600 flex items-center justify-center cursor-pointer"
+                title="Atur Waktu Presisi"
+              >
+                <Sliders className="w-3 h-3" />
+              </button>
               <button
                 type="button"
                 onClick={onResetTimer}
-                className="btn-tactile p-1.5 rounded-md bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white border border-white/10"
+                className="btn-tactile py-1 px-1 rounded-md bg-[var(--bg-surface)] hover:bg-slate-200 dark:hover:bg-slate-700 text-[var(--text-muted)] hover:text-[var(--text-main)] border border-slate-300 dark:border-slate-600 flex items-center justify-center cursor-pointer"
                 aria-label="Reset Timer"
-                title="Reset Stopwatch"
+                title={`Reset ke ${adminDurationMinutes} Menit (Default Admin)`}
               >
                 <RotateCcw className="w-3 h-3" />
               </button>
@@ -229,6 +327,120 @@ export const ScoringTimedGoals: React.FC<ScoringTimedGoalsProps> = ({
         onUndoLastEvent={onUndoLastEvent}
         onUndoTeamGoal={onUndoTeamGoal}
       />
+
+      {/* MODAL ATUR WAKTU PERTANDINGAN */}
+      {showTimeModal && (
+        <div
+          className="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex items-center justify-center p-4 animate-fadeIn"
+          onClick={() => setShowTimeModal(false)}
+        >
+          <div
+            className="w-full max-w-sm rounded-xl bg-[var(--bg-surface)] border-2 border-slate-300 dark:border-slate-800 p-5 space-y-4 text-[var(--text-main)] shadow-2xl animate-scaleUp"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800">
+              <div className="flex items-center gap-2">
+                <Clock className="w-4 h-4 text-[#1D63B8] dark:text-sky-400" />
+                <h4 className="font-bebas text-lg uppercase tracking-wide text-[var(--text-main)]">
+                  Atur Waktu Pertandingan
+                </h4>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowTimeModal(false)}
+                className="p-1 rounded-lg hover:bg-[var(--bg-muted)] text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <form onSubmit={handleApplyCustomTime} className="space-y-4">
+              {/* Preset Cepat */}
+              <div>
+                <label className="text-[10px] font-barlow font-bold uppercase tracking-wider text-[var(--text-muted)] block mb-1.5">
+                  Preset Cepat (Menit):
+                </label>
+                <div className="grid grid-cols-4 gap-1.5">
+                  {[10, 12, 15, adminDurationMinutes || 20].map((mins, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => handleQuickPreset(mins)}
+                      className={`btn-tactile py-2 px-2 rounded-lg text-xs font-mono font-bold border transition-all cursor-pointer ${
+                        inputMinutes === mins && inputSeconds === 0
+                          ? 'bg-[#1D63B8] text-white border-transparent shadow-xs'
+                          : 'bg-[var(--bg-muted)] hover:bg-slate-200 dark:hover:bg-slate-700 text-[var(--text-main)] border-slate-300 dark:border-slate-700'
+                      }`}
+                    >
+                      {mins}m
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Input Manual Menit & Detik */}
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-barlow font-bold uppercase tracking-wider text-[var(--text-muted)] block">
+                  Set Waktu Manual:
+                </label>
+                <div className="flex items-center justify-center gap-2 bg-[var(--bg-muted)] p-3 rounded-xl border border-slate-200 dark:border-slate-700">
+                  <div className="text-center">
+                    <span className="text-[9px] uppercase tracking-wider text-[var(--text-muted)] block mb-1">
+                      Menit
+                    </span>
+                    <input
+                      type="number"
+                      min={0}
+                      max={90}
+                      value={inputMinutes}
+                      onChange={(e) => setInputMinutes(Math.max(0, Number(e.target.value)))}
+                      className="w-16 text-center text-3xl font-teko font-bold bg-[var(--bg-surface)] border border-slate-300 dark:border-slate-600 rounded-lg py-1 text-[var(--text-main)] focus:outline-none focus:border-[#1D63B8]"
+                    />
+                  </div>
+                  <span className="text-2xl font-bold text-[#1D63B8] dark:text-sky-400 pt-3">:</span>
+                  <div className="text-center">
+                    <span className="text-[9px] uppercase tracking-wider text-[var(--text-muted)] block mb-1">
+                      Detik
+                    </span>
+                    <input
+                      type="number"
+                      min={0}
+                      max={59}
+                      value={inputSeconds}
+                      onChange={(e) => setInputSeconds(Math.max(0, Math.min(59, Number(e.target.value))))}
+                      className="w-16 text-center text-3xl font-teko font-bold bg-[var(--bg-surface)] border border-slate-300 dark:border-slate-600 rounded-lg py-1 text-[var(--text-main)] focus:outline-none focus:border-[#1D63B8]"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-2.5 rounded-lg bg-blue-50 dark:bg-sky-950/40 border border-blue-200 dark:border-sky-800 text-[11px] text-[#1D63B8] dark:text-sky-300 flex items-center justify-between">
+                <span>Default Pengaturan Admin:</span>
+                <span className="font-mono font-bold text-[var(--text-main)]">{adminDurationMinutes} Menit</span>
+              </div>
+
+              <div className="flex items-center gap-2 pt-1">
+                <button
+                  type="button"
+                  onClick={() => {
+                    handleQuickPreset(adminDurationMinutes);
+                  }}
+                  className="btn-tactile flex-1 py-2.5 rounded-lg bg-[var(--bg-muted)] hover:bg-slate-200 dark:hover:bg-slate-700 text-[var(--text-main)] text-xs font-barlow font-bold uppercase tracking-wider border border-slate-300 dark:border-slate-700 transition-colors cursor-pointer min-h-[42px]"
+                >
+                  Reset ke Admin
+                </button>
+                <button
+                  type="submit"
+                  className="btn-tactile flex-1 py-2.5 rounded-lg bg-[#1D63B8] hover:bg-[#154D92] text-white text-xs font-barlow font-bold uppercase tracking-wider transition-colors flex items-center justify-center gap-1.5 shadow-xs cursor-pointer min-h-[42px]"
+                >
+                  <Check className="w-3.5 h-3.5" />
+                  <span>Terapkan</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

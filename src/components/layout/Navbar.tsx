@@ -44,23 +44,24 @@ export const Navbar: React.FC<NavbarProps> = ({
   }, []);
 
   return (
-    <header className="sticky top-0 z-50 bg-[var(--bg-surface)]/95 backdrop-blur-xs border-b border-[var(--border-subtle)] transition-colors duration-150">
+    <header className="sticky top-0 z-50 bg-[var(--bg-surface)]/95 backdrop-blur-md border-b-2 border-slate-200 dark:border-slate-800 transition-colors duration-150">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16 sm:h-18 gap-3">
+        <div className="flex items-center justify-between h-14 sm:h-18 gap-3">
           {/* Logo & Brand Identity */}
-          <div className="flex items-center gap-3.5 shrink-0">
+          <div className="flex items-center gap-2.5 sm:gap-3 shrink-0">
             <SaumaArenaLogo size="md" />
             <div>
               <div className="flex items-center gap-2">
                 <span className="font-teko font-bold text-2xl sm:text-3xl tracking-wide text-[var(--text-main)] leading-none">
                   SAUMA ARENA
                 </span>
-                <span className="font-barlow text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-[var(--color-arena-primary-light)] text-[var(--color-arena-primary)] dark:bg-[#102235] dark:text-sky-300 border border-[var(--border-subtle)]">
-                  Turnamen Olahraga
+                <span className="font-barlow text-[10px] sm:text-[11px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-blue-50 dark:bg-sky-950/40 text-[#1D63B8] dark:text-sky-300 border border-blue-200 dark:border-sky-800 flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#1D63B8] animate-pulse" />
+                  <span>MMFC I</span>
                 </span>
               </div>
               <p className="text-xs text-[var(--text-muted)] font-medium hidden sm:block">
-                Manajemen Turnamen &amp; Match Center Terpadu
+                Match Center &amp; Turnamen Futsal Terpadu
               </p>
             </div>
           </div>
@@ -75,8 +76,8 @@ export const Navbar: React.FC<NavbarProps> = ({
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onFocus={() => setIsSearchActive(true)}
-                  placeholder="Cari tim peserta turnamen..."
-                  className="w-full pl-8 pr-8 py-1.5 rounded-xl bg-[var(--bg-muted)] border border-[var(--border-subtle)] text-xs text-[var(--text-main)] placeholder-[var(--text-muted)] focus:outline-hidden focus:border-[var(--color-arena-primary)] transition-colors"
+                  placeholder="Cari tim atau sekolah kontingen..."
+                  className="w-full pl-8 pr-8 py-2 rounded-lg bg-[var(--bg-muted)] border border-slate-300 dark:border-slate-700 text-xs text-[var(--text-main)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[#1D63B8] transition-colors min-h-[40px]"
                 />
                 {searchQuery && (
                   <button
@@ -92,7 +93,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
               {/* Search Results Dropdown */}
               {isSearchActive && searchQuery.trim().length > 0 && (
-                <div className="absolute left-0 right-0 top-full mt-1.5 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-xl shadow-xl z-50 max-h-64 overflow-y-auto p-1.5 space-y-1 animate-fadeIn">
+                <div className="absolute left-0 right-0 top-full mt-1.5 bg-[var(--bg-surface)] border-2 border-slate-300 dark:border-slate-800 rounded-lg shadow-xl z-50 max-h-64 overflow-y-auto p-1.5 space-y-1 animate-fadeIn">
                   <div className="px-2.5 py-1 text-[10px] font-barlow font-bold uppercase tracking-wider text-[var(--text-muted)]">
                     Hasil Pencarian Tim ({filteredTeams.length})
                   </div>
@@ -108,17 +109,17 @@ export const Navbar: React.FC<NavbarProps> = ({
                           setIsSearchActive(false);
                           setSearchQuery('');
                         }}
-                        className="px-2.5 py-1.5 rounded-lg hover:bg-[var(--bg-muted)] flex items-center justify-between cursor-pointer transition-colors"
+                        className="px-2.5 py-1.5 rounded-md hover:bg-[var(--bg-muted)] flex items-center justify-between cursor-pointer transition-colors"
                       >
-                        <div className="flex items-center gap-2 min-w-0">
+                        <div className="flex items-center gap-2.5 min-w-0">
                           {team.logoUrl ? (
                             <img
                               src={team.logoUrl}
                               alt={team.name}
-                              className="w-5 h-5 rounded-full object-cover shrink-0"
+                              className="w-6 h-6 rounded-md object-contain shrink-0"
                             />
                           ) : (
-                            <div className="w-5 h-5 rounded-full bg-[var(--color-arena-primary-light)] text-[var(--color-arena-primary)] flex items-center justify-center text-[10px] font-bold">
+                            <div className="w-6 h-6 rounded-md bg-blue-50 text-[#1D63B8] flex items-center justify-center text-[10px] font-bold">
                               {team.name.charAt(0)}
                             </div>
                           )}
@@ -131,7 +132,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                             </span>
                           </div>
                         </div>
-                        <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-md bg-[var(--bg-muted)] text-[var(--text-muted)] shrink-0 border border-[var(--border-subtle)]">
+                        <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-md bg-blue-50 dark:bg-sky-950/40 text-[#1D63B8] dark:text-sky-300 shrink-0 border border-blue-200 dark:border-sky-800">
                           Grup {team.group}
                         </span>
                       </div>
@@ -143,8 +144,8 @@ export const Navbar: React.FC<NavbarProps> = ({
           )}
 
           {/* Right Controls: Tombol Login, Tombol Pendaftaran & Theme Toggle */}
-          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-            {/* Tombol Login (menggantikan tombol tiket masuk) */}
+          <div className="flex items-center gap-2 shrink-0">
+            {/* Tombol Login */}
             <button
               type="button"
               onClick={() => {
@@ -154,21 +155,21 @@ export const Navbar: React.FC<NavbarProps> = ({
                   onViewChange('public');
                 }
               }}
-              className="btn-tactile flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full font-barlow font-bold uppercase tracking-wider text-xs sm:text-sm bg-[#EAF2FB] hover:bg-[#D8E8F8] active:scale-95 text-[#0D2A4A] dark:bg-[#102235] dark:text-sky-300 dark:hover:bg-[#162D45] border border-[#CDE1F5] dark:border-[#1E3B5B] transition-all min-h-[38px] shadow-2xs shrink-0"
+              className="btn-tactile flex items-center gap-1.5 px-3 sm:px-3.5 py-2 rounded-lg font-barlow font-bold uppercase tracking-wider text-xs bg-[var(--bg-muted)] hover:bg-[var(--bg-surface)] active:scale-95 text-[var(--text-main)] border border-slate-300 dark:border-slate-700 transition-all min-h-[40px] shadow-2xs shrink-0 cursor-pointer"
               title={currentView === 'public' ? 'Login ke Portal Admin / Juri' : 'Kembali ke Tampilan Publik'}
             >
-              <LogIn className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#1D64C8] dark:text-sky-400 shrink-0" />
-              <span>{currentView === 'public' ? 'Login' : 'Publik'}</span>
+              <LogIn className="w-3.5 h-3.5 text-[#1D63B8] dark:text-sky-400 shrink-0" />
+              <span>{currentView === 'public' ? 'Login Portal' : 'Tampilan Publik'}</span>
             </button>
 
             {/* Tombol Pendaftaran Tim */}
             <button
               type="button"
               onClick={onOpenRegModal}
-              className="btn-tactile flex items-center gap-1.5 sm:gap-2 px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-full font-barlow font-bold uppercase tracking-wider text-xs sm:text-sm bg-[var(--color-arena-primary)] hover:bg-[#1D4ED8] active:scale-95 text-white shadow-xs transition-all min-h-[38px] shrink-0"
+              className="btn-tactile flex items-center gap-1.5 px-3.5 sm:px-4 py-2 rounded-lg font-barlow font-bold uppercase tracking-wider text-xs bg-[#1D63B8] hover:bg-[#154D92] active:scale-95 text-white shadow-xs transition-all min-h-[40px] shrink-0 cursor-pointer"
               title="Daftarkan Tim Peserta Turnamen"
             >
-              <Users className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
+              <Users className="w-3.5 h-3.5 shrink-0" />
               <span>
                 <span className="inline sm:hidden">Daftar</span>
                 <span className="hidden sm:inline">Pendaftaran Tim</span>
@@ -179,11 +180,11 @@ export const Navbar: React.FC<NavbarProps> = ({
             <button
               type="button"
               onClick={onToggleDarkMode}
-              className="btn-tactile flex items-center justify-center w-9 h-9 rounded-full border border-[var(--border-subtle)] bg-[var(--bg-surface)] text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-muted)] transition-colors shrink-0"
+              className="btn-tactile flex items-center justify-center w-10 h-10 rounded-lg border border-slate-300 dark:border-slate-700 bg-[var(--bg-surface)] text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-muted)] transition-colors shrink-0 cursor-pointer"
               title={darkMode ? 'Beralih ke Mode Terang' : 'Beralih ke Mode Gelap'}
               aria-label="Toggle tema gelap atau terang"
             >
-              {darkMode ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4" />}
+              {darkMode ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-slate-700" />}
             </button>
           </div>
         </div>

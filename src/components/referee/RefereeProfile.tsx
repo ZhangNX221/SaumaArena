@@ -121,7 +121,7 @@ export const RefereeProfile: React.FC<RefereeProfileProps> = ({
   return (
     <form onSubmit={handleSaveProfile} className="space-y-6 max-w-5xl mx-auto pb-24 animate-fadeIn">
       {/* 1. Header Banner Ringkas & Minimalis */}
-      <div className="p-5 sm:p-6 rounded-2xl bg-[#0D1E30] text-white border border-[#1C3B5B] transition-all duration-200 shadow-xs">
+      <div className="p-5 sm:p-6 rounded-2xl bg-[#071F14] text-white border border-[#143D28] transition-all duration-200 shadow-xs">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="space-y-1">
             <h1 className="font-bebas text-2xl sm:text-3xl tracking-wide uppercase text-white leading-none">
@@ -134,7 +134,7 @@ export const RefereeProfile: React.FC<RefereeProfileProps> = ({
 
           <button
             type="submit"
-            className="btn-tactile px-5 py-2.5 rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] active:scale-[0.98] text-white text-xs font-barlow font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-all duration-150 shrink-0 self-start sm:self-auto min-h-[42px]"
+            className="btn-tactile px-5 py-2.5 rounded-xl bg-[var(--color-arena-primary)] hover:bg-[var(--color-arena-primary-hover)] active:scale-[0.98] text-white text-xs font-barlow font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-all duration-150 shrink-0 self-start sm:self-auto min-h-[42px]"
           >
             <Save className="w-3.5 h-3.5" />
             <span>Simpan Profil</span>
@@ -153,7 +153,7 @@ export const RefereeProfile: React.FC<RefereeProfileProps> = ({
       {/* 2. Official Accreditation ID Card - Ringkas & Minimalis */}
       <div className="p-4 sm:p-5 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xs">
         <div className="flex items-center gap-3.5">
-          <div className="w-14 h-14 rounded-2xl bg-[#07131F] text-[#F6AE2D] flex items-center justify-center font-bebas text-2xl border border-[#1C3B5B] shrink-0">
+          <div className="w-14 h-14 rounded-2xl bg-[#04120C] text-[var(--color-arena-accent)] flex items-center justify-center font-bebas text-2xl border border-[#143D28] shrink-0">
             {user.avatarText || 'MI'}
           </div>
           <div className="space-y-0.5 min-w-0">

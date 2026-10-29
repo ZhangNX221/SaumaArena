@@ -1,282 +1,224 @@
-# 08. Arsitektur Perangkat Lunak & Model Data
+# 08. Arsitektur Perangkat Lunak & Model Data (Software Architecture & Schema)
 
 **Dokumen PRD — Bagian 8/12**  
 **Produk:** Sauma Arena (Platform Manajemen Pertandingan Multi-Cabang Olahraga)  
-**Versi:** 1.0  
+**Edisi Turnamen:** Milad Matsanega Futsal Competition I (MMFC I) • MTsN 3 Blitar  
+**Versi:** 2.0  
 
 ---
 
-## 8.1 Pola Arsitektur: Modular Monolith
+## 8.1 Pola Arsitektur: Unified App Router dengan Tiga Konsol Terpadu
 
-Sauma Arena dibangun menggunakan pola **Modular Monolith**: satu aplikasi tunggal dalam satu repositori (*single codebase*), namun memiliki batasan modul cabang olahraga yang terisolasi secara ketat di balik kontrak antarmuka (*interface contract*).
+Sauma Arena dibangun menggunakan **Next.js App Router (TypeScript Strict Mode)** dengan arsitektur *Modular Monolith*. Aplikasi ini menggabungkan tiga konsol operasional dalam satu rute aplikasi tunggal yang dinamis (`src/app/page.tsx`):
 
-### Prinsip Batasan Modul & Dependensi
-1. **Isolasi Inti (`src/core`):** Folder `src/core` berisi logika umum yang berlaku universal untuk semua cabang olahraga (state machine status laga, event store, tiebreaker klasemen, generator jadwal, tipe bersama). **Dilarang keras memasukkan aturan spesifik cabor apa pun ke dalam `src/core`**.
-2. **Modul Cabor Terisolasi (`src/sports/<kode>`):** Setiap cabang olahraga memiliki folder mandiri yang berisi `template.json`, `module.ts`, `console.tsx`, dan unit test murni `*.test.ts`. Modul ini hanya boleh mengimpor dari `src/core/types`. Dilarang mengimpor dari modul cabang olahraga lain.
-3. **Penyambungan via Registry (`src/core/registry`):** Kode inti aplikasi hanya boleh berinteraksi dengan modul cabang melalui registri terpusat (`registry.get(sportCode)`).
+1. **Konsol Publik (`/` atau `?view=public`):** Antarmuka penonton dan suporter madrasah yang dioptimasi untuk kecepatan baca (*read-optimized*).
+2. **Konsol Wasit Lapangan (`?view=referee`):** Tablet digital ramah sentuhan (*touchscreen-optimized*) untuk pencatatan skor, waktu, foul, kartu, dan penilaian suporter.
+3. **Konsol Admin Arena (`?view=admin`):** Pusat manajemen komisioner yang beroperasi dengan perlindungan sesi autentikasi dan tata letak simetris terpusat (`max-w-7xl mx-auto`).
 
 ---
 
-## 8.2 Struktur Direktori Proyek
+## 8.2 Struktur Direktori Proyek Sebenarnya (`/src`)
 
 ```
-/
-├─ docs/
-│  └─ prd/                    # Dokumentasi modular PRD (00-index s/d 12-master-prd)
-├─ src/
-│  ├─ core/                   # TIDAK BOLEH berisi aturan cabang tertentu
-│  │  ├─ types/               # Interface SportModule, MatchState, MatchEvent, dll.
-│  │  ├─ registry/            # Registrasi dan loader modul cabor
-│  │  ├─ standings/           # Kalkulasi klasemen + registry fungsi tie-breaker
-│  │  ├─ scheduling/          # Generator jadwal & bagan gugur
-│  │  ├─ statemachine/        # Mesin status pertandingan
-│  │  └─ events/              # Pengelolaan event, pembatalan (void), dan idempotensi
-│  ├─ sports/
-│  │  ├─ football/            # template.json, module.ts, console.tsx, football.test.ts
-│  │  ├─ futsal/              # template.json, module.ts, console.tsx, futsal.test.ts
-│  │  ├─ volleyball/          # template.json, module.ts, console.tsx, volleyball.test.ts
-│  │  ├─ badminton/           # template.json, module.ts, console.tsx, badminton.test.ts
-│  │  └─ esport/              # template.json, module.ts, console.tsx, esport.test.ts
-│  ├─ app/
-│  │  ├─ (public)/            # Rute publik bebas akses tanpa login (/c/[slug])
-│  │  ├─ admin/               # Rute dasbor pengelola turnamen (/admin/*)
-│  │  ├─ official/            # Rute konsol panitia/wasit lapangan (/official/*)
-│  │  └─ login/               # Halaman autentikasi sistem
-│  ├─ components/             # Komponen UI modular (< 400 baris per file)
-│  ├─ mocks/                  # Data uji coba terisolasi
-│  └─ lib/                    # Klien Supabase, format waktu, utilitas bersama
-└─ supabase/
-   └─ migrations/             # Skema DDL PostgreSQL + kebijakan RLS
+src/
+├─ app/
+│  ├─ api/auth/
+│  │  ├─ login/route.ts       # Endpoint autentikasi admin & wasit
+│  │  ├─ logout/route.ts      # Endpoint pembersihan cookie sesi
+│  │  └─ me/route.ts          # Pemeriksaan data pengguna aktif
+│  ├─ favicon.ico
+│  ├─ globals.css             # Desain sistem Dual Athletic Theme & token warna
+│  ├─ layout.tsx              # Root layout & deklarasi font (Teko, Bebas, Barlow)
+│  └─ page.tsx                # Rute tunggal utama pengatur peralihan 3 konsol
+├─ components/
+│  ├─ brand/
+│  │  └─ SaumaArenaLogo.tsx   # Logo resmi Sauma Arena (berbagai ukuran)
+│  ├─ layout/
+│  │  └─ Navbar.tsx           # Header utama publik + live team search
+│  ├─ public/
+│  │  ├─ PublicTournamentHeader.tsx # Hero spotlight MMFC I & athletic ticker
+│  │  ├─ PublicTabBar.tsx           # 8 Tab navigasi publik docked
+│  │  ├─ tabs/
+│  │  │  ├─ InfoTab.tsx             # Panduan, Juknis PDF, & Alur Gate
+│  │  │  ├─ LiveMatchTab.tsx        # Live score & event timeline
+│  │  │  ├─ ScheduleTab.tsx         # Jadwal 17 laga & filter grup A-D
+│  │  │  ├─ StandingsTab.tsx        # Klasemen grup resmi (aturan 3/1/0)
+│  │  │  ├─ BracketTab.tsx          # Bagan eliminasi 4 besar & grand final
+│  │  │  ├─ TeamsTab.tsx            # Profil 14 tim kontingen & atlet
+│  │  │  ├─ StatsTab.tsx            # Sepatu Emas & grafik analisis gol
+│  │  │  ├─ SupporterTab.tsx        # Leaderboard Best Supporter madrasah
+│  │  │  └─ SupporterDetailModal.tsx
+│  │  ├─ live/                      # Sub-komponen papan skor & kartu atlet
+│  │  ├─ stats/                     # Grafik batang & garis produktivitas gol
+│  │  ├─ registration/              # Modal pendaftaran kontingen 4 tahap
+│  │  └─ ticket/                    # Modal pembelian & checkout e-tiket QR
+│  ├─ referee/
+│  │  ├─ RefereeDashboard.tsx       # Root container konsol tablet wasit
+│  │  ├─ RefereeHeader.tsx          # Top bar wasit & indikator sinkron
+│  │  ├─ RefereeSidebar.tsx         # Menu samping konsol tablet
+│  │  ├─ RefereeBottomNav.tsx       # Navigasi bawah ramah jempol mobile
+│  │  ├─ RefereeDashboardHome.tsx   # Daftar laga tugas wasit hari ini
+│  │  ├─ RefereeMatchCenter.tsx     # Konsol kendali laga aktif
+│  │  ├─ RefereeSupporterScoringView.tsx # Form penilaian suporter madrasah
+│  │  ├─ RefereeSchedule.tsx        # Jadwal penugasan wasit
+│  │  ├─ RefereeRosterView.tsx      # Pemeriksaan kehadiran atlet & starter
+│  │  ├─ RefereeProfile.tsx         # Profil lisensi wasit
+│  │  ├─ steps/scoring/             # Stopwatch, papan skor, pencatat gol & foul
+│  │  └─ reports/                   # Pratinjau BAP digital & laporan insiden
+│  ├─ admin/
+│  │  ├─ AdminDashboard.tsx         # Root container admin (max-w-7xl mx-auto)
+│  │  ├─ AdminSidebar.tsx           # Sidebar navigasi modul admin
+│  │  ├─ layout/AdminHeader.tsx     # Top bar admin & tombol aksi
+│  │  ├─ common/                    # Komponen bersama (AdminPageHeaderCard, ConfirmModal)
+│  │  └─ modules/
+│  │     ├─ AdminOverviewModule.tsx # Ringkasan metrik & medal tally 1-tap
+│  │     ├─ master/                 # Manajemen kompetisi, cabor, kategori, venue
+│  │     ├─ participants/           # Verifikasi berkas NISN & ID Card QR
+│  │     ├─ matches/                # Drawing bracket, jadwal, override, verifikasi BAP
+│  │     ├─ ticketing/              # Kuota tiket & scanner QR gate stadion
+│  │     └─ system/                 # Durasi waktu, banner hero, backup/restore
+├─ config/
+│  ├─ menuConfig.ts                 # Definisi konfigurasi menu publik & admin
+│  └─ features.ts                   # Feature flags (ticketing, supporter, dll)
+├─ mocks/                           # Data sumber kebenaran turnamen MMFC I
+│  ├─ tournamentData.ts             # 17 Laga, skor, foul, kartu, & BAP
+│  ├─ mockTeams.ts                  # 14 Kontingen madrasah & roster pemain
+│  ├─ multiSportData.ts             # Klasemen perolehan medali
+│  ├─ headerConfig.ts               # Preset banner & konfigurasi hero
+│  └─ partnersData.ts               # Daftar sponsor resmi MMFC I
+└─ types/
+   └─ index.ts                      # Kontrak antarmuka TypeScript lengkap
 ```
 
 ---
 
 ## 8.3 Skema Model Data Relasional (PostgreSQL)
 
-Seluruh entitas disimpan dalam basis data PostgreSQL. Setiap tabel memiliki kolom `id uuid primary key default gen_random_uuid()`, `created_at timestamptz default now()`, dan `updated_at timestamptz default now()`.
+Berikut adalah struktur entitas database untuk mendukung seluruh alur operasional:
 
 ```sql
--- 1. PROFILES (Pengguna Terotentikasi)
+-- 1. USERS & PROFILES (Autentikasi & RBAC)
 create table profiles (
   id uuid primary key references auth.users(id) on delete cascade,
-  role text not null check (role in ('admin', 'official')),
-  display_name text not null,
+  role text not null check (role in ('superadmin', 'commissioner', 'referee', 'gate_officer')),
+  full_name text not null,
   phone text,
+  license_number text,
   is_active boolean default true,
-  created_at timestamptz default now(),
-  updated_at timestamptz default now()
-);
-
--- 2. SPORTS (Daftar Cabang Olahraga)
-create table sports (
-  code text primary key, -- misal: 'football', 'futsal', 'badminton'
-  name text not null,
-  scoring_model text not null check (scoring_model in ('timed_goals', 'rally_set', 'map_series', 'judged', 'placement_points')),
-  default_rules jsonb not null,
-  rules_version text not null default '1.0.0',
   created_at timestamptz default now()
 );
 
--- 3. COMPETITIONS (Entitas Turnamen)
+-- 2. COMPETITIONS (Entitas Turnamen MMFC I)
 create table competitions (
   id uuid primary key default gen_random_uuid(),
-  sport_code text not null references sports(code),
+  sport_code text not null default 'futsal',
   name text not null,
   slug text unique not null,
   season text not null,
-  status text not null default 'draft' check (status in ('draft', 'registration', 'ongoing', 'finished')),
-  rules_overrides jsonb default '{}'::jsonb,
-  rules_snapshot jsonb, -- dibekukan permanen saat status beralih ke 'ongoing'
-  visibility text not null default 'public' check (visibility in ('private', 'public')),
+  status text not null default 'ongoing' check (status in ('draft', 'registration', 'ongoing', 'finished')),
+  rules_snapshot jsonb not null,
+  venue_name text not null,
   start_date date not null,
   end_date date not null,
-  description text,
-  logo_url text,
-  created_at timestamptz default now(),
-  updated_at timestamptz default now()
-);
-
--- 4. STAGES (Fase Kompetisi: Grup / Gugur)
-create table stages (
-  id uuid primary key default gen_random_uuid(),
-  competition_id uuid not null references competitions(id) on delete cascade,
-  name text not null,
-  order_index int not null,
-  format text not null check (format in ('round_robin', 'single_elimination', 'group_then_knockout', 'double_elimination', 'swiss')),
-  config jsonb default '{}'::jsonb,
   created_at timestamptz default now()
 );
 
--- 5. STAGE_GROUPS (Grup Penyisihan)
-create table stage_groups (
-  id uuid primary key default gen_random_uuid(),
-  stage_id uuid not null references stages(id) on delete cascade,
-  name text not null, -- misal: 'Grup A', 'Grup B'
-  created_at timestamptz default now()
-);
-
--- 6. TEAMS (Peserta Kompetisi Generik)
+-- 3. TEAMS & CONTINGENTS (14 Kontingen Sekolah)
 create table teams (
   id uuid primary key default gen_random_uuid(),
+  competition_id uuid references competitions(id) on delete cascade,
   name text not null,
-  short_name text not null,
+  school_name text not null,
+  city text not null,
+  group_name text check (group_name in ('A', 'B', 'C', 'D')),
   logo_url text,
-  kind text not null default 'team' check (kind in ('team', 'individual', 'pair')),
-  created_at timestamptz default now(),
-  updated_at timestamptz default now()
+  coach_name text not null,
+  coach_phone text,
+  verification_status text default 'VERIFIED' check (verification_status in ('PENDING', 'VERIFIED', 'REJECTED')),
+  created_at timestamptz default now()
 );
 
--- 7. PLAYERS (Master Data Atlet)
+-- 4. PLAYERS & ATHLETES (Roster 10-12 Atlet per Tim)
 create table players (
   id uuid primary key default gen_random_uuid(),
-  team_id uuid references teams(id) on delete set null,
+  team_id uuid references teams(id) on delete cascade,
+  jersey_number integer not null,
   full_name text not null,
-  birth_date date not null, -- SENSITIF: Diblokir dari akses publik
-  gender text not null check (gender in ('M', 'F')),
+  nisn text not null,
+  position text check (position in ('GK', 'Anchor', 'Flank', 'Pivot', 'Universal')),
+  is_captain boolean default false,
   photo_url text,
-  is_active boolean default true,
-  created_at timestamptz default now()
+  created_at timestamptz default now(),
+  unique (team_id, jersey_number)
 );
 
--- 8. COMPETITION_TEAMS (Pendaftaran Tim ke Turnamen)
-create table competition_teams (
-  id uuid primary key default gen_random_uuid(),
-  competition_id uuid not null references competitions(id) on delete cascade,
-  team_id uuid not null references teams(id) on delete cascade,
-  group_id uuid references stage_groups(id) on delete set null,
-  seed int,
-  status text not null default 'approved' check (status in ('pending', 'approved', 'rejected')),
-  unique(competition_id, team_id)
-);
-
--- 9. COMPETITION_PLAYERS (Roster Pemain Turnamen)
-create table competition_players (
-  id uuid primary key default gen_random_uuid(),
-  competition_id uuid not null references competitions(id) on delete cascade,
-  team_id uuid not null references teams(id) on delete cascade,
-  player_id uuid not null references players(id) on delete cascade,
-  jersey_number int not null,
-  position text,
-  status text not null default 'eligible' check (status in ('eligible', 'suspended', 'removed')),
-  unique(competition_id, player_id)
-);
-
--- 10. VENUES (Lokasi & Lapangan)
-create table venues (
-  id uuid primary key default gen_random_uuid(),
-  name text not null,
-  address text,
-  notes text,
-  created_at timestamptz default now()
-);
-
--- 11. MATCHES (Sesi Pertandingan)
+-- 5. MATCHES (17 Pertandingan Turnamen)
 create table matches (
   id uuid primary key default gen_random_uuid(),
-  competition_id uuid not null references competitions(id) on delete cascade,
-  stage_id uuid not null references stages(id) on delete cascade,
-  group_id uuid references stage_groups(id) on delete set null,
-  round_no int not null default 1,
-  match_no int not null,
-  home_team_id uuid references teams(id),
-  away_team_id uuid references teams(id),
-  venue_id uuid references venues(id),
-  scheduled_at timestamptz not null, -- format UTC
-  status text not null default 'scheduled' check (status in (
-    'scheduled', 'lineup_confirmed', 'live', 'break', 'finished',
-    'verified', 'postponed', 'cancelled', 'walkover', 'abandoned'
-  )),
-  result jsonb default '{}'::jsonb, -- CACHE HASIL (dihitung dari events)
-  winner_team_id uuid references teams(id),
-  verified_by uuid references profiles(id),
-  verified_at timestamptz,
+  competition_id uuid references competitions(id) on delete cascade,
+  match_number integer not null,
+  stage text not null check (stage in ('GROUP', 'SEMI_FINAL', 'BRONZE', 'FINAL')),
+  group_name text,
+  team_a_id uuid references teams(id),
+  team_b_id uuid references teams(id),
+  scheduled_time timestamptz not null,
+  court_name text not null,
+  status text not null default 'SCHEDULED' check (status in ('SCHEDULED', 'LIVE', 'FINISHED', 'VERIFIED')),
+  score_team_a integer default 0,
+  score_team_b integer default 0,
+  period text default 'FIRST_HALF',
+  fouls_team_a integer default 0,
+  fouls_team_b integer default 0,
+  timeouts_team_a integer default 0,
+  timeouts_team_b integer default 0,
+  is_verified boolean default false,
   locked boolean default false,
-  next_match_id uuid references matches(id),
-  next_match_slot text check (next_match_slot in ('home', 'away')),
-  created_at timestamptz default now(),
-  updated_at timestamptz default now()
+  created_at timestamptz default now()
 );
 
--- 12. MATCH_OFFICIALS (Penugasan Perangkat Laga)
-create table match_officials (
-  id uuid primary key default gen_random_uuid(),
-  match_id uuid not null references matches(id) on delete cascade,
-  profile_id uuid not null references profiles(id) on delete cascade,
-  duty text not null check (duty in ('referee', 'scorekeeper', 'judge', 'assistant')),
-  unique(match_id, profile_id)
-);
-
--- 13. MATCH_LINEUPS (Lineup Laga)
-create table match_lineups (
-  id uuid primary key default gen_random_uuid(),
-  match_id uuid not null references matches(id) on delete cascade,
-  team_id uuid not null references teams(id) on delete cascade,
-  player_id uuid not null references players(id) on delete cascade,
-  is_starter boolean not null default true,
-  position text,
-  jersey_number int not null,
-  unique(match_id, player_id)
-);
-
--- 14. MATCH_EVENTS (SUMBER KEBENARAN PERTANDINGAN - APPEND ONLY)
+-- 6. MATCH_EVENTS (Pencatatan Gol, Kartu, & Foul per Menit)
 create table match_events (
-  id uuid not null, -- UUID dibuat di klien untuk idempotensi
-  match_id uuid not null references matches(id) on delete cascade,
-  seq int not null, -- urutan kronologis kejadian
-  type text not null,
+  id uuid primary key default gen_random_uuid(),
+  client_uuid uuid not null unique,
+  match_id uuid references matches(id) on delete cascade,
+  seq integer not null,
+  minute integer not null,
+  period text not null,
   team_id uuid references teams(id),
   player_id uuid references players(id),
-  period_no int,
-  clock_ms int,
-  payload jsonb default '{}'::jsonb,
-  created_by uuid references profiles(id),
-  created_at timestamptz default now(),
+  event_type text not null check (event_type in ('GOAL', 'FOUL', 'YELLOW_CARD', 'RED_CARD', 'TIMEOUT')),
+  sub_type text, -- 'regular', 'first_penalty', 'second_penalty_10m', 'own_goal'
   voided_at timestamptz,
-  voided_by uuid references profiles(id),
   void_reason text,
-  primary key (match_id, id),
-  unique (match_id, seq)
+  created_at timestamptz default now()
 );
 
--- 15. PROTESTS (Sengketa Laga Resmi)
-create table protests (
+-- 7. SUPPORTER_SCORES (Penilaian Tribun Suporter Madrasah)
+create table supporter_scores (
   id uuid primary key default gen_random_uuid(),
-  match_id uuid not null references matches(id) on delete cascade,
-  team_id uuid not null references teams(id),
-  reason text not null,
-  status text not null default 'open' check (status in ('open', 'accepted', 'rejected')),
-  resolution text,
-  resolved_by uuid references profiles(id),
-  created_at timestamptz default now(),
-  updated_at timestamptz default now()
+  competition_id uuid references competitions(id) on delete cascade,
+  team_id uuid references teams(id) on delete cascade,
+  ticket_points integer default 0,
+  creativity_points integer default 0,
+  penalty_points integer default 0,
+  total_score integer generated always as (ticket_points + creativity_points - penalty_points) stored,
+  notes text,
+  evaluated_by uuid references profiles(id),
+  created_at timestamptz default now()
 );
 
--- 16. AUDIT_LOGS (Perekam Jejak Perubahan Administratif)
-create table audit_logs (
+-- 8. TICKETS (E-Tiket & Scanner Gate Pintu Masuk)
+create table tickets (
   id uuid primary key default gen_random_uuid(),
-  actor_id uuid references profiles(id),
-  action text not null,
-  entity text not null,
-  entity_id text not null,
-  before jsonb,
-  after jsonb,
-  reason text,
+  booking_code text unique not null,
+  buyer_name text not null,
+  buyer_phone text not null,
+  team_id uuid references teams(id), -- jika tiket rombongan suporter
+  quantity integer not null default 1,
+  status text not null default 'ISSUED' check (status in ('ISSUED', 'CHECKED_IN', 'CANCELLED')),
+  checked_in_at timestamptz,
+  checked_in_by uuid references profiles(id),
+  gate_name text check (gate_name in ('Gate Barat (VIP/Atlet)', 'Gate Timur 1 (Suporter)', 'Gate Timur 2 (Umum)')),
   created_at timestamptz default now()
 );
 ```
-
----
-
-## 8.4 Kebijakan Keamanan Row Level Security (RLS)
-
-1. **Akses Publik (Anonim):**
-   - Hanya diizinkan melakukan operasi `SELECT` pada kompetisi dengan status `visibility = 'public'` beserta pertandingan, tim, dan event yang berelasi dengannya.
-   - Kolom sensitif atlet (`players.birth_date`, `profiles.phone`) tidak diekspos melalui kebijakan RLS kolom / PostgreSQL View publik.
-
-2. **Akses Panitia Lapangan (`official`):**
-   - Hanya dapat membaca pertandingan yang terdapat dalam penugasan `match_officials` miliknya.
-   - Hanya dapat melakukan `INSERT` pada tabel `match_events` untuk laga yang berstatus `live` atau `break`.
-   - Dilarang keras melakukan `UPDATE` atau `DELETE` pada isi event yang telah tersimpan (kecuali mengisi kolom `voided_*`).
-
-3. **Akses Administrator (`admin`):**
-   - Memiliki hak akses penuh (`ALL`) untuk seluruh tabel operasional, audit log, dan eksekusi penguncian hasil (`verified`).

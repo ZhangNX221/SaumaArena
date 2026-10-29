@@ -3,8 +3,38 @@ import { authenticateUser, signToken } from '@/lib/auth';
 import { run } from '@/db/sqlite';
 import { randomUUID } from 'node:crypto';
 
+// Rate limiter in-memory untuk mitigasi Brute Force / Credential Stuffing (hunt-brute-force)
+const loginAttempts = new Map<string, { count: number; resetAt: number }>();
+const MAX_ATTEMPTS = 10;
+const WINDOW_MS = 60 * 1000; // 1 menit
+
+function checkRateLimit(ip: string): boolean {
+  const now = Date.now();
+  const record = loginAttempts.get(ip);
+  if (!record || now > record.resetAt) {
+    loginAttempts.set(ip, { count: 1, resetAt: now + WINDOW_MS });
+    return true;
+  }
+  if (record.count >= MAX_ATTEMPTS) {
+    return false;
+  }
+  record.count += 1;
+  return true;
+}
+
 export async function POST(request: Request) {
   try {
+    const ip = request.headers.get('x-forwarded-for')?.split(',')[0].trim() || '127.0.0.1';
+    if (!checkRateLimit(ip)) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Terlalu banyak percobaan masuk. Mohon tunggu 1 menit sebelum mencoba kembali (Rate limit exceeded).',
+        },
+        { status: 429 }
+      );
+    }
+
     const body = await request.json();
     const { username, password, role } = body;
 
@@ -22,6 +52,9 @@ export async function POST(request: Request) {
         { status: authResult.statusCode || 401 }
       );
     }
+
+    // Reset rate limit on success
+    loginAttempts.delete(ip);
 
     const user = authResult.user;
 

@@ -1,44 +1,38 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Clock, MapPin, ChevronRight, Play, Calendar } from 'lucide-react';
+import {
+  Calendar,
+  Clock,
+  MapPin,
+  ChevronRight,
+  Play,
+} from 'lucide-react';
+import { AppUser, RefereeMatchDuty } from '@/types';
 import { REFEREE_DUTIES } from '@/mocks/multiSportData';
-import { initialMatches } from '@/mocks/tournamentData';
-import { RefereeMatchDuty, AppUser, Match } from '@/types';
 import { usePersistentState } from '@/hooks/usePersistentState';
 
 interface RefereeScheduleProps {
-  onSelectDutyMatch: (duty: RefereeMatchDuty) => void;
-  user?: AppUser;
-  initialTab?: 'TODAY' | 'UPCOMING' | 'HISTORY';
+  user: AppUser;
+  initialTab?: 'TODAY' | 'UPCOMING' | 'HISTORY' | string;
+  onSelectDutyMatch: (match: RefereeMatchDuty) => void;
 }
 
 export const RefereeSchedule: React.FC<RefereeScheduleProps> = ({
-  onSelectDutyMatch,
   user,
   initialTab = 'TODAY',
+  onSelectDutyMatch,
 }) => {
-  const [activeSegment, setActiveSegment] = useState<'TODAY' | 'UPCOMING' | 'HISTORY'>(initialTab);
-
   const [duties] = usePersistentState<RefereeMatchDuty[]>('sauma_arena_duties', REFEREE_DUTIES);
-  const [matches] = usePersistentState<Match[]>('sauma_arena_matches', initialMatches);
-
-  const myDuties = user
-    ? duties.filter(
-        (d) => d.refereeId === user.id || user.assignedMatchIds?.includes(d.matchId)
-      )
-    : duties;
-
-  const activeDuties = myDuties.length > 0 ? myDuties : duties;
-
-  // Filter based on 3 tabs: Hari Ini, Mendatang, Selesai
-  const todayDuties = activeDuties.filter(
-    (d) => d.status === 'LIVE' || d.time.includes('Hari Ini') || d.time.includes('14:00') || d.time.includes('10:00')
+  const [activeSegment, setActiveSegment] = useState<'TODAY' | 'UPCOMING' | 'HISTORY'>(
+    initialTab === 'UPCOMING' ? 'UPCOMING' : initialTab === 'HISTORY' ? 'HISTORY' : 'TODAY'
   );
-  const upcomingDuties = activeDuties.filter(
-    (d) => d.status === 'UPCOMING' || d.time.includes('Besok') || d.time.includes('16:30')
+
+  const todayDuties = duties.filter(
+    (d) => d.time.includes('Hari Ini') || (d.status as string) === 'LIVE' || d.matchNumber <= 10
   );
-  const historyDuties = activeDuties.filter((d) => d.status === 'COMPLETED');
+  const upcomingDuties = duties.filter((d) => d.status === 'UPCOMING');
+  const historyDuties = duties.filter((d) => d.status === 'COMPLETED');
 
   const displayedDuties =
     activeSegment === 'TODAY'
@@ -49,8 +43,8 @@ export const RefereeSchedule: React.FC<RefereeScheduleProps> = ({
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto pb-16 animate-fadeIn">
-      {/* 1. Header Banner - Quieter: Crisp 1px border, calm background */}
-      <div className="p-6 sm:p-7 rounded-2xl bg-[#0D1E30] text-white border border-[#1C3B5B] transition-all duration-200">
+      {/* 1. Header Banner - Crisp border, athletic dark pitch broadcast header */}
+      <div className="p-6 sm:p-7 rounded-2xl bg-[#071F14] text-white border border-emerald-900/40 shadow-xs transition-all duration-200">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-5">
           <div className="space-y-1">
             <h1 className="font-bebas text-3xl sm:text-4xl tracking-wide uppercase text-white leading-none">
@@ -62,13 +56,13 @@ export const RefereeSchedule: React.FC<RefereeScheduleProps> = ({
           </div>
 
           {/* 3-Tab Segmented Filter: Hari Ini | Mendatang | Selesai */}
-          <div className="flex items-center gap-1 p-1 rounded-xl bg-[#07131F] border border-[#1C3B5B] shrink-0">
+          <div className="flex items-center gap-1 p-1 rounded-xl bg-[#04120C] border border-[#143D28] shrink-0">
             <button
               type="button"
               onClick={() => setActiveSegment('TODAY')}
-              className={`btn-tactile px-4 py-2 rounded-lg font-barlow font-bold uppercase tracking-wider text-xs transition-all duration-150 active:scale-[0.98] ${
+              className={`btn-tactile px-4 py-2 rounded-lg font-barlow font-bold uppercase tracking-wider text-xs transition-all duration-150 active:scale-[0.98] cursor-pointer ${
                 activeSegment === 'TODAY'
-                  ? 'bg-[#2563EB] text-white'
+                  ? 'bg-[var(--color-arena-primary)] text-white shadow-xs'
                   : 'text-slate-400 hover:text-white'
               }`}
             >
@@ -77,9 +71,9 @@ export const RefereeSchedule: React.FC<RefereeScheduleProps> = ({
             <button
               type="button"
               onClick={() => setActiveSegment('UPCOMING')}
-              className={`btn-tactile px-4 py-2 rounded-lg font-barlow font-bold uppercase tracking-wider text-xs transition-all duration-150 active:scale-[0.98] ${
+              className={`btn-tactile px-4 py-2 rounded-lg font-barlow font-bold uppercase tracking-wider text-xs transition-all duration-150 active:scale-[0.98] cursor-pointer ${
                 activeSegment === 'UPCOMING'
-                  ? 'bg-[#2563EB] text-white'
+                  ? 'bg-[var(--color-arena-primary)] text-white shadow-xs'
                   : 'text-slate-400 hover:text-white'
               }`}
             >
@@ -88,9 +82,9 @@ export const RefereeSchedule: React.FC<RefereeScheduleProps> = ({
             <button
               type="button"
               onClick={() => setActiveSegment('HISTORY')}
-              className={`btn-tactile px-4 py-2 rounded-lg font-barlow font-bold uppercase tracking-wider text-xs transition-all duration-150 active:scale-[0.98] ${
+              className={`btn-tactile px-4 py-2 rounded-lg font-barlow font-bold uppercase tracking-wider text-xs transition-all duration-150 active:scale-[0.98] cursor-pointer ${
                 activeSegment === 'HISTORY'
-                  ? 'bg-[#2563EB] text-white'
+                  ? 'bg-[var(--color-arena-primary)] text-white shadow-xs'
                   : 'text-slate-400 hover:text-white'
               }`}
             >
@@ -100,7 +94,7 @@ export const RefereeSchedule: React.FC<RefereeScheduleProps> = ({
         </div>
       </div>
 
-      {/* 2. Duty Match List - Distilled & Animate */}
+      {/* 2. Duty Match List */}
       <div className="space-y-3">
         {displayedDuties.length === 0 ? (
           <div className="p-10 text-center rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] space-y-2">
@@ -123,14 +117,14 @@ export const RefereeSchedule: React.FC<RefereeScheduleProps> = ({
                 <div className="flex flex-wrap items-center gap-2">
                   <span
                     className={`px-2.5 py-0.5 rounded-md text-[10px] font-barlow font-bold uppercase tracking-wider ${
-                      duty.status === 'LIVE'
+                      (duty.status as string) === 'LIVE'
                         ? 'bg-red-500/15 text-red-600 dark:text-red-400 font-bold'
                         : duty.status === 'COMPLETED'
                         ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 font-bold'
-                        : 'bg-[var(--color-arena-primary)]/10 text-[var(--color-arena-primary)]'
+                        : 'bg-[var(--color-arena-primary-light)] text-[var(--color-arena-primary)]'
                     }`}
                   >
-                    {duty.status === 'LIVE' ? 'Sedang Berjalan' : duty.status === 'COMPLETED' ? 'Selesai & BAP Sah' : 'Terjadwal'}
+                    {(duty.status as string) === 'LIVE' ? 'Sedang Berjalan' : duty.status === 'COMPLETED' ? 'Selesai & BAP Sah' : 'Terjadwal'}
                   </span>
                   <span className="font-mono font-bold text-xs text-[var(--color-arena-primary)]">
                     Laga #{duty.matchNumber}
@@ -167,7 +161,7 @@ export const RefereeSchedule: React.FC<RefereeScheduleProps> = ({
                 <button
                   type="button"
                   onClick={() => onSelectDutyMatch(duty)}
-                  className="btn-tactile px-4 py-2.5 rounded-xl bg-[var(--color-arena-primary)] hover:bg-[var(--color-arena-primary-hover)] active:scale-[0.98] text-white text-xs font-barlow font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-all duration-150 shrink-0 min-h-[42px]"
+                  className="btn-tactile px-4 py-2.5 rounded-xl bg-[var(--color-arena-primary)] hover:bg-[var(--color-arena-primary-hover)] active:scale-[0.98] text-white text-xs font-barlow font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-all duration-150 shrink-0 min-h-[42px] cursor-pointer"
                 >
                   <Play className="w-3.5 h-3.5 fill-current" />
                   <span>Buka Meja Laga</span>

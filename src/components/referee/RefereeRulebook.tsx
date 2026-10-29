@@ -29,7 +29,7 @@ export const RefereeRulebook: React.FC<RefereeRulebookProps> = ({ user, sport })
   return (
     <div className="space-y-6 max-w-5xl mx-auto pb-16 animate-fadeIn">
       {/* 1. Header Banner */}
-      <div className="p-6 sm:p-7 rounded-2xl bg-[#0D1E30] text-white border border-[#1C3B5B] transition-all duration-200">
+      <div className="p-6 sm:p-7 rounded-2xl bg-[#071F14] text-white border border-emerald-900/40 shadow-xs transition-all duration-200">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-5">
           <div className="space-y-1">
             <h1 className="font-bebas text-3xl sm:text-4xl tracking-wide uppercase text-white leading-none">
@@ -43,9 +43,9 @@ export const RefereeRulebook: React.FC<RefereeRulebookProps> = ({ user, sport })
           </div>
 
           <div className="flex items-center gap-3 shrink-0">
-            <div className="px-3.5 py-2 rounded-xl bg-[#07131F] border border-[#1C3B5B] text-left">
-              <div className="text-[10px] font-barlow font-bold uppercase tracking-wider text-[#F6AE2D] flex items-center gap-1.5">
-                <ShieldCheck className="w-3.5 h-3.5 text-[#F6AE2D]" />
+            <div className="px-3.5 py-2 rounded-xl bg-[#04120C] border border-[#143D28] text-left">
+              <div className="text-[10px] font-barlow font-bold uppercase tracking-wider text-[var(--color-arena-accent)] flex items-center gap-1.5">
+                <ShieldCheck className="w-3.5 h-3.5 text-[var(--color-arena-accent)]" />
                 <span>Spesialisasi Lapangan</span>
               </div>
               <div className="text-xs font-mono font-bold text-white mt-0.5">
@@ -56,11 +56,11 @@ export const RefereeRulebook: React.FC<RefereeRulebookProps> = ({ user, sport })
         </div>
       </div>
 
-      {/* 2. Kartu Cepat Meja Wasit - Rapi, Lega & Tanpa Teks Terpotong */}
+      {/* 2. Kartu Cepat Meja Wasit */}
       <div className="space-y-3.5">
         <div className="flex items-center justify-between px-1">
           <div className="flex items-center gap-2">
-            <Zap className="w-4 h-4 text-[#F6AE2D]" />
+            <Zap className="w-4 h-4 text-[var(--color-arena-accent)]" />
             <h2 className="font-bebas text-xl sm:text-2xl text-[var(--text-main)] uppercase tracking-wide">
               Rujukan Cepat Lapangan
             </h2>
@@ -147,7 +147,7 @@ export const RefereeRulebook: React.FC<RefereeRulebookProps> = ({ user, sport })
                     <button
                       type="button"
                       onClick={() => setSelectedRuleForModal(article)}
-                      className="btn-tactile px-3.5 py-1.5 rounded-xl border border-[var(--border-subtle)] group-hover:border-[var(--color-arena-primary)] bg-[var(--bg-surface)] hover:bg-[var(--color-arena-primary)] hover:text-white text-[var(--text-main)] text-xs font-barlow font-bold uppercase tracking-wider inline-flex items-center gap-1.5 transition-all shadow-xs"
+                      className="btn-tactile px-3.5 py-1.5 rounded-xl border border-[var(--border-subtle)] group-hover:border-[var(--color-arena-primary)] bg-[var(--bg-surface)] hover:bg-[var(--color-arena-primary)] hover:text-white text-[var(--text-main)] text-xs font-barlow font-bold uppercase tracking-wider inline-flex items-center gap-1.5 transition-all shadow-xs cursor-pointer"
                       aria-label={`Buka detail ${article.title}`}
                     >
                       <Eye className="w-3.5 h-3.5" />

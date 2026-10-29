@@ -4,6 +4,7 @@ export type MatchStatus =
   | 'live'
   | 'break'
   | 'finished'
+  | 'bap_signed'
   | 'verified'
   | 'postponed'
   | 'cancelled'
@@ -42,11 +43,17 @@ const TRANSITIONS: Record<MatchStatus, Partial<Record<MatchStatus, TransitionRul
     abandoned: { allowedRoles: ['admin', 'official'], requiresReason: true },
   },
   finished: {
+    bap_signed: { allowedRoles: ['admin', 'official'] },
     verified: { allowedRoles: ['admin'] },
     live: { allowedRoles: ['admin'], requiresReason: true }, // emergency reopen
   },
+  bap_signed: {
+    verified: { allowedRoles: ['admin'] },
+    finished: { allowedRoles: ['admin', 'official'], requiresReason: true }, // emergency return
+  },
   verified: {
     finished: { allowedRoles: ['admin'], requiresReason: true }, // emergency unlock
+    bap_signed: { allowedRoles: ['admin'], requiresReason: true },
   },
   postponed: {
     scheduled: { allowedRoles: ['admin'] },

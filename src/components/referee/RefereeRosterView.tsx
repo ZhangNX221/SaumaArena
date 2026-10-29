@@ -1,24 +1,21 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
-import { 
-  UserCheck, 
-  CheckCircle2, 
-  QrCode, 
-  Check, 
-  Search, 
-  X, 
-  RotateCcw, 
+import {
+  UserCheck,
+  CheckCircle2,
+  Search,
+  Filter,
+  Check,
+  QrCode,
   ArrowRight,
-  ShieldCheck,
-  Filter
 } from 'lucide-react';
-import { AthleteIdCard, Match, AppUser } from '@/types';
+import { AppUser, Match, AthleteIdCard } from '@/types';
 import { ATHLETE_ID_CARDS } from '@/mocks/multiSportData';
 import { usePersistentState } from '@/hooks/usePersistentState';
 
 interface RefereeRosterViewProps {
-  user?: AppUser;
+  user: AppUser;
   currentMatch?: Match;
   onGoToScoring?: () => void;
 }
@@ -28,64 +25,61 @@ export const RefereeRosterView: React.FC<RefereeRosterViewProps> = ({
   currentMatch,
   onGoToScoring,
 }) => {
-  const [roster, setRoster] = usePersistentState<AthleteIdCard[]>('sauma_arena_athletes', ATHLETE_ID_CARDS);
+  const [roster, setRoster] = usePersistentState<AthleteIdCard[]>(
+    'sauma_arena_athletes_roster',
+    ATHLETE_ID_CARDS
+  );
+
+  const [statusFilter, setStatusFilter] = useState<'ALL' | 'CHECKED_IN' | 'NOT_YET'>('ALL');
   const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState<'ALL' | 'CHECKED' | 'UNCHECKED'>('ALL');
-  const [scanNotice, setScanNotice] = useState<string | null>(null);
+  const [feedbackNotice, setFeedbackNotice] = useState<string | null>(null);
 
-  // Hitungan kehadiran
-  const checkedCount = roster.filter((r) => r.checkedIn).length;
-  const uncheckCount = roster.length - checkedCount;
-
-  // Toggle satu pemain
   const handleToggleCheckIn = (id: string, name: string) => {
     setRoster((prev) =>
       prev.map((a) => {
         if (a.id === id) {
-          const next = !a.checkedIn;
-          setScanNotice(
-            next
-              ? `Pemain diverifikasi hadir: ${name}`
-              : `Status kehadiran dibatalkan: ${name}`
+          const updated = !a.checkedIn;
+          setFeedbackNotice(
+            updated
+              ? `✓ Atlet ${name} terverifikasi hadir.`
+              : `Status kehadiran ${name} dibatalkan.`
           );
-          return { ...a, checkedIn: next };
+          setTimeout(() => setFeedbackNotice(null), 3000);
+          return { ...a, checkedIn: updated };
         }
         return a;
       })
     );
-    setTimeout(() => setScanNotice(null), 3000);
   };
 
-  // Tandai semua hadir
-  const handleCheckAll = () => {
-    setRoster((prev) => prev.map((a) => ({ ...a, checkedIn: true })));
-    setScanNotice('Semua pemain (10 orang) berhasil ditandai hadir.');
-    setTimeout(() => setScanNotice(null), 3000);
+  const handleMarkAllMatchAthletes = () => {
+    setRoster((prev) =>
+      prev.map((a) => ({
+        ...a,
+        checkedIn: true,
+      }))
+    );
+    setFeedbackNotice('Semua atlet dalam daftar telah ditandai hadir.');
+    setTimeout(() => setFeedbackNotice(null), 3000);
   };
 
-  // Reset semua kehadiran
-  const handleResetAll = () => {
-    setRoster((prev) => prev.map((a) => ({ ...a, checkedIn: false })));
-    setScanNotice('Daftar kehadiran di-reset. Semua pemain belum hadir.');
-    setTimeout(() => setScanNotice(null), 3000);
-  };
+  const checkedCount = useMemo(() => roster.filter((a) => a.checkedIn).length, [roster]);
 
-  // Filter daftar pemain
   const filteredRoster = useMemo(() => {
-    return roster.filter((athlete) => {
+    return roster.filter((a) => {
       const matchStatus =
-        statusFilter === 'ALL' ||
-        (statusFilter === 'CHECKED' && athlete.checkedIn) ||
-        (statusFilter === 'UNCHECKED' && !athlete.checkedIn);
+        statusFilter === 'ALL'
+          ? true
+          : statusFilter === 'CHECKED_IN'
+          ? a.checkedIn
+          : !a.checkedIn;
 
       const q = searchQuery.toLowerCase().trim();
-      if (!q) return matchStatus;
-
       const matchQuery =
-        athlete.name.toLowerCase().includes(q) ||
-        athlete.contingent.toLowerCase().includes(q) ||
-        athlete.qrCode.toLowerCase().includes(q) ||
-        athlete.athleteId.toLowerCase().includes(q);
+        !q ||
+        a.name.toLowerCase().includes(q) ||
+        a.contingent.toLowerCase().includes(q) ||
+        a.athleteId.toLowerCase().includes(q);
 
       return matchStatus && matchQuery;
     });
@@ -94,16 +88,16 @@ export const RefereeRosterView: React.FC<RefereeRosterViewProps> = ({
   return (
     <div className="space-y-6 max-w-5xl mx-auto pb-16 animate-fadeIn">
       {/* 1. Header Banner */}
-      <div className="p-6 sm:p-7 rounded-2xl bg-[#0D1E30] text-white border border-[#1C3B5B] transition-all duration-200 shadow-xs">
+      <div className="p-6 sm:p-7 rounded-2xl bg-[#071F14] text-white border border-emerald-900/40 shadow-xs transition-all duration-200">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-5">
           <div className="space-y-1.5">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#13273D] border border-[#1C3B5B] text-[#F6AE2D] text-[10px] font-barlow font-bold uppercase tracking-wider">
-                <UserCheck className="w-3 h-3 text-[#F6AE2D]" />
+              <span className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#04120C] border border-[#143D28] text-[var(--color-arena-accent)] text-[10px] font-barlow font-bold uppercase tracking-wider">
+                <UserCheck className="w-3 h-3 text-[var(--color-arena-accent)]" />
                 <span>Pemeriksaan Meja Wasit</span>
               </span>
               {currentMatch && (
-                <span className="text-xs font-mono font-bold text-white/80 px-2.5 py-0.5 rounded-md bg-[#07131F] border border-[#1C3B5B]">
+                <span className="text-xs font-mono font-bold text-white/80 px-2.5 py-0.5 rounded-md bg-[#04120C] border border-[#143D28]">
                   Laga #{currentMatch.matchNumber} &bull; {currentMatch.courtName || 'Lapangan Utama'}
                 </span>
               )}
@@ -118,7 +112,7 @@ export const RefereeRosterView: React.FC<RefereeRosterViewProps> = ({
           </div>
 
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 shrink-0">
-            <div className="px-4 py-2 rounded-xl bg-[#07131F] border border-[#1C3B5B] text-left min-w-[140px]">
+            <div className="px-4 py-2 rounded-xl bg-[#04120C] border border-[#143D28] text-left min-w-[140px]">
               <div className="text-[10px] font-barlow font-bold uppercase tracking-wider text-slate-400">
                 Total Kehadiran
               </div>
@@ -131,7 +125,7 @@ export const RefereeRosterView: React.FC<RefereeRosterViewProps> = ({
               <button
                 type="button"
                 onClick={onGoToScoring}
-                className="btn-tactile px-4 py-2.5 rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] active:scale-95 text-white text-xs font-barlow font-bold uppercase tracking-wider flex items-center gap-2 transition-all shadow-xs"
+                className="btn-tactile px-4 py-2.5 rounded-xl bg-[var(--color-arena-primary)] hover:bg-[var(--color-arena-primary-hover)] active:scale-95 text-white text-xs font-barlow font-bold uppercase tracking-wider flex items-center gap-2 transition-all shadow-xs cursor-pointer"
               >
                 <span>Catat Skor Laga</span>
                 <ArrowRight className="w-4 h-4" />
@@ -141,122 +135,110 @@ export const RefereeRosterView: React.FC<RefereeRosterViewProps> = ({
         </div>
       </div>
 
-      {/* 2. Feedback Toast Notification */}
-      {scanNotice && (
-        <div className="p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/25 text-xs sm:text-sm font-medium text-emerald-800 dark:text-emerald-300 flex items-center gap-2.5 animate-fadeIn font-sans">
-          <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-          <span>{scanNotice}</span>
+      {/* Feedback Toast */}
+      {feedbackNotice && (
+        <div className="p-3.5 rounded-xl bg-[var(--color-arena-primary-light)] text-[var(--color-arena-primary)] border border-[var(--color-arena-primary)]/20 font-semibold text-xs flex items-center gap-2 animate-fadeIn">
+          <CheckCircle2 className="w-4 h-4 shrink-0 text-[var(--color-arena-primary)]" />
+          <span>{feedbackNotice}</span>
         </div>
       )}
 
-      {/* 3. Toolbar: Search, Status Filter & Mass Action Buttons */}
-      <div className="space-y-3">
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-          {/* Search Box */}
-          <div className="relative flex-1">
-            <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-faint)]" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Cari nama pemain, madrasah / tim, atau kode ID..."
-              className="w-full pl-10 pr-9 py-2.5 text-xs sm:text-sm rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] text-[var(--text-main)] placeholder:text-[var(--text-faint)] focus:outline-none focus:border-[var(--color-arena-primary)] transition-all font-sans shadow-xs"
-            />
-            {searchQuery && (
-              <button
-                type="button"
-                onClick={() => setSearchQuery('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-md text-[var(--text-muted)] hover:text-[var(--text-main)]"
-                aria-label="Bersihkan pencarian"
-              >
-                <X className="w-3.5 h-3.5" />
-              </button>
-            )}
-          </div>
-
-          {/* Mass Action Buttons */}
-          <div className="flex items-center gap-2 shrink-0">
-            <button
-              type="button"
-              onClick={handleCheckAll}
-              className="btn-tactile px-3.5 py-2.5 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] hover:bg-[var(--bg-muted)] text-[var(--text-main)] text-xs font-barlow font-bold uppercase tracking-wider inline-flex items-center gap-1.5 transition-all shadow-xs"
-            >
-              <Check className="w-3.5 h-3.5 text-emerald-500" />
-              <span>Semua Hadir</span>
-            </button>
-            <button
-              type="button"
-              onClick={handleResetAll}
-              className="btn-tactile px-3.5 py-2.5 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] hover:bg-[var(--bg-muted)] text-[var(--text-muted)] hover:text-red-500 text-xs font-barlow font-bold uppercase tracking-wider inline-flex items-center gap-1.5 transition-all shadow-xs"
-            >
-              <RotateCcw className="w-3.5 h-3.5" />
-              <span>Reset</span>
-            </button>
-          </div>
+      {/* 2. Control Toolbar */}
+      <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
+        {/* Search */}
+        <div className="relative flex-1 max-w-md">
+          <Search className="w-4 h-4 text-[var(--text-muted)] absolute left-3.5 top-1/2 -translate-y-1/2" />
+          <input
+            type="text"
+            placeholder="Cari nama atlet, tim, atau ID berkas..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-10 pr-4 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] text-xs text-[var(--text-main)] placeholder:text-[var(--text-faint)] focus:border-[var(--color-arena-primary)] transition-colors min-h-[42px]"
+          />
         </div>
 
-        {/* Status Filter Pills */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
-          {[
-            { key: 'ALL' as const, label: `Semua Pemain (${roster.length})` },
-            { key: 'CHECKED' as const, label: `Hadir (${checkedCount})` },
-            { key: 'UNCHECKED' as const, label: `Belum Hadir (${uncheckCount})` },
-          ].map((pill) => {
-            const isActive = statusFilter === pill.key;
-            return (
-              <button
-                key={pill.key}
-                type="button"
-                onClick={() => setStatusFilter(pill.key)}
-                className={`btn-tactile px-3.5 py-1.5 rounded-xl text-xs font-barlow font-bold uppercase tracking-wider whitespace-nowrap transition-all duration-150 active:scale-95 shadow-xs ${
-                  isActive
-                    ? 'bg-[var(--color-arena-primary)] text-white'
-                    : 'bg-[var(--bg-surface)] border border-[var(--border-subtle)] text-[var(--text-muted)] hover:bg-[var(--bg-muted)] hover:text-[var(--text-main)]'
-                }`}
-              >
-                {pill.label}
-              </button>
-            );
-          })}
+        {/* Filters & Actions */}
+        <div className="flex flex-wrap items-center gap-2">
+          {/* Status Tabs */}
+          <div className="flex items-center gap-1 p-1 rounded-xl bg-[var(--bg-muted)] border border-[var(--border-subtle)]">
+            <button
+              type="button"
+              onClick={() => setStatusFilter('ALL')}
+              className={`btn-tactile px-3 py-1.5 rounded-lg text-xs font-barlow font-bold uppercase tracking-wider transition-colors cursor-pointer ${
+                statusFilter === 'ALL'
+                  ? 'bg-[var(--bg-surface)] text-[var(--text-main)] shadow-xs'
+                  : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'
+              }`}
+            >
+              Semua ({roster.length})
+            </button>
+            <button
+              type="button"
+              onClick={() => setStatusFilter('CHECKED_IN')}
+              className={`btn-tactile px-3 py-1.5 rounded-lg text-xs font-barlow font-bold uppercase tracking-wider transition-colors cursor-pointer ${
+                statusFilter === 'CHECKED_IN'
+                  ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 font-bold'
+                  : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'
+              }`}
+            >
+              Hadir ({checkedCount})
+            </button>
+            <button
+              type="button"
+              onClick={() => setStatusFilter('NOT_YET')}
+              className={`btn-tactile px-3 py-1.5 rounded-lg text-xs font-barlow font-bold uppercase tracking-wider transition-colors cursor-pointer ${
+                statusFilter === 'NOT_YET'
+                  ? 'bg-amber-500/15 text-amber-700 dark:text-amber-400 font-bold'
+                  : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'
+              }`}
+            >
+              Belum ({roster.length - checkedCount})
+            </button>
+          </div>
+
+          <button
+            type="button"
+            onClick={handleMarkAllMatchAthletes}
+            className="btn-tactile px-3.5 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] hover:bg-[var(--bg-muted)] text-[var(--text-main)] text-xs font-barlow font-bold uppercase tracking-wider transition-all flex items-center gap-1.5 min-h-[42px] cursor-pointer"
+          >
+            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
+            <span>Tandai Semua Hadir</span>
+          </button>
         </div>
       </div>
 
-      {/* 4. Tabel Susunan Pemain Resmi */}
-      <div className="space-y-3">
-        <div className="flex items-center justify-between text-xs text-[var(--text-muted)] px-1">
-          <span className="font-sans">
-            Menampilkan <strong className="text-[var(--text-main)]">{filteredRoster.length}</strong> dari {roster.length} pemain
-          </span>
-        </div>
-
+      {/* 3. Athletes Roster Table */}
+      <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] overflow-hidden shadow-xs">
         {filteredRoster.length === 0 ? (
-          <div className="p-10 text-center rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] space-y-2">
-            <Filter className="w-7 h-7 text-[var(--text-faint)] mx-auto" />
-            <h3 className="font-bebas text-lg text-[var(--text-main)] uppercase tracking-wide">
-              Tidak Ada Pemain yang Cocok
-            </h3>
+          <div className="p-12 text-center space-y-2">
+            <Filter className="w-8 h-8 text-[var(--text-faint)] mx-auto opacity-50" />
+            <h4 className="font-bebas text-lg text-[var(--text-main)] uppercase tracking-wide">
+              Tidak Ada Atlet Ditemukan
+            </h4>
             <p className="text-xs text-[var(--text-muted)] max-w-sm mx-auto font-sans">
-              Coba gunakan kata kunci pencarian lain atau pilih filter status &quot;Semua Pemain&quot;.
+              Tidak ada atlet yang cocok dengan filter atau kata kunci pencarian yang dimasukkan.
             </p>
           </div>
         ) : (
-          <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] overflow-x-auto shadow-xs">
-            <table className="w-full text-left text-xs min-w-[680px]">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs min-w-[700px]">
               <thead className="bg-[var(--bg-muted)]/70 text-[var(--text-muted)] uppercase text-[11px] font-barlow font-bold tracking-wider border-b border-[var(--border-subtle)]">
                 <tr>
                   <th className="py-3.5 px-4 w-12 text-center">No</th>
-                  <th className="py-3.5 px-4">Nama Pemain &amp; Kategori</th>
-                  <th className="py-3.5 px-4">Tim / Madrasah</th>
-                  <th className="py-3.5 px-4">Kode ID &amp; QR</th>
-                  <th className="py-3.5 px-4 text-center w-36">Status Kehadiran</th>
-                  <th className="py-3.5 px-4 text-right w-36">Aksi Wasit</th>
+                  <th className="py-3.5 px-4">Nama Atlet &amp; Cabor</th>
+                  <th className="py-3.5 px-4">Kontingen / Sekolah</th>
+                  <th className="py-3.5 px-4">Kode QR ID</th>
+                  <th className="py-3.5 px-4 text-center">Status Verifikasi</th>
+                  <th className="py-3.5 px-4 text-right">Aksi Meja</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[var(--border-subtle)] font-medium text-[var(--text-main)]">
                 {filteredRoster.map((athlete, index) => (
                   <tr
                     key={athlete.id}
-                    className="hover:bg-[var(--bg-muted)]/40 transition-colors group"
+                    className={`hover:bg-[var(--bg-muted)]/30 transition-colors ${
+                      athlete.checkedIn ? 'bg-emerald-500/5' : ''
+                    }`}
                   >
                     {/* No */}
                     <td className="py-3.5 px-4 text-center font-mono text-[var(--text-muted)]">
@@ -266,7 +248,7 @@ export const RefereeRosterView: React.FC<RefereeRosterViewProps> = ({
                     {/* Atlet */}
                     <td className="py-3.5 px-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-xl bg-[#07131F] text-[#F6AE2D] border border-[#1C3B5B] flex items-center justify-center font-bebas text-sm shrink-0">
+                        <div className="w-9 h-9 rounded-xl bg-[#04120C] text-[var(--color-arena-accent)] border border-[#143D28] flex items-center justify-center font-bebas text-sm shrink-0">
                           {athlete.name.charAt(0)}
                         </div>
                         <div className="min-w-0">
@@ -317,10 +299,10 @@ export const RefereeRosterView: React.FC<RefereeRosterViewProps> = ({
                       <button
                         type="button"
                         onClick={() => handleToggleCheckIn(athlete.id, athlete.name)}
-                        className={`btn-tactile px-3.5 py-1.5 rounded-xl text-xs font-barlow font-bold uppercase tracking-wider inline-flex items-center gap-1.5 transition-all shadow-xs ${
+                        className={`btn-tactile px-3.5 py-1.5 rounded-xl text-xs font-barlow font-bold uppercase tracking-wider inline-flex items-center gap-1.5 transition-all shadow-xs cursor-pointer ${
                           athlete.checkedIn
                             ? 'bg-[var(--bg-muted)] hover:bg-red-500/10 hover:text-red-500 border border-[var(--border-subtle)] text-[var(--text-muted)]'
-                            : 'bg-[#2563EB] hover:bg-[#1D4ED8] text-white'
+                            : 'bg-[var(--color-arena-primary)] hover:bg-[var(--color-arena-primary-hover)] text-white'
                         }`}
                         aria-label={`Ubah kehadiran ${athlete.name}`}
                       >

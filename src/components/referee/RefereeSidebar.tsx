@@ -75,19 +75,19 @@ export const RefereeSidebar: React.FC<RefereeSidebarProps> = ({
       )}
 
       <aside
-        className={`fixed lg:static top-0 bottom-0 left-0 z-50 w-56 bg-[#0b1a28] text-white flex flex-col border-r border-[#1f374f] transition-transform duration-200 shrink-0 ${
+        className={`fixed lg:static top-0 bottom-0 left-0 z-50 w-56 bg-[#071F14] text-white flex flex-col border-r border-emerald-900/40 transition-transform duration-200 shrink-0 ${
           isOpenMobile ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         }`}
       >
         {/* Minimalist Header */}
-        <div className="h-16 px-4 border-b border-[#1f374f] flex items-center justify-between">
+        <div className="h-16 px-4 border-b border-emerald-900/40 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <SaumaArenaLogo size="sm" variant="dark" />
             <div>
               <div className="font-bebas text-base tracking-wider uppercase text-white">
                 JURI CENTER
               </div>
-              <p className="text-[10px] text-slate-400 font-barlow font-semibold uppercase tracking-wider">
+              <p className="text-[10px] text-emerald-400/80 font-barlow font-semibold uppercase tracking-wider">
                 Meja Lapangan
               </p>
             </div>
@@ -95,7 +95,7 @@ export const RefereeSidebar: React.FC<RefereeSidebarProps> = ({
           <button
             type="button"
             onClick={onCloseMobile}
-            className="p-1 rounded-lg text-slate-400 hover:text-white lg:hidden"
+            className="p-1 rounded-lg text-slate-400 hover:text-white lg:hidden cursor-pointer"
             aria-label="Tutup menu juri"
           >
             <X className="w-5 h-5" />
@@ -119,14 +119,14 @@ export const RefereeSidebar: React.FC<RefereeSidebarProps> = ({
                   onSelectTab(item.id as RefereeTabKey);
                   onCloseMobile();
                 }}
-                className={`btn-tactile w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-left transition-all duration-150 active:scale-[0.98] ${
+                className={`btn-tactile w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-left transition-all duration-150 active:scale-[0.98] cursor-pointer ${
                   isActive
-                    ? 'bg-[var(--color-arena-primary)] text-white font-bold'
-                    : 'text-slate-300 hover:bg-slate-800/70 hover:text-white font-medium'
+                    ? 'bg-[var(--color-arena-primary)] text-white font-bold shadow-xs'
+                    : 'text-slate-300 hover:bg-emerald-950/40 hover:text-white font-medium'
                 }`}
               >
                 <div className="flex items-center gap-3 min-w-0">
-                  <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-white' : 'text-slate-400'}`} />
+                  <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-[var(--color-arena-accent)]' : 'text-slate-400'}`} />
                   <span className="font-barlow font-bold text-sm tracking-wide truncate">
                     {item.label}
                   </span>
@@ -149,7 +149,7 @@ export const RefereeSidebar: React.FC<RefereeSidebarProps> = ({
         </nav>
 
         {/* Bottom Quick Switchers */}
-        <div className="p-3 border-t border-[#1f374f] space-y-1.5 bg-[#07131f]/60 shrink-0">
+        <div className="p-3 border-t border-emerald-900/40 space-y-1.5 bg-[#04120C]/80 shrink-0">
           {user?.role === 'ADMIN' && onGoToAdmin && (
             <button
               type="button"
@@ -157,7 +157,7 @@ export const RefereeSidebar: React.FC<RefereeSidebarProps> = ({
                 onGoToAdmin();
                 onCloseMobile();
               }}
-              className="btn-tactile w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-barlow font-bold uppercase tracking-wider text-amber-300 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 transition-all active:scale-[0.98]"
+              className="btn-tactile w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-barlow font-bold uppercase tracking-wider text-amber-300 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 transition-all active:scale-[0.98] cursor-pointer"
               title="Kembali ke Meja Kerja Administrator"
             >
               <ShieldCheck className="w-4 h-4 text-amber-400 shrink-0" />
@@ -172,7 +172,7 @@ export const RefereeSidebar: React.FC<RefereeSidebarProps> = ({
                 onBackToPublic();
                 onCloseMobile();
               }}
-              className="btn-tactile w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-barlow font-bold uppercase tracking-wider text-slate-300 hover:text-white hover:bg-slate-800 border border-[#1f374f] transition-all active:scale-[0.98]"
+              className="btn-tactile w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-barlow font-bold uppercase tracking-wider text-slate-300 hover:text-white hover:bg-emerald-950/40 border border-emerald-900/40 transition-all active:scale-[0.98] cursor-pointer"
               title="Lihat Tampilan Portal Publik"
             >
               <Globe className="w-4 h-4 text-slate-400 shrink-0" />

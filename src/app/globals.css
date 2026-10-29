@@ -1,11 +1,11 @@
 @import "tailwindcss";
 
-@custom-variant dark (&:where(.dark, .dark *));
+@variant dark (&:where(.dark, .dark *));
 
 /*
  * Sauma Arena — Dual Athletic Sports Theme
  * Dark Mode: Emas Royal & Biru Gelap (Sporty, Royal, Challenging, Kompetitif)
- * Light Mode: Putih-Biru (Sporty, Fresh, Semangat, Ringan)
+ * Light Mode: Putih-Biru Sporty & Fresh (Sporty, Semangat, Tajam, Berenergi)
  */
 
 @theme {
@@ -17,14 +17,14 @@
   --color-arena-blue-hover: var(--arena-primary-hover);
   --color-arena-blue-light: var(--arena-primary-light);
 
-  --color-arena-green: var(--arena-primary);
-  --color-arena-green-hover: var(--arena-primary-hover);
-  --color-arena-green-light: var(--arena-primary-light);
-  
+  --color-arena-green: #10B981;
+  --color-arena-green-hover: #059669;
+  --color-arena-green-light: #ECFDF5;
+
   --color-arena-dark: var(--arena-dark);
   --color-arena-dark-surface: var(--arena-dark-surface);
   --color-arena-dark-border: var(--arena-dark-border);
-  
+
   --color-arena-accent: var(--arena-accent);
   --color-arena-accent-hover: var(--arena-accent-hover);
   --color-arena-accent-light: var(--arena-accent-light);
@@ -33,15 +33,15 @@
   --color-arena-gold-glow: var(--arena-gold-glow);
 
   --color-sport-blue: var(--arena-primary);
-  --color-sport-gold: var(--arena-accent);
+  --color-sport-gold: #F59E0B;
   --color-sport-red: #ef4444;
 
   --color-status-verified: var(--arena-primary);
-  --color-status-pending: var(--arena-accent);
+  --color-status-pending: #F59E0B;
   --color-status-rejected: #ef4444;
   --color-status-used: #64748b;
 
-  --font-sans: var(--font-sans), "Inter", -apple-system, sans-serif;
+  --font-sans: var(--font-sans), "Plus Jakarta Sans", "Inter", -apple-system, sans-serif;
   --font-teko: var(--font-teko), "Teko", sans-serif;
   --font-bebas: var(--font-bebas), "Bebas Neue", sans-serif;
   --font-barlow: var(--font-barlow-condensed), "Barlow Condensed", sans-serif;
@@ -52,78 +52,106 @@
   --radius-sm: 6px;
   --radius-md: 10px;
   --radius-lg: 14px;
-  --radius-xl: 20px;
+  --radius-xl: 18px;
   --radius-full: 9999px;
+
+  --shadow-2xs: 0 1px 2px 0 rgba(12, 35, 64, 0.05);
+  --shadow-xs: 0 1px 3px 0 rgba(12, 35, 64, 0.08), 0 1px 2px -1px rgba(12, 35, 64, 0.06);
+  --shadow-sm: 0 2px 6px -1px rgba(12, 35, 64, 0.09), 0 1px 4px -1px rgba(12, 35, 64, 0.05);
+  --shadow-md: 0 4px 14px -2px rgba(12, 35, 64, 0.12), 0 2px 6px -2px rgba(12, 35, 64, 0.06);
+  --shadow-lg: 0 10px 25px -4px rgba(12, 35, 64, 0.14), 0 4px 10px -3px rgba(12, 35, 64, 0.08);
+  --shadow-xl: 0 20px 30px -5px rgba(12, 35, 64, 0.18), 0 8px 12px -4px rgba(12, 35, 64, 0.10);
 }
 
 :root {
-  /* LIGHT MODE (Putih Biru Sporty, Fresh, Semangat, Ringan) */
-  --arena-primary: #1d63b8;         /* Energetic Sporty Royal Blue */
-  --arena-primary-hover: #154d92;
-  --arena-primary-light: #ebf3fc;   /* Soft fresh blue tint */
+  /* LIGHT MODE (Putih-Biru Sporty & Fresh: Tajam, Bersih, Berenergi - Tanpa Nuansa Coklat) */
+  --arena-primary: #1D63B8;
+  /* Energetic Sporty Royal Blue */
+  --arena-primary-hover: #154D92;
+  --arena-primary-light: #EBF3FC;
+  /* Soft fresh blue tint */
 
-  --arena-accent: #f59e0b;          /* Warm golden trophy glow */
-  --arena-accent-hover: #d97706;
-  --arena-accent-light: #fef3c7;
+  --arena-accent: #0284C7;
+  /* Vibrant athletic cyan/sky blue (NO BROWN/MUDDY TONES) */
+  --arena-accent-hover: #0369A1;
+  --arena-accent-light: #E0F2FE;
 
-  --arena-gold: #f59e0b;
-  --arena-gold-glow: rgba(245, 158, 11, 0.2);
+  --arena-gold: #F59E0B;
+  /* Authentic trophy & medal gold */
+  --arena-gold-glow: rgba(245, 158, 11, 0.25);
 
-  --arena-dark: #0c2340;            /* Deep athletic navy for icons/accents */
-  --arena-dark-surface: #142e4d;
-  --arena-dark-border: #d4e4f3;
+  --arena-dark: #0C2340;
+  /* Deep athletic navy for icons/accents */
+  --arena-dark-surface: #142E4D;
+  --arena-dark-border: #94B8DB;
 
-  --bg-page: #f4f8fd;               /* Putih kebiruan sangat sejuk & ringan */
-  --bg-surface: #ffffff;            /* Putih bersih kristal */
-  --bg-surface-elevated: #ffffff;
-  --bg-muted: #e8f1fa;              /* Pill & tombol sekunder segar */
-  --bg-input: #ffffff;
+  --bg-page: #F4F8FD;
+  /* Putih kebiruan sangat sejuk & ringan */
+  --bg-surface: #FFFFFF;
+  /* Putih bersih kristal */
+  --bg-surface-elevated: #FFFFFF;
+  --bg-muted: #E8F1FA;
+  /* Pill & tombol sekunder segar */
+  --bg-input: #FFFFFF;
 
-  --text-main: #0c2340;             /* Navy atletik pekat (kontras tinggi, outdoor-ready) */
-  --text-muted: #436382;            /* Slate-blue segar */
-  --text-faint: #4e7399;            /* Kontras tajam WCAG AA (>4.5:1) di latar terang */
+  --text-main: #0C2340;
+  /* Navy atletik pekat (kontras tinggi, outdoor-ready) */
+  --text-muted: #334E68;
+  /* Slate-blue segar */
+  --text-faint: #486581;
+  /* Kontras tajam WCAG AA (>4.5:1) di latar terang */
 
-  --border-subtle: #d2e3f2;          /* Garis batas biru muda bersih & ringan */
-  --border-field: rgba(29, 99, 184, 0.25);
+  /* BORDER CARD TEGAS: Tidak samar dan bergradasi tajam di layar cerah */
+  --border-subtle: #CBD5E1;
+  /* Garis batas tegas (slate-300), jelas terlihat & berbobot */
+  --border-field: rgba(29, 99, 184, 0.35);
 
-  --shadow-card: 0 1px 4px rgba(12, 35, 64, 0.05);
-  --shadow-elevated: 0 4px 16px rgba(12, 35, 64, 0.09);
+  /* BAYANGAN CARD HALUS (ELEVATION): Memberi dimensi agar card terangkat dari background */
+  --shadow-card: 0 2px 8px -1px rgba(12, 35, 64, 0.08), 0 1px 4px -1px rgba(12, 35, 64, 0.05);
+  --shadow-elevated: 0 10px 25px -4px rgba(12, 35, 64, 0.12), 0 4px 10px -2px rgba(12, 35, 64, 0.06);
 
   color-scheme: light;
 }
 
 html.dark {
   /* DARK MODE (Emas Royal & Biru Gelap: Sporty, Royal, Challenging, Kompetitif) */
-  --arena-primary: #2563eb;         /* Biru Elektrik Royal (Sporty & Tajam) */
-  --arena-primary-hover: #1d4ed8;
-  --arena-primary-light: #12273d;
+  --arena-primary: #38BDF8;
+  /* Biru Elektrik Sky/Cyan Tajam */
+  --arena-primary-hover: #0284C7;
+  --arena-primary-light: #0C2A4A;
 
-  --arena-accent: #f6ae2d;          /* Emas Royal Murni (Championship Gold) */
-  --arena-accent-hover: #e59a16;
-  --arena-accent-light: #2c2211;
+  --arena-accent: #38BDF8;
+  --arena-accent-hover: #0284C7;
+  --arena-accent-light: #0C2A4A;
 
-  --arena-gold: #f6ae2d;
-  --arena-gold-glow: rgba(246, 174, 45, 0.35);
+  --arena-gold: #F59E0B;
+  /* Emas Pemenang */
+  --arena-gold-glow: rgba(245, 158, 11, 0.35);
 
-  --arena-dark: #07131f;            /* Midnight Stadium Arena Navy */
-  --arena-dark-surface: #0d1e30;    /* Pitch Carbon Navy */
-  --arena-dark-border: #1c3b5b;
+  --arena-dark: #07131F;
+  /* Hitam-Biru Lapangan Malam */
+  --arena-dark-surface: #0D1E30;
+  /* Surface Card Navy Gelap */
+  --arena-dark-border: #1C3B5B;
 
-  --bg-page: #07131f;               /* Biru Gelap Stadion Malam (Sporty, Maskulin) */
-  --bg-surface: #0d1e30;            /* Permukaan Kartu Biru Gelap */
-  --bg-surface-elevated: #13273d;   /* Elemen Bertingkat Biru Gelap */
-  --bg-muted: #1a334e;              /* Pill & Inset Biru Stadion */
-  --bg-input: #091624;
+  --bg-page: #07131F;
+  /* Midnight Arena Navy */
+  --bg-surface: #0D1E30;
+  /* Surface Card Navy Gelap */
+  --bg-surface-elevated: #13273D;
+  --bg-muted: #102438;
+  --bg-input: #091726;
 
-  --text-main: #f8fafc;             /* Chalk White Tajam */
-  --text-muted: #9ab3cc;            /* Metallic Stadium Blue-Gray */
-  --text-faint: #63819f;
+  --text-main: #F8FAFC;
+  --text-muted: #94A3B8;
+  --text-faint: #64748B;
 
-  --border-subtle: #1c3b5b;         /* Garis batas biru malam kokoh */
-  --border-field: rgba(246, 174, 45, 0.4); /* Garis aksen emas royal */
+  --border-subtle: #1E3A5F;
+  /* Defined dark athletic border */
+  --border-field: rgba(56, 189, 248, 0.35);
 
-  --shadow-card: 0 2px 6px rgba(0, 0, 0, 0.5);
-  --shadow-elevated: 0 8px 24px rgba(0, 0, 0, 0.7);
+  --shadow-card: 0 2px 10px rgba(0, 0, 0, 0.45);
+  --shadow-elevated: 0 8px 30px rgba(0, 0, 0, 0.6);
 
   color-scheme: dark;
 }
@@ -143,7 +171,7 @@ body {
   font-feature-settings: "tnum";
 }
 
-/* Field Line Motif (Authentic Stadium Midfield Double Lines) */
+/* Midfield Tactical Lines */
 .midfield-line {
   position: relative;
   display: flex;
@@ -156,70 +184,35 @@ body {
   content: "";
   display: block;
   height: 2px;
-  background-color: var(--color-arena-primary);
+  background-color: var(--color-arena-accent);
   border-radius: 9999px;
 }
 
-html.dark .midfield-line::before,
-html.dark .midfield-line::after {
-  background-color: var(--color-arena-accent);
-}
-
 .midfield-line::before {
-  width: 28px;
+  width: 32px;
 }
 
 .midfield-line::after {
-  width: 14px;
+  width: 16px;
   opacity: 0.7;
 }
 
-/* High-contrast Stadium Scoreboard Badge (Lampiran 2 Rubrik) */
-.stadium-badge-positive {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-family: var(--font-mono);
+/* Authentic Tactical Pitch Board Line Texture (3-5% Opacity) */
+.tactical-pitch-pattern {
+  background-image:
+    radial-gradient(circle at 50% 50%, transparent 40px, currentColor 41px, currentColor 42px, transparent 43px),
+    linear-gradient(to right, transparent calc(50% - 1px), currentColor calc(50% - 1px), currentColor calc(50% + 1px), transparent calc(50% + 1px));
+  background-size: 100% 100%, 100% 100%;
+  background-position: center;
+}
+
+/* Giant Watermark Numerics for Bento Cards */
+.watermark-num {
+  font-family: var(--font-teko), "Teko", sans-serif;
   font-weight: 800;
-  border-radius: 6px;
-  background-color: var(--color-arena-primary);
-  color: #ffffff;
-  padding: 4px 10px;
-  letter-spacing: -0.02em;
-  transition: transform 120ms ease-out;
-}
-
-.stadium-badge-positive:hover {
-  transform: scale(1.04);
-}
-
-html.dark .stadium-badge-positive {
-  background-color: #1a334e;
-  color: var(--color-arena-accent);
-  border: 1px solid rgba(246, 174, 45, 0.4);
-}
-
-.stadium-badge-penalty {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-family: var(--font-mono);
-  font-weight: 800;
-  border-radius: 6px;
-  background-color: #dc2626;
-  color: #ffffff;
-  padding: 4px 10px;
-  letter-spacing: -0.02em;
-  transition: transform 120ms ease-out;
-}
-
-.stadium-badge-penalty:hover {
-  transform: scale(1.04);
-}
-
-html.dark .stadium-badge-penalty {
-  background-color: #991b1b;
-  color: #fca5a5;
+  line-height: 0.75;
+  user-select: none;
+  pointer-events: none;
 }
 
 /* Tactile micro-interaction utility for buttons */
@@ -237,6 +230,7 @@ html.dark .stadium-badge-penalty {
     opacity: 0;
     transform: translateY(4px);
   }
+
   to {
     opacity: 1;
     transform: none;
@@ -248,6 +242,7 @@ html.dark .stadium-badge-penalty {
     opacity: 0;
     transform: scale(0.97);
   }
+
   to {
     opacity: 1;
     transform: none;
@@ -264,7 +259,7 @@ html.dark .stadium-badge-penalty {
 
 /* Accessible focus rings */
 :focus-visible {
-  outline: 2px solid var(--color-arena-primary);
+  outline: 2px solid var(--color-arena-accent);
   outline-offset: 2px;
 }
 
@@ -273,15 +268,18 @@ html.dark .stadium-badge-penalty {
   width: 6px;
   height: 6px;
 }
+
 ::-webkit-scrollbar-track {
   background: transparent;
 }
+
 ::-webkit-scrollbar-thumb {
-  background: #cfdde8;
+  background: #cbd5e1;
   border-radius: 4px;
 }
+
 html.dark ::-webkit-scrollbar-thumb {
-  background: #1f374f;
+  background: #1c3b5b;
 }
 
 /* Hide scrollbar utilities */
@@ -290,6 +288,7 @@ html.dark ::-webkit-scrollbar-thumb {
   -ms-overflow-style: none !important;
   scrollbar-width: none !important;
 }
+
 .no-scrollbar::-webkit-scrollbar,
 .scrollbar-none::-webkit-scrollbar {
   display: none !important;
@@ -299,7 +298,10 @@ html.dark ::-webkit-scrollbar-thumb {
 
 /* Reduced motion preference */
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
+
+  *,
+  *::before,
+  *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
@@ -335,4 +337,3 @@ html.dark ::-webkit-scrollbar-thumb {
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
-

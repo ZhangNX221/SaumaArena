@@ -76,7 +76,7 @@ export const ScoringMapSeries: React.FC<ScoringMapSeriesProps> = ({
               Laga #{currentMatch.matchNumber}
             </span>
           </div>
-          <span className="px-3 py-1 rounded-md bg-slate-800 text-[#f6ae2d] font-barlow font-bold uppercase tracking-wider text-xs">
+          <span className="px-3 py-1 rounded-md bg-slate-800 text-[var(--color-arena-accent)] font-barlow font-bold uppercase tracking-wider text-xs">
             Butuh 3 Kemenangan
           </span>
         </div>
@@ -92,7 +92,7 @@ export const ScoringMapSeries: React.FC<ScoringMapSeriesProps> = ({
                 {currentMatch.teamAName}
               </h3>
             </div>
-            <div className="col-span-1 flex items-center justify-center gap-2 font-scoreboard font-bold text-5xl sm:text-6xl text-[#f6ae2d] tabular-nums leading-none">
+            <div className="col-span-1 flex items-center justify-center gap-2 font-scoreboard font-bold text-5xl sm:text-6xl text-[var(--color-arena-accent)] tabular-nums leading-none">
               <span>{winsA}</span>
               <span className="text-slate-600 text-3xl font-light">-</span>
               <span>{winsB}</span>

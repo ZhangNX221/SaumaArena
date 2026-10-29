@@ -23,9 +23,9 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
       return NextResponse.json({ success: false, error: 'Pertandingan tidak ditemukan' }, { status: 404 });
     }
 
-    if (match.status !== 'finished' && match.status !== 'walkover') {
+    if (match.status !== 'finished' && match.status !== 'bap_signed' && match.status !== 'walkover') {
       return NextResponse.json(
-        { success: false, error: `Hanya pertandingan dengan status 'finished' atau 'walkover' yang dapat diverifikasi.` },
+        { success: false, error: `Hanya pertandingan dengan status 'finished', 'bap_signed', atau 'walkover' yang dapat diverifikasi.` },
         { status: 400 }
       );
     }
@@ -36,6 +36,12 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
        SET status = 'verified', locked = 1, verified_by = ?, verified_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP
        WHERE id = ?`,
       [user.id, matchId]
+    );
+
+    // Update status BAP jika ada
+    run(
+      `UPDATE match_bap SET status = 'VERIFIED', updated_at = CURRENT_TIMESTAMP WHERE match_id = ?`,
+      [matchId]
     );
 
     // Propagate winner to next match if knockout stage (PRD Flow 5.5)

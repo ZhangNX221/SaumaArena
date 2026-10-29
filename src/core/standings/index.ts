@@ -4,6 +4,7 @@ export interface TeamInfo {
   shortName: string;
   logoUrl?: string;
   schoolName?: string;
+  supporterPoints?: number;
 }
 
 export interface VerifiedMatchSummary {
@@ -36,6 +37,7 @@ export interface StandingRow {
   goalDifference: number;
   points: number;
   fairPlayScore: number; // lower penalty is better, or higher fair play
+  supporterPoints: number; // Poin Suporter Madrasah MMFC I
 }
 
 export type TiebreakerFn = (a: StandingRow, b: StandingRow, matches: VerifiedMatchSummary[]) => number;
@@ -45,7 +47,9 @@ export const TIEBREAKER_REGISTRY: Record<string, TiebreakerFn> = {
   goal_difference: (a, b) => b.goalDifference - a.goalDifference,
   goals_for: (a, b) => b.goalsFor - a.goalsFor,
   wins: (a, b) => b.won - a.won,
-  fair_play: (a, b) => b.fairPlayScore - a.fairPlayScore, // Higher is better (e.g. 100 minus card penalties)
+  fair_play: (a, b) => b.fairPlayScore - a.fairPlayScore, // Higher is better (100 baseline minus cards)
+  supporter_fair_play_points: (a, b) => (b.supporterPoints || 0) - (a.supporterPoints || 0),
+  supporter_points: (a, b) => (b.supporterPoints || 0) - (a.supporterPoints || 0),
   head_to_head_points: (a, b, matches) => {
     let h2hA = 0;
     let h2hB = 0;
@@ -66,7 +70,15 @@ export const TIEBREAKER_REGISTRY: Record<string, TiebreakerFn> = {
 export function calculateStandings(
   teams: TeamInfo[],
   matches: VerifiedMatchSummary[],
-  tiebreakers: string[] = ['points', 'goal_difference', 'goals_for', 'head_to_head_points', 'fair_play', 'draw_lots']
+  tiebreakers: string[] = [
+    'points',
+    'goal_difference',
+    'goals_for',
+    'head_to_head_points',
+    'supporter_fair_play_points',
+    'fair_play',
+    'draw_lots',
+  ]
 ): StandingRow[] {
   const map = new Map<string, StandingRow>();
 
@@ -87,6 +99,7 @@ export function calculateStandings(
       goalDifference: 0,
       points: 0,
       fairPlayScore: 100, // starting fair play baseline
+      supporterPoints: t.supporterPoints || 0,
     });
   }
 

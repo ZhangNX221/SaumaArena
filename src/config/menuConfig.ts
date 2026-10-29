@@ -64,7 +64,7 @@ export const PUBLIC_MENU_CONFIG: MenuItemConfig[] = [
   },
   {
     id: 'standings',
-    label: 'Grub',
+    label: 'Grup',
     subtitle: 'Peringkat grup & kualifikasi',
     icon: 'ListOrdered',
     href: '#standings',

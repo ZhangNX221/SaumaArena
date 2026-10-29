@@ -1,263 +1,126 @@
-# 12. Master Dokumen Spesifikasi Produk (Compiled PRD v1.0)
+# 12. Master Dokumen Spesifikasi Produk (Compiled PRD v2.0)
 
 **Dokumen PRD — Bagian 12/12**  
 **Produk:** Sauma Arena (Platform Manajemen Pertandingan Multi-Cabang Olahraga)  
-**Versi Dokumen:** 1.0  
-**Bahasa UI Aplikasi:** Bahasa Indonesia (siapkan struktur i18n)  
-**Bahasa Kode & Identifier:** Inggris  
-**Tujuan Dokumen:** Spesifikasi utama untuk AI coding agent dan seluruh tim engineering.
+**Edisi Turnamen:** Milad Matsanega Futsal Competition I (MMFC I) • MTsN 3 Blitar  
+**Versi Dokumen:** 2.0 (Arsitektur Lengkap Tiga Konsol Terpadu)  
+**Bahasa UI Aplikasi:** Bahasa Indonesia (dengan struktur penamaan atletik standar internasional)  
+**Bahasa Kode & Identifier:** TypeScript / English  
+**Tujuan Dokumen:** Spesifikasi induk operasional dan teknis bagi seluruh tim pengembang, wasit, dan panitia pelaksana.
 
 ---
 
-## 0. Cara Memakai Dokumen Ini (WAJIB DIBACA AGENT)
+## 0. Cara Memakai Dokumen Ini (Wajib Dipatuhi)
 
-### 0.1 Aturan kerja
-
-1. Baca seluruh dokumen dulu. Jangan mulai coding dari bagian tengah.
-2. Kerjakan **per fase** (Bagian 14). Selesaikan semua *acceptance criteria* dan tes satu fase sebelum pindah ke fase berikutnya.
-3. **Dilarang menaruh aturan olahraga di luar folder `/sports/<kode-cabang>/`.** Kode `/core` tidak boleh tahu aturan sepakbola, bulutangkis, dll.
-4. `/core` hanya boleh memakai modul cabang lewat **registry** (Bagian 8.1), tidak boleh import langsung.
-5. Semua logika aturan olahraga ditulis sebagai **fungsi murni** (tanpa akses database/jaringan) dan wajib punya unit test.
-6. **Skor bukan sumber kebenaran.** Sumber kebenaran adalah rangkaian `match_events`. Skor, klasemen, top skor, dan kartu selalu dihitung dari event.
-7. Setiap perubahan oleh Admin/Panitia pada pertandingan harus menulis `audit_logs`.
-8. Jika ada hal yang ambigu atau tidak tercakup, **tanyakan ke pemilik produk**. Jika tidak bisa bertanya, ambil asumsi paling sederhana dan catat di [11-decisions.md](./11-decisions.md).
-9. Commit kecil dan sering. Satu commit = satu perubahan yang bisa dijelaskan dalam satu kalimat.
-10. Jangan menambah fitur di luar dokumen ini tanpa persetujuan.
-
-### 0.2 Prioritas requirement
-
-| Kode | Arti |
-|---|---|
-| **P0** | Wajib ada (MVP) |
-| **P1** | Sebaiknya ada, dikerjakan setelah P0 fase terkait |
-| **P2** | Opsional / masa depan |
+### 0.1 Aturan Kerja Utama
+1. **Prinsip Tiga Konsol Terpadu:** Platform beroperasi dalam satu codebase tunggal (`Next.js App Router`) dengan tiga antarmuka terintegrasi:
+   - **Portal Publik (`/`):** 8 Tab informasi, live score, jadwal, klasemen, bagan gugur, tim, statistik, suporter, registrasi kontingen, dan pemesanan e-tiket.
+   - **Konsol Wasit Lapangan (`/?view=referee`):** Tablet digital untuk stopwatch (running/stop clock), pencatatan gol per menit, foul 5/5, time-out, kartu wasit, form penilaian suporter madrasah, dan pengesahan BAP digital.
+   - **Admin Arena Command Center (`/?view=admin`):** Pusat kendali komisioner turnamen untuk verifikasi berkas atlet (NISN), drawing bagan, verifikasi BAP dua tahap, scanner gate tiket, sinkronisasi waktu laga, dan ekspor laporan resmi.
+2. **Desain Dual Athletic Sports Theme:**
+   - **Mode Terang (*Light Mode*):** Putih-Biru Sporty Enerjik (`#1D63B8`, Deep Athletic Navy `#0C2340`, latar sejuk `#F4F8FD`, border tegas `#CBD5E1`, dan bayangan kartu halus). Bebas dari nuansa coklat/amber pada teks dan kartu.
+   - **Mode Gelap (*Dark Mode*):** Emas Pemenang (`#F59E0B`) & Midnight Pitch Charcoal (`#07131F`).
+3. **Skor Bukan Sumber Kebenaran Tunggal:** Sumber kebenaran mutlak adalah rangkaian peristiwa `match_events` (gol, foul, kartu, timeout) yang dicatat kronologis per menit. Skor, klasemen, top scorer sepatu emas, dan evaluasi suporter dihitung secara konsisten dari deretan event yang sah.
+4. **Verifikasi Hasil Dua Tahap (*Two-Stage Verification*):**
+   - Tahap 1: Wasit 1, Wasit 2, dan Pengawas Pertandingan menandatangani BAP digital lapangan (`finished`).
+   - Tahap 2: Komisioner/Pengawas Pertandingan di Admin Arena mengesahkan dan mengunci permanen (`verified` & `locked = true`). Hanya hasil berstatus `verified` yang diakumulasikan ke klasemen resmi.
+5. **Idempotensi & Ketahanan Lapangan:** Setiap aksi pencatatan gol/pelanggaran memiliki UUID unik di sisi klien untuk mencegah duplikasi skor saat jaringan seluler di GOR terputus (*offline queue caching*).
 
 ---
 
-## 1. Ringkasan Produk
+## 1. Ringkasan Eksekutif & Konteks Turnamen MMFC I
 
-Aplikasi web untuk mengelola turnamen/liga/event olahraga di **banyak cabang** (sepakbola, futsal, bola voli, bulutangkis, esport, dan cabang lain di masa depan) dalam **satu aplikasi dan satu codebase**.
-
-Karena aturan setiap cabang berbeda, aplikasi memakai **Sport Template** (konfigurasi aturan) dan **Sport Module** (logika khusus per cabang) sehingga cabang baru ditambah dengan membuat modul baru, bukan mengubah inti aplikasi.
-
-### 1.1 Tujuan
-
-- **G1.** Panitia/wasit bisa mencatat pertandingan langsung dari HP dengan cepat dan **tanpa melanggar aturan cabang**.
-- **G2.** Admin bisa membuat kompetisi, jadwal, dan klasemen dengan sedikit pekerjaan manual.
-- **G3.** Publik bisa melihat skor live, jadwal, klasemen, dan bagan **tanpa login**.
-- **G4.** Menambah cabang olahraga baru cukup dengan membuat template + modul baru.
-
-### 1.2 Bukan tujuan (di luar cakupan, kecuali disebut lain)
-
-- Pembayaran/biaya pendaftaran
-- Live streaming video
-- Pendaftaran mandiri oleh tim (Admin yang memasukkan tim)
-- Aplikasi native iOS/Android (cukup web PWA)
-- Multi-penyelenggara/multi-tenant penuh (P2)
-- Cabang berbasis peringkat/placement (battle royale, balap) (P2)
+- **Ajang Pertandingan:** *Milad Matsanega Futsal Competition I (MMFC I)* dalam rangka memperingati Milad ke-31 MTsN 3 Blitar.
+- **Peserta:** 14 Tim Kontingen Pelajar SD/MI se-derajat di Blitar Raya yang terbagi ke dalam 4 Grup (A, B, C, D) dengan sistem setengah kompetisi dilanjutkan babak semifinal, bronze match, dan grand final (total 17 pertandingan).
+- **Lokasi Venue:** *Lapangan Futsal Seabless Srengat, Blitar* dengan kapasitas 500 penonton dan pembagian pintu: Gate Barat (VIP & Atlet) serta Gate Timur (Suporter Madrasah & Umum).
 
 ---
 
-## 2. Prinsip Desain (Invariant)
+## 2. Prinsip Desain Invariant Sistem
 
-Prinsip ini tidak boleh dilanggar oleh implementasi apa pun.
-
-1. **Data-driven rules:** aturan = template (JSON) + modul cabang. Bukan `if (sport === 'football')` di core.
-2. **Event sourcing ringan:** state pertandingan = hasil reduce dari event yang tidak di-void. Event tidak pernah dihapus, hanya di-*void* dengan alasan.
-3. **Validasi saat input:** event yang melanggar aturan **ditolak** dengan pesan jelas (bahasa Indonesia).
-4. **Dua tahap hasil:** Panitia menginput, Admin memverifikasi. Hanya pertandingan `verified` yang dihitung di klasemen resmi.
-5. **Snapshot aturan:** saat kompetisi dimulai, aturan yang berlaku disalin ke `competitions.rules_snapshot`. Perubahan template di kemudian hari tidak mengubah kompetisi yang sedang berjalan.
-6. **Mobile-first untuk Panitia, read-only cepat untuk Publik.**
-7. **Idempoten:** pengiriman event yang sama dua kali (misal karena sinyal buruk) tidak boleh menggandakan event.
-
----
-
-## 3. Peran & Hak Akses
-
-Ada 3 jenis pengguna.
-
-| Peran | Login? | Deskripsi |
-|---|---|---|
-| `admin` | Ya | Mengelola semua data dan memverifikasi hasil |
-| `official` | Ya | Panitia: wasit, juri, scorekeeper/operator. Hanya mengakses pertandingan yang ditugaskan |
-| Publik | **Tidak** | Penonton. Hanya baca data yang dipublikasikan |
-
-### 3.1 Matriks hak akses
-
-| Aksi | Admin | Panitia | Publik |
-|---|:-:|:-:|:-:|
-| Kelola cabang/template aturan | ✅ | ❌ | ❌ |
-| Kelola kompetisi, fase, grup | ✅ | ❌ | ❌ |
-| Kelola tim, pemain, venue | ✅ | ❌ | ❌ |
-| Kelola user & tugaskan panitia | ✅ | ❌ | ❌ |
-| Buat/ubah jadwal | ✅ | ❌ | ❌ |
-| Lihat pertandingan yang ditugaskan | ✅ | ✅ (hanya miliknya) | ❌ |
-| Konfirmasi lineup | ✅ | ✅ (miliknya) | ❌ |
-| Input event pertandingan | ✅ | ✅ (miliknya, status `live`/`break`) | ❌ |
-| Void/koreksi event | ✅ | ✅ (miliknya, sebelum `finished`, wajib alasan) | ❌ |
-| Tandai pertandingan selesai | ✅ | ✅ (miliknya) | ❌ |
-| Verifikasi hasil (`verified`) | ✅ | ❌ | ❌ |
-| Buka kunci pertandingan terverifikasi | ✅ (wajib alasan) | ❌ | ❌ |
-| Lihat audit log | ✅ | ❌ | ❌ |
-| Lihat jadwal, skor, klasemen, bagan, profil tim | ✅ | ✅ | ✅ (hanya data publik) |
-
-### 3.2 Tugas panitia per pertandingan (`match_officials.duty`)
-
-`referee` (wasit utama), `scorekeeper` (pencatat skor/operator), `judge` (juri), `assistant`. Wasit/scorekeeper/operator boleh menginput event. Aturan siapa-boleh-apa per tugas bisa disempurnakan di P1.
+1. **Data-Driven Rules:** Regulasi cabor didefinisikan sebagai template JSON dan modul TypeScript terisolasi.
+2. **Event Sourcing Ringan:** State pertandingan merupakan hasil kalkulasi murni dari deretan `match_events` append-only yang tidak di-void.
+3. **Validasi Saat Input:** Setiap input yang melanggar aturan teknis cabor ditolak seketika oleh fungsi murni `validateEvent` dengan pesan bahasa Indonesia.
+4. **Verifikasi Dua Tahap:** Hasil lapangan ditandatangani wasit, lalu diverifikasi pengawas pertandingan sebelum masuk klasemen resmi.
+5. **Snapshot Aturan:** Regulasi dibekukan ke `rules_snapshot` saat kompetisi berstatus `ongoing`.
+6. **Mobile-First Lapangan & Centered Admin:** Tablet wasit dioptimasi untuk kecepatan sentuh di pinggir lapangan, sedangkan dasbor admin diposisikan simetris di tengah layar lebar (`max-w-7xl mx-auto`).
+7. **Idempotensi Mutlak:** UUID unik klien menjamin tidak ada duplikasi data akibat pengiriman ulang jaringan.
+8. **Dual Athletic Theme Bebas Coklat:** Konsistensi visual sporty biru energetik tanpa teks atau kartu bernuansa coklat/pudar.
 
 ---
 
-## 4. Glosarium
+## 3. Matriks Peran & Hak Akses
 
-| Istilah | Arti |
-|---|---|
-| **Competition** | Satu turnamen/liga/event untuk satu cabang olahraga |
-| **Stage** | Fase dalam kompetisi (grup, gugur, final) |
-| **Participant / Team** | Peserta pertandingan: tim, individu, atau pasangan (ganda) |
-| **Match** | Satu pertandingan antara dua peserta |
-| **Period** | Bagian pertandingan berbasis waktu (babak, quarter) |
-| **Set / Game** | Bagian pertandingan berbasis poin (voli, bulutangkis) |
-| **Map** | Satu permainan dalam seri esport |
-| **Event** | Kejadian yang tercatat (gol, poin, kartu, pergantian) |
-| **Sport Template** | Konfigurasi aturan cabang (JSON) |
-| **Sport Module** | Kode TypeScript yang menjalankan aturan cabang |
-| **Verified** | Hasil sudah disahkan Admin, terkunci, dihitung di klasemen |
-| **WO** | Walkover: salah satu tim tidak hadir, lawan menang administratif |
-
----
-
-## 5. Arsitektur & Tech Stack
-
-### 5.1 Pola arsitektur
-
-**Modular monolith**: satu aplikasi, satu repo, dengan modul cabang yang terpisah.
-
-### 5.2 Stack default
-
-| Lapisan | Pilihan default |
-|---|---|
-| Bahasa | TypeScript (strict mode) |
-| Framework web | Next.js (App Router) |
-| UI | Tailwind CSS + komponen sederhana |
-| Database & Auth & Realtime | Supabase (PostgreSQL, Auth, Realtime, Row Level Security) |
-| Validasi data | Zod |
-| Tes | Vitest (unit), Playwright (e2e, P1) |
-| PWA | Service worker + manifest (untuk konsol Panitia) |
-
-### 5.3 Struktur folder
-
-```
-/
-├─ docs/
-│  └─ prd/                    # 00-index s/d 12-master-prd
-├─ src/
-│  ├─ core/                   # TIDAK boleh berisi aturan cabang tertentu
-│  │  ├─ types/               # tipe bersama (SportModule, MatchState, Event, dll)
-│  │  ├─ registry/            # registrasi modul cabang
-│  │  ├─ standings/           # hitung klasemen + registry tie-breaker
-│  │  ├─ scheduling/          # generator jadwal & bagan
-│  │  ├─ statemachine/        # status pertandingan
-│  │  └─ events/              # penyimpanan event, void, idempotensi
-│  ├─ sports/
-│  │  ├─ football/            # template.json, module.ts, console.tsx, *.test.ts
-│  │  ├─ futsal/
-│  │  ├─ volleyball/
-│  │  ├─ badminton/
-│  │  └─ esport/
-│  ├─ app/
-│  │  ├─ (public)/            # halaman publik tanpa login
-│  │  ├─ admin/
-│  │  └─ official/
-│  └─ lib/                    # supabase client, util
-└─ supabase/
-   └─ migrations/             # SQL migrasi + kebijakan RLS
-```
+| Operasi Sistem | Superadmin | Pengawas (PP) | Wasit & Meja | Juri Suporter | Petugas Gate | Official Tim | Publik |
+|---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+| Konfigurasi Cabor & Freeze Rules | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| Verifikasi Berkas Atlet (NISN) | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| Drawing Bagan & Plotting Jadwal | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| Kendali Stopwatch & Skor Laga | ✅ *(override)* | ❌ | ✅ *(tugasnya)* | ❌ | ❌ | ❌ | ❌ |
+| Form Penilaian Tribun Suporter | ✅ | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ |
+| Tanda Tangan Digital BAP | ❌ | ✅ *(Tahap 3)* | ✅ *(Tahap 1&2)*| ❌ | ❌ | ❌ | ❌ |
+| Pengesahan Akhir BAP (Kunci) | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| Scanner Validasi E-Tiket Gate | ✅ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ |
+| Form Registrasi Tim Kontingen | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ *(Form)* | ❌ |
+| Pesan E-Tiket Masuk Stadion | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ *(Form)* |
+| Lihat Live Score, Jadwal & Klasemen | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ *(Read-Only)* |
 
 ---
 
-## 6. Model Data (PostgreSQL)
+## 4. Spesifikasi Fungsional Kunci
 
-Gunakan PostgreSQL. Semua tabel punya `id uuid primary key`, `created_at`, `updated_at` kecuali dinyatakan lain. Aktifkan **Row Level Security** di semua tabel.
+### 4.1 Portal Publik (`/`)
+- **Pencarian Tim Reaktif:** Input navbar untuk mencari kontingen dengan hasil dropdown instan.
+- **Hero Spotlight MMFC I:** Banner atletik berlatar stadion navy, sorotan logo resmi Matsanega, dan ticker jadwal.
+- **8 Tab Publik:** Informasi & Juknis (Bento Grid), Live Match, Jadwal 17 Laga, Klasemen Grup A-D, Bagan Gugur 4 Besar, Profil 14 Tim, Statistik Top Scorer Sepatu Emas, dan Leaderboard Best Supporter.
+- **Modal Registrasi Tim Kontingen:** Wizard 4 tahap (Data Tim, Roster 10-12 Atlet NISN, Unggah Rekomendasi, Ringkasan).
+- **Modal E-Tiket & Booking QR:** Pemesanan e-tiket dengan kode QR untuk Gate Barat / Timur.
 
-Tabel lengkap terdefinisi di [08-software-architecture.md](./08-software-architecture.md):
-`profiles`, `sports`, `competitions`, `stages`, `stage_groups`, `teams`, `players`, `competition_teams`, `competition_players`, `venues`, `matches`, `match_officials`, `match_lineups`, `match_events`, `protests`, `audit_logs`.
+### 4.2 Konsol Wasit Meja Lapangan (`/?view=referee`)
+- **Stopwatch Digital Taktil:** Running clock (Grup) vs Stop clock (Gugur), tombol Jalankan/Jeda, Bel Kick-off, Reset.
+- **Papan Skor & Pencatat Gol:** Tombol raksasa `+ 1 GOL` dengan perekaman menit otomatis dan pemilihan pemain.
+- **Akumulasi Foul Tim (5/5):** 5 Lampu indikator pelanggaran dengan bel peringatan dan aktivasi second penalty 10m.
+- **Time-Out 60 Detik:** Hitung mundur time-out 60 detik (1x per babak tiap tim).
+- **Sanksi Disiplin Kartu:** Kartu kuning, akumulasi 2 KK menjadi kartu merah, dan kartu merah langsung KKM.
+- **Form Penilaian Suporter:** Form khusus juri untuk menilai 5 kriteria positif (+poin) dan 5 kategori sanksi (-poin).
+- **Lembar BAP Digital 3 Pihak:** Tanda tangan digital Wasit 1, Wasit 2, dan Pengawas Pertandingan.
+- **Pelaporan Insiden Komdis:** Pencatatan insiden perusakan, kericuhan, atau pelanggaran disiplin berat.
 
----
-
-## 7. Sport Template (Konfigurasi Aturan)
-
-Mendukung model skor `timed_goals` (sepakbola, futsal), `rally_set` (bola voli, bulutangkis), `map_series` (esport generik). Konfigurasi lengkap JSON terdefinisi di [04-functional-specs.md](./04-functional-specs.md).
-
----
-
-## 8. Mesin Aturan (Sport Module)
-
-Interface wajib `SportModule<Rules, State>` diimplementasikan murni oleh setiap cabor di `src/sports/<kode>/module.ts` dan diregistrasikan ke `src/core/registry`. State selalu dihitung murni melalui reduce event valid.
-
----
-
-## 9. State Machine Pertandingan
-
-`scheduled` $\rightarrow$ `lineup_confirmed` $\rightarrow$ `live` $\rightleftarrows$ `break` $\rightarrow$ `finished` $\rightarrow$ `verified` (`locked=true`).
-
----
-
-## 10. Format Kompetisi, Jadwal & Klasemen
-
-Format didukung: `round_robin`, `single_elimination`, `group_then_knockout`. Urutan peringkat klasemen menerapkan registry `tiebreakers` berurutan.
+### 4.3 Admin Arena Dashboard (`/?view=admin`)
+- **Tata Letak Simetris:** Container terpusat `max-w-7xl mx-auto` bebas void layar lebar.
+- **Beranda Metrik & Medali 1-Tap:** Total kontingen, total laga, laga live, dan stepper medali cepat.
+- **Verifikasi Berkas Kontingen:** Validasi status NISN atlet (`VERIFIED`, `REJECTED`, `PENDING`) dan cetak ID card QR.
+- **Drawing Bracket & Penjadwalan:** Bagan interaktif 4 besar dan deteksi bentrok jadwal wasit.
+- **Verifikasi Hasil Dua Tahap:** Pengawas pertandingan mengesahkan BAP dan memicu kalkulasi poin klasemen.
+- **Scanner Tiket Gate Masuk:** Validasi QR e-tiket, cegah double check-in, dan akumulasi poin suporter sekolah.
+- **Sinkronisasi Durasi Waktu:** Pengaturan durasi babak dan timeout yang langsung sinkron ke konsol wasit.
+- **Pencadangan & Ekspor:** Backup/Restore database JSON 1-klik dan ekspor laporan PDF/Excel resmi.
 
 ---
 
-## 11. Requirement Fungsional
+## 5. Kebutuhan Non-Fungsional (NFR)
 
-- Admin: `FR-ADM-01` s/d `FR-ADM-18` (P0/P1/P2)
-- Panitia: `FR-OFF-01` s/d `FR-OFF-11` (P0/P1/P2)
-- Publik: `FR-PUB-01` s/d `FR-PUB-09` (P0/P1/P2)
-- Konsol Lapangan Cabor: `timed_goals`, `rally_set`, `map_series` (lihat [09-wireframes-and-ui.md](./09-wireframes-and-ui.md)).
-
----
-
-## 12. Requirement Non-Fungsional
-
-`NFR-01` s/d `NFR-10` (LCP < 2,5s, realtime < 3s, touch response < 100ms, RLS, privasi pemain, audit logs, zona waktu UTC/WIB).
+- **LCP Portal Publik:** $< 2,0$ detik pada jaringan 4G.
+- **Latensi Skor Realtime:** $< 3$ detik dari meja wasit ke publik.
+- **Respons Sentuh Tablet:** $< 80$ milidetik dengan konfirmasi haptik/visual.
+- **Keamanan:** Cookie HTTP-only, proteksi RBAC, dan masking NISN pada data publik.
+- **Audit Trail:** Perekaman lengkap seluruh aksi void dan override skor.
+- **Ketahanan Offline:** Penyimpanan antrean lokal di tablet saat sinyal GOR terputus dengan auto-sync.
+- **Aksesibilitas:** WCAG 2.1 AA, border tegas `#CBD5E1`, bayangan kartu halus, dan bebas warna teks coklat/pudar.
 
 ---
 
-## 13. Rute Halaman
+## 6. Daftar Rujukan Dokumen Spesifikasi
 
-- Publik: `/`, `/c/[slug]`, `/c/[slug]/m/[matchId]`, `/c/[slug]/t/[teamId]`
-- Auth: `/login`
-- Admin: `/admin`, `/admin/competitions`, `/admin/teams`, `/admin/players`, `/admin/venues`, `/admin/officials`, `/admin/audit`
-- Panitia: `/official`, `/official/match/[id]`
-
----
-
-## 14. Roadmap & Acceptance Criteria
-
-Fase 0 (Fondasi) $\rightarrow$ Fase 1 (Inti + Sepakbola) $\rightarrow$ Fase 2 (Bulutangkis & Refactor) $\rightarrow$ Fase 3 (Format & Futsal/Voli) $\rightarrow$ Fase 4 (Esport & Offline Sync). Rincian per fase terdokumentasi di [07-success-metrics.md](./07-success-metrics.md).
-
----
-
-## 15. Persyaratan Pengujian
-
-Unit test (Vitest) **wajib** untuk seluruh fungsi murni di `src/sports/*` dan modul perhitungan `core/*`.
-
----
-
-## 16. Definition of Done (per fitur)
-
-Terdokumentasi lengkap di [07-success-metrics.md](./07-success-metrics.md).
-
----
-
-## 17. Pertanyaan Terbuka
-
-Terdokumentasi lengkap di [07-success-metrics.md](./07-success-metrics.md).
-
----
-
-## 18. Catatan Penutup untuk Agent
-
-- Prioritaskan **kebenaran aturan** dan **kemudahan input Panitia** di atas fitur tambahan.
-- Jika ragu antara "generik tapi rumit" dan "sederhana tapi jalan", pilih sederhana dulu, lalu refactor saat cabang berikutnya menuntutnya.
-- Jangan menebak aturan olahraga. Jika aturan tidak tercantum di template, tanyakan atau minta pemilik produk menambahkan ke template.
+1. [00-index.md](./00-index.md) — Panduan Kerja & Indeks Dokumen PRD
+2. [01-executive-summary.md](./01-executive-summary.md) — Visi, Tujuan & Batasan Produk
+3. [02-target-personas.md](./02-target-personas.md) — Matriks Hak Akses & Glosarium Teknis
+4. [03-user-stories.md](./03-user-stories.md) — Kebutuhan Fungsional FR-ADM, FR-OFF, FR-PUB
+5. [04-functional-specs.md](./04-functional-specs.md) — Mesin Aturan, Template Cabor & State Machine
+6. [05-user-flows.md](./05-user-flows.md) — Alur Pengguna Operasional Lengkap & Diagram Interaksi
+7. [06-non-functional-requirements.md](./06-non-functional-requirements.md) — Spesifikasi Kebutuhan Non-Fungsional
+8. [07-success-metrics.md](./07-success-metrics.md) — Roadmap, Kasus Uji & Definition of Done
+9. [08-software-architecture.md](./08-software-architecture.md) — Arsitektur Modular Monolith & Model Data
+10. [09-wireframes-and-ui.md](./09-wireframes-and-ui.md) — Desain Antarmuka & Ilustrasi Wireframe Tiga Konsol
+11. [10-product-context.md](./10-product-context.md) — Konteks Produk & Brand MMFC I MTsN 3 Blitar
+12. [11-decisions.md](./11-decisions.md) — Architectural Decision Records (ADR-001 s/d ADR-014)

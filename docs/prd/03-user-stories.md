@@ -1,91 +1,78 @@
-# 03. Kebutuhan Fungsional & User Stories
+# 03. Kebutuhan Fungsional & User Stories (Functional Specs & Stories)
 
 **Dokumen PRD — Bagian 3/12**  
 **Produk:** Sauma Arena (Platform Manajemen Pertandingan Multi-Cabang Olahraga)  
-**Versi:** 1.0  
+**Edisi Turnamen:** Milad Matsanega Futsal Competition I (MMFC I) • MTsN 3 Blitar  
+**Versi:** 2.0  
 
 ---
 
-## 3.1 Kebutuhan Fungsional Administrator (`FR-ADM`)
+## 3.1 Kebutuhan Fungsional Administrator Arena (`FR-ADM`)
 
 | ID | Kebutuhan Fungsional | Prioritas | Kriteria Penerimaan (Acceptance Criteria) |
 |---|---|:---:|---|
-| **FR-ADM-01** | Autentikasi & Dashboard Ringkas | **P0** | Admin dapat login/logout dengan aman; melihat kartu statistik kompetisi aktif, jumlah tim terdaftar, dan jadwal pertandingan hari ini. |
-| **FR-ADM-02** | Manajemen Kompetisi (CRUD) | **P0** | Admin dapat memilih cabang olahraga, menentukan nama turnamen, slug URL unik, musim, rentang tanggal pelaksanaan, dan visibilitas (`public` / `private`). |
-| **FR-ADM-03** | Konfigurasi & Override Aturan Cabor | **P0** | Admin dapat melihat template standar cabor dan menerapkan override aturan spesifik turnamen (misal: durasi babak, batas pergantian) yang divalidasi lewat `validateRules`. |
-| **FR-ADM-04** | Pembekuan Aturan (*Rules Snapshot*) | **P0** | Saat status kompetisi diubah menjadi `ongoing`, konfigurasi aturan otomatis disalin permanen ke `rules_snapshot` dan terkunci dari perubahan global. |
-| **FR-ADM-05** | Master Data Tim & Pemain | **P0 (CRUD)<br>P1 (CSV)** | Admin dapat menambah/mengedit/menghapus peserta dan pemain, serta mengunggah data pemain via berkas CSV/Excel. |
-| **FR-ADM-06** | Pendaftaran Tim & Roster Kompetisi | **P0** | Admin dapat menetapkan tim ke dalam kompetisi, membagi grup/seeding, menyetujui status kepesertaan, serta mengunci nomor punggung roster. |
-| **FR-ADM-07** | Manajemen Venue & Lapangan | **P0** | Admin dapat mendaftarkan nama venue/GOR, jumlah lapangan (Court 1, Court 2), alamat, dan catatan teknis operasional. |
-| **FR-ADM-08** | Manajemen Fase Kompetisi (*Stages*) | **P0** | Admin dapat membuat fase pertandingan bertingkat dan memilih format turnamen (`round_robin`, `single_elimination`, `group_then_knockout`). |
-| **FR-ADM-09** | Plotting Jadwal & Deteksi Bentrok | **P0 (Manual)<br>P1 (Oto)** | Admin dapat mengatur jadwal pertandingan; sistem otomatis memvalidasi dan memperingatkan jika terjadi bentrok jadwal venue, tim, atau wasit. |
-| **FR-ADM-10** | Manajemen Akun Panitia / Perangkat | **P0** | Admin dapat membuat dan mengundang akun panitia/wasit (`official`), mengatur status aktif, dan mereset kredensial jika diperlukan. |
-| **FR-ADM-11** | Penugasan Panitia Lapangan | **P0** | Admin dapat menugaskan satu atau lebih panitia ke suatu laga berdasarkan tugasnya (`referee`, `scorekeeper`, `judge`, `assistant`). |
-| **FR-ADM-12** | Tinjauan & Verifikasi Hasil Laga | **P0** | Admin dapat meninjau timeline event laga yang telah berstatus `finished`, lalu melakukan pengesahan resmi menjadi `verified` (`locked = true`). |
-| **FR-ADM-13** | Pembukaan Kunci Laga Terverifikasi | **P0** | Jika terjadi kesalahan fatal, Admin dapat membuka kunci laga terverifikasi kembali ke `finished` dengan mewajibkan alasan tertulis dan mencatatnya ke audit log. |
-| **FR-ADM-14** | Putusan Administratif (WO, Tunda, Batal) | **P0** | Admin dapat mengubah status pertandingan menjadi `walkover`, `postponed`, atau `cancelled` dengan pencatatan skor default sesuai regulasi cabor. |
-| **FR-ADM-15** | Peninjau Audit Log | **P1** | Admin dapat memeriksa jejak audit sistem dengan filter nama aktor, nomor laga, rentang tanggal, dan tipe aksi perubahan data. |
-| **FR-ADM-16** | Manajemen Protes & Sengketa Tim | **P1** | Admin dapat mendokumentasikan protes resmi tim, mengubah status sengketa (`open`, `accepted`, `rejected`), dan menuliskan resolusi putusan. |
-| **FR-ADM-17** | Manajemen Skorsing & Akumulasi Kartu | **P1** | Sistem menghitung akumulasi kartu kuning/merah secara otomatis sesuai template dan memberikan peringatan larangan tanding pada laga berikutnya. |
-| **FR-ADM-18** | Ekspor Dokumen Resmi (BAP / PDF / CSV) | **P2** | Admin dapat mengunduh Berita Acara Pertandingan (BAP) dan tabel klasemen resmi dalam format PDF siap cetak atau CSV. |
+| **FR-ADM-01** | Autentikasi & Sesi RBAC Aman | **P0** | Superadmin dan Pengawas Pertandingan dapat login via `/api/auth/login`, sesi aman via cookie terenkripsi, dan proteksi rute admin. |
+| **FR-ADM-02** | Dashboard Beranda & 4 Metrik Kunci | **P0** | Menyajikan ringkasan instan: Total Kontingen (14 Tim), Total Laga (17 Pertandingan), Status Laga Berjalan (LIVE), dan Puncak Klasemen Medali. |
+| **FR-ADM-03** | Klasemen Perolehan Medali 1-Tap | **P0** | Stepper cepat tombol `+` dan `-` untuk mencatat medali Emas, Perak, Perunggu tanpa modal rumit, otomatis mengurutkan kontingen teratas. |
+| **FR-ADM-04** | Manajemen Kompetisi & Freeze Rules | **P0** | Admin dapat membuat kompetisi baru dan membekukan seluruh regulasi teknis ke `rules_snapshot` saat status beralih ke `ongoing`. |
+| **FR-ADM-05** | Master Data Cabor, Kategori & Lapangan | **P0** | Pengelolaan data cabor Futsal, batas usia pelajar SD/MI, nomor tanding, dan master venue Lapangan Futsal Seabless Srengat. |
+| **FR-ADM-06** | Verifikasi Berkas Kontingen Atlet | **P0** | Antarmuka peninjauan dokumen pendaftaran sekolah: verifikasi NISN resmi, surat rekomendasi kepala madrasah, dengan aksi `VERIFIED`, `REJECTED`, atau `PENDING`. |
+| **FR-ADM-07** | Database Atlet & Cetak ID Card Ber-QR | **P0** | Tabel database seluruh atlet terdaftar lengkap dengan fungsi ekspor dan pencetakan ID Card ber-QR code untuk akses gerbang atlet Gate Barat. |
+| **FR-ADM-08** | Interactive Drawing Bracket Bagan Gugur | **P0** | Alat interaktif pengundian bagan grup dan fase gugur (Semifinal, Bronze Match, Grand Final) dengan opsi seeding manual atau acak. |
+| **FR-ADM-09** | Penjadwalan Laga & Deteksi Bentrok Wasit | **P0** | Plotting jam tanding, nomor lapangan, dan penugasan wasit dengan deteksi bentrok otomatis jika wasit/lapangan terjadwal ganda. |
+| **FR-ADM-10** | Live Score Override Darurat Lapangan | **P0** | Kemampuan darurat bagi komisioner untuk mengoreksi skor, menit, atau status pertandingan jika terjadi kegagalan teknis pada konsol wasit. |
+| **FR-ADM-11** | Verifikasi BAP Dua Tahap (Pengawas) | **P0** | Pengawas Pertandingan memeriksa kecocokan BAP digital wasit, menandatangani persetujuan, dan mengunci hasil permanen (`locked = true`). |
+| **FR-ADM-12** | Otomasi Propagasi Klasemen & Bagan | **P0** | Saat laga berstatus `verified`, sistem otomatis menghitung ulang poin klasemen (3/1/0) dan memajukan tim pemenang ke slot babak semifinal/final. |
+| **FR-ADM-13** | Konfigurasi Kuota Tiket Masuk Stadion | **P0** | Mengatur batas kuota harian e-tiket suporter rombongan dan penonton umum di Lapangan Seabless. |
+| **FR-ADM-14** | Scanner Check-in Tiket Gate Masuk | **P0** | Pemindai kamera/barcode untuk validasi QR e-tiket di pintu masuk; mencegah *double check-in* dan mengkreditkan poin kehadiran suporter sekolah. |
+| **FR-ADM-15** | Rekapitulasi & Moderasi Best Supporter | **P0** | Tinjauan agregat nilai tribun suporter madrasah yang menggabungkan poin tiket, kreativitas yel-yel, atribut, maskot, dan sanksi kedisiplinan. |
+| **FR-ADM-16** | Sinkronisasi Pengaturan Durasi Waktu | **P0** | Panel pengaturan durasi babak 1 & 2 (15 menit), akumulasi foul (5), time-out (1 menit), dan jeda istirahat yang langsung sinkron ke konsol wasit. |
+| **FR-ADM-17** | Kustomisasi Banner Hero & Portal Publik | **P1** | Pengaturan preset banner stadion, slider transparansi overlay, pengaturan posisi dan ukuran logo resmi MMFC I MTsN 3 Blitar. |
+| **FR-ADM-18** | Manajemen Akun Panitia & Hak Akses | **P1** | Pengelolaan pengguna panpel, wasit, dan juri suporter dengan penetapan role RBAC. |
+| **FR-ADM-19** | Cadangkan & Pulihkan Database (JSON) | **P1** | Fitur 1-klik unduh seluruh database turnamen dalam format JSON terenkripsi dan restore instan jika terjadi bencana perangkat keras. |
+| **FR-ADM-20** | Ekspor Laporan Resmi (PDF & Excel) | **P1** | Ekspor lembar BAP resmi, klasemen akhir fase grup, dan rekapitulasi pencetak gol terbanyak (Sepatu Emas) untuk arsip Dispora & Kemenag. |
+| **FR-ADM-21** | Jejak Audit Log Perubahan Skor & Hasil | **P1** | Perekaman otomatis setiap aksi void gol, perubahan jadwal, dan pembukaan kunci laga (`actor_id`, `timestamp`, `reason`). |
+| **FR-ADM-22** | Tata Letak Dasbor Simetris (*Centered*) | **P0** | Konten dasbor admin dibungkus dalam container simetris `max-w-7xl mx-auto` sehingga tampil seimbang dan proporsional di layar lebar (*widescreen*). |
 
 ---
 
-## 3.2 Kebutuhan Fungsional Panitia & Wasit Lapangan (`FR-OFF`)
+## 3.2 Kebutuhan Fungsional Wasit Lapangan (`FR-OFF`)
 
 | ID | Kebutuhan Fungsional | Prioritas | Kriteria Penerimaan (Acceptance Criteria) |
 |---|---|:---:|---|
-| **FR-OFF-01** | Beranda Tugas Lapangan | **P0** | Panitia yang login langsung disajikan daftar pertandingan yang ditugaskan kepadanya, dengan laga aktif hari ini berada di posisi teratas. |
-| **FR-OFF-02** | Konfirmasi Lineup Pertandingan | **P0** | Panitia memeriksa dan memilih pemain starter serta cadangan dari daftar roster resmi sebelum pertandingan dimulai. |
-| **FR-OFF-03** | Konsol Pertandingan Terkonfigurasi | **P0** | Antarmuka konsol pertandingan dibentuk secara dinamis dari `consoleConfig` modul cabor (tombol, nama aksi, dan skema input disesuaikan cabor). |
-| **FR-OFF-04** | Pencatatan Event Cepat & Validasi | **P0** | Panitia mencatat skor atau pelanggaran dalam 1–2 ketukan; setiap aksi diverifikasi murni oleh `validateEvent` (input tidak sah langsung ditolak). |
-| **FR-OFF-05** | Pembatalan / Void Event | **P0** | Panitia dapat membatalkan event yang salah input sebelum laga selesai dengan alasan wajib; sistem otomatis menghitung ulang skor secara instan. |
-| **FR-OFF-06** | Timer Pertandingan Andal | **P0** | Untuk cabor berbasis waktu (`timed_goals`), timer dapat dimulai, dijeda, dan ditambah waktu tanpa desinkronisasi saat tab diminimalkan (dihitung dari timestamp). |
-| **FR-OFF-07** | Transisi Periode & Selesai Laga | **P0** | Panitia dapat menutup babak/set/map dan menandai laga selesai (`finished`) saat syarat kemenangan pada modul cabor terpenuhi. |
-| **FR-OFF-08** | Ringkasan BAP Lapangan | **P0** | Sebelum menyerahkan hasil ke Admin, panitia dapat meninjau ringkasan statistik (skor akhir, pencetak poin, kartu, pencatat waktu). |
-| **FR-OFF-09** | Mode Offline Lapangan | **P1** | Saat koneksi internet di venue putus, event disimpan lokal dengan UUID unik dan nomor urut `seq`, lalu disinkronkan otomatis tanpa duplikasi saat online kembali. |
-| **FR-OFF-10** | Tanda Tangan Digital Wasit | **P2** | Wasit utama dan kapten kedua tim dapat membubuhkan tanda tangan digital langsung pada layar sentuh perangkat sebagai bukti pengesahan BAP. |
-| **FR-OFF-11** | Laporan Insiden Khusus (*Match Incident*) | **P1** | Panitia dapat mencatat insiden khusus (kericuhan, cedera parah, kerusakan fasilitas) dalam bentuk catatan berkas resmi. |
+| **FR-OFF-01** | Jadwal Pertandingan Tugas Hari Ini | **P0** | Wasit/juri yang membuka konsol langsung disajikan daftar laga tugasnya, dengan laga LIVE atau laga berikutnya berada di posisi teratas. |
+| **FR-OFF-02** | Konfirmasi Kehadiran & Lineup Roster | **P0** | Pemeriksaan daftar 10–12 atlet yang sah bertanding dan penentuan 5 pemain starter di lapangan. |
+| **FR-OFF-03** | Kendali Stopwatch Digital (Running/Stop) | **P0** | Stopwatch taktil besar: Waktu kotor (*running clock*) di babak grup; Waktu bersih (*stop clock*) di babak gugur. Tombol Jalankan/Jeda, Bel Kick-Off, dan Reset. |
+| **FR-OFF-04** | Pencatatan Gol Cepat per Menit | **P0** | Tombol raksasa `+ 1 GOL` dengan perekaman otomatis menit pertandingan, pemilihan atlet pencetak gol, dan jenis gol (biasa, penalti, own goal). |
+| **FR-OFF-05** | Papan Skor Digital Kontras Tinggi | **P0** | Tampilan angka skor besar tabular di tengah konsol dengan nama kontingen sekolah dan lencana tim A / tim B. |
+| **FR-OFF-06** | Akumulasi Pelanggaran Tim (Fouls 5/5) | **P0** | Stepper pencatat foul dengan 5 lampu indikator; saat mencapai 5/5, sistem membunyikan bel peringatan dan mengaktifkan second penalty 10m. |
+| **FR-OFF-07** | Kuota & Hitung Mundur Time-Out (60 Dtk) | **P0** | Pemicu time-out 60 detik (1x per babak tiap tim) dengan audio sinyal bel pada sisa 10 detik. |
+| **FR-OFF-08** | Sanksi Disiplin Kartu Wasit | **P0** | Pencatatan kartu kuning dan kartu merah langsung; otomatis mengonversi akumulasi 2 kartu kuning menjadi kartu merah keluar lapangan. |
+| **FR-OFF-09** | Pembatalan Gol / Koreksi Kesalahan (*Void*) | **P0** | Kemampuan membatalkan gol atau event yang salah input sebelum laga berakhir dengan pencatatan alasan wajib. |
+| **FR-OFF-10** | Form Penilaian Tribun Suporter Madrasah | **P0** | Formulir khusus juri suporter: memilih sekolah kontingen, menilai 5 kriteria positif (+poin), dan mencatat sanksi pelanggaran (-poin). |
+| **FR-OFF-11** | Pratinjau & Tanda Tangan Digital BAP | **P0** | Modal pratinjau berita acara pertandingan lengkap dengan tanda tangan digital 3 pihak: Wasit 1, Wasit 2, dan Pengawas Pertandingan. |
+| **FR-OFF-12** | Form Pelaporan Insiden Khusus Komdis | **P1** | Formulir formal pencatatan insiden perusakan, kericuhan, atau pelanggaran disiplin berat untuk disidangkan Komisi Disiplin. |
+| **FR-OFF-13** | Ketahanan Jaringan & Mode Offline GOR | **P1** | Jika koneksi internet di venue putus, event tetap dicatat di local storage tablet dan otomatis disinkronkan saat sinyal kembali normal. |
 
 ---
 
-## 3.3 Kebutuhan Fungsional Publik Tanpa Login (`FR-PUB`)
+## 3.3 Kebutuhan Fungsional Publik & Suporter (`FR-PUB`)
 
 | ID | Kebutuhan Fungsional | Prioritas | Kriteria Penerimaan (Acceptance Criteria) |
 |---|---|:---:|---|
-| **FR-PUB-01** | Direktori Turnamen Publik | **P0** | Pengunjung dapat melihat daftar kejuaraan yang dipublikasikan, dengan turnamen "Sedang Berlangsung" ditampilkan di bagian paling atas. |
-| **FR-PUB-02** | Halaman Utama Kompetisi Modular | **P0** | Halaman kompetisi memiliki tab navigasi terstruktur: **Jadwal**, **Hasil**, **Klasemen**, **Bagan Gugur (Bracket)**, dan **Statistik**. |
-| **FR-PUB-03** | Halaman Detail Laga Live | **P0** | Menampilkan papan skor besar, status waktu/set, timeline peristiwa (menit demi menit / poin demi poin), dan susunan pemain dengan update live tanpa refresh. |
-| **FR-PUB-04** | Profil Tim & Atlet Publik | **P1** | Menampilkan profil tim, daftar pemain aktif, jadwal tanding, dan riwayat skor tim tanpa mengekspos data pribadi sensitif (tanggal lahir/kontak disembunyikan). |
-| **FR-PUB-05** | URL Ramah Sosial Media (OpenGraph) | **P0** | Setiap URL kompetisi dan pertandingan menyajikan preview meta-tag OpenGraph lengkap (nama laga, skor live, logo cabor) saat dibagikan ke media sosial. |
-| **FR-PUB-06** | Label Transparansi Hasil | **P0** | Pertandingan yang belum disahkan Admin diberi label penjelas *"Belum Resmi"*, dan hasilnya tidak dimasukkan ke dalam tabel klasemen publik sebelum `verified`. |
-| **FR-PUB-07** | Filter Pencarian Jadwal | **P1** | Publik dapat memfilter laga berdasarkan tanggal, nama tim sekolah, lapangan venue, atau babak pertandingan. |
-| **FR-PUB-08** | QR Code Cepat Laga & Turnamen | **P1** | Tersedia tombol generate QR code untuk discan oleh penonton di tribun menggunakan kamera HP guna membuka halaman live score laga bersangkutan. |
-| **FR-PUB-09** | Tim Favorit & Notifikasi Web | **P2** | Pengunjung dapat menandai tim favorit (disimpan di browser lokal) dan menerima notifikasi web push saat tim favorit bertanding atau mencetak skor. |
-
----
-
-## 3.4 Desain Antarmuka Konsol Lapangan Berdasarkan Model Skor
-
-UI konsol pertandingan dibentuk secara otomatis melalui konfigurasi `consoleConfig` modul cabor:
-
-1. **Model `timed_goals` (Sepakbola & Futsal):**
-   - Scoreboard digital besar dengan kontras tinggi.
-   - Timer babak terintegrasi (Mulai, Jeda, Tambah Waktu Hentian).
-   - Tombol cepat per tim: **+ Gol**, **Kartu Kuning**, **Kartu Merah**, **Pelanggaran (Foul)**, **Pergantian Pemain**, dan **Timeout**.
-   - Pemilihan pemain instan dari daftar pemain yang sedang berada di atas lapangan.
-   - Indikator khusus futsal: Penghitung akumulasi foul per babak (peringatan saat mencapai 5 foul dan penanda penalti 10m).
-
-2. **Model `rally_set` (Bola Voli & Bulutangkis):**
-   - Scoreboard set dan perolehan poin set berjalan.
-   - Tombol raksasa **+1 Poin** untuk Tim Kiri dan Tim Kanan yang mudah ditekan satu tangan.
-   - Tombol **Undo Cepat** untuk koreksi poin seketika.
-   - Penanda interval otomatis (misal poin 11 pada bulutangkis) dan tombol timeout resmi.
-   - Sistem otomatis mengunci set saat syarat kemenangan tercapai dan membuka set berikutnya.
-
-3. **Model `map_series` (Esport):**
-   - Daftar Game/Map 1 hingga N sesuai aturan best-of.
-   - Form ringkas input skor map: Pemenang Map, Skor Kills/Rounds, dan durasi pertandingan.
-   - Perhitungan otomatis agregat kemenangan seri (misal: 2-0 atau 2-1 pada format BO3).
-
-*Ilustrasi wireframe visual lengkap untuk masing-masing model konsol lapangan dapat dilihat pada dokumen [09-wireframes-and-ui.md](./09-wireframes-and-ui.md).*
+| **FR-PUB-01** | Akses Bebas Hambatan Tanpa Login | **P0** | Publik dapat membuka seluruh informasi portal publik langsung dari browser tanpa mewajibkan registrasi atau pembuatan akun. |
+| **FR-PUB-02** | Navbar Atas dengan Pencarian Reaktif | **P0** | Input pencarian instan pada navbar untuk mencari tim atau sekolah kontingen madrasah dengan hasil dropdown cepat. |
+| **FR-PUB-03** | Hero Spotlight MMFC I & Scoreboard Ticker | **P0** | Banner atletik berlatar stadion navy, sorotan logo resmi Matsanega, jadwal, lokasi Seabless Srengat, dan ticker informasi waktu. |
+| **FR-PUB-04** | Sub-Navigation Bar 8 Tab Docked | **P0** | Tab bar berlabuh (*sticky*) di bawah navbar dengan indikator aktif biru royal: Info, Live, Jadwal, Grup, Bracket, Tim, Statistik, Suporter. |
+| **FR-PUB-05** | Tab Informasi & Juknis (Bento Grid) | **P0** | Bento grid olahraga berkontras tinggi: kartu durasi 2x15M, kartu disiplin wasit (visual kartu kuning & merah), kartu penghargaan, dan panduan gate access. |
+| **FR-PUB-06** | Unduh Berkas Juknis Resmi (PDF 2.4 MB) | **P0** | Tombol taktil unduh berkas juknis teknis pertandingan resmi Dispora/Asosiasi Futsal dengan notifikasi konfirmasi. |
+| **FR-PUB-07** | Tab Live Scoreboard & Timeline Laga | **P0** | Skor langsung pertandingan aktif (< 3 detik latensi), menit gol, nama pencetak gol, akumulasi foul tim, dan status time-out. |
+| **FR-PUB-08** | Tab Jadwal & Hasil Pertandingan | **P0** | Daftar lengkap 17 laga dengan filter fase grup A–D, semifinal, final, tautan Google Maps venue, dan lencana status verifikasi resmi. |
+| **FR-PUB-09** | Tab Klasemen Fase Grup (Grup A–D) | **P0** | Tabel klasemen 14 tim kontingen dengan metrik P, W, D, L, GF, GA, GD, Poin Suporter (SP), PTS, dan penanda kelolosan juara grup ke semifinal. |
+| **FR-PUB-10** | Tab Bagan Eliminasi (Knockout Bracket) | **P0** | Bagan gugur interaktif Babak 4 Besar (Semifinal 1 & 2), Perebutan Juara 3 (Bronze Match), dan Grand Final dengan propagasi pemenang otomatis. |
+| **FR-PUB-11** | Tab Profil 14 Tim Kontingen Madrasah | **P0** | Profil kontingen sekolah, foto logo madrasah, roster 10–12 atlet, pelatih kepala, dan catatan akumulasi kartu. |
+| **FR-PUB-12** | Tab Statistik & Sepatu Emas (Top Scorer) | **P0** | Peringkat pencetak gol terbanyak turnamen, grafik batang produktivitas per tim, dan grafik garis menit terciptanya gol. |
+| **FR-PUB-13** | Tab & Leaderboard Best Supporter | **P0** | Peringkat suporter madrasah berdasarkan akumulasi poin kehadiran tiket, atribut, yel-yel, maskot, serta pengurangan poin sanksi. |
+| **FR-PUB-14** | Modal Wizard Pendaftaran Kontingen | **P0** | Formulir pendaftaran 4 langkah bagi sekolah peserta: biodata tim, roster 10–12 atlet dengan NISN, unggah surat rekomendasi kepala madrasah. |
+| **FR-PUB-15** | Modal Pemesanan E-Tiket Masuk Stadion | **P0** | Pemilihan kategori tiket suporter rombongan atau umum, konfirmasi reservasi, dan penerbitan kode booking QR tiket masuk. |
+| **FR-PUB-16** | Desain Biru Sporty & Anti-Samar | **P0** | Tampilan mode terang didominasi Putih-Biru Sporty Enerjik (`#1D63B8`), Navy (`#0C2340`), border tegas (`#CBD5E1`), dan bebas elemen teks bernuansa coklat/pudar. |

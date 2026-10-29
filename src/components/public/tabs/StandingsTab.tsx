@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { HelpCircle, ChevronLeft, ChevronRight, ListOrdered, ShieldCheck } from 'lucide-react';
+import { HelpCircle, ChevronLeft, ChevronRight, ListOrdered, ShieldCheck, Crown } from 'lucide-react';
 import { getTeamLogoUrl } from '@/mocks/teamLogos';
 import { SportCode } from '@/types';
 import { PublicPageHeader } from '../layout/PublicPageHeader';
@@ -18,7 +18,7 @@ interface StandingRow {
   goalsFor: number;
   goalsAgainst: number;
   goalDifference: number;
-  sp: number; // Supporter Points (Poin Suporter)
+  sp: number; // Supporter Points
   points: number;
   isQualified: boolean;
 }
@@ -85,77 +85,80 @@ export const StandingsTab: React.FC<StandingsTabProps> = ({ sportCode = 'FUTSAL'
   );
 
   return (
-    <div className="space-y-6 animate-fadeIn">
+    <div className="space-y-6 sm:space-y-8 animate-fadeIn pb-6">
       {/* Public Page Header */}
       <PublicPageHeader
         icon={ListOrdered}
         category={`PERINGKAT FASE GRUP • ${sportCode}`}
-        title="Klasemen &amp; Kualifikasi"
-        description="Perolehan poin, selisih gol, rekor kemenangan, dan penentuan dua tim teratas yang melaju ke babak gugur."
+        title="Klasemen & Kualifikasi"
+        description="Perolehan poin, selisih gol, rekor kemenangan, dan penentuan juara grup yang melaju ke babak semifinal."
       />
 
       {/* Two-Stage Verification Notice */}
-      <div className="p-3.5 rounded-2xl bg-blue-500/10 border border-blue-500/20 text-blue-950 dark:text-blue-200 text-xs flex items-start gap-3">
-        <ShieldCheck className="w-4 h-4 text-[var(--color-arena-primary)] shrink-0 mt-0.5" />
+      <div className="p-4 rounded-xl bg-blue-50 dark:bg-sky-950/40 border-2 border-blue-200 dark:border-sky-800 text-[var(--text-main)] text-xs flex items-start gap-3 shadow-xs">
+        <ShieldCheck className="w-4 h-4 text-[#1D63B8] dark:text-sky-400 shrink-0 mt-0.5" />
         <div className="space-y-0.5">
-          <span className="font-barlow font-bold uppercase tracking-wider block text-xs">
-            Regulasi Klasemen Resmi &bull; Verifikasi Dua Tahap
+          <span className="font-barlow font-bold uppercase tracking-wider block text-xs text-[#1D63B8] dark:text-sky-300">
+            Regulasi Klasemen Resmi &bull; Verifikasi Berita Acara Pertandingan (BAP)
           </span>
-          <p className="text-[11px] text-[var(--text-muted)] leading-relaxed">
-            Klasemen resmi hanya mengakumulasi pertandingan yang telah berstatus <strong>✓ Terverifikasi Resmi</strong> oleh Admin turnamen. Hasil skor yang masih menunggu verifikasi juri lapangan tidak akan mengubah poin sebelum disahkan.
+          <p className="text-[11px] text-[var(--text-muted)] leading-relaxed font-sans">
+            Klasemen resmi diperbarui berdasarkan pertandingan yang telah berstatus <strong>✓ Terverifikasi Resmi</strong> oleh Pengawas Pertandingan. Hasil skor live lapangan otomatis dikunci setelah berita acara disahkan.
           </p>
         </div>
       </div>
 
-      {/* Render Futsal Standings (Grup A, B, C, D) */}
+      {/* Render Futsal Standings Grid (Grup A, B, C, D) */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
         {paginatedFutsalGroups.map((grp) => (
           <div
             key={grp.groupName}
-            className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] overflow-hidden shadow-xs"
+            className="rounded-xl border-2 border-slate-300 dark:border-slate-800 bg-[var(--bg-surface)] overflow-hidden shadow-sm hover:border-[#1D63B8]/60 transition-colors"
           >
-            <div className="px-5 py-3.5 bg-[var(--bg-muted)]/80 border-b border-[var(--border-subtle)] flex items-center justify-between">
-              <h3 className="font-bebas text-base text-[var(--text-main)] uppercase tracking-wider">
-                Klasemen {grp.groupName} &bull; Turnamen
+            <div className="px-5 py-3.5 bg-[var(--bg-muted)]/80 border-b-2 border-slate-200 dark:border-slate-800 flex items-center justify-between">
+              <h3 className="font-bebas text-base sm:text-lg text-[var(--text-main)] uppercase tracking-wider">
+                Klasemen {grp.groupName} &bull; MMFC I
               </h3>
-              <span className="text-[11px] text-[var(--text-muted)] font-medium">Juara Grup Lolos ke 4 Besar (Semifinal)</span>
+              <span className="text-[11px] text-[#1D63B8] dark:text-sky-400 font-semibold font-mono">
+                Juara Grup Lolos ke Semifinal
+              </span>
             </div>
 
-            <div className="overflow-x-auto">
-              <table className="w-full text-xs text-left">
-                <thead className="text-xs uppercase font-bold text-[var(--text-muted)] border-b border-[var(--border-subtle)] bg-[var(--bg-muted)]/40 font-barlow tracking-wider">
+            <div className="overflow-x-auto touch-pan-x">
+              <table className="w-full text-xs text-left border-collapse">
+                <thead className="text-xs uppercase font-bold text-[var(--text-muted)] border-b border-slate-200 dark:border-slate-800 bg-[var(--bg-muted)]/50 font-barlow tracking-wider">
                   <tr>
                     <th className="py-2.5 px-3 text-center w-8">#</th>
-                    <th className="py-2.5 px-3">Klub / Sekolah</th>
+                    <th className="py-2.5 px-3 min-w-[140px] sticky left-0 bg-[var(--bg-muted)] sm:static">Klub / Sekolah</th>
                     <th className="py-2.5 px-2 text-center">Mn</th>
                     <th className="py-2.5 px-2 text-center">M</th>
                     <th className="py-2.5 px-2 text-center">S</th>
                     <th className="py-2.5 px-2 text-center">K</th>
                     <th className="py-2.5 px-2 text-center font-bold">SG</th>
                     <th className="py-2.5 px-2 text-center font-bold text-amber-600 dark:text-amber-400" title="Poin Suporter">SP</th>
-                    <th className="py-2.5 px-3 text-center font-bold text-[var(--color-arena-primary)]">Poin</th>
+                    <th className="py-2.5 px-3 text-center font-bold text-[#1D63B8] dark:text-sky-400">Poin</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[var(--border-subtle)]">
+                <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
                   {grp.rows.map((row) => (
                     <tr
                       key={row.teamId}
-                      className={`hover:bg-[var(--bg-muted)]/40 transition-colors ${
-                        row.isQualified ? 'bg-emerald-500/5' : ''
+                      className={`hover:bg-[var(--bg-muted)]/50 transition-colors ${
+                        row.rank === 1 ? 'bg-amber-500/5 dark:bg-amber-500/10' : ''
                       }`}
                     >
                       <td className="py-2.5 px-3 text-center font-bold relative font-mono tabular-nums">
-                        {row.isQualified && (
-                          <div className="absolute left-0 top-0 bottom-0 w-1 bg-emerald-500 rounded-r" />
+                        {row.rank === 1 ? (
+                          <span className="w-5 h-5 rounded-md bg-[var(--color-arena-accent)] text-slate-950 font-mono font-black text-[10px] inline-flex items-center justify-center shadow-2xs">
+                            1
+                          </span>
+                        ) : (
+                          <span className="text-[var(--text-muted)] font-mono">{row.rank}</span>
                         )}
-                        <span className={row.isQualified ? 'text-emerald-700 dark:text-emerald-400 font-black' : 'text-[var(--text-muted)]'}>
-                          {row.rank}
-                        </span>
                       </td>
-                      <td className="py-2.5 px-3 font-semibold text-[var(--text-main)]">
+                      <td className="py-2.5 px-3 font-semibold text-[var(--text-main)] sticky left-0 bg-[var(--bg-surface)] sm:static">
                         <div className="flex items-center gap-2">
-                          <img src={row.logoUrl} alt={row.teamName} className="w-6 h-6 object-contain shrink-0" />
-                          <span className="truncate max-w-[130px] font-barlow font-bold text-sm tracking-wide">{row.teamName}</span>
+                          <img src={row.logoUrl} alt={row.teamName} className="w-6 h-6 object-contain shrink-0" loading="lazy" />
+                          <span className="truncate max-w-[140px] sm:max-w-none font-barlow font-bold text-sm tracking-wide">{row.teamName}</span>
                         </div>
                       </td>
                       <td className="py-2.5 px-2 text-center font-mono tabular-nums text-[var(--text-muted)]">{row.played}</td>
@@ -164,7 +167,7 @@ export const StandingsTab: React.FC<StandingsTabProps> = ({ sportCode = 'FUTSAL'
                       <td className="py-2.5 px-2 text-center font-mono tabular-nums text-red-600 font-medium">{row.lost}</td>
                       <td className="py-2.5 px-2 text-center font-mono tabular-nums font-bold">{row.goalDifference > 0 ? `+${row.goalDifference}` : row.goalDifference}</td>
                       <td className="py-2.5 px-2 text-center font-mono tabular-nums font-bold text-amber-600 dark:text-amber-400">{row.sp}</td>
-                      <td className="py-2.5 px-3 text-center font-teko tabular-nums font-bold text-lg text-[var(--color-arena-primary)] leading-none">
+                      <td className="py-2.5 px-3 text-center font-teko tabular-nums font-bold text-lg text-[#1D63B8] dark:text-sky-400 leading-none">
                         {row.points}
                       </td>
                     </tr>
@@ -176,9 +179,9 @@ export const StandingsTab: React.FC<StandingsTabProps> = ({ sportCode = 'FUTSAL'
         ))}
       </div>
 
-      {/* Tombol Melanjutkan Halaman (Hanya Muncul Jika Total Tabel Lebih dari 10) */}
+      {/* Pagination Bar (Only visible if > 10 tables) */}
       {totalTables > 10 && (
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 p-4 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] text-xs font-semibold shadow-xs">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 p-4 rounded-xl bg-[var(--bg-surface)] border-2 border-slate-300 dark:border-slate-800 text-xs font-semibold shadow-xs">
           <div className="text-[var(--text-muted)]">
             Menampilkan tabel{' '}
             <strong className="text-[var(--text-main)] font-mono">
@@ -192,7 +195,7 @@ export const StandingsTab: React.FC<StandingsTabProps> = ({ sportCode = 'FUTSAL'
               type="button"
               disabled={currentPage === 1}
               onClick={() => setCurrentPage((p: number) => Math.max(1, p - 1))}
-              className="btn-tactile px-3.5 py-2 rounded-xl border border-[var(--border-subtle)] text-[var(--text-main)] hover:bg-[var(--bg-muted)] disabled:opacity-40 disabled:cursor-not-allowed transition-colors flex items-center gap-1.5"
+              className="btn-tactile px-3.5 py-2 rounded-lg border border-slate-300 dark:border-slate-700 text-[var(--text-main)] hover:bg-[var(--bg-muted)] disabled:opacity-40 disabled:cursor-not-allowed transition-colors flex items-center gap-1.5 cursor-pointer"
             >
               <ChevronLeft className="w-4 h-4" />
               <span>Halaman Sebelumnya</span>
@@ -202,7 +205,7 @@ export const StandingsTab: React.FC<StandingsTabProps> = ({ sportCode = 'FUTSAL'
               type="button"
               disabled={currentPage >= totalPages}
               onClick={() => setCurrentPage((p: number) => Math.min(totalPages, p + 1))}
-              className="btn-tactile px-4 py-2 rounded-xl bg-[var(--color-arena-primary)] text-white hover:bg-[var(--color-arena-primary-hover)] font-bold disabled:opacity-40 disabled:cursor-not-allowed shadow-xs transition-colors flex items-center gap-1.5"
+              className="btn-tactile px-4 py-2 rounded-lg bg-[#1D63B8] text-white hover:bg-[#154D92] font-bold disabled:opacity-40 disabled:cursor-not-allowed shadow-xs transition-colors flex items-center gap-1.5 cursor-pointer"
             >
               <span>Lanjutkan Halaman</span>
               <ChevronRight className="w-4 h-4" />
@@ -211,16 +214,16 @@ export const StandingsTab: React.FC<StandingsTabProps> = ({ sportCode = 'FUTSAL'
         </div>
       )}
 
-      {/* Keterangan Singkatan Kolom & Regulasi Klasemen (Selalu Muncul) */}
-      <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-5 sm:p-6 shadow-xs space-y-3.5">
-        <div className="flex items-center gap-2.5 text-sm font-barlow font-bold uppercase tracking-wider text-[var(--text-main)] pb-2.5 border-b border-[var(--border-subtle)]">
-          <HelpCircle className="w-4 h-4 text-[var(--color-arena-primary)] shrink-0" />
+      {/* Keterangan Singkatan Kolom & Regulasi Klasemen */}
+      <div className="rounded-xl border-2 border-slate-300 dark:border-slate-800 bg-[var(--bg-surface)] p-5 sm:p-6 shadow-xs space-y-3.5">
+        <div className="flex items-center gap-2.5 text-sm font-barlow font-bold uppercase tracking-wider text-[var(--text-main)] pb-2.5 border-b border-slate-200 dark:border-slate-800">
+          <HelpCircle className="w-4 h-4 text-[#1D63B8] dark:text-sky-400 shrink-0" />
           <span>
-            Keterangan Singkatan Kolom &amp; Regulasi Klasemen {sportCode === 'FUTSAL' ? 'FFI' : sportCode}
+            Keterangan Singkatan Kolom &amp; Regulasi Klasemen Futsal MMFC I
           </span>
         </div>
 
-        <div className="space-y-3 text-xs text-[var(--text-muted)] leading-relaxed">
+        <div className="space-y-3 text-xs text-[var(--text-muted)] leading-relaxed font-sans">
           <div>
             <span className="font-bold text-[var(--text-main)] block mb-1">Singkatan Kolom:</span>
             <p>
@@ -244,10 +247,10 @@ export const StandingsTab: React.FC<StandingsTabProps> = ({ sportCode = 'FUTSAL'
             </span>
             <p>
               Apabila dua atau lebih tim memiliki poin akhir yang sama, urutan klasemen ditentukan melalui:{' '}
-              <strong className="text-[var(--text-main)]">1. Selisih Gol / Selisih Skor (SG)</strong> di seluruh laga grup &rarr;{' '}
+              <strong className="text-[var(--text-main)]">1. Selisih Gol (SG)</strong> di seluruh laga grup &rarr;{' '}
               <strong className="text-[var(--text-main)]">2. Produktivitas Gol Memasukkan (GM)</strong> &rarr;{' '}
-              <strong className="text-[var(--text-main)]">3. Head-to-Head</strong> hasil pertemuan langsung antar tim terkait &rarr;{' '}
-              <strong className="text-[var(--text-main)]">4. Nilai Fair Play</strong> berdasarkan akumulasi kartu wasit.
+              <strong className="text-[var(--text-main)]">3. Head-to-Head</strong> hasil pertemuan langsung &rarr;{' '}
+              <strong className="text-[var(--text-main)]">4. Nilai Fair Play</strong> berdasarkan kartu wasit.
             </p>
           </div>
         </div>

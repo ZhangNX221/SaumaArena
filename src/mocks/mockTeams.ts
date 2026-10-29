@@ -2,7 +2,7 @@ import { Team } from '@/types';
 import { getTeamLogoUrl } from './teamLogos';
 
 export const initialTeams: Team[] = [
-  // ================= GRUP A =================
+  // Group A
   {
     id: 'team-sdi-kardina',
     name: 'SDI KARDINA MASSA',
@@ -58,7 +58,7 @@ export const initialTeams: Team[] = [
     officials: [{ id: 'off-m8-1', name: 'Subhan Malik', role: 'Pelatih Kepala', phone: '081234567803' }],
   },
 
-  // ================= GRUP B =================
+  // Group B
   {
     id: 'team-sdn1-srengat',
     name: 'UPT SDN 1 SRENGAT',
@@ -129,7 +129,7 @@ export const initialTeams: Team[] = [
     officials: [{ id: 'off-m13b-1', name: 'Rahmat Hidayat', role: 'Pelatih Kepala', phone: '081234567807' }],
   },
 
-  // ================= GRUP C =================
+  // Group C
   {
     id: 'team-min2-blitar',
     name: 'MIN 2 BLITAR',
@@ -183,7 +183,7 @@ export const initialTeams: Team[] = [
     officials: [{ id: 'off-m13c-1', name: 'M. Syafi\'i', role: 'Pelatih Kepala', phone: '081234567810' }],
   },
 
-  // ================= GRUP D =================
+  // Group D
   {
     id: 'team-mi-ploso',
     name: 'MI PLOSO KEDIRI',
@@ -254,3 +254,4 @@ export const initialTeams: Team[] = [
     officials: [{ id: 'off-m5-1', name: 'Eko Wahyudi', role: 'Pelatih Kepala', phone: '081234567814' }],
   },
 ];
+

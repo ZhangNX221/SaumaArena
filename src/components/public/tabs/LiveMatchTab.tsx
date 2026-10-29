@@ -5,6 +5,7 @@ import { Layers, ChevronDown, Maximize, Minimize } from 'lucide-react';
 import { initialMatches } from '@/mocks/tournamentData';
 import { MatchEvent, SportCode, Match } from '@/types';
 import { usePersistentState } from '@/hooks/usePersistentState';
+import { SportRuleSettings, DEFAULT_SPORT_RULES } from '@/config/sportRules';
 import { LiveMatchHeader } from './live/LiveMatchHeader';
 import { LiveMatchScoreboard } from './live/LiveMatchScoreboard';
 import { LiveMatchGoalHistory } from './live/LiveMatchGoalHistory';
@@ -24,6 +25,13 @@ export const LiveMatchTab: React.FC<LiveMatchTabProps> = ({
   const [isPreviewMode, setIsPreviewMode] = useState<boolean>(false);
 
   const [matches] = usePersistentState<Match[]>('sauma_arena_matches', initialMatches);
+  const [matchRules] = usePersistentState<Record<string, SportRuleSettings>>(
+    'sauma_arena_match_rules',
+    DEFAULT_SPORT_RULES
+  );
+
+  const adminDurationMinutes = matchRules[sportCode]?.durationPerPeriod || 20;
+  const adminInitialSeconds = adminDurationMinutes * 60;
 
   const availableMatches = matches.filter(
     (m) => m.stage === 'GROUP' || m.status === 'LIVE' || m.status === 'COMPLETED'
@@ -39,10 +47,10 @@ export const LiveMatchTab: React.FC<LiveMatchTabProps> = ({
   const hasLiveMatch = matches.some((m) => m.status === 'LIVE') || selectedMatch.status === 'LIVE';
   const isLiveActive = hasLiveMatch || isPreviewMode;
 
-  // State skor & timer live real-time (default 0 jika belum dimulai)
+  // State skor & timer live real-time (default durasi dari pengaturan admin)
   const [scoreA, setScoreA] = useState<number>(selectedMatch.scoreA ?? 0);
   const [scoreB, setScoreB] = useState<number>(selectedMatch.scoreB ?? 0);
-  const [timerSeconds, setTimerSeconds] = useState<number>(1200); // 20:00
+  const [timerSeconds, setTimerSeconds] = useState<number>(adminInitialSeconds);
   const [isTimerRunning, setIsTimerRunning] = useState<boolean>(selectedMatch.status === 'LIVE');
   const [currentPeriod, setCurrentPeriod] = useState<string>(
     selectedMatch.status === 'LIVE' ? 'Babak 1' : 'Pemanasan / Menunggu Kickoff'
@@ -68,8 +76,8 @@ export const LiveMatchTab: React.FC<LiveMatchTabProps> = ({
     setFoulsB(0);
     setTimeoutsA(0);
     setTimeoutsB(0);
-    setTimerSeconds(1200);
-  }, [selectedMatchId, selectedMatch]);
+    setTimerSeconds(adminInitialSeconds);
+  }, [selectedMatchId, selectedMatch, adminInitialSeconds]);
 
   // Simulasi pergerakan waktu live real-time (ticking down)
   useEffect(() => {

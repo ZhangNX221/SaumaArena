@@ -2,7 +2,6 @@
 
 import React, { useState } from 'react';
 import {
-  Clock,
   Play,
   ArrowRight,
   Shield,
@@ -53,8 +52,8 @@ export const RefereeDashboardHome: React.FC<RefereeDashboardHomeProps> = ({
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto pb-16 animate-fadeIn">
-      {/* 1. Header Banner - Quieter: Subtle 1px border, no loud gradient or blobs */}
-      <div className="p-6 sm:p-7 rounded-2xl bg-[#0D1E30] text-white border border-[#1C3B5B] relative overflow-hidden transition-all duration-200">
+      {/* 1. Header Banner - Crisp border, athletic pitch green header */}
+      <div className="p-6 sm:p-7 rounded-2xl bg-[#071F14] text-white border border-emerald-900/40 shadow-xs relative overflow-hidden transition-all duration-200">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-5 relative z-10">
           <div className="space-y-1">
             <h1 className="font-bebas text-3xl sm:text-4xl tracking-wide uppercase text-white leading-none">
@@ -69,7 +68,7 @@ export const RefereeDashboardHome: React.FC<RefereeDashboardHomeProps> = ({
             <button
               type="button"
               onClick={onGoToMatchCenter}
-              className="btn-tactile flex items-center gap-2 px-5 py-3 rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] active:scale-[0.98] text-white font-barlow font-bold text-xs uppercase tracking-wider transition-all duration-150 min-h-[46px]"
+              className="btn-tactile flex items-center gap-2 px-5 py-3 rounded-xl bg-[var(--color-arena-primary)] hover:bg-[var(--color-arena-primary-hover)] active:scale-[0.98] text-white font-barlow font-bold text-xs uppercase tracking-wider transition-all duration-150 min-h-[46px] cursor-pointer shadow-xs"
             >
               <Play className="w-4 h-4 fill-current" />
               <span>Buka Catat Skor</span>
@@ -142,7 +141,7 @@ export const RefereeDashboardHome: React.FC<RefereeDashboardHomeProps> = ({
             <button
               type="button"
               onClick={onGoToSchedule}
-              className="text-xs text-[var(--color-arena-primary)] hover:underline font-barlow font-bold uppercase tracking-wider flex items-center gap-1 transition-colors"
+              className="text-xs text-[var(--color-arena-primary)] hover:underline font-barlow font-bold uppercase tracking-wider flex items-center gap-1 transition-colors cursor-pointer"
             >
               <span>Semua Jadwal</span>
               <ArrowRight className="w-3.5 h-3.5" />
@@ -187,7 +186,7 @@ export const RefereeDashboardHome: React.FC<RefereeDashboardHomeProps> = ({
                     <button
                       type="button"
                       onClick={onGoToMatchCenter}
-                      className="btn-tactile px-4 py-2 rounded-xl bg-[var(--color-arena-primary)] hover:bg-[var(--color-arena-primary-hover)] active:scale-[0.98] text-white text-xs font-barlow font-bold uppercase tracking-wider transition-all duration-150"
+                      className="btn-tactile px-4 py-2 rounded-xl bg-[var(--color-arena-primary)] hover:bg-[var(--color-arena-primary-hover)] active:scale-[0.98] text-white text-xs font-barlow font-bold uppercase tracking-wider transition-all duration-150 cursor-pointer"
                     >
                       Buka Meja Laga
                     </button>
@@ -195,7 +194,7 @@ export const RefereeDashboardHome: React.FC<RefereeDashboardHomeProps> = ({
                     <button
                       type="button"
                       onClick={onGoToSchedule}
-                      className="btn-tactile px-4 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] text-[var(--text-main)] text-xs font-barlow font-bold uppercase tracking-wider hover:bg-[var(--bg-muted)] active:scale-[0.98] transition-all duration-150"
+                      className="btn-tactile px-4 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] text-[var(--text-main)] text-xs font-barlow font-bold uppercase tracking-wider hover:bg-[var(--bg-muted)] active:scale-[0.98] transition-all duration-150 cursor-pointer"
                     >
                       Rincian Laga
                     </button>

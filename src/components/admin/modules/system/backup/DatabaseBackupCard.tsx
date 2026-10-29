@@ -57,7 +57,7 @@ export const DatabaseBackupCard: React.FC = () => {
     <div className="space-y-6">
       <div className="p-6 rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
         <div className="flex items-start gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-blue-500/10 text-[var(--color-arena-primary)] flex items-center justify-center shrink-0">
+          <div className="w-12 h-12 rounded-2xl bg-[var(--color-arena-primary-light)] text-[var(--color-arena-primary)] flex items-center justify-center shrink-0">
             <Database className="w-6 h-6" />
           </div>
           <div className="space-y-1">

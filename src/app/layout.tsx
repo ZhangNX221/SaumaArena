@@ -30,9 +30,9 @@ const barlowCondensed = Barlow_Condensed({
 });
 
 export const metadata: Metadata = {
-  title: 'Sauma Arena',
+  title: 'Sauma Arena — MMFC I 2026 MTsN 3 Blitar',
   description:
-    'Sistem manajemen turnamen terpadu untuk panitia, peserta, dan penonton. Dilengkapi portal publik, papan klasemen, live score, dan penilaian best supporter.',
+    'Sistem manajemen turnamen terpadu dan match center resmi Milad Matsanega Futsal Competition I (MMFC I). Papan klasemen, live score real-time, juknis turnamen, dan penilaian best supporter madrasah.',
   keywords: [
     'Sauma Arena',
     'Turnamen Futsal SD MI',
@@ -57,25 +57,21 @@ export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   maximumScale: 5,
-  themeColor: '#1D63B8',
+  themeColor: '#0D5C3A',
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <html
       lang="id"
-      className={`${inter.variable} ${teko.variable} ${bebasNeue.variable} ${barlowCondensed.variable}`}
+      className={`${inter.variable} ${teko.variable} ${bebasNeue.variable} ${barlowCondensed.variable} antialiased`}
+      suppressHydrationWarning
     >
-      <head>
-        <link rel="icon" href="/favicon.ico" sizes="any" />
-        <link rel="icon" href="/icon.png" type="image/png" sizes="192x192" />
-        <link rel="apple-touch-icon" href="/apple-icon.png" />
-      </head>
-      <body className="min-h-screen bg-[var(--bg-page)] text-[var(--text-main)] font-[var(--font-sans)] antialiased transition-colors duration-150">
+      <body className="min-h-screen bg-[var(--bg-page)] text-[var(--text-main)] transition-colors duration-150">
         {children}
       </body>
     </html>

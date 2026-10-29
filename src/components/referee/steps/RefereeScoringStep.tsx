@@ -16,6 +16,10 @@ interface RefereeScoringStepProps {
   onToggleTimer: () => void;
   onResetTimer: () => void;
   onAddMinute?: () => void;
+  onSubtractMinute?: () => void;
+  onSetTimerSeconds?: (seconds: number) => void;
+  onChangePeriod?: (period: string) => void;
+  adminDurationMinutes?: number;
   onUpdateScore: (team: 'A' | 'B', delta: number) => void;
   onQuickIncident?: (type: EventType, team: 'A' | 'B', label: string) => void;
   events?: MatchEvent[];
@@ -33,6 +37,10 @@ export const RefereeScoringStep: React.FC<RefereeScoringStepProps> = ({
   onToggleTimer,
   onResetTimer,
   onAddMinute,
+  onSubtractMinute,
+  onSetTimerSeconds,
+  onChangePeriod,
+  adminDurationMinutes = 20,
   onUpdateScore,
   onQuickIncident,
   events,
@@ -65,6 +73,10 @@ export const RefereeScoringStep: React.FC<RefereeScoringStepProps> = ({
           onToggleTimer={onToggleTimer}
           onResetTimer={onResetTimer}
           onAddMinute={onAddMinute}
+          onSubtractMinute={onSubtractMinute}
+          onSetTimerSeconds={onSetTimerSeconds}
+          onChangePeriod={onChangePeriod}
+          adminDurationMinutes={adminDurationMinutes}
           onUpdateScore={onUpdateScore}
           onQuickIncident={onQuickIncident}
           events={events}

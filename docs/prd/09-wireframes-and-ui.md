@@ -2,223 +2,194 @@
 
 **Dokumen PRD — Bagian 9/12**  
 **Produk:** Sauma Arena (Platform Manajemen Pertandingan Multi-Cabang Olahraga)  
-**Versi:** 1.0  
-**Inspirasi Desain:** Sofascore / Flashscore (Hierarki data padat rapi), Toornament (Dasbor jadwal & bagan), Strava / Nike Training Club (Tema gelap atletik, tipografi tebal `Bebas Neue` & `Teko`).
+**Edisi Turnamen:** Milad Matsanega Futsal Competition I (MMFC I) • MTsN 3 Blitar  
+**Versi:** 2.0  
+**Desain Sistem:** Dual Athletic Sports Theme (Mode Terang: Putih-Biru Sporty Enerjik `#1D63B8`, Border Tegas `#CBD5E1`, Bayangan Halus, Bebas Coklat; Mode Gelap: Emas Royal `#F59E0B` & Midnight Navy `#07131F`). Tipografi: `Bebas Neue`, `Teko`, `Barlow Condensed`, & `Plus Jakarta Sans`.
 
 ---
 
-## 9.1 Wireframe 1: Admin Matchday Command Center (`/admin/competitions/[id]`)
-
-Pusat kendali panitia utama untuk memantau seluruh lapangan secara simultan, mengganti status laga (1 ketukan), dan override skor instan.
+## 9.1 Wireframe 1: Portal Publik — Beranda & Bento Grid Informasi (`/`)
 
 ```
-┌──────────────────────────────────────────────────────────────────────────────────────────────┐
-│ [ SAUMA ARENA ]   Turnamen Futsal Pelajar 2026   [🟢 Online • Sinkron]  [🌙] [Profil Admin ▼] │
-├──────────────────────────────────────────────────────────────────────────────────────────────┤
-│ ◄ Kembali ke Daftar Kompetisi                                                                │
-│                                                                                              │
-│ BABAK PENYISIHAN GRUP • GOR FLOBAMORA                                                        │
-│ [Ringkasan] [Plotting Jadwal & Juri] [Live Monitor & Override] [Bagan Gugur] [Klasemen Grup] │
-├──────────────────────────────────────────────────────────────────────────────────────────────┤
-│ Status Filter: [ Semua (12) ] [ 🔴 Live (2) ] [ Terjadwal (8) ] [ Selesai (2) ]   [🔍 Cari...]│
-├──────────────────────────────────────────────────────────────────────────────────────────────┤
-│ ┌──────────────────────────────────────────────┐ ┌──────────────────────────────────────────┐ │
-│ │ Laga #04 • Lapangan A             🔴 LIVE    │ │ Laga #05 • Lapangan B         TERJADWAL  │ │
-│ │ Babak 1 (14:22) • Wasit: Yohanes S.          │ │ Mulai: 15:30 WITA • Wasit: Robert M.     │ │
-│ ├──────────────────────────────────────────────┤ ├──────────────────────────────────────────┤ │
-│ │  SMAN 1 Kupang                 SMA Taruna    │ │  SMA Kristen 1               SMK 2 Kupang│ │
-│ │  ┌───────────────┐ ┌─────────┐ ┌───────────┐ │ │  ┌─────────────┐ ┌─────────┐ ┌─────────┐ │ │
-│ │  │ [ - ] [ +Poin]│ │  3 - 1  │ │[+Poin] [-]│ │ │  │ [ - ] [+Poin]│ │  0 - 0  │ │[+Poin][-]│ │ │
-│ │  └───────────────┘ └─────────┘ └───────────┘ │ │  └─────────────┘ └─────────┘ └─────────┘ │ │
-│ │  Foul: 3/5                     Foul: 5/5 ⚠️  │ │  Roster: 12 Atlet            Roster: 10  │ │
-│ ├──────────────────────────────────────────────┤ ├──────────────────────────────────────────┤ │
-│ │ [✓ Set Selesai]    [Monitor Juri]  [Kustom ⚙]│ │ [▶ Mulai Laga]   [Monitor Juri] [Kustom ⚙]│ │
-│ └──────────────────────────────────────────────┘ └──────────────────────────────────────────┘ │
-│ ┌──────────────────────────────────────────────┐ ┌──────────────────────────────────────────┐ │
-│ │ Laga #03 • Lapangan A             ✓ SELESAI  │ │ Laga #06 • Lapangan A         TERJADWAL  │ │
-│ │ Skor Akhir: 4 - 2 • Disahkan oleh Admin      │ │ Mulai: 16:45 WITA • Wasit: Antonius K.   │ │
-│ └──────────────────────────────────────────────┘ └──────────────────────────────────────────┘ │
-└──────────────────────────────────────────────────────────────────────────────────────────────┘
-```
-
----
-
-## 9.2 Wireframe 2: Konsol Mobile Panitia — Model `timed_goals` (Sepakbola & Futsal)
-
-Antarmuka smartphone satu tangan untuk wasit / pencatat meja lapangan di pinggir garis lapangan.
-
-```
-┌────────────────────────────────────────┐
-│ [◄] Laga #04 • Futsal Putra  [🟢 Sinkron]│
-│ GOR Flobamora Lapangan A               │
-├────────────────────────────────────────┤
-│           BABAK 1 • 14:20              │
-│       [⏸ JEDA]   [+1 Menit]            │
-├────────────────────────────────────────┤
-│    SMAN 1 KUPANG       SMA TARUNA      │
-│         3          -        1          │
-│                                        │
-│    Akumulasi Foul      Akumulasi Foul  │
-│      [ ● ● ● ○ ○ ]       [ ● ● ● ● ● ] ⚠️│
-│                         (Penalti 10m!) │
-├────────────────────────────────────────┤
-│ AKSI TIM A (SMAN 1)  │ AKSI TIM B (TARUNA) │
-├──────────────────────┼─────────────────┤
-│ [ ⚽ + GOL TIM A ]   │ [ ⚽ + GOL TIM B ]│
-│ [ 🟨 KARTU KUNING ]  │ [ 🟨 KARTU KUNING]│
-│ [ 🟥 KARTU MERAH ]   │ [ 🟥 KARTU MERAH] │
-│ [ ⚠️ +1 FOUL ]       │ [ ⚠️ +1 FOUL ]    │
-│ [ 🔄 GANTI PEMAIN ]  │ [ 🔄 GANTI PEMAIN]│
-│ [ ⏱️ TIMEOUT (1) ]   │ [ ⏱️ TIMEOUT (0) ]│
-├────────────────────────────────────────┤
-│ TIMELINE PERISTIWA CEPAT:              │
-│ • 14' ⚽ Gol: #10 Marselino (SMAN 1)   │
-│ • 11' ⚠️ Foul ke-5: #04 Dimas (Taruna) │
-│ • 08' 🟨 Kartu: #07 Kevin (Taruna)     │
-│ [ ↩️ BATALKAN / VOID EVENT TERAKHIR ]  │
-├────────────────────────────────────────┤
-│ [ SELESAIKAN BABAK 1 ] [ LAPOR INSIDEN]│
-└────────────────────────────────────────┘
+┌────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│ [ SAUMA ARENA • MMFC I ]    [ 🔍 Cari tim atau sekolah kontingen... ]       [ LOGIN PORTAL ] [ DAFTAR] [🌙]│
+├────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+│ [ HERO SPOTLIGHT MMFC I • MTsN 3 BLITAR ]                                                               │
+│                                                                                                        │
+│  MILAD MATSANEGA FUTSAL COMPETITION I (MMFC I)                ┌───────────────────────────────┐        │
+│  ----------------------------------------------               │       [ LOGO RESMI 2026 ]     │        │
+│  Turnamen futsal antarpelajar tingkat SD/MI se-derajat        │     MATSANEGA FUTSAL CHAMP.   │        │
+│  memperebutkan Piala Bergilir MMFC I & Best Supporter.        └───────────────────────────────┘        │
+│                                                                                                        │
+│  [📅 3 - 4 November 2026]  [📍 Lapangan Seabless Srengat]  [🏆 14 Tim (4 Grup)]  [⏱️ 2x15 Menit/Laga]   │
+├────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+│ [DOCKED SUB-NAVBAR]: [1. INFORMASI] [2. LIVE🔴] [3. JADWAL] [4. GRUP] [5. BRACKET] [6. TIM] [7. STATS]  │
+├────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+│ PANDUAN & REGULASI RESMI • FUTSAL                                                                      │
+│ INFORMASI & PETUNJUK TEKNIS                                                                            │
+│                                                                                                        │
+│ ┌────────────────────────────────────────────────────────────────────────────────────────────────────┐ │
+│ │ 📄 BUKU PANDUAN RESMI (DISPORA & ASOSIASI FUTSAL)                                                  │ │
+│ │ FORMAT PERTANDINGAN FUTSAL & ALUR TURNAMEN                     [ 📥 UNDUH JUKNIS (PDF) • 2.4 MB ] │ │
+│ │ 14 Tim dibagi 4 Grup (A, B, C, D) setengah kompetisi.         Edisi Revisi Technical Meeting Resmi │ │
+│ └────────────────────────────────────────────────────────────────────────────────────────────────────┘ │
+│                                                                                                        │
+│ ┌──────────────────────────────┐ ┌──────────────────────────────┐ ┌──────────────────────────────────┐ │
+│ │ 30                 [⏱️ WAKTU] │ │ 2              [⚠️ KARTU]    │ │ 1·2·3             [🏆 PENGHARGAAN] │ │
+│ │ 2 × 15 MENIT                 │ │ AKUMULASI 2 KARTU            │ │ PIALA BERGILIR & SERTIFIKAT    │ │
+│ │ Kotor di Grup • Bersih Gugur │ │ Larangan Tampil 1 Laga Lanjut│ │ Juara 1, 2, 3 • Sepatu Emas    │ │
+│ │ Running clock babak grup;    │ │ 2 Kartu kuning di laga beda  │ │ Juara 1-3 piala tetap, sepatu  │ │
+│ │ Stop clock babak 4 besar.    │ │ kena sanksi skorsing 1 laga. │ │ emas top scorer, e-sertifikat. │ │
+│ │ [GRUP: 2x15M] [FINAL: BERSIH]│ │ [2 KUNING = SKORS] [MERAH=KKM│ │ [PIALA BERGILIR] [E-SERTIFIKAT] │ │
+│ └──────────────────────────────┘ └──────────────────────────────┘ └──────────────────────────────────┘ │
+│                                                                                                        │
+│ ┌────────────────────────────────────────────────────────────────────────────────────────────────────┐ │
+│ │ 📍 INFORMASI VENUE & AKSES STADION: LAPANGAN FUTSAL SEABLESS SRENGAT BLITAR  [ 🗺️ BUKA MAPS ]      │ │
+│ │ • Gate Barat: Pintu Khusus VIP, Wasit, Atlet & Official Kontingen (Wajib ID Card)                  │ │
+│ │ • Gate Timur 1: Pintu Khusus Rombongan Suporter Madrasah (Scan QR Tiket Masuk +1 Poin)              │ │
+│ │ • Gate Timur 2: Pintu Masuk Penonton Reguler & Umum                                                 │ │
+│ └────────────────────────────────────────────────────────────────────────────────────────────────────┘ │
+└────────────────────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 9.3 Wireframe 3: Konsol Mobile Panitia — Model `rally_set` (Bola Voli & Bulutangkis)
-
-Desain tombol raksasa ergonomis untuk wasit bulutangkis atau operator voli. Poin dapat dicatat dalam 1 ketukan cepat (<100ms response).
+## 9.2 Wireframe 2: Konsol Tablet Wasit Meja Lapangan (`/?view=referee`)
 
 ```
-┌────────────────────────────────────────┐
-│ [◄] Semifinal Bulutangkis Tunggal [🟢] │
-│ Match #12 • Lapangan 3                 │
-├────────────────────────────────────────┤
-│              GAME KE-2                 │
-│         (Game 1: 21 - 18)              │
-├────────────────────────────────────────┤
-│  A. GINTING (SMA 1)   J. CHRISTIE (SMA 2)│
-│                                        │
-│        19                     20       │
-│                                        │
-│   [ MATCH POINT ]        [ DEUCE! ]    │
-│   (Selisih minimal 2 poin atau cap 30) │
-├────────────────────────────────────────┤
-│ ┌──────────────────┐ ┌───────────────┐ │
-│ │                  │ │               │ │
-│ │     +1 POIN      │ │    +1 POIN    │ │
-│ │   A. GINTING     │ │  J. CHRISTIE  │ │
-│ │    (KIRI)        │ │    (KANAN)    │ │
-│ │                  │ │               │ │
-│ └──────────────────┘ └───────────────┘ │
-├────────────────────────────────────────┤
-│ [ ↩️ UNDO POIN ]   [ ⏱️ INTERVAL 60s ] │
-├────────────────────────────────────────┤
-│ Riwayat Game:                          │
-│ • Game 1: 21 - 18 (22 menit) Selesai   │
-│ • Game 2: Sedang Berlangsung (19 - 20) │
-├────────────────────────────────────────┤
-│ [ TUTUP GAME & KUNCI ] [ PINDAH SISI ] │
-└────────────────────────────────────────┘
+┌────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│ [◄ DAFTAR LAGA]   KONSOL JURI MEJA • LAPANGAN SEABLESS SRENGAT            [ 🟢 ONLINE • SINKRON ]      │
+├────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+│                                PAPAN SKOR & STOPWATCH DIGITAL                                          │
+│ ┌────────────────────────────────────┐ ┌─────────────────────┐ ┌─────────────────────────────────────┐ │
+│ │ SDI KARDINA MASSA           [TIM A]│ │  WAKTU PERTANDINGAN │ │ [TIM B]                MIN 7 BLITAR │ │
+│ │                                    │ │       14:20         │ │                                     │ │
+│ │                3                   │ │                     │ │                  1                  │ │
+│ │                                    │ │   [ ▶ JALANKAN ]    │ │                                     │ │
+│ │  [ - ]        [ + 1 GOL ]          │ │   [ 🔔 BUNYIKAN BEL]│ │   [ - ]         [ + 1 GOL ]         │ │
+│ │                                    │ │   [ +1M ]  [RESET]  │ │                                     │ │
+│ │ FOUL 3/5: [● ● ● ○ ○]     [+ FOUL] │ └─────────────────────┘ │ FOUL 5/5: [● ● ● ● ●] ⚠️   [+ FOUL] │ │
+│ │ TIME-OUT: [ ⏱️ TO DIGUNAKAN (1) ]  │                         │ TIME-OUT: [ ⏱️ AMBIL TIME-OUT (0) ]  │ │
+│ │ KARTU: [🟨 KUNING (1)] [🟥 MERAH (0)│                         │ KARTU: [🟨 KUNING (2)] [🟥 MERAH (1)] │ │
+│ └────────────────────────────────────┘                         └─────────────────────────────────────┘ │
+├────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+│ RIWAYAT GOL PERTANDINGAN (TIMELINE EVENT)                                                 Total: 4 Gol │
+│ • 14' ⚽ SDI KARDINA MASSA: #10 Moch. Farel (Gol Biasa Lapangan)                                       │
+│ • 11' ⚠️ MIN 7 BLITAR: Akumulasi Foul ke-5 Tercapai (Second Penalty Aktif)                              │
+│ • 08' 🟨 MIN 7 BLITAR: #07 Dwi Cahyo (Kartu Kuning - Pelanggaran Menjegal)                              │
+│ • 04' ⚽ SDI KARDINA MASSA: #08 Rizky Pratama (Tendangan Bebas 10M)                                     │
+│ • 02' ⚽ MIN 7 BLITAR: #09 Ahmad Zaki (Gol Lapangan)                                                   │
+├────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+│ [ ↩️ ANULIR / VOID GOL TERAKHIR ]     [ 📝 FORM PENILAIAN SUPORTER ]      [ ✓ SELESAIKAN & SAHKAN BAP ]│
+└────────────────────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 9.4 Wireframe 4: Konsol Mobile Panitia — Model `map_series` (Esport Generik)
-
-Pencatatan seri best-of (BO3 / BO5) turnamen game kompetitif dengan durasi dan skor per map.
+## 9.3 Wireframe 3: Form Penilaian Skor Tribun Suporter Madrasah
 
 ```
-┌────────────────────────────────────────┐
-│ [◄] Grand Final MLBB (BO5)       [🟢] │
-│ Stage: Main Event Stage A              │
-├────────────────────────────────────────┤
-│       EVOS ACADEMY vs RRQ JUNIOR       │
-│          SERI SKOR:  2  -  1           │
-│         (Butuh 3 Kemenangan)           │
-├────────────────────────────────────────┤
-│ MAP 1 (Selesai):                       │
-│ Pemenang: EVOS ACADEMY (Skor: 18 - 11) │
-│ Durasi: 14 menit 10 detik              │
-├────────────────────────────────────────┤
-│ MAP 2 (Selesai):                       │
-│ Pemenang: RRQ JUNIOR (Skor: 09 - 22)   │
-│ Durasi: 18 menit 45 detik              │
-├────────────────────────────────────────┤
-│ MAP 3 (Selesai):                       │
-│ Pemenang: EVOS ACADEMY (Skor: 15 - 13) │
-│ Durasi: 21 menit 02 detik              │
-├────────────────────────────────────────┤
-│ MAP 4 (SEDANG BERJALAN):               │
-│ Pemenang Map: [ EVOS ▼ ]               │
-│ Skor Kills: [ 12 ] vs [ 14 ]           │
-│ Durasi (Menit): [ 16 ]                 │
-│ [ SIMPAN HASIL MAP 4 ]                 │
-├────────────────────────────────────────┤
-│ [ SAHKAN HASIL SERI KE ADMIN ]         │
-└────────────────────────────────────────┘
+┌────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│ [◄ KEMBALI KE MEJA WASIT]   FORM PENILAIAN TRIBUN SUPORTER MADRASAH                                    │
+│ KONSOL JURI • PENILAIAN KONTINGEN SUPORTER TRIBUN MMFC I                                               │
+├────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+│ 1. PILIH SUPORTER SEKOLAH KONTINGEN:                                                                   │
+│ [ SDI KARDINA MASSA                                                                                 ▼ ]│
+├────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+│ 2. KRITERIA POSITIF & KREATIVITAS TRIBUN (+ POIN)                                   Subtotal: +45 Poin │
+│ [✓] Kekompakan & Gemuruh Yel-Yel Madrasah (+15 Poin)                                                   │
+│ [✓] Atribut, Bendera Raksasa & Seragam Kontingen (+10 Poin)                                            │
+│ [✓] Maskot Sekolah & Koreografi Gerak Berirama (+10 Poin)                                              │
+│ [ ] Instrumen Musik Akustik / Perkusi Teratur (+10 Poin)                                               │
+│ [✓] Kebersihan & Kerapian Tribun Pasca Laga (+15 Poin)                                                 │
+├────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+│ 3. SANKSI PELANGGARAN & KETERTIBAN (- POIN)                                        Pengurangan: 0 Poin │
+│ [ ] Penggunaan Flare / Asap / Bahan Berbahaya (-50 Poin)                                               │
+│ [ ] Ujaran Kebencian / Nyanyian Provokatif Rasis (-30 Poin)                                            │
+│ [ ] Pelemparan Botol / Benda Keras ke Lapangan (-25 Poin)                                              │
+│ [ ] Memanjat Pagar Pengaman Tribun Lapangan (-15 Poin)                                                 │
+│ [ ] Sampah Berserakan di Area Tribun Suporter (-10 Poin)                                               │
+├────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+│ 4. REKAPITULASI NILAI BERSIH:                                                                          │
+│ Poin Kehadiran Tiket Gate: +85 Poin  |  Nilai Kreativitas: +45 Poin  |  Sanksi: 0 Poin                 │
+│ TOTAL POIN SESI INI: 130 POIN                                                                          │
+│ Catatan Juri: "Suporter sangat kompak, koreografi rapi, dan tertib memungut sampah."                  │
+│                                                                                                        │
+│                                           [ BATAL ]   [ 💾 SIMPAN & KIRIM SKOR KE LEADERBOARD PUBLIK ] │
+└────────────────────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 9.5 Wireframe 5: Portal Publik Live Score & Kompetisi (`/c/[slug]`)
-
-Tampilan responsif tanpa login untuk penonton publik, suporter, dan jurnalis olahraga.
+## 9.4 Wireframe 4: Berita Acara Pertandingan (BAP) Digital 3 Pihak
 
 ```
-┌────────────────────────────────────────────────────────┐
-│ [ SAUMA ARENA ]              Turnamen Antar Pelajar 🔍 │
-├────────────────────────────────────────────────────────┤
-│ 🏆 PIALA GUBERNUR PELAJAR SE-NTT 2026                 │
-│ Futsal Putra • 16 Tim Peserta • GOR Flobamora Kupang   │
-├────────────────────────────────────────────────────────┤
-│ [ JADWAL ] [ HASIL ] [ KLASEMEN ] [ BAGAN ] [STATISTIK]│
-├────────────────────────────────────────────────────────┤
-│ 🔴 SEDANG BERLANGSUNG (LIVE)                           │
-│ ┌────────────────────────────────────────────────────┐ │
-│ │ Babak 2 • Menit 34'           Lapangan A  🔴 LIVE  │ │
-│ │                                                    │ │
-│ │ SMAN 1 Kupang                     SMA Taruna       │ │
-│ │     [ 3 ]                            [ 2 ]         │ │
-│ │                                                    │ │
-│ │ ⚽ Pencetak Gol:                                   │ │
-│ │ 12' Marselino, 24' Rizky      18' Dimas, 31' Kevin │ │
-│ │                                                    │ │
-│ │ ⚠️ Status: Belum Resmi (Menunggu Verifikasi Admin) │ │
-│ └────────────────────────────────────────────────────┘ │
-│                                                        │
-│ 📅 JADWAL PERTANDINGAN HARI INI                        │
-│ ┌────────────────────────────────────────────────────┐ │
-│ │ 15:30 WITA • Lapangan B               TERJADWAL    │ │
-│ │ SMA Kristen 1 Kupang vs SMK Negeri 2 Kupang        │ │
-│ └────────────────────────────────────────────────────┘ │
-│ ┌────────────────────────────────────────────────────┐ │
-│ │ 17:00 WITA • Lapangan A               TERJADWAL    │ │
-│ │ SMA Santo Arnoldus vs MAN Model Kupang             │ │
-│ └────────────────────────────────────────────────────┘ │
-└────────────────────────────────────────────────────────┘
+┌────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│ BERITA ACARA PERTANDINGAN (BAP) DIGITAL • MMFC I 2026                               [ CETAK DOKUMEN 🖨️] │
+├────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+│ Pertandingan #01 • Fase Grup A • Lapangan Futsal Seabless Srengat Blitar                               │
+│ Waktu: Selasa, 3 November 2026 • 08:00 - 08:35 WIB                                                     │
+│                                                                                                        │
+│ HASIL AKHIR PERTANDINGAN:                                                                              │
+│      SDI KARDINA MASSA (A1)    [ 3 ]   -   [ 1 ]    MIN 7 BLITAR (A2)                                  │
+│      (Babak 1: 2 - 1  •  Babak 2: 1 - 0)                                                               │
+│                                                                                                        │
+│ PENCETAK GOL:                                 PELANGGARAN & DISIPLIN KARTU:                            │
+│ • 02' #09 Ahmad Zaki (MIN 7)                  • 08' 🟨 #07 Dwi Cahyo (MIN 7 Blitar)                   │
+│ • 04' #08 Rizky Pratama (SDI Kardina)         • Akumulasi Foul Babak 1: Kardina (3) - MIN 7 (5)        │
+│ • 14' #10 Moch. Farel (SDI Kardina)           • Akumulasi Foul Babak 2: Kardina (2) - MIN 7 (3)        │
+│ • 26' #10 Moch. Farel (SDI Kardina)           • Time-Out: Kardina (Babak 1), MIN 7 (Babak 2)           │
+├────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+│ PENGESAHAN & TANDA TANGAN DIGITAL TIGA PIHAK:                                                          │
+│                                                                                                        │
+│       WASIT UTAMA 1                  WASIT UTAMA 2              PENGAWAS PERTANDINGAN (PP)             │
+│   [ ✍️ TERTANDATANGANI ]        [ ✍️ TERTANDATANGANI ]             [ ✍️ TERTANDATANGANI ]               │
+│   Yohanes S., S.Pd (Blitar)     Budi Santoso (Kediri)          Ust. H. Syamsul Arifin, M.Pd            │
+│   Kode Verifikasi: #BAP-8491    Kode Verifikasi: #BAP-8492     Status: RESMI DISAHKAN & DIKUNCI        │
+└────────────────────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 9.6 Wireframe 6: Bagan Gugur (Single Elimination Bracket)
-
-Visualisasi pohon turnamen dengan propagasi otomatis pemenang pertandingan (`next_match_id`).
+## 9.5 Wireframe 5: Admin Arena Dashboard Centered (`/?view=admin`)
 
 ```
-  PEREMPAT FINAL          SEMIFINAL                FINAL               JUARA
-┌────────────────┐
-│ SMAN 1 (4)     │───┐
-│ SMK 2  (1)     │   │  ┌────────────────┐
-└────────────────┘   ├──│ SMAN 1 (3)     │───┐
-┌────────────────┐   │  │ SMA Taruna (2) │   │
-│ SMA Taruna (2) │───┘  └────────────────┘   │
-│ SMA Kencana(0) │                           │  ┌────────────────┐
-└────────────────┘                           ├──│ SMAN 1         │─── [ 🏆 TROFI ]
-┌────────────────┐                           │  │ SMAN 3         │
-│ SMAN 3 (3)     │───┐                       │  └────────────────┘
-│ MAN Model (1)  │   │  ┌────────────────┐   │
-└────────────────┘   ├──│ SMAN 3 (2)     │───┘
-┌────────────────┐   │  │ SMA Santo (1)  │
-│ SMA Santo (2)  │───┘  └────────────────┘
-│ SMA Ragunan(1) │
-└────────────────┘
+┌────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│ [ SAUMA ARENA • ADMIN ]    RINGKASAN UTAMA                        [ 🌙 MODE ]  [ UST. SYAMSUL (SUPER) ▼]│
+├──────────────┬─────────────────────────────────────────────────────────────────────────────────────────┤
+│ [SIDEBAR]    │ ◄ CONTAINER UTAMA SIMETRIS TERPUSAT (max-w-7xl mx-auto px-6 py-7)                      │
+│              │                                                                                         │
+│ 📊 BERANDA   │ ┌─────────────────────────────────────────────────────────────────────────────────────┐ │
+│ • Ringkasan  │ │ BERANDA • RINGKASAN HARI INI                                                        │ │
+│ • Medali     │ │ RINGKASAN TURNAMEN & KLASEMEN PEROLEHAN MEDALI                                      │ │
+│              │ └─────────────────────────────────────────────────────────────────────────────────────┘ │
+│ ⚙️ PERSIAPAN  │                                                                                         │
+│ • Kompetisi  │ ┌───────────────┐ ┌───────────────┐ ┌───────────────┐ ┌───────────────────────────────┐ │
+│ • Cabor      │ │TOTAL KONTINGEN│ │TOTAL LAGASAH │ │LAGA BERJALAN  │ │PUNCAK KLASEMEN MEDALI         │ │
+│ • Kategori   │ │ 14 Tim        │ │ 17 Laga       │ │ 3 - 1         │ │ SDI KARDINA MASSA           │ │
+│ • Lapangan   │ │ 146 Atlet     │ │ 14 Grup, 3 Gug│ │ Menit 14 LIVE │ │ 1 Emas • 0 Perak • 0 Pgg    │ │
+│              │ └───────────────┘ └───────────────┘ └───────────────┘ └───────────────────────────────┘ │
+│ 👥 PESERTA   │                                                                                         │
+│ • Verifikasi │ ┌──────────────────────────────────────┐ ┌────────────────────────────────────────────┐ │
+│ • Data Atlet │ │ DISTRIBUSI TOTAL GOL PER KONTINGEN   │ │ DISTRIBUSI WAKTU MENIT TERCIPTANYA GOL     │ │
+│ • Tim/Sekolah│ │ [ GRAFIK BATANG GOL TIM A S/D TIM D ]│ │ [ GRAFIK GARIS MENIT 1-10, 11-20, 21-30 ]  │ │
+│              │ └──────────────────────────────────────┘ └────────────────────────────────────────────┘ │
+│ ⚽ LAGA       │                                                                                         │
+│ • Drawing    │ KLASEMEN PEROLEHAN MEDALI KONTINGEN (1-TAP STEPPER)              [ + TAMBAH KONTINGEN ] │
+│ • Jadwal     │ ┌───────┬───────────────────────────┬─────────────┬─────────────┬─────────────┬───────┐ │
+│ • Override   │ │ Pering│ Kontingen Sekolah         │  Emas (1-Tap│ Perak (1-Tap│ Perunggu    │ Total │ │
+│ • Verif BAP  │ ├───────┼───────────────────────────┼─────────────┼─────────────┼─────────────┼───────┤ │
+│              │ │  🥇 1 │ SDI KARDINA MASSA         │ [ - ] 1 [ +]│ [ - ] 0 [ +]│ [ - ] 0 [ +]│   1   │ │
+│ 🎫 TIKET     │ │  🥈 2 │ MIN 7 BLITAR              │ [ - ] 0 [ +]│ [ - ] 1 [ +]│ [ - ] 0 [ +]│   1   │ │
+│ • Kuota      │ │  🥉 3 │ UPT SDN 1 SRENGAT         │ [ - ] 0 [ +]│ [ - ] 0 [ +]│ [ - ] 1 [ +]│   1   │ │
+│ • Scanner    │ └───────┴───────────────────────────┴─────────────┴─────────────┴─────────────┴───────┘ │
+│ • Best Supp  │                                                                                         │
+│              │                                                                                         │
+│ 🛠️ SISTEM    │                                                                                         │
+│ • Akun User  │                                                                                         │
+│ • Waktu Laga │                                                                                         │
+│ • Banner     │                                                                                         │
+│ • Backup/Rest│                                                                                         │
+│ • Laporan PDF│                                                                                         │
+└──────────────┴─────────────────────────────────────────────────────────────────────────────────────────┘
 ```

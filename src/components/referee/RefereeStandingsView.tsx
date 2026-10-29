@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Trophy, GitBranch, ListOrdered } from 'lucide-react';
+import { GitBranch, ListOrdered } from 'lucide-react';
 import { GroupStandingsTab } from '@/components/admin/modules/matches/GroupStandingsTab';
 import { DrawingBracketTab } from '@/components/admin/modules/matches/DrawingBracketTab';
 
@@ -11,7 +11,7 @@ export const RefereeStandingsView: React.FC = () => {
   return (
     <div className="space-y-6 max-w-5xl mx-auto pb-16 animate-fadeIn">
       {/* Header Banner Juri */}
-      <div className="p-6 sm:p-7 rounded-2xl bg-[#0D1E30] text-white border border-[#1C3B5B] transition-all duration-200">
+      <div className="p-6 sm:p-7 rounded-2xl bg-[#071F14] text-white border border-emerald-900/40 shadow-xs transition-all duration-200">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-5">
           <div className="space-y-1">
             <h1 className="font-bebas text-3xl sm:text-4xl tracking-wide uppercase text-white leading-none">
@@ -23,13 +23,13 @@ export const RefereeStandingsView: React.FC = () => {
           </div>
 
           {/* Segmented Mode Selector */}
-          <div className="flex items-center gap-1 p-1 rounded-xl bg-[#07131F] border border-[#1C3B5B] shrink-0">
+          <div className="flex items-center gap-1 p-1 rounded-xl bg-[#04120C] border border-[#143D28] shrink-0">
             <button
               type="button"
               onClick={() => setActiveTab('STANDINGS')}
-              className={`btn-tactile px-4 py-2 rounded-lg font-barlow font-bold uppercase tracking-wider text-xs transition-all duration-150 active:scale-[0.98] flex items-center gap-1.5 ${
+              className={`btn-tactile px-4 py-2 rounded-lg font-barlow font-bold uppercase tracking-wider text-xs transition-all duration-150 active:scale-[0.98] flex items-center gap-1.5 cursor-pointer ${
                 activeTab === 'STANDINGS'
-                  ? 'bg-[#2563EB] text-white'
+                  ? 'bg-[var(--color-arena-primary)] text-white shadow-xs'
                   : 'text-slate-400 hover:text-white'
               }`}
             >
@@ -39,9 +39,9 @@ export const RefereeStandingsView: React.FC = () => {
             <button
               type="button"
               onClick={() => setActiveTab('BRACKET')}
-              className={`btn-tactile px-4 py-2 rounded-lg font-barlow font-bold uppercase tracking-wider text-xs transition-all duration-150 active:scale-[0.98] flex items-center gap-1.5 ${
+              className={`btn-tactile px-4 py-2 rounded-lg font-barlow font-bold uppercase tracking-wider text-xs transition-all duration-150 active:scale-[0.98] flex items-center gap-1.5 cursor-pointer ${
                 activeTab === 'BRACKET'
-                  ? 'bg-[#2563EB] text-white'
+                  ? 'bg-[var(--color-arena-primary)] text-white shadow-xs'
                   : 'text-slate-400 hover:text-white'
               }`}
             >

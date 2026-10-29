@@ -20,10 +20,10 @@ const INITIAL_TEMPLATES: CertificateTemplate[] = [
     id: 'tmpl-1',
     title: 'Piagam Juara Turnamen & Medali',
     category: 'Juara 1 / 2 / 3 & Peringkat',
-    issuerOrg: 'PANITIA MILAD MATSANEGA I & MTsN 1 MALANG',
+    issuerOrg: 'PANITIA MILAD MATSANEGA I & MTsN 3 BLITAR',
     tournamentName: 'Milad Matsanega Futsal Competition I (MMFC I)',
-    signatory: 'Dra. Hj. Erni Qomariyah, M.Pd (Kepala MTsN 1 Kota Malang)',
-    accentColor: '#f6ae2d',
+    signatory: 'Dra. Hj. Erni Qomariyah, M.Pd (Kepala MTsN 3 Blitar)',
+    accentColor: '#F59E0B',
   },
   {
     id: 'tmpl-2',
@@ -32,7 +32,7 @@ const INITIAL_TEMPLATES: CertificateTemplate[] = [
     issuerOrg: 'PANITIA MILAD MATSANEGA I & KEMENAG',
     tournamentName: 'Milad Matsanega Futsal Competition I (MMFC I)',
     signatory: 'Ust. H. Syamsul Arifin, M.Pd (Ketua Panitia MMFC I)',
-    accentColor: '#1d63b8',
+    accentColor: '#0D5C3A',
   },
   {
     id: 'tmpl-3',
@@ -59,7 +59,7 @@ export const CertificateTemplatesTab: React.FC = () => {
     issuerOrg: '',
     tournamentName: '',
     signatory: '',
-    accentColor: '#1d63b8',
+    accentColor: '#0D5C3A',
   });
 
   const handleOpenAdd = () => {
@@ -70,7 +70,7 @@ export const CertificateTemplatesTab: React.FC = () => {
       issuerOrg: 'PANITIA MILAD MATSANEGA I',
       tournamentName: 'Milad Matsanega Futsal Competition I (MMFC I)',
       signatory: 'Ketua Panitia Pelaksana MMFC I',
-      accentColor: '#1d63b8',
+      accentColor: '#0D5C3A',
     });
     setIsModalOpen(true);
   };

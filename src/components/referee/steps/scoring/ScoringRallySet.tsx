@@ -99,7 +99,7 @@ export const ScoringRallySet: React.FC<ScoringRallySetProps> = ({
               Laga #{currentMatch.matchNumber}
             </span>
           </div>
-          <span className="px-2.5 py-0.5 rounded-md bg-slate-800 text-[#f6ae2d] font-barlow font-bold uppercase tracking-wider text-xs">
+          <span className="px-2.5 py-0.5 rounded-md bg-slate-800 text-[var(--color-arena-accent)] font-barlow font-bold uppercase tracking-wider text-xs">
             GAME KE-{currentGame}
           </span>
         </div>
@@ -145,7 +145,7 @@ export const ScoringRallySet: React.FC<ScoringRallySetProps> = ({
               <span className="font-bebas text-lg sm:text-xl uppercase tracking-wide text-slate-300 block truncate">
                 {leftTeamName}
               </span>
-              <div className="text-5xl sm:text-6xl font-scoreboard font-bold text-[#f6ae2d] tabular-nums leading-none">
+              <div className="text-5xl sm:text-6xl font-scoreboard font-bold text-[var(--color-arena-accent)] tabular-nums leading-none">
                 {leftScore}
               </div>
             </div>
@@ -153,7 +153,7 @@ export const ScoringRallySet: React.FC<ScoringRallySetProps> = ({
               <span className="font-bebas text-lg sm:text-xl uppercase tracking-wide text-slate-300 block truncate">
                 {rightTeamName}
               </span>
-              <div className="text-5xl sm:text-6xl font-scoreboard font-bold text-[#f6ae2d] tabular-nums leading-none">
+              <div className="text-5xl sm:text-6xl font-scoreboard font-bold text-[var(--color-arena-accent)] tabular-nums leading-none">
                 {rightScore}
               </div>
             </div>

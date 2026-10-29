@@ -2,37 +2,41 @@
 
 **Dokumen PRD — Bagian 6/12**  
 **Produk:** Sauma Arena (Platform Manajemen Pertandingan Multi-Cabang Olahraga)  
-**Versi:** 1.0  
+**Edisi Turnamen:** Milad Matsanega Futsal Competition I (MMFC I) • MTsN 3 Blitar  
+**Versi:** 2.0  
 
 ---
 
 ## 6.1 Matriks Kebutuhan Non-Fungsional (NFR-01 s/d NFR-10)
 
-| ID | Parameter | Spesifikasi Teknis | Standar Pengujian |
+| ID | Parameter Sistem | Spesifikasi Teknis & Standar Arsitektur | Kriteria Verifikasi |
 |---|---|---|---|
-| **NFR-01** | Kecepatan Muat Halaman Publik | Waktu muat Largest Contentful Paint (LCP) **< 2,5 detik** pada jaringan seluler 4G standar. Gunakan strategi caching dan Incremental Static Regeneration (ISR) untuk halaman publik. | Lighthouse Performance Score $\ge 90$ |
-| **NFR-02** | Latensi Pembaruan Real-Time | Pembaruan peristiwa pertandingan (skor gol, poin rally, kartu) diterima oleh penonton publik dalam waktu **< 3 detik** sejak disimpan panitia, memanfaatkan koneksi Supabase Realtime / WebSocket / Server-Sent Events (SSE). | Realtime latency benchmark |
-| **NFR-03** | Responsivitas Sentuhan Konsol | Tombol aksi pada konsol panitia/wasit wajib merespons ketukan dalam waktu **< 100 milidetik** memanfaatkan prinsip *Optimistic UI*, dengan mekanisme *rollback* halus jika server menolak validasi. | Mobile input response test |
-| **NFR-04** | Keamanan Data & Autorisasi (RLS) | Mekanisme **Row Level Security (RLS)** wajib diaktifkan pada seluruh tabel PostgreSQL. Kunci rahasia API tidak boleh bocor ke bundle JavaScript klien. Semua input wajib divalidasi ganda di server menggunakan Zod. | Audit keamanan & penetration testing dasar |
-| **NFR-05** | Perlindungan Privasi Pemain | Data sensitif atlet (tanggal lahir, nomor telepon, NISN/NIK) **dilarang keras** diekspos ke publik. Gunakan PostgreSQL Database View khusus untuk endpoint publik tanpa login. | RLS Policy unit test untuk peran anonim |
-| **NFR-06** | Audit Trail Lengkap | Seluruh aksi modifikasi data penting (void event, pengubahan jadwal, putusan WO, pembukaan kunci laga) wajib mencatat rekaman ke tabel `audit_logs` (mencakup `actor_id`, `before`, `after`, dan `reason`). | Integritas audit log test |
-| **NFR-07** | Konsistensi Zona Waktu | Seluruh stempel waktu (`scheduled_at`, `created_at`, durasi clock) disimpan dalam format **UTC**. Antarmuka pengguna menyajikan waktu dalam zona **Asia/Jakarta (WIB)** atau zona waktu lokal venue (WITA/WIT). | Timezone conversion test |
-| **NFR-08** | Aksesibilitas & Ergonomi Lapangan | Memenuhi pedoman dasar aksesibilitas: kontras warna tinggi (terbaca jelas di bawah terik matahari lapangan outdoor), ukuran target sentuh minimal **44 × 44 piksel**, dan dukungan navigasi keyboard di sisi Admin. | Antislop-human & WCAG 2.1 AA check |
-| **NFR-09** | Pembatasan Beban & Anti-Scraping | Pembatasan laju permintaan (*Rate Limiting*) diterapkan pada rute publik untuk mencegah scraping agresif dan serangan denial of service (DoS) saat lonjakan suporter di hari final. | Load test 1.000 req/sec |
-| **NFR-10** | Dukungan Tema Terang / Gelap | Antarmuka mendukung mode gelap (*Dark Mode*) dan terang (*Light Mode*) secara konsisten, mengadaptasi preferensi sistem perangkat pengguna dengan opsi toggle manual. | Visual contrast audit |
+| **NFR-01** | Kecepatan Muat Portal Publik | Waktu muat Largest Contentful Paint (LCP) **< 2,0 detik** pada jaringan seluler 4G. Memanfaatkan Next.js Client Component Caching dan SSR teroptimasi. | Lighthouse Performance $\ge 90$ |
+| **NFR-02** | Latensi Siaran Skor Real-Time | Pembaruan peristiwa pertandingan (skor gol, foul 5/5, kartu, dan waktu) diterima penonton dalam waktu **< 3 detik** sejak disimpan wasit meja. | Realtime benchmark latency |
+| **NFR-03** | Responsivitas Sentuh Tablet Wasit | Tombol taktil konsol wasit (`+1 GOL`, `+ FOUL`, `STOPWATCH`) merespons dalam waktu **< 80 milidetik** dengan konfirmasi haptik / visual instan. | Touch latency test (< 80ms) |
+| **NFR-04** | Keamanan Sesi & Otorisasi RBAC | Autentikasi aman melalui cookie HTTP-only terenkripsi. Hak akses dibatasi ketat antar Superadmin, Pengawas Pertandingan, dan Wasit Lapangan. | Audit sesi & proteksi rute |
+| **NFR-05** | Perlindungan Privasi Atlet Pelajar | NISN, nomor induk kependudukan, dan nomor telepon siswa **wajib dilindungi**. Data sensitif tidak boleh diekspos pada endpoint publik tanpa autentikasi. | Pemeriksaan payload JSON publik |
+| **NFR-06** | Audit Trail Lengkap | Setiap aksi void gol, modifikasi skor manual, perubahan jadwal, dan pembatalan pertandingan wajib mencatat rekaman ke log audit (`actor`, `timestamp`, `reason`). | Integritas audit trail test |
+| **NFR-07** | Konsistensi Zona Waktu | Seluruh stempel waktu pertandingan disimpan dalam format **UTC (ISO 8601)** dan disajikan kepada pengguna dalam zona **Waktu Indonesia Barat (WIB / UTC+7)**. | Timezone verification test |
+| **NFR-08** | Desain Kontras Tinggi Anti-Samar | Mematuhi standar WCAG 2.1 AA. Mode terang menggunakan border tegas slate-300 (`#CBD5E1`), bayangan kartu halus (`rgba(12, 35, 64, 0.08)`), dan bebas warna teks pudar/coklat. | Audit rasio kontras > 4.5:1 |
+| **NFR-09** | Tata Letak Admin Simetris | Tampilan konten Admin Arena diatur terpusat secara simetris (`max-w-7xl mx-auto`), menghilangkan area void/kosong pada monitor widescreen 1080p dan 4K. | Pengujian multi-resolusi layar |
+| **NFR-10** | Ketahanan Offline Lapangan | Jika koneksi internet di Lapangan Seabless putus, konsol wasit menyimpan event secara lokal di IndexedDB/localStorage dan melakukan sinkronisasi otomatis saat online. | Pengujian offline network toggle |
 
 ---
 
-## 6.2 Ketahanan Jaringan & Mode Offline Lapangan
+## 6.2 Protokol Ketahanan Jaringan & Mode Offline di GOR
 
-Mengingat venue pertandingan olahraga (seperti gedung olahraga bawah tanah atau lapangan tertutup) kerap memiliki sinyal seluler yang fluktuatif, platform mengimplementasikan protokol ketahanan jaringan:
+Mengingat kondisi gedung olahraga (GOR) atau arena futsal sering mengalami pelemahan sinyal operator seluler, Sauma Arena menerapkan protokol ketahanan jaringan berlapis:
 
 1. **Idempotensi Berbasis UUID Klien:**
-   - Setiap kali panitia menekan tombol aksi (misal +1 Gol), klien men-generate UUID unik v4 di sisi browser.
-   - Database memiliki *unique constraint* pada pasangan `(match_id, id)`.
-   - Jika jaringan terputus dan browser melakukan pengiriman ulang (*retry*), basis data akan mengabaikan duplikasi secara aman tanpa menambah skor dobel.
-
+   - Setiap kali wasit menekan tombol aksi (misal `+1 Gol` atau `+ Foul`), peramban men-generate UUID unik v4 di sisi klien.
+   - Server memberlakukan *unique constraint* pada pasangan `(match_id, event_uuid)`.
+   - Jika jaringan terputus dan browser melakukan pengiriman ulang (*retry queue*), basis data akan mengabaikan duplikasi secara aman tanpa menambah skor ganda.
 2. **Penyimpanan Lokal Sementara (Local Caching):**
-   - State pertandingan dan antrean event yang belum terkirim disimpan dalam `localStorage` / IndexedDB.
-   - Header konsol menampilkan pill indikator koneksi: `🟢 Online • Sinkron` vs `🟡 Offline Lokal • Tersimpan`.
-   - Begitu koneksi internet pulih, antrean event disinkronkan secara otomatis sesuai nomor urut `seq`.
+   - Rangkaian event pertandingan yang belum terkirim ditampung dalam antrean lokal (`localStorage` / IndexedDB).
+   - Header konsol menampilkan indikator status:
+     - `🟢 Terhubung • Sinkron` (Sinyal stabil, data live).
+     - `🟡 Mode Offline Lapangan • Tersimpan Aman` (Sinyal terputus, data tersimpan lokal).
+   - Begitu koneksi internet kembali pulih, sistem secara otomatis mengeksekusi *queue flush* sesuai urutan kronologis kejadian.
+3. **Penyimpanan Snapshot BAP Fisik:**
+   - Setelah laga selesai, konsol wasit dapat langsung mengekspor berkas BAP digital menjadi dokumen pratinjau yang dapat disimpan sebagai cadangan sebelum diunggah ke server.

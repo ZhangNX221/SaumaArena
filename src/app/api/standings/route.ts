@@ -5,16 +5,20 @@ import { calculateStandings, TeamInfo, VerifiedMatchSummary } from '@/core/stand
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
-    const competitionId = searchParams.get('competitionId');
+    const competitionId = searchParams.get('competitionId') || 'comp_futsal_2026';
     const groupId = searchParams.get('groupId');
-
-    if (!competitionId) {
-      return NextResponse.json({ success: false, error: 'competitionId is required' }, { status: 400 });
-    }
 
     const comp = queryOne<any>('SELECT rules_snapshot FROM competitions WHERE id = ?', [competitionId]);
     const rules = comp?.rules_snapshot ? JSON.parse(comp.rules_snapshot) : {};
-    const tiebreakers = rules.tiebreakers || ['points', 'goal_difference', 'goals_for', 'head_to_head_points', 'fair_play', 'draw_lots'];
+    const tiebreakers = rules.tiebreakers || [
+      'points',
+      'goal_difference',
+      'goals_for',
+      'head_to_head_points',
+      'supporter_fair_play_points',
+      'fair_play',
+      'draw_lots',
+    ];
 
     // 1. Fetch registered teams
     let teamSql = `
@@ -30,7 +34,26 @@ export async function GET(request: Request) {
       teamParams.push(groupId);
     }
 
-    const teams = query<TeamInfo>(teamSql, teamParams);
+    const rawTeams = query<TeamInfo>(teamSql, teamParams);
+
+    // Ambil poin suporter per tim dari tabel supporter_scores
+    const supporterMap = new Map<string, number>();
+    try {
+      const supRows = query<any>(
+        'SELECT team_id, total_score FROM supporter_scores WHERE competition_id = ?',
+        [competitionId]
+      );
+      for (const s of supRows) {
+        supporterMap.set(s.team_id, s.total_score || 0);
+      }
+    } catch (e) {
+      console.warn('Could not load supporter_scores for standings:', e);
+    }
+
+    const teams: TeamInfo[] = rawTeams.map((t) => ({
+      ...t,
+      supporterPoints: supporterMap.get(t.id) || 0,
+    }));
 
     // 2. Fetch only VERIFIED matches for official standings (PRD ADR-003)
     let matchSql = `
@@ -47,23 +70,31 @@ export async function GET(request: Request) {
 
     const matchRows = query<any>(matchSql, matchParams);
 
-    // Parse match summaries and calculate cards for fair play
+    const matchIds = matchRows.map((m) => m.id);
+    const cardMap = new Map<string, { yellows: number; reds: number }>();
+    if (matchIds.length > 0) {
+      const placeholders = matchIds.map(() => '?').join(',');
+      const cardCounts = query<any>(
+        `SELECT match_id, team_id,
+          SUM(CASE WHEN LOWER(type) = 'yellow_card' THEN 1 ELSE 0 END) as yellows,
+          SUM(CASE WHEN LOWER(type) = 'red_card' THEN 1 ELSE 0 END) as reds
+         FROM match_events
+         WHERE match_id IN (${placeholders}) AND voided_at IS NULL
+         GROUP BY match_id, team_id`,
+        matchIds
+      );
+      for (const c of cardCounts) {
+        cardMap.set(`${c.match_id}_${c.team_id}`, {
+          yellows: Number(c.yellows) || 0,
+          reds: Number(c.reds) || 0,
+        });
+      }
+    }
+
     const verifiedMatches: VerifiedMatchSummary[] = matchRows.map((m) => {
       const res = JSON.parse(m.result || '{}');
-
-      // Fetch cards for home & away teams
-      const cardCounts = query<any>(
-        `SELECT team_id,
-          SUM(CASE WHEN type = 'yellow_card' THEN 1 ELSE 0 END) as yellows,
-          SUM(CASE WHEN type = 'red_card' THEN 1 ELSE 0 END) as reds
-         FROM match_events
-         WHERE match_id = ? AND voided_at IS NULL
-         GROUP BY team_id`,
-        [m.id]
-      );
-
-      const homeCards = cardCounts.find((c) => c.team_id === m.home_team_id);
-      const awayCards = cardCounts.find((c) => c.team_id === m.away_team_id);
+      const homeCards = cardMap.get(`${m.id}_${m.home_team_id}`);
+      const awayCards = cardMap.get(`${m.id}_${m.away_team_id}`);
 
       return {
         id: m.id,

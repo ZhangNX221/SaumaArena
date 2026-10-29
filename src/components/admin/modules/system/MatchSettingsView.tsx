@@ -16,41 +16,18 @@ import {
 import { AdminPageHeaderCard } from '@/components/admin/common/AdminPageHeaderCard';
 import { MatchAssignmentsTab } from '../officials/MatchAssignmentsTab';
 import { SPORTS_CONFIG } from '@/mocks/multiSportData';
+import { usePersistentState } from '@/hooks/usePersistentState';
+import { SportRuleSettings, DEFAULT_SPORT_RULES } from '@/config/sportRules';
 
 type SettingSubTab = 'RULES' | 'OFFICIALS' | 'PROTOCOLS';
-
-interface SportRuleSettings {
-  durationPerPeriod: number; // minutes
-  periodCount: number;
-  breakDuration: number; // minutes
-  winPoints: number;
-  drawPoints: number;
-  lossPoints: number;
-  foulLimit: number;
-  timeoutPerPeriod: number;
-  extraTimeDuration: number;
-  penaltyKicksCount: number;
-}
-
-const DEFAULT_SPORT_RULES: Record<string, SportRuleSettings> = {
-  FUTSAL: {
-    durationPerPeriod: 20,
-    periodCount: 2,
-    breakDuration: 5,
-    winPoints: 3,
-    drawPoints: 1,
-    lossPoints: 0,
-    foulLimit: 5,
-    timeoutPerPeriod: 1,
-    extraTimeDuration: 5,
-    penaltyKicksCount: 5,
-  },
-};
 
 export const MatchSettingsView: React.FC = () => {
   const [activeTab, setActiveTab] = useState<SettingSubTab>('RULES');
   const [selectedSport, setSelectedSport] = useState<string>('FUTSAL');
-  const [rulesState, setRulesState] = useState<Record<string, SportRuleSettings>>(DEFAULT_SPORT_RULES);
+  const [rulesState, setRulesState] = usePersistentState<Record<string, SportRuleSettings>>(
+    'sauma_arena_match_rules',
+    DEFAULT_SPORT_RULES
+  );
   
   // Protocol State
   const [woScoreA, setWoScoreA] = useState<number>(3);
