@@ -1,8 +1,74 @@
 /**
  * Utilitas Suara Bel / Buzzer Pertandingan Lapangan
- * Menggunakan Web Audio API sintetis & audio resmi.
+ * Menggunakan audio resmi /wrong-answer-sound-effect.mp3 dengan fallback Web Audio API sintetis.
  */
 
+export const playAudioFile = (src: string = '/wrong-answer-sound-effect.mp3'): Promise<void> => {
+  return new Promise((resolve) => {
+    if (typeof window === 'undefined') {
+      resolve();
+      return;
+    }
+
+    try {
+      const audio = new Audio(src);
+      let isResolved = false;
+      const done = () => {
+        if (!isResolved) {
+          isResolved = true;
+          resolve();
+        }
+      };
+
+      audio.onended = done;
+      audio.onerror = () => {
+        console.warn(`[arenaSound] Audio file "${src}" gagal dimuat, fallback ke buzzer sintetis`);
+        playBuzzerTone(0.75, 0);
+        done();
+      };
+
+      // Timeout pengaman jika browser menahan event onended
+      setTimeout(done, 1400);
+
+      const promise = audio.play();
+      if (promise !== undefined) {
+        promise.catch((err) => {
+          console.warn('[arenaSound] audio.play() diblokir oleh browser atau gagal:', err);
+          playBuzzerTone(0.75, 0);
+          done();
+        });
+      }
+    } catch {
+      playBuzzerTone(0.75, 0);
+      resolve();
+    }
+  });
+};
+
+/**
+ * 1. Bunyi TEPAT 1 KALI saat timer dimulai (Start / Resume)
+ * Memutar /wrong-answer-sound-effect.mp3 sebanyak 1 kali.
+ */
+export const playTimerStartSound = () => {
+  playAudioFile('/wrong-answer-sound-effect.mp3');
+};
+
+/**
+ * 2. Bunyi TEPAT 2 KALI saat timer pertandingan habis / selesai (00:00)
+ * Memutar /wrong-answer-sound-effect.mp3 sebanyak 2 kali berturut-turut dengan jeda singkat.
+ */
+export const playTimerEndSound = async () => {
+  // Bunyi ke-1
+  await playAudioFile('/wrong-answer-sound-effect.mp3');
+  // Jeda singkat antar bunyi
+  await new Promise((resolve) => setTimeout(resolve, 220));
+  // Bunyi ke-2
+  await playAudioFile('/wrong-answer-sound-effect.mp3');
+};
+
+/**
+ * Fallback Web Audio API sintetis
+ */
 export const playBuzzerTone = (durationSeconds = 0.75, delaySeconds = 0) => {
   if (typeof window === 'undefined') return;
 
@@ -54,33 +120,16 @@ export const playBuzzerTone = (durationSeconds = 0.75, delaySeconds = 0) => {
     osc2.stop(now + durationSeconds);
     subOsc.stop(now + durationSeconds);
   } catch (error) {
-    console.warn('Gagal memutar buzzer stadion:', error);
+    console.warn('Gagal memutar buzzer sintetis:', error);
   }
 };
 
-/**
- * Memainkan suara alarm stadion tepat 2 KALI berturut-turut saat waktu habis
- */
 export const playDoubleAlarmBuzzer = (times = 2) => {
-  const duration = 0.75; // Durasi bunyi (0.75 detik)
-  const gap = 0.28; // Jeda antar bunyi (0.28 detik)
-
-  for (let i = 0; i < times; i++) {
-    playBuzzerTone(duration, i * (duration + gap));
-  }
+  playTimerEndSound();
 };
 
 export const playMatchStartBell = (durationSeconds = 1.3) => {
-  try {
-    const audio = new Audio('/wrong-answer-sound-effect.mp3');
-    audio.play().catch((err) => {
-      console.warn('Audio play failed, falling back to Web Audio oscillator:', err);
-      playSyntheticBuzzer(durationSeconds);
-    });
-  } catch (error) {
-    console.warn('Gagal memutar audio file:', error);
-    playSyntheticBuzzer(durationSeconds);
-  }
+  playTimerStartSound();
 };
 
 export const playSyntheticBuzzer = (durationSeconds = 1.3) => {

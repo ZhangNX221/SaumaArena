@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Radio, RotateCcw } from 'lucide-react';
 import { Match, MatchEvent, SportCode, EventType, MatchLiveTelemetry } from '@/types';
 import { RefereeScoringStep } from './steps/RefereeScoringStep';
@@ -9,7 +9,7 @@ import { SportRuleSettings, DEFAULT_SPORT_RULES } from '@/config/sportRules';
 import { AdminPageHeaderCard } from '@/components/admin/common/AdminPageHeaderCard';
 import { initialMatches } from '@/mocks/tournamentData';
 import { pushMatchToBackend } from '@/lib/apiSync';
-import { playDoubleAlarmBuzzer } from '@/utils/arenaSound';
+import { playTimerStartSound, playTimerEndSound } from '@/utils/arenaSound';
 
 interface RefereeMatchCenterProps {
   currentMatch: Match;
@@ -87,9 +87,6 @@ export const RefereeMatchCenter: React.FC<RefereeMatchCenterProps> = ({
           const cur = prev[currentMatch.id] || defaultTelemetry;
           if (!cur.isTimerRunning || cur.timerSeconds <= 0) return prev;
           const nextSecs = Math.max(0, cur.timerSeconds - 1);
-          if (nextSecs === 0 && cur.timerSeconds > 0) {
-            playDoubleAlarmBuzzer();
-          }
           return {
             ...prev,
             [currentMatch.id]: {
@@ -104,6 +101,22 @@ export const RefereeMatchCenter: React.FC<RefereeMatchCenterProps> = ({
     }
     return () => clearInterval(interval);
   }, [isTimerRunning, timerSeconds, currentMatch.id]);
+
+  // Efek Suara Timer Habis (00:00) berbunyi tepat 2 KALI
+  const prevRefereeSecondsRef = useRef<number>(timerSeconds);
+  const hasTriggeredRefereeEndSoundRef = useRef<boolean>(false);
+
+  useEffect(() => {
+    if (prevRefereeSecondsRef.current > 0 && timerSeconds === 0) {
+      if (!hasTriggeredRefereeEndSoundRef.current) {
+        playTimerEndSound();
+        hasTriggeredRefereeEndSoundRef.current = true;
+      }
+    } else if (timerSeconds > 0) {
+      hasTriggeredRefereeEndSoundRef.current = false;
+    }
+    prevRefereeSecondsRef.current = timerSeconds;
+  }, [timerSeconds]);
 
   const formatTime = (secs: number) => {
     const m = Math.floor(secs / 60);
@@ -163,6 +176,11 @@ export const RefereeMatchCenter: React.FC<RefereeMatchCenterProps> = ({
 
   const handleToggleTimer = () => {
     const nextIsRunning = !isTimerRunning;
+
+    // Bunyi 1 kali saat timer dimulai (Start / Resume). Jika di-pause, TIDAK ADA bunyi!
+    if (nextIsRunning && timerSeconds > 0) {
+      playTimerStartSound();
+    }
 
     // Jika juri menjalankan timer, pastikan status match berubah ke LIVE di seluruh sistem
     if (nextIsRunning && currentMatch.status !== 'LIVE' && currentMatch.status !== 'COMPLETED') {

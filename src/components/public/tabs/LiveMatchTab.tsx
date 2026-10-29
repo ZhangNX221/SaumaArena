@@ -9,7 +9,7 @@ import { LiveMatchHeader } from './live/LiveMatchHeader';
 import { LiveMatchScoreboard } from './live/LiveMatchScoreboard';
 import { LiveMatchGoalHistory } from './live/LiveMatchGoalHistory';
 import { LiveMatchFullscreenArena } from './live/LiveMatchFullscreenArena';
-import { playStadiumAlarm } from '@/lib/soundEffects';
+import { playTimerStartSound, playTimerEndSound } from '@/lib/soundEffects';
 
 interface LiveMatchTabProps {
   sportCode?: SportCode;
@@ -62,18 +62,40 @@ export const LiveMatchTab: React.FC<LiveMatchTabProps> = ({
   const scoreB = selectedMatch.scoreB ?? 0;
   const events = selectedMatch.events || [];
 
-  // Alarm otomatis berbunyi 2 kali saat timer pertandingan habis (mencapai 0)
+  // Efek Suara Timer:
+  // 1. Saat timer DIMULAI (Start / Resume) dan waktu masih ada > 0: Berbunyi 1 KALI (/wrong-answer-sound-effect.mp3)
+  // 2. Saat timer SELESAI / HABIS (mencapai 0): Berbunyi 2 KALI
+  // 3. Saat timer di-PAUSE: TIDAK ADA BUNYI sama sekali
+  const isInitialMountRef = useRef<boolean>(true);
+  const prevIsRunningRef = useRef<boolean>(isTimerRunning);
   const prevSecondsRef = useRef<number>(timerSeconds);
-  const hasTriggeredAlarmRef = useRef<boolean>(false);
+  const hasTriggeredEndAlarmRef = useRef<boolean>(false);
 
   useEffect(() => {
+    if (isInitialMountRef.current) {
+      isInitialMountRef.current = false;
+      prevIsRunningRef.current = isTimerRunning;
+      prevSecondsRef.current = timerSeconds;
+      return;
+    }
+
+    // Timer DIMULAI (berubah dari false -> true) saat waktu > 0: bunyi 1 kali
+    if (!prevIsRunningRef.current && isTimerRunning && timerSeconds > 0) {
+      playTimerStartSound();
+    }
+    // Jika timer di-pause (berubah dari true -> false): tidak ada bunyi sama sekali
+    prevIsRunningRef.current = isTimerRunning;
+  }, [isTimerRunning, timerSeconds]);
+
+  useEffect(() => {
+    // Timer SELESAI / HABIS (mencapai 0): bunyi 2 kali
     if (prevSecondsRef.current > 0 && timerSeconds === 0) {
-      if (!hasTriggeredAlarmRef.current) {
-        playStadiumAlarm(2);
-        hasTriggeredAlarmRef.current = true;
+      if (!hasTriggeredEndAlarmRef.current) {
+        playTimerEndSound();
+        hasTriggeredEndAlarmRef.current = true;
       }
     } else if (timerSeconds > 0) {
-      hasTriggeredAlarmRef.current = false;
+      hasTriggeredEndAlarmRef.current = false;
     }
     prevSecondsRef.current = timerSeconds;
   }, [timerSeconds]);

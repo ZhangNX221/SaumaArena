@@ -1,3 +1,11 @@
 'use client';
 
-export { playDoubleAlarmBuzzer as playStadiumAlarm, playDoubleAlarmBuzzer, playBuzzerTone } from '@/utils/arenaSound';
+export {
+  playTimerStartSound,
+  playTimerEndSound,
+  playAudioFile,
+  playDoubleAlarmBuzzer as playStadiumAlarm,
+  playDoubleAlarmBuzzer,
+  playBuzzerTone,
+  playMatchStartBell,
+} from '@/utils/arenaSound';
