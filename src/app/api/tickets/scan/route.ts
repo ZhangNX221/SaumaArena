@@ -6,11 +6,9 @@ import { randomUUID } from 'node:crypto';
 export async function POST(request: Request) {
   try {
     // 1. Otorisasi ketat: Hanya petugas terautentikasi (ADMIN atau REFEREE/petugas lapangan) yang berhak memindai tiket
-    let officerId = 'usr_admin_1';
     const auth = requireAuth(request, ['ADMIN', 'REFEREE']);
-    if (!(auth instanceof NextResponse)) {
-      officerId = auth.user.id;
-    }
+    if (auth instanceof NextResponse) return auth;
+    const officerId = auth.user.id;
 
     const body = await request.json().catch(() => ({}));
     const { bookingCode, gateName = 'Gate Timur 1 (Suporter)' } = body;

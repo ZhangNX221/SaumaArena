@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { query, queryOne, run } from '@/db/sqlite';
+import { requireAuth } from '@/lib/auth';
 import '@/sports';
 import { sportRegistry } from '@/core/registry';
 
@@ -109,6 +110,9 @@ export async function GET(request: Request, context: { params: Promise<{ id: str
 
 export async function PATCH(request: Request, context: { params: Promise<{ id: string }> }) {
   try {
+    const auth = requireAuth(request, ['ADMIN', 'REFEREE']);
+    if (auth instanceof NextResponse) return auth;
+
     const { id } = await context.params;
     const body = await request.json().catch(() => ({}));
     const altId = id.startsWith('m_') ? id.replace(/^m_/, '') : `m_${id}`;
@@ -186,6 +190,9 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
 
 export async function DELETE(request: Request, context: { params: Promise<{ id: string }> }) {
   try {
+    const auth = requireAuth(request, ['ADMIN']);
+    if (auth instanceof NextResponse) return auth;
+
     const { id } = await context.params;
     const altId = id.startsWith('m_') ? id.replace(/^m_/, '') : `m_${id}`;
 

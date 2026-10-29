@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { query, queryOne, run } from '@/db/sqlite';
+import { requireAuth } from '@/lib/auth';
 import { calculateStandings, TeamInfo, VerifiedMatchSummary } from '@/core/standings';
 
 export async function GET(request: Request) {
@@ -135,6 +136,9 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
+    const auth = requireAuth(request, ['ADMIN']);
+    if (auth instanceof NextResponse) return auth;
+
     const body = await request.json();
     const competitionId = body.competitionId || 'comp_futsal_2026';
     const groups = body.groups;

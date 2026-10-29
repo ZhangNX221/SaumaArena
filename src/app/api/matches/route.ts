@@ -116,7 +116,10 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    // 1. Otorisasi: Boleh diautentikasi atau request lokal admin
+    // 1. Otorisasi ketat: Hanya ADMIN yang berhak membuat atau menjadwalkan pertandingan
+    const auth = requireAuth(request, ['ADMIN']);
+    if (auth instanceof NextResponse) return auth;
+
     const body = await request.json().catch(() => ({}));
     const {
       competitionId = 'comp_futsal_2026',
