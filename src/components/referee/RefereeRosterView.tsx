@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { AthleteIdCard, Match, AppUser } from '@/types';
 import { ATHLETE_ID_CARDS } from '@/mocks/multiSportData';
+import { usePersistentState } from '@/hooks/usePersistentState';
 
 interface RefereeRosterViewProps {
   user?: AppUser;
@@ -27,7 +28,7 @@ export const RefereeRosterView: React.FC<RefereeRosterViewProps> = ({
   currentMatch,
   onGoToScoring,
 }) => {
-  const [roster, setRoster] = useState<AthleteIdCard[]>(ATHLETE_ID_CARDS);
+  const [roster, setRoster] = usePersistentState<AthleteIdCard[]>('sauma_arena_athletes', ATHLETE_ID_CARDS);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<'ALL' | 'CHECKED' | 'UNCHECKED'>('ALL');
   const [scanNotice, setScanNotice] = useState<string | null>(null);

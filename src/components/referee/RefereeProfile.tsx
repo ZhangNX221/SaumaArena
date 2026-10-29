@@ -7,6 +7,8 @@ import {
   ToggleLeft, 
 } from 'lucide-react';
 import { AppUser } from '@/types';
+import { PRESET_USERS } from '@/mocks/multiSportData';
+import { usePersistentState } from '@/hooks/usePersistentState';
 import { ProfileIdentityTab } from './profile/ProfileIdentityTab';
 import { ProfileAvailabilityTab } from './profile/ProfileAvailabilityTab';
 import { ProfileSecurityTab } from './profile/ProfileSecurityTab';
@@ -24,6 +26,7 @@ export const RefereeProfile: React.FC<RefereeProfileProps> = ({
   onUpdateProfile,
   onUpdateAvailability,
 }) => {
+  const [officials, setOfficials] = usePersistentState<AppUser[]>('sauma_arena_officials', PRESET_USERS);
   const [isAvailable, setIsAvailable] = useState<boolean>(user.isAvailable ?? true);
 
   // Form Fields State
@@ -60,6 +63,9 @@ export const RefereeProfile: React.FC<RefereeProfileProps> = ({
     setIsAvailable(next);
     onUpdateAvailability?.(next);
     onUpdateProfile?.({ isAvailable: next });
+    setOfficials((prev) =>
+      prev.map((off) => (off.id === user.id ? { ...off, isAvailable: next } : off))
+    );
     showToast(`Status ketersediaan diubah ke: ${next ? 'Siap Bertugas' : 'Sedang Istirahat'}`);
   };
 
@@ -86,6 +92,22 @@ export const RefereeProfile: React.FC<RefereeProfileProps> = ({
       avatarText: avatarInitials,
       isAvailable,
     });
+
+    setOfficials((prev) =>
+      prev.map((off) =>
+        off.id === user.id
+          ? {
+              ...off,
+              name,
+              email,
+              roleLabel,
+              licenseLevel,
+              avatarText: avatarInitials,
+              isAvailable,
+            }
+          : off
+      )
+    );
 
     showToast('Perubahan profil berhasil disimpan dan langsung aktif.');
   };

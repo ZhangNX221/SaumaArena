@@ -10,10 +10,10 @@ interface IntervalPoint {
 }
 
 const INTERVALS: IntervalPoint[] = [
-  { interval: "01' - 10'", phase: 'Babak 1 (Awal)', goals: 8 },
-  { interval: "11' - 20'", phase: 'Babak 1 (Akhir)', goals: 14 },
-  { interval: "21' - 30'", phase: 'Babak 2 (Awal)', goals: 12 },
-  { interval: "31' - 40'", phase: 'Babak 2 (Crunch Time)', goals: 21 },
+  { interval: "01' - 10'", phase: 'Babak 1 (Awal)', goals: 0 },
+  { interval: "11' - 20'", phase: 'Babak 1 (Akhir)', goals: 0 },
+  { interval: "21' - 30'", phase: 'Babak 2 (Awal)', goals: 0 },
+  { interval: "31' - 40'", phase: 'Babak 2 (Crunch Time)', goals: 0 },
 ];
 
 export const GoalMinuteLineChart: React.FC = () => {
@@ -52,9 +52,9 @@ export const GoalMinuteLineChart: React.FC = () => {
         </div>
         <div className="text-left sm:text-right shrink-0">
           <span className="text-xs font-barlow font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
-            Puncak: 21 Gol (31&apos; - 40&apos;)
+            Puncak: 0 Gol (Menunggu Kickoff)
           </span>
-          <span className="text-[10px] text-[var(--text-muted)] block">38.2% Gol di Fase Akhir</span>
+          <span className="text-[10px] text-[var(--text-muted)] block">Belum ada gol tercipta</span>
         </div>
       </div>
 

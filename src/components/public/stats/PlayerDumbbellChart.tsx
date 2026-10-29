@@ -11,12 +11,12 @@ interface PlayerStat {
 }
 
 const PLAYERS: PlayerStat[] = [
-  { name: 'Rizky Aditya', team: 'MIN 1 Kota Malang', goals: 7, assists: 3 },
-  { name: 'Dimas Arya', team: 'SDN 1 Kauman', goals: 6, assists: 2 },
-  { name: 'Kevin Pratama', team: 'SDIT Insan Permata', goals: 5, assists: 4 },
-  { name: 'Farhan Malik', team: 'SDK Cor Jesu', goals: 4, assists: 3 },
-  { name: 'Arkan Ziyad', team: 'SDI Surya Buana', goals: 4, assists: 2 },
-  { name: 'Bima Sena', team: 'SDN Model Malang', goals: 3, assists: 3 },
+  { name: 'M. Rizky Pratama', team: 'SDI KARDINA MASSA', goals: 0, assists: 0 },
+  { name: 'Ahmad Dani', team: 'MIN 7 BLITAR', goals: 0, assists: 0 },
+  { name: 'Farel Prayoga', team: 'UPT SDN 1 SRENGAT', goals: 0, assists: 0 },
+  { name: 'Dimas Arya', team: 'MIN 14 BLITAR', goals: 0, assists: 0 },
+  { name: 'Bima Sena', team: 'MIN 2 BLITAR', goals: 0, assists: 0 },
+  { name: 'Kevin Pratama', team: 'MI WAHID HASYIM', goals: 0, assists: 0 },
 ];
 
 export const PlayerDumbbellChart: React.FC = () => {
@@ -49,7 +49,7 @@ export const PlayerDumbbellChart: React.FC = () => {
           <span className="text-xs font-mono font-bold text-[var(--text-main)]">
             Skala 0 – 8 Kontribusi
           </span>
-          <span className="text-[10px] text-[var(--text-muted)] block">Urutan: Total Gol Tertinggi</span>
+          <span className="text-[10px] text-[var(--text-muted)] block">Menunggu Kickoff Pertandingan</span>
         </div>
       </div>
 

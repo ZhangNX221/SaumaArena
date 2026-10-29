@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { User, ShieldCheck, Plus, Search, UserCog } from 'lucide-react';
 import { AppUser } from '@/types';
 import { PRESET_USERS } from '@/mocks/multiSportData';
+import { usePersistentState } from '@/hooks/usePersistentState';
 import { AdminProfileTab } from './AdminProfileTab';
 import { UserFormModal, UserFormData } from './UserFormModal';
 import { ConfirmModal } from '@/components/admin/common/ConfirmModal';
@@ -26,8 +27,8 @@ export const AccountSettingsView: React.FC<AccountSettingsViewProps> = ({
     initialSubTab === 'referee_staff_accounts' ? 'OFFICIALS' : 'ADMIN'
   );
 
-  // Referee / Officials State
-  const [officials, setOfficials] = useState<AppUser[]>(PRESET_USERS);
+  // Referee / Officials State (Persisted)
+  const [officials, setOfficials] = usePersistentState<AppUser[]>('sauma_arena_officials', PRESET_USERS);
   const [searchTerm, setSearchTerm] = useState('');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [editingOfficial, setEditingOfficial] = useState<AppUser | null>(null);
@@ -119,35 +120,35 @@ export const AccountSettingsView: React.FC<AccountSettingsViewProps> = ({
             ? 'Kelola kredensial administrator, kata sandi, preferensi tampilan gelap/terang, dan identitas panitia.'
             : 'Kelola akun wasit dan pencatat meja, spesialisasi cabang olahraga, serta lisensi penugasan pertandingan.'
         }
-        action={
-          <div className="flex items-center gap-1 p-1.5 rounded-2xl bg-[var(--bg-muted)]/80 border border-[var(--border-subtle)] text-xs font-barlow font-bold uppercase tracking-wider w-fit">
-            <button
-              type="button"
-              onClick={() => setActiveTab('ADMIN')}
-              className={`btn-tactile flex items-center gap-1.5 px-4 py-2 rounded-xl transition-all ${
-                activeTab === 'ADMIN'
-                  ? 'bg-[var(--color-arena-primary)] text-white shadow-xs'
-                  : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'
-              }`}
-            >
-              <User className="w-3.5 h-3.5" />
-              <span>Profil Admin</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveTab('OFFICIALS')}
-              className={`btn-tactile flex items-center gap-1.5 px-4 py-2 rounded-xl transition-all ${
-                activeTab === 'OFFICIALS'
-                  ? 'bg-[var(--color-arena-primary)] text-white shadow-xs'
-                  : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'
-              }`}
-            >
-              <ShieldCheck className="w-3.5 h-3.5" />
-              <span>Akun Petugas &amp; Juri ({officials.length})</span>
-            </button>
-          </div>
-        }
       />
+
+      {/* Sub-tab Navigation Bar */}
+      <div className="flex items-center gap-1.5 p-1.5 rounded-2xl bg-[var(--bg-muted)]/80 border border-[var(--border-subtle)] text-xs font-barlow font-bold uppercase tracking-wider w-fit">
+        <button
+          type="button"
+          onClick={() => setActiveTab('ADMIN')}
+          className={`btn-tactile flex items-center gap-1.5 px-4 py-2 rounded-xl transition-all ${
+            activeTab === 'ADMIN'
+              ? 'bg-[var(--color-arena-primary)] text-white shadow-xs'
+              : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'
+          }`}
+        >
+          <User className="w-3.5 h-3.5" />
+          <span>Profil Admin</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => setActiveTab('OFFICIALS')}
+          className={`btn-tactile flex items-center gap-1.5 px-4 py-2 rounded-xl transition-all ${
+            activeTab === 'OFFICIALS'
+              ? 'bg-[var(--color-arena-primary)] text-white shadow-xs'
+              : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'
+          }`}
+        >
+          <ShieldCheck className="w-3.5 h-3.5" />
+          <span>Akun Petugas &amp; Juri ({officials.length})</span>
+        </button>
+      </div>
 
       {/* Sub-tab 1: Profil Admin */}
       {activeTab === 'ADMIN' && (

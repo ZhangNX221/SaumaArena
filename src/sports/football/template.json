@@ -1,0 +1,33 @@
+{
+  "code": "football",
+  "name": "Sepakbola",
+  "version": "1.0.0",
+  "scoring_model": "timed_goals",
+  "participants": {
+    "kind": "team",
+    "on_field": 11,
+    "min_on_field_to_continue": 7,
+    "squad_min": 11,
+    "squad_max": 23,
+    "starters": 11
+  },
+  "periods": {
+    "count": 2,
+    "minutes": 45,
+    "clock": "running",
+    "allow_stoppage_time": true
+  },
+  "substitutions": {
+    "max": 5,
+    "max_windows": 3,
+    "reentry_allowed": false
+  },
+  "discipline": {
+    "cards": ["yellow", "red"],
+    "second_yellow_is_red": true,
+    "suspension": { "yellow_accumulation": 3, "red_card_matches": 1 }
+  },
+  "points_system": { "win": 3, "draw": 1, "loss": 0 },
+  "tiebreakers": ["points", "goal_difference", "goals_for", "head_to_head_points", "fair_play", "draw_lots"],
+  "draw_allowed": { "group": true, "knockout": false }
+}

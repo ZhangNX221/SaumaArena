@@ -11,12 +11,12 @@ interface TeamDiscipline {
 }
 
 const DISCIPLINE_DATA: TeamDiscipline[] = [
-  { team: 'SDIT Bina Insani', yellow: 1, red: 0, fairPlayScore: 98 },
-  { team: 'MIS Al-Hidayah', yellow: 1, red: 0, fairPlayScore: 97 },
-  { team: 'MIN 1 Kota', yellow: 2, red: 0, fairPlayScore: 94 },
-  { team: 'SDN Percobaan 1', yellow: 2, red: 0, fairPlayScore: 92 },
-  { team: 'MIN 2 Unggulan', yellow: 3, red: 0, fairPlayScore: 89 },
-  { team: "MI Ma'arif Nurul Ulum", yellow: 3, red: 1, fairPlayScore: 81 },
+  { team: 'SDI KARDINA MASSA', yellow: 0, red: 0, fairPlayScore: 100 },
+  { team: 'MIN 7 BLITAR', yellow: 0, red: 0, fairPlayScore: 100 },
+  { team: 'UPT SDN 1 SRENGAT', yellow: 0, red: 0, fairPlayScore: 100 },
+  { team: 'MIN 14 BLITAR', yellow: 0, red: 0, fairPlayScore: 100 },
+  { team: 'MIN 2 BLITAR', yellow: 0, red: 0, fairPlayScore: 100 },
+  { team: 'MI WAHID HASYIM', yellow: 0, red: 0, fairPlayScore: 100 },
 ];
 
 export const DisciplineFairPlayChart: React.FC = () => {
@@ -44,7 +44,7 @@ export const DisciplineFairPlayChart: React.FC = () => {
           <span className="text-xs font-mono font-bold text-emerald-600 dark:text-emerald-400">
             Penghargaan Fair Play Tim Terbaik
           </span>
-          <span className="text-[10px] text-[var(--text-muted)] block">SDIT Insan Permata Memimpin (98 Poin)</span>
+          <span className="text-[10px] text-[var(--text-muted)] block">Seluruh Tim Disiplin Sempurna (100 Poin)</span>
         </div>
       </div>
 

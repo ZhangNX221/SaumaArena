@@ -30,9 +30,9 @@ const barlowCondensed = Barlow_Condensed({
 });
 
 export const metadata: Metadata = {
-  title: 'Sauma Arena | Platform Manajemen Turnamen Olahraga & Live Score',
+  title: 'Sauma Arena',
   description:
-    'Sistem manajemen turnamen terpadu untuk panitia, peserta, dan penonton. Dilengkapi 7 tab publik, papan klasemen, live score, dan penilaian best supporter.',
+    'Sistem manajemen turnamen terpadu untuk panitia, peserta, dan penonton. Dilengkapi portal publik, papan klasemen, live score, dan penilaian best supporter.',
   keywords: [
     'Sauma Arena',
     'Turnamen Futsal SD MI',
@@ -44,7 +44,12 @@ export const metadata: Metadata = {
   ],
   authors: [{ name: 'Sauma Arena Team' }],
   icons: {
-    icon: '/favicon.ico',
+    icon: [
+      { url: '/favicon.ico', sizes: 'any' },
+      { url: '/icon.png', sizes: '192x192', type: 'image/png' },
+    ],
+    shortcut: '/favicon.ico',
+    apple: '/apple-icon.png',
   },
 };
 
@@ -65,6 +70,11 @@ export default function RootLayout({
       lang="id"
       className={`${inter.variable} ${teko.variable} ${bebasNeue.variable} ${barlowCondensed.variable}`}
     >
+      <head>
+        <link rel="icon" href="/favicon.ico" sizes="any" />
+        <link rel="icon" href="/icon.png" type="image/png" sizes="192x192" />
+        <link rel="apple-touch-icon" href="/apple-icon.png" />
+      </head>
       <body className="min-h-screen bg-[var(--bg-page)] text-[var(--text-main)] font-[var(--font-sans)] antialiased transition-colors duration-150">
         {children}
       </body>

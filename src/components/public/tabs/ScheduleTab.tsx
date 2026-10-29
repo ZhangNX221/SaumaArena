@@ -1,30 +1,44 @@
 'use client';
 
 import React, { useState } from 'react';
-import { MapPin, Clock, ChevronDown, ChevronUp, ShieldCheck, Calendar } from 'lucide-react';
+import { MapPin, Clock, ChevronDown, ChevronUp, Calendar } from 'lucide-react';
 import { initialMatches } from '@/mocks/tournamentData';
-import { CABOR_MATCHES_DATA, CABOR_INFO_DATA } from '@/mocks/caborContentData';
+import { CABOR_INFO_DATA } from '@/mocks/caborContentData';
 import { Match, SportCode } from '@/types';
+import { usePersistentState } from '@/hooks/usePersistentState';
 import { PublicPageHeader } from '../layout/PublicPageHeader';
+import { TournamentRundownTable } from './schedule/TournamentRundownTable';
 
 interface ScheduleTabProps {
   sportCode?: SportCode;
 }
 
+const parseScheduleInfo = (scheduledTimeStr: string, matchNumber: number) => {
+  const parts = scheduledTimeStr.split('•').map((s) => s.trim());
+  const dateStr = parts[0] || 'Jadwal Turnamen';
+  const restStr = parts.slice(1).join(' • ');
+
+  const timeMatch = restStr.match(/(\d{2}[:.]\d{2}\s*-\s*\d{2}[:.]\d{2}(?:\s*WIB)?)/i);
+  const time = timeMatch ? (timeMatch[1].includes('WIB') ? timeMatch[1] : `${timeMatch[1]} WIB`) : '07:30 - 08:00 WIB';
+
+  const codeMatch = restStr.match(/\((.*?)\)/);
+  const code = codeMatch ? codeMatch[1] : `Partai P${matchNumber}`;
+
+  return { dateStr, time, code };
+};
+
 export const ScheduleTab: React.FC<ScheduleTabProps> = ({ sportCode = 'FUTSAL' }) => {
-  const isCustomCabor = sportCode === 'VOLI' || sportCode === 'ESPORT';
-  const customMatches = CABOR_MATCHES_DATA[sportCode] || [];
   const caborMeta = CABOR_INFO_DATA[sportCode] || CABOR_INFO_DATA.FUTSAL;
 
-  const [matches] = useState<Match[]>(initialMatches);
-  const hasLive = (isCustomCabor ? customMatches : matches).some((m) => m.status === 'LIVE');
-  const [statusFilter, setStatusFilter] = useState<'LIVE' | 'UPCOMING' | 'COMPLETED'>(
-    hasLive ? 'LIVE' : 'UPCOMING'
-  );
-  const [expandedMatchId, setExpandedMatchId] = useState<string | null>('match-103');
+  const [matches] = usePersistentState<Match[]>('sauma_arena_matches', initialMatches);
+  const [dateFilter, setDateFilter] = useState<'ALL' | 'H1' | 'H2'>('ALL');
+  const [expandedMatchId, setExpandedMatchId] = useState<string | null>('match-1');
 
-  const filteredMatches = matches.filter((m) => m.status === statusFilter);
-  const filteredCustomMatches = customMatches.filter((m) => m.status === statusFilter);
+  const filteredMatches = matches.filter((m) => {
+    if (dateFilter === 'H1') return m.scheduledTime.includes('Selasa, 3 Nov') || m.matchNumber <= 10;
+    if (dateFilter === 'H2') return m.scheduledTime.includes('Rabu, 4 Nov') || m.matchNumber >= 11;
+    return true;
+  });
 
   const toggleExpand = (id: string) => {
     setExpandedMatchId(expandedMatchId === id ? null : id);
@@ -40,42 +54,42 @@ export const ScheduleTab: React.FC<ScheduleTabProps> = ({ sportCode = 'FUTSAL' }
         description="Pembaruan skor langsung babak per babak, hasil pertandingan terverifikasi berita acara juri, dan agenda pertandingan berikutnya."
       />
 
-      {/* Top Filter Segmented Bar: Sedang Berlangsung | Akan Datang | Selesai */}
+      {/* Top Filter Segmented Bar: Tanggal Pertandingan */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-1.5 p-1 rounded-xl bg-[var(--bg-muted)] border border-[var(--border-subtle)] text-xs font-semibold">
           <button
             type="button"
-            onClick={() => setStatusFilter('LIVE')}
+            onClick={() => setDateFilter('ALL')}
+            className={`px-4 py-2 rounded-lg transition-all min-h-[38px] ${
+              dateFilter === 'ALL'
+                ? 'bg-[var(--bg-surface)] text-[var(--text-main)] shadow-xs font-bold'
+                : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'
+            }`}
+          >
+            Semua Tanggal
+          </button>
+          <button
+            type="button"
+            onClick={() => setDateFilter('H1')}
             className={`px-4 py-2 rounded-lg transition-all flex items-center gap-1.5 min-h-[38px] ${
-              statusFilter === 'LIVE'
-                ? 'bg-red-600 text-white shadow-xs font-bold'
-                : 'text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40'
-            }`}
-          >
-            <span className="w-2 h-2 rounded-full bg-current animate-pulse" />
-            <span>Sedang Berlangsung</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => setStatusFilter('UPCOMING')}
-            className={`px-4 py-2 rounded-lg transition-all min-h-[38px] ${
-              statusFilter === 'UPCOMING'
+              dateFilter === 'H1'
                 ? 'bg-[var(--bg-surface)] text-[var(--text-main)] shadow-xs font-bold'
                 : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'
             }`}
           >
-            Akan Datang
+            <span className="w-2 h-2 rounded-full bg-red-600 animate-pulse" />
+            <span>Selasa, 3 Nov 2026</span>
           </button>
           <button
             type="button"
-            onClick={() => setStatusFilter('COMPLETED')}
+            onClick={() => setDateFilter('H2')}
             className={`px-4 py-2 rounded-lg transition-all min-h-[38px] ${
-              statusFilter === 'COMPLETED'
+              dateFilter === 'H2'
                 ? 'bg-[var(--bg-surface)] text-[var(--text-main)] shadow-xs font-bold'
                 : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'
             }`}
           >
-            Selesai
+            Rabu, 4 Nov 2026
           </button>
         </div>
 
@@ -85,121 +99,25 @@ export const ScheduleTab: React.FC<ScheduleTabProps> = ({ sportCode = 'FUTSAL' }
         </div>
       </div>
 
-      {/* Render Custom Cabor Matches (Voli / Esport) */}
-      {isCustomCabor ? (
-        filteredCustomMatches.length === 0 ? (
-          <div className="p-8 text-center rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] space-y-2">
-            <p className="text-sm font-bold text-[var(--text-main)]">
-              Tidak ada pertandingan pada status ini.
-            </p>
-            <p className="text-xs text-[var(--text-muted)]">
-              Silakan klik tab Selesai atau Akan Datang untuk meninjau pertandingan lainnya.
-            </p>
-          </div>
-        ) : (
-          <div className="space-y-5">
-            {filteredCustomMatches.map((m) => {
-            const isLive = m.status === 'LIVE';
-            const isCompleted = m.status === 'COMPLETED';
-            return (
-              <div
-                key={m.id}
-                className={`rounded-2xl bg-[var(--bg-surface)] border transition-all overflow-hidden shadow-xs ${
-                  isLive
-                    ? 'border-red-500/60 ring-2 ring-red-500/10'
-                    : 'border-[var(--border-subtle)] hover:border-[var(--color-arena-primary)]/40'
-                }`}
-              >
-                <div className="px-6 py-3 bg-[var(--bg-muted)]/70 border-b border-[var(--border-subtle)] flex items-center justify-between text-xs text-[var(--text-muted)]">
-                  <div className="flex items-center gap-2.5 font-bold">
-                    <span className="text-[var(--text-main)] font-mono">Pertandingan #{m.matchNumber}</span>
-                    <span>&bull;</span>
-                    <span className="uppercase tracking-wider text-[11px] font-mono">{m.stage}</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <span className="text-[11px] font-semibold text-[var(--text-muted)] flex items-center gap-1">
-                      <MapPin className="w-3.5 h-3.5 text-[var(--color-arena-primary)]" />
-                      <span>{m.courtName}</span>
-                    </span>
-                    {isLive && (
-                      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-barlow font-black uppercase tracking-wider bg-red-600 text-white">
-                        <span className="w-1.5 h-1.5 rounded-full bg-white animate-ping" />
-                        <span>LIVE NOW</span>
-                      </span>
-                    )}
-                    {isCompleted && (
-                      <span className="px-2.5 py-0.5 rounded-md text-[10px] font-barlow font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-800 dark:text-emerald-300 border border-emerald-500/20">
-                        ✓ Terverifikasi Resmi
-                      </span>
-                    )}
-                    {m.status === 'UPCOMING' && (
-                      <span className="px-2.5 py-0.5 rounded-md text-[10px] font-barlow font-extrabold uppercase tracking-wider bg-amber-500/10 text-amber-800 dark:text-amber-300 border border-amber-500/20">
-                        Akan Datang
-                      </span>
-                    )}
-                  </div>
-                </div>
-
-                <div className="p-5 sm:p-7">
-                  <div className="grid grid-cols-1 md:grid-cols-7 items-center gap-5 sm:gap-6">
-                    <div className="md:col-span-3 flex items-center justify-between md:justify-end gap-3.5 text-left md:text-right">
-                      <div>
-                        <h4 className="font-barlow font-bold text-lg sm:text-xl text-[var(--text-main)] tracking-wide">
-                          {m.teamAName}
-                        </h4>
-                      </div>
-                      <div className="w-12 h-12 rounded-xl bg-[var(--bg-muted)] border border-[var(--border-subtle)] flex items-center justify-center p-1.5 shrink-0 overflow-hidden">
-                        <img src={m.teamALogo} alt={m.teamAName} className="w-full h-full object-contain" />
-                      </div>
-                    </div>
-
-                    <div className="md:col-span-1 flex flex-col items-center justify-center text-center">
-                      <div className="flex items-center gap-2 font-teko tabular-nums font-bold text-3xl sm:text-4xl tracking-wide text-[var(--text-main)] leading-none">
-                        <span>{m.scoreA}</span>
-                        <span className="text-[var(--text-muted)] text-xl font-normal">:</span>
-                        <span>{m.scoreB}</span>
-                      </div>
-                      {m.scoreDetail && (
-                        <div className="text-[11px] font-semibold text-[var(--color-arena-primary)] mt-1 font-barlow">
-                          {m.scoreDetail}
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="md:col-span-3 flex items-center justify-between md:justify-start gap-3.5 text-left">
-                      <div className="w-12 h-12 rounded-xl bg-[var(--bg-muted)] border border-[var(--border-subtle)] flex items-center justify-center p-1.5 shrink-0 overflow-hidden order-last md:order-first">
-                        <img src={m.teamBLogo} alt={m.teamBName} className="w-full h-full object-contain" />
-                      </div>
-                      <div>
-                        <h4 className="font-barlow font-bold text-lg sm:text-xl text-[var(--text-main)] tracking-wide">
-                          {m.teamBName}
-                        </h4>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-          </div>
-        )
+      {/* Tab Semua Tanggal: Munculkan Tabel Rundown saja. Tab Tanggal: Tampilkan per Pertandingan */}
+      {dateFilter === 'ALL' ? (
+        <TournamentRundownTable />
+      ) : filteredMatches.length === 0 ? (
+        <div className="p-8 text-center rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] space-y-2">
+          <p className="text-sm font-bold text-[var(--text-main)]">
+            Tidak ada pertandingan pada tanggal ini.
+          </p>
+          <p className="text-xs text-[var(--text-muted)]">
+            Silakan pilih tanggal lain atau klik Semua Tanggal untuk melihat seluruh pertandingan.
+          </p>
+        </div>
       ) : (
-        /* Render Futsal Matches */
-        filteredMatches.length === 0 ? (
-          <div className="p-8 text-center rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] space-y-2">
-            <p className="text-sm font-bold text-[var(--text-main)]">
-              Tidak ada pertandingan pada status ini.
-            </p>
-            <p className="text-xs text-[var(--text-muted)]">
-              Silakan klik tab Selesai atau Akan Datang untuk meninjau pertandingan lainnya.
-            </p>
-          </div>
-        ) : (
-          <div className="space-y-5">
+        <div className="space-y-5">
           {filteredMatches.map((match) => {
             const isLive = match.status === 'LIVE';
             const isCompleted = match.status === 'COMPLETED';
             const isExpanded = expandedMatchId === match.id;
+            const { time, code } = parseScheduleInfo(match.scheduledTime, match.matchNumber);
 
             return (
               <div
@@ -210,18 +128,26 @@ export const ScheduleTab: React.FC<ScheduleTabProps> = ({ sportCode = 'FUTSAL' }
                     : 'border-[var(--border-subtle)] hover:border-[var(--color-arena-primary)]/40'
                 }`}
               >
-                <div className="px-6 py-3 bg-[var(--bg-muted)]/70 border-b border-[var(--border-subtle)] flex items-center justify-between text-xs text-[var(--text-muted)]">
+                <div className="px-5 sm:px-7 py-3 bg-[var(--bg-muted)]/70 border-b border-[var(--border-subtle)] flex flex-wrap items-center justify-between gap-3 text-xs text-[var(--text-muted)]">
                   <div className="flex items-center gap-2.5 font-bold">
-                    <span className="text-[var(--text-main)] font-mono">Pertandingan #{match.matchNumber}</span>
+                    <span className="text-[var(--text-main)] font-mono text-xs sm:text-sm">Pertandingan #{match.matchNumber}</span>
                     <span>&bull;</span>
-                    <span className="uppercase tracking-wider text-[11px] font-mono">
-                      {match.stage === 'GROUP' ? `Fase Grup ${match.group}` : 'Babak Perempat Final'}
+                    <span className="uppercase tracking-wider text-[11px] sm:text-xs font-mono font-bold text-[var(--color-arena-primary)]">
+                      {match.stage === 'GROUP'
+                        ? `FASE GRUP ${match.group}`
+                        : match.stage === 'QUARTER_FINAL'
+                        ? 'BABAK 8 BESAR'
+                        : match.stage === 'SEMI_FINAL'
+                        ? 'BABAK 4 BESAR (SEMIFINAL)'
+                        : match.stage === 'FINAL'
+                        ? 'BABAK GRAND FINAL'
+                        : 'BABAK GUGUR'}
                     </span>
                   </div>
 
                   <div className="flex items-center gap-3">
                     <a
-                      href="https://maps.google.com/?q=MTsN+1+Kota+Malang"
+                      href="https://maps.app.goo.gl/71UwUT3czxJj5Mip7"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="btn-tactile inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[var(--bg-surface)] hover:bg-[var(--bg-muted)] text-[var(--color-arena-primary)] border border-[var(--border-subtle)] text-[11px] font-bold shadow-2xs transition-colors"
@@ -240,90 +166,95 @@ export const ScheduleTab: React.FC<ScheduleTabProps> = ({ sportCode = 'FUTSAL' }
                       </span>
                     )}
                     {isCompleted && match.isVerified === false && (
-                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[10px] font-barlow font-bold uppercase tracking-wider bg-amber-500/15 text-amber-800 dark:text-amber-300 border border-amber-500/30">
-                        ⚠️ Belum Resmi (Menunggu Verifikasi Admin)
-                      </span>
+                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[10px] font-barlow font-bold uppercase tracking-wider bg-amber-500/15 text-amber-800 dark:text-amber-300 border border-amber-500/30">⚠️ Belum Resmi (Menunggu Verifikasi)</span>
                     )}
                     {isCompleted && match.isVerified !== false && (
-                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[10px] font-barlow font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-800 dark:text-emerald-300 border border-emerald-500/20">
-                        ✓ Terverifikasi Resmi
-                      </span>
+                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[10px] font-barlow font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-800 dark:text-emerald-300 border border-emerald-500/20">✓ Terverifikasi Resmi</span>
                     )}
                     {match.status === 'UPCOMING' && (
-                      <span className="px-2.5 py-0.5 rounded-md text-[10px] font-barlow font-extrabold uppercase tracking-wider bg-amber-500/10 text-amber-800 dark:text-amber-300 border border-amber-500/20">
-                        Akan Datang
-                      </span>
+                      <span className="px-2.5 py-0.5 rounded-md text-[10px] font-barlow font-extrabold uppercase tracking-wider bg-amber-500/10 text-amber-800 dark:text-amber-300 border border-amber-500/20">Akan Datang</span>
                     )}
                   </div>
                 </div>
 
                 <div className="p-5 sm:p-7">
-                  <div className="grid grid-cols-1 md:grid-cols-7 items-center gap-5 sm:gap-6">
-                    <div className="md:col-span-3 flex items-center justify-between md:justify-end gap-3.5 text-left md:text-right">
+                  <div className="flex flex-col md:flex-row items-center justify-between gap-6 md:gap-5">
+                    {/* TIM A (Kiri) */}
+                    <div className="flex-1 w-full md:w-auto flex items-center justify-between md:justify-end gap-4 sm:gap-5 text-left md:text-right">
                       <div className="min-w-0 flex-1 md:flex-initial">
-                        <h4 className="font-barlow font-bold text-lg sm:text-xl text-[var(--text-main)] leading-tight tracking-wide truncate md:overflow-visible">
+                        <h4 className="font-barlow font-extrabold text-xl sm:text-2xl lg:text-3xl text-[var(--text-main)] leading-tight tracking-tight">
                           {match.teamAName}
                         </h4>
-                        <span className="text-xs text-[var(--text-muted)] font-medium block mt-0.5">
-                          {match.group ? `Grup ${match.group}` : 'Tim Unggulan'}
-                        </span>
+                        <div className="mt-1.5 flex items-center md:justify-end">
+                          <span className="inline-flex items-center px-3 py-0.5 rounded-full text-xs sm:text-sm font-barlow font-bold uppercase tracking-wider bg-[var(--color-arena-primary-light)] text-[var(--color-arena-primary)] border border-[var(--color-arena-primary)]/25">
+                            {match.group ? `Fase Grup ${match.group}` : (match.stage === 'FINAL' ? 'Grand Final' : 'Babak 4 Besar')}
+                          </span>
+                        </div>
                       </div>
-                      <div className="w-12 h-12 rounded-xl bg-[var(--bg-muted)] border border-[var(--border-subtle)] flex items-center justify-center p-1.5 shrink-0 shadow-2xs overflow-hidden">
+                      <div className="w-16 h-16 sm:w-20 sm:h-20 lg:w-[84px] lg:h-[84px] rounded-2xl bg-[var(--bg-muted)] border-2 border-[var(--border-subtle)] flex items-center justify-center p-2.5 shrink-0 shadow-xs overflow-hidden">
                         {match.teamALogo ? (
                           <img src={match.teamALogo} alt={match.teamAName} className="w-full h-full object-contain" />
                         ) : (
-                          <span className="font-barlow font-bold text-xs text-[var(--color-arena-primary)]">
+                          <span className="font-barlow font-black text-lg sm:text-xl text-[var(--color-arena-primary)]">
                             {match.teamAName.split(' ')[0]}
                           </span>
                         )}
                       </div>
                     </div>
 
-                    <div className="md:col-span-1 flex flex-col items-center justify-center text-center">
+                    {/* AREA TENGAH: WAKTU & VS / SKOR */}
+                    <div className="shrink-0 flex flex-col items-center justify-center text-center">
                       {match.status === 'UPCOMING' ? (
-                        <div className="flex flex-col items-center gap-1">
-                          <span className="px-3 py-1 rounded-lg bg-[var(--bg-muted)] text-[var(--text-main)] font-mono font-bold text-xs border border-[var(--border-subtle)]">
-                            {match.scheduledTime.split(',')[1]?.trim() || match.scheduledTime}
-                          </span>
-                          <span className="text-[11px] text-[var(--text-muted)] uppercase tracking-wider font-bebas">
-                            VS
-                          </span>
+                        <div className="flex flex-col items-center justify-center gap-1.5 px-4 py-2.5 rounded-2xl bg-[var(--bg-muted)]/70 border border-[var(--border-subtle)] shadow-2xs min-w-[170px]">
+                          <div className="flex items-center gap-1.5 text-xs sm:text-sm font-mono font-bold text-[var(--color-arena-primary)]">
+                            <Clock className="w-3.5 h-3.5 text-[var(--color-arena-accent)] shrink-0" />
+                            <span>{time}</span>
+                          </div>
+                          <div className="px-3.5 py-0.5 rounded-full bg-[var(--bg-surface)] border border-[var(--border-subtle)] shadow-2xs">
+                            <span className="font-bebas text-sm sm:text-base text-[var(--text-muted)] tracking-wider">VS</span>
+                          </div>
+                          <div className="text-[11px] font-mono font-bold text-[var(--text-muted)] tracking-tight">
+                            {code}
+                          </div>
                         </div>
                       ) : (
-                        <div className="flex flex-col items-center">
-                          <div className="flex items-center gap-3 font-teko tabular-nums font-bold text-3xl sm:text-4xl tracking-wide text-[var(--text-main)] leading-none">
+                        <div className="flex flex-col items-center px-5 py-2 min-w-[140px]">
+                          <div className="flex items-center gap-3 font-teko tabular-nums font-bold text-4xl sm:text-5xl lg:text-6xl tracking-wide text-[var(--text-main)] leading-none">
                             <span className={match.scoreA > match.scoreB ? 'text-[var(--color-arena-primary)]' : ''}>
                               {match.scoreA}
                             </span>
-                            <span className="text-[var(--text-muted)] text-xl font-normal">:</span>
+                            <span className="text-[var(--text-muted)] text-2xl font-normal">:</span>
                             <span className={match.scoreB > match.scoreA ? 'text-[var(--color-arena-primary)]' : ''}>
                               {match.scoreB}
                             </span>
                           </div>
-                          <span className="text-[10px] text-[var(--text-muted)] font-semibold mt-1">
+                          <span className="text-xs font-barlow font-bold uppercase tracking-wider text-[var(--text-muted)] mt-1.5">
                             {isLive ? 'Babak Ke-2' : 'Skor Akhir'}
                           </span>
                         </div>
                       )}
                     </div>
 
-                    <div className="md:col-span-3 flex items-center justify-between md:justify-start gap-3.5 text-left">
-                      <div className="w-12 h-12 rounded-xl bg-[var(--bg-muted)] border border-[var(--border-subtle)] flex items-center justify-center p-1.5 shrink-0 shadow-2xs overflow-hidden order-last md:order-first">
+                    {/* TIM B (Kanan) */}
+                    <div className="flex-1 w-full md:w-auto flex items-center justify-between md:justify-start gap-4 sm:gap-5 text-left">
+                      <div className="w-16 h-16 sm:w-20 sm:h-20 lg:w-[84px] lg:h-[84px] rounded-2xl bg-[var(--bg-muted)] border-2 border-[var(--border-subtle)] flex items-center justify-center p-2.5 shrink-0 shadow-xs overflow-hidden order-last md:order-first">
                         {match.teamBLogo ? (
                           <img src={match.teamBLogo} alt={match.teamBName} className="w-full h-full object-contain" />
                         ) : (
-                          <span className="font-barlow font-bold text-xs text-[var(--color-arena-primary)]">
+                          <span className="font-barlow font-black text-lg sm:text-xl text-[var(--color-arena-primary)]">
                             {match.teamBName.split(' ')[0]}
                           </span>
                         )}
                       </div>
                       <div className="min-w-0 flex-1 md:flex-initial">
-                        <h4 className="font-barlow font-bold text-lg sm:text-xl text-[var(--text-main)] leading-tight tracking-wide truncate md:overflow-visible">
+                        <h4 className="font-barlow font-extrabold text-xl sm:text-2xl lg:text-3xl text-[var(--text-main)] leading-tight tracking-tight">
                           {match.teamBName}
                         </h4>
-                        <span className="text-xs text-[var(--text-muted)] font-medium block mt-0.5">
-                          {match.group ? `Grup ${match.group}` : 'Kuda Hitam'}
-                        </span>
+                        <div className="mt-1.5 flex items-center md:justify-start">
+                          <span className="inline-flex items-center px-3 py-0.5 rounded-full text-xs sm:text-sm font-barlow font-bold uppercase tracking-wider bg-[var(--color-arena-primary-light)] text-[var(--color-arena-primary)] border border-[var(--color-arena-primary)]/25">
+                            {match.group ? `Fase Grup ${match.group}` : (match.stage === 'FINAL' ? 'Grand Final' : 'Babak 4 Besar')}
+                          </span>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -378,8 +309,7 @@ export const ScheduleTab: React.FC<ScheduleTabProps> = ({ sportCode = 'FUTSAL' }
             );
           })}
           </div>
-        )
-      )}
+        )}
     </div>
   );
 };

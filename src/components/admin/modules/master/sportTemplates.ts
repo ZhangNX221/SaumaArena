@@ -14,17 +14,6 @@ export interface SportTemplate {
 
 export const SPORT_TEMPLATES: SportTemplate[] = [
   {
-    name: 'Sepak Bola',
-    code: 'SEPAK_BOLA',
-    scoringType: 'TIME_BASED',
-    scoringLabel: 'Gol (2 × 45 Menit PSSI/FIFA)',
-    durationMinutes: 90,
-    periodCount: 2,
-    defaultCategories: ['Putra U-18', 'Putra U-15', 'Putri Terbuka'],
-    icon: '⚽',
-    badge: '2 × 45 Menit',
-  },
-  {
     name: 'Futsal',
     code: 'FUTSAL',
     scoringType: 'TIME_BASED',
@@ -34,6 +23,17 @@ export const SPORT_TEMPLATES: SportTemplate[] = [
     defaultCategories: ['Pelajar SMA/SMK', 'Pelajar SD/MI', 'U-18 Terbuka'],
     icon: '👟',
     badge: '2 × 20 Menit',
+  },
+  {
+    name: 'Sepak Bola',
+    code: 'SEPAK_BOLA',
+    scoringType: 'TIME_BASED',
+    scoringLabel: 'Gol (2 × 45 Menit PSSI/FIFA)',
+    durationMinutes: 90,
+    periodCount: 2,
+    defaultCategories: ['Putra U-18', 'Putra U-15', 'Putri Terbuka'],
+    icon: '⚽',
+    badge: '2 × 45 Menit',
   },
   {
     name: 'Bulutangkis',

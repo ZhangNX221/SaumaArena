@@ -3,13 +3,13 @@
 import React from 'react';
 import {
   Info,
+  Radio,
   Users,
   Calendar,
   ListOrdered,
   GitBranch,
   Activity,
   Megaphone,
-  UserPlus,
   Ticket,
 } from 'lucide-react';
 
@@ -19,15 +19,17 @@ import { initialMatches } from '@/mocks/tournamentData';
 
 export type PublicTabKey =
   | 'info'
-  | 'teams'
+  | 'live'
   | 'schedule'
   | 'standings'
   | 'bracket'
+  | 'teams'
   | 'stats'
   | 'supporter';
 
 const TAB_ICONS: Record<PublicTabKey, React.ComponentType<{ className?: string }>> = {
   info: Info,
+  live: Radio,
   schedule: Calendar,
   standings: ListOrdered,
   bracket: GitBranch,
@@ -104,29 +106,19 @@ export const PublicTabBar: React.FC<PublicTabBarProps> = ({
               );
             })}
 
-            {/* Divider */}
-            <div className="w-px h-6 bg-[var(--border-subtle)] mx-1 shrink-0" />
-
-            {/* Tombol Pendaftaran Tim */}
-            <button
-              type="button"
-              onClick={onOpenRegModal}
-              className="btn-tactile flex items-center gap-2 px-3.5 sm:px-4 py-2 rounded-xl sm:rounded-full text-sm font-bebas tracking-wider uppercase text-[var(--color-arena-primary)] bg-[var(--color-arena-primary-light)] hover:bg-[var(--color-arena-primary)] hover:text-white border border-[var(--color-arena-primary)]/40 dark:bg-blue-950/60 dark:text-sky-300 dark:border-blue-700 transition-all duration-150 min-h-[42px] shrink-0 shadow-2xs"
-            >
-              <UserPlus className="w-4 h-4 shrink-0" />
-              <span>Pendaftaran Tim</span>
-            </button>
-
             {/* Tombol Beli Tiket (Hanya tampil saat FEATURES.ticketing = true) */}
             {FEATURES.ticketing && (
-              <button
-                type="button"
-                onClick={onOpenTicketModal}
-                className="btn-tactile flex items-center gap-2 px-3.5 sm:px-4 py-2 rounded-xl sm:rounded-full text-sm font-bebas tracking-wider uppercase text-slate-950 bg-[var(--color-arena-accent)] hover:brightness-105 shadow-xs transition-all duration-150 min-h-[42px] shrink-0"
-              >
-                <Ticket className="w-4 h-4 shrink-0" />
-                <span>Beli Tiket</span>
-              </button>
+              <>
+                <div className="w-px h-6 bg-[var(--border-subtle)] mx-1 shrink-0" />
+                <button
+                  type="button"
+                  onClick={onOpenTicketModal}
+                  className="btn-tactile flex items-center gap-2 px-3.5 sm:px-4 py-2 rounded-xl sm:rounded-full text-sm font-bebas tracking-wider uppercase text-slate-950 bg-[var(--color-arena-accent)] hover:brightness-105 shadow-xs transition-all duration-150 min-h-[42px] shrink-0"
+                >
+                  <Ticket className="w-4 h-4 shrink-0" />
+                  <span>Beli Tiket</span>
+                </button>
+              </>
             )}
           </div>
         </div>

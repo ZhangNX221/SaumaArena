@@ -32,6 +32,7 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({
   const [password, setPassword] = useState('pass1234');
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const handleSelectRoleTab = (role: UserRole) => {
@@ -44,7 +45,7 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({
     }
   };
 
-  const handleLogin = (e?: React.FormEvent) => {
+  const handleLogin = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
 
     if (!username.trim() || !password.trim()) {
@@ -52,31 +53,51 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({
       return;
     }
 
-    const input = username.trim().toLowerCase();
-    const matched = PRESET_USERS.find(
-      (u) =>
-        (u.username && u.username.toLowerCase() === input) ||
-        u.email.toLowerCase() === input ||
-        u.email.toLowerCase().startsWith(input) ||
-        u.name.toLowerCase().includes(input)
-    );
-
-    const user: AppUser = matched
-      ? { ...matched, role: activeRoleTab }
-      : {
-          id: `usr-${Date.now()}`,
-          name: username.trim(),
-          username: username.trim(),
-          email: `${username.trim()}@sauma.arena`,
-          role: activeRoleTab,
-          roleLabel: activeRoleTab === 'ADMIN' ? 'Admin Turnamen' : 'Panitia / Juri Lapangan',
-          specialization: activeRoleTab === 'REFEREE' ? 'FUTSAL' : undefined,
-          avatarText: username.trim().slice(0, 2).toUpperCase(),
-          isAvailable: true,
-        };
-
+    setIsLoading(true);
     setErrorMessage(null);
-    onLoginSuccess(user);
+
+    try {
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username: username.trim(),
+          password: password.trim(),
+          role: activeRoleTab,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        setErrorMessage(data.error || 'Autentikasi gagal. Periksa kembali username dan kata sandi Anda.');
+        setIsLoading(false);
+        return;
+      }
+
+      // Persist auth token dan user session ke localStorage
+      if (rememberMe && data.token) {
+        try {
+          localStorage.setItem('sauma_auth_token', data.token);
+          localStorage.setItem('sauma_auth_user', JSON.stringify(data.user));
+          localStorage.setItem(
+            'sauma_current_view',
+            data.user.role === 'REFEREE' ? 'referee' : 'admin'
+          );
+        } catch {
+          // ignore storage error
+        }
+      }
+
+      onLoginSuccess(data.user);
+    } catch (err: any) {
+      console.error('Login error:', err);
+      setErrorMessage('Gagal menghubungi server autentikasi. Pastikan koneksi server lokal aktif.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -256,16 +277,28 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({
 
               <button
                 type="submit"
+                disabled={isLoading}
                 className={`btn-tactile w-full py-3.5 rounded-xl font-bebas text-lg uppercase tracking-wider shadow-xs transition-colors min-h-[48px] flex items-center justify-center gap-2 ${
+                  isLoading ? 'opacity-70 cursor-not-allowed' : ''
+                } ${
                   activeRoleTab === 'ADMIN'
                     ? 'bg-[var(--color-arena-primary)] hover:bg-[var(--color-arena-primary-hover)] text-white'
                     : 'bg-[var(--color-arena-accent)] hover:brightness-105 text-slate-900'
                 }`}
               >
-                <ShieldCheck className="w-4 h-4" />
-                <span>
-                  {activeRoleTab === 'ADMIN' ? 'Masuk sebagai Admin' : 'Masuk sebagai Panitia / Juri'}
-                </span>
+                {isLoading ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                    <span>Memverifikasi Akun...</span>
+                  </>
+                ) : (
+                  <>
+                    <ShieldCheck className="w-4 h-4" />
+                    <span>
+                      {activeRoleTab === 'ADMIN' ? 'Masuk sebagai Admin' : 'Masuk sebagai Panitia / Juri'}
+                    </span>
+                  </>
+                )}
               </button>
             </form>
           </div>

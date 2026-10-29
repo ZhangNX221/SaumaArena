@@ -8,7 +8,10 @@ import {
   Shield,
   UserCheck,
 } from 'lucide-react';
-import { AppUser, Match } from '@/types';
+import { AppUser, Match, RefereeMatchDuty } from '@/types';
+import { REFEREE_DUTIES } from '@/mocks/multiSportData';
+import { initialMatches } from '@/mocks/tournamentData';
+import { usePersistentState } from '@/hooks/usePersistentState';
 
 interface RefereeDashboardHomeProps {
   user: AppUser;
@@ -26,28 +29,27 @@ export const RefereeDashboardHome: React.FC<RefereeDashboardHomeProps> = ({
 }) => {
   const [isReady, setIsReady] = useState(user.isAvailable !== false);
 
-  const TODAY_ASSIGNMENTS = [
-    {
-      id: 'match-101',
-      matchNumber: 1,
-      court: 'Lapangan Utama (Vinyl)',
-      time: '08:30 WIB',
-      teamA: 'MIN 1 Kota',
-      teamB: 'MIS Al-Hidayah',
-      role: 'Wasit Utama (Wasit 1)',
-      status: 'LIVE' as const,
-    },
-    {
-      id: 'match-103',
-      matchNumber: 3,
-      court: 'Lapangan 2 (Semen)',
-      time: '14:00 WIB',
-      teamA: 'SDN 2 Harapan',
-      teamB: 'MIS Darussalam',
-      role: 'Wasit Cadangan / Meja',
-      status: 'UPCOMING' as const,
-    },
-  ];
+  const [duties] = usePersistentState<RefereeMatchDuty[]>('sauma_arena_duties', REFEREE_DUTIES);
+  const [matches] = usePersistentState<Match[]>('sauma_arena_matches', initialMatches);
+
+  const userDuties = duties.filter(
+    (d) => d.refereeId === user.id || user.assignedMatchIds?.includes(d.matchId)
+  );
+  const activeDuties = userDuties.length > 0 ? userDuties : duties.slice(0, 3);
+
+  const todayAssignments = activeDuties.map((d) => {
+    const linkedMatch = matches.find((m) => m.id === d.matchId);
+    return {
+      id: d.matchId,
+      matchNumber: d.matchNumber,
+      court: d.courtName,
+      time: d.time,
+      teamA: d.teamA,
+      teamB: d.teamB,
+      role: d.roleInMatch || 'Wasit Pertandingan',
+      status: (linkedMatch?.status || d.status || 'UPCOMING') as Match['status'],
+    };
+  });
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto pb-16 animate-fadeIn">
@@ -135,7 +137,7 @@ export const RefereeDashboardHome: React.FC<RefereeDashboardHomeProps> = ({
               <h2 className="font-bebas text-xl sm:text-2xl text-[var(--text-main)] uppercase tracking-wide">
                 Jadwal Tugas Hari Ini
               </h2>
-              <p className="text-xs text-[var(--text-muted)] font-sans">Sabtu, 24 Oktober 2026</p>
+              <p className="text-xs text-[var(--text-muted)] font-sans">Selasa, 3 November 2026</p>
             </div>
             <button
               type="button"
@@ -148,7 +150,7 @@ export const RefereeDashboardHome: React.FC<RefereeDashboardHomeProps> = ({
           </div>
 
           <div className="space-y-3">
-            {TODAY_ASSIGNMENTS.map((m) => (
+            {todayAssignments.map((m) => (
               <div
                 key={m.id}
                 className="p-4 sm:p-5 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)]/50 hover:bg-[var(--bg-muted)] hover:border-[var(--color-arena-primary)]/30 transition-all duration-150 flex flex-col sm:flex-row sm:items-center justify-between gap-3"

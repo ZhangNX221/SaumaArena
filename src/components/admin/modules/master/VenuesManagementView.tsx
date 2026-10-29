@@ -5,13 +5,14 @@ import { Plus, Search, Edit2, Trash2, MapPin, X } from 'lucide-react';
 import { Venue } from '@/types';
 import { ConfirmModal } from '@/components/admin/common/ConfirmModal';
 import { ModalPortal } from '@/components/common/ModalPortal';
+import { usePersistentState } from '@/hooks/usePersistentState';
 
 interface VenuesManagementViewProps {
   venues: Venue[];
 }
 
 export const VenuesManagementView: React.FC<VenuesManagementViewProps> = ({ venues: initialVenues }) => {
-  const [venues, setVenues] = useState<Venue[]>(initialVenues);
+  const [venues, setVenues] = usePersistentState<Venue[]>('sauma_arena_venues', initialVenues);
   const [search, setSearch] = useState('');
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
 

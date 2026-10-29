@@ -1,14 +1,15 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Plus, Search, Edit2, Trash2, X, Users, CheckCircle2 } from 'lucide-react';
+import { Plus, Search, Edit2, Trash2 } from 'lucide-react';
 import { initialTeams } from '@/mocks/tournamentData';
 import { Team } from '@/types';
 import { ConfirmModal } from '@/components/admin/common/ConfirmModal';
-import { ModalPortal } from '@/components/common/ModalPortal';
+import { TeamEditModal, TeamFormData } from './TeamEditModal';
+import { usePersistentState } from '@/hooks/usePersistentState';
 
 export const TeamsManagementTab: React.FC = () => {
-  const [teams, setTeams] = useState<Team[]>(initialTeams);
+  const [teams, setTeams] = usePersistentState<Team[]>('sauma_arena_teams', initialTeams);
   const [search, setSearch] = useState('');
   const [groupFilter, setGroupFilter] = useState('ALL');
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
@@ -16,38 +17,14 @@ export const TeamsManagementTab: React.FC = () => {
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTeam, setEditingTeam] = useState<Team | null>(null);
-  const [formData, setFormData] = useState({
-    name: '',
-    schoolName: '',
-    city: 'Kota Malang',
-    coachName: '',
-    group: 'A' as 'A' | 'B',
-    rosterCount: 12,
-  });
 
   const handleOpenAdd = () => {
     setEditingTeam(null);
-    setFormData({
-      name: '',
-      schoolName: '',
-      city: 'Kota Malang',
-      coachName: '',
-      group: 'A',
-      rosterCount: 12,
-    });
     setIsModalOpen(true);
   };
 
   const handleOpenEdit = (team: Team) => {
     setEditingTeam(team);
-    setFormData({
-      name: team.name,
-      schoolName: team.schoolName,
-      city: team.city,
-      coachName: team.coachName,
-      group: team.group,
-      rosterCount: team.players.length || 12,
-    });
     setIsModalOpen(true);
   };
 
@@ -62,10 +39,7 @@ export const TeamsManagementTab: React.FC = () => {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!formData.name.trim() || !formData.schoolName.trim()) return;
-
+  const handleSaveTeam = (formData: TeamFormData) => {
     if (editingTeam) {
       setTeams((prev) =>
         prev.map((t) =>
@@ -77,6 +51,7 @@ export const TeamsManagementTab: React.FC = () => {
                 city: formData.city,
                 coachName: formData.coachName,
                 group: formData.group,
+                logoUrl: formData.logoUrl || t.logoUrl,
               }
             : t
         )
@@ -88,7 +63,7 @@ export const TeamsManagementTab: React.FC = () => {
         shortName: formData.name.slice(0, 3).toUpperCase(),
         schoolName: formData.schoolName,
         city: formData.city,
-        logoUrl: '/teams/default.png',
+        logoUrl: formData.logoUrl || '/logos/sdi-kardina-massa.jpeg',
         coachName: formData.coachName,
         group: formData.group,
         rosterLocked: false,
@@ -147,6 +122,8 @@ export const TeamsManagementTab: React.FC = () => {
           <option value="ALL">Semua Grup ({teams.length})</option>
           <option value="A">Grup A</option>
           <option value="B">Grup B</option>
+          <option value="C">Grup C</option>
+          <option value="D">Grup D</option>
         </select>
         <button
           type="button"
@@ -182,9 +159,18 @@ export const TeamsManagementTab: React.FC = () => {
             ) : (
               filtered.map((t) => (
                 <tr key={t.id} className="hover:bg-[var(--bg-muted)]/30 transition-colors">
-                  <td className="py-4 px-4 font-bold text-[var(--text-main)]">
-                    <div>{t.schoolName}</div>
-                    <div className="text-[11px] text-[var(--text-muted)] font-normal">{t.city}</div>
+                  <td className="py-3.5 px-4 font-bold text-[var(--text-main)]">
+                    <div className="flex items-center gap-3">
+                      <img
+                        src={t.logoUrl}
+                        alt={t.name}
+                        className="w-12 h-12 object-contain shrink-0 filter drop-shadow-2xs"
+                      />
+                      <div>
+                        <div className="font-bold text-xs sm:text-sm text-[var(--text-main)]">{t.schoolName}</div>
+                        <div className="text-[11px] text-[var(--text-muted)] font-normal">{t.city}</div>
+                      </div>
+                    </div>
                   </td>
                   <td className="py-4 px-4 font-barlow font-bold uppercase tracking-wide text-sm text-[var(--color-arena-primary)]">
                     {t.name}
@@ -231,117 +217,15 @@ export const TeamsManagementTab: React.FC = () => {
       </div>
 
       {/* Modal CRUD (Create & Update) */}
-      {isModalOpen && (
-        <ModalPortal>
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/70 backdrop-blur-md animate-fadeIn" onClick={() => setIsModalOpen(false)}>
-            <div className="bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4" onClick={(e) => e.stopPropagation()}>
-              <div className="flex items-center justify-between pb-2 border-b border-[var(--border-subtle)]">
-                <h3 className="font-bebas text-xl uppercase tracking-wide text-[var(--text-main)]">
-                  {editingTeam ? 'Edit Data Kontingen Tim' : 'Tambah Kontingen Tim Baru'}
-                </h3>
-                <button
-                  type="button"
-                  onClick={() => setIsModalOpen(false)}
-                  className="p-1 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-main)]"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
-
-              <form onSubmit={handleSubmit} className="space-y-3 text-xs">
-                <div>
-                  <label className="font-barlow font-bold uppercase tracking-wider text-[11px] text-[var(--text-main)] block mb-1">Nama Kontingen / Sekolah</label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="Contoh: MIN 1 Kota Malang"
-                    value={formData.schoolName}
-                    onChange={(e) => setFormData({ ...formData, schoolName: e.target.value })}
-                    className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)]"
-                  />
-                </div>
-
-                <div>
-                  <label className="font-barlow font-bold uppercase tracking-wider text-[11px] text-[var(--text-main)] block mb-1">Nama Tim / Klub</label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="Contoh: Elang Muda Matsanega"
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)]"
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="font-barlow font-bold uppercase tracking-wider text-[11px] text-[var(--text-main)] block mb-1">Kota / Kabupaten</label>
-                    <input
-                      type="text"
-                      required
-                      value={formData.city}
-                      onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                      className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)]"
-                    />
-                  </div>
-                  <div>
-                    <label className="font-barlow font-bold uppercase tracking-wider text-[11px] text-[var(--text-main)] block mb-1">Plotting Grup</label>
-                    <select
-                      value={formData.group}
-                      onChange={(e) => setFormData({ ...formData, group: e.target.value as 'A' | 'B' })}
-                      className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)] font-barlow font-bold uppercase text-xs"
-                    >
-                      <option value="A">Grup A</option>
-                      <option value="B">Grup B</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="font-barlow font-bold uppercase tracking-wider text-[11px] text-[var(--text-main)] block mb-1">Pelatih Kepala</label>
-                    <input
-                      type="text"
-                      required
-                      value={formData.coachName}
-                      onChange={(e) => setFormData({ ...formData, coachName: e.target.value })}
-                      placeholder="Nama Pelatih"
-                      className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)]"
-                    />
-                  </div>
-                  <div>
-                    <label className="font-barlow font-bold uppercase tracking-wider text-[11px] text-[var(--text-main)] block mb-1">Kapasitas Roster</label>
-                    <input
-                      type="number"
-                      min="5"
-                      max="30"
-                      value={formData.rosterCount}
-                      onChange={(e) => setFormData({ ...formData, rosterCount: Number(e.target.value) })}
-                      className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)] font-teko font-bold text-base"
-                    />
-                  </div>
-                </div>
-
-                <div className="flex gap-2 pt-3">
-                  <button
-                    type="submit"
-                    className="btn-tactile flex-1 py-2.5 rounded-xl bg-[var(--color-arena-primary)] text-white font-barlow font-bold uppercase tracking-wider text-xs"
-                  >
-                    {editingTeam ? 'Simpan Perubahan' : 'Tambahkan Tim'}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setIsModalOpen(false)}
-                    className="btn-tactile px-4 py-2.5 rounded-xl border border-[var(--border-subtle)] text-xs font-barlow font-bold uppercase tracking-wider"
-                  >
-                    Batal
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        </ModalPortal>
-      )}
+      <TeamEditModal
+        isOpen={isModalOpen}
+        editingTeam={editingTeam}
+        onClose={() => {
+          setIsModalOpen(false);
+          setEditingTeam(null);
+        }}
+        onSave={handleSaveTeam}
+      />
 
       {/* Reusable Confirm Delete Modal */}
       <ConfirmModal

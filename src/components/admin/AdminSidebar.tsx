@@ -29,6 +29,7 @@ import {
   QrCode,
   Globe,
   Database,
+  Tablet,
   ChevronDown,
   ChevronRight,
   Filter,
@@ -52,19 +53,11 @@ export type AdminSubmenuId =
   | 'registration_verify'
   | 'contingents_teams'
   | 'athletes_players'
-  | 'athletes_id_cards'
-  | 'schedule_plotting'
-  | 'drawing_bracket'
-  | 'live_score_control'
-  | 'results_verification'
-  | 'group_standings'
-  | 'protests_sanctions'
   | 'referee_staff_accounts'
-  | 'match_assignments'
   | 'event_settings'
+  | 'match_settings'
   | 'account_settings'
   | 'backup_restore'
-  | 'audit_logs'
   | 'reports_export'
   | 'ticket_management'
   | 'transaction_history'
@@ -100,6 +93,7 @@ const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   QrCode,
   Globe,
   Database,
+  Tablet,
 };
 
 interface AdminSidebarProps {
@@ -121,8 +115,6 @@ interface AdminSidebarProps {
 
 const AVAILABLE_COMPETITIONS = [
   'Milad Matsanega Futsal Competition I (MMFC I)',
-  'Matsanega E-Sport Arena Cup 2026',
-  'Piala Rektor Bola Voli Remaja 2026',
 ];
 
 export const AdminSidebar: React.FC<AdminSidebarProps> = ({
@@ -338,6 +330,39 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
               </div>
             );
           })}
+        </div>
+
+        {/* Bottom Quick Switchers: Juri Console & Public Portal */}
+        <div className="p-3 border-t border-[var(--border-subtle)] space-y-1.5 bg-[var(--bg-muted)]/20 shrink-0">
+          {onGoToReferee && (
+            <button
+              type="button"
+              onClick={() => {
+                onGoToReferee();
+                onCloseMobile();
+              }}
+              className="btn-tactile w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-barlow font-bold uppercase tracking-wider text-sky-700 dark:text-sky-300 bg-sky-500/10 hover:bg-sky-500/20 border border-sky-500/30 transition-all active:scale-[0.98]"
+              title="Beralih ke Meja Juri / Tablet Lapangan"
+            >
+              <Tablet className="w-4 h-4 text-sky-600 dark:text-sky-400 shrink-0" />
+              <span className="truncate">Konsol Juri Lapangan</span>
+            </button>
+          )}
+
+          {onBackToPublic && (
+            <button
+              type="button"
+              onClick={() => {
+                onBackToPublic();
+                onCloseMobile();
+              }}
+              className="btn-tactile w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-barlow font-bold uppercase tracking-wider text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-surface)] border border-[var(--border-subtle)] transition-all active:scale-[0.98]"
+              title="Beralih ke Tampilan Portal Publik"
+            >
+              <Globe className="w-4 h-4 text-[var(--text-muted)] shrink-0" />
+              <span className="truncate">Portal Publik Penonton</span>
+            </button>
+          )}
         </div>
 
       </aside>

@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { Plus, Search, Edit2, Trash2, X, QrCode, ShieldCheck, Printer, Download } from 'lucide-react';
 import { ATHLETE_ID_CARDS } from '@/mocks/multiSportData';
 import { SportCode } from '@/types';
+import { usePersistentState } from '@/hooks/usePersistentState';
 import { ConfirmModal } from '@/components/admin/common/ConfirmModal';
 import { ModalPortal } from '@/components/common/ModalPortal';
 
@@ -15,6 +16,8 @@ export interface AthleteRecord {
   category: string;
   qrCode: string;
   nisn?: string;
+  isCheckedIn?: boolean;
+  checkInTime?: string;
 }
 
 interface AthletesManagementTabProps {
@@ -22,7 +25,7 @@ interface AthletesManagementTabProps {
 }
 
 export const AthletesManagementTab: React.FC<AthletesManagementTabProps> = ({ selectedSport = 'ALL' }) => {
-  const [athletes, setAthletes] = useState<AthleteRecord[]>(ATHLETE_ID_CARDS);
+  const [athletes, setAthletes] = usePersistentState<AthleteRecord[]>('sauma_arena_athletes', ATHLETE_ID_CARDS);
   const [search, setSearch] = useState('');
   const [selectedIdCard, setSelectedIdCard] = useState<AthleteRecord | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);

@@ -3,16 +3,14 @@
 import React from 'react';
 import {
   Trophy,
-  ShieldAlert,
   BarChart3,
-  Award,
   Flame,
   Zap,
 } from 'lucide-react';
 import { initialTeams } from '@/mocks/tournamentData';
-import { CABOR_STATS_LEADERS } from '@/mocks/caborStandingsAndStats';
 import { TeamGoalsBarChart } from '../stats/TeamGoalsBarChart';
 import { DisciplineFairPlayChart } from '../stats/DisciplineFairPlayChart';
+import { LiveMatchTeamCardsSummary } from './live/LiveMatchTeamCardsSummary';
 import { SportCode } from '@/types';
 import { PublicPageHeader } from '../layout/PublicPageHeader';
 
@@ -21,9 +19,6 @@ interface StatsTabProps {
 }
 
 export const StatsTab: React.FC<StatsTabProps> = ({ sportCode = 'FUTSAL' }) => {
-  const isCustomCabor = sportCode === 'VOLI' || sportCode === 'ESPORT';
-  const customStats = CABOR_STATS_LEADERS[sportCode];
-
   // Ambil seluruh pemain Futsal
   const allPlayers = initialTeams.flatMap((t) =>
     t.players.map((p) => ({
@@ -35,82 +30,16 @@ export const StatsTab: React.FC<StatsTabProps> = ({ sportCode = 'FUTSAL' }) => {
   );
 
   const topScorers = [...allPlayers].sort((a, b) => b.goals - a.goals).slice(0, 5);
-  const topAssists = [...allPlayers].sort((a, b) => b.assists - a.assists).slice(0, 5);
-  const disciplinedPlayers = [...allPlayers]
-    .filter((p) => p.yellowCards > 0 || p.redCards > 0 || p.isSuspended)
-    .sort((a, b) => b.yellowCards + b.redCards * 2 - (a.yellowCards + a.redCards * 2));
 
   return (
     <div className="space-y-8 animate-fadeIn pb-6">
       {/* Public Page Header */}
       <PublicPageHeader
         icon={BarChart3}
-        category={`INFOGRAFIS & ANALISIS PERTANDINGAN • ${sportCode}`}
-        title={isCustomCabor && customStats ? customStats.title : `Statistik & Performa Turnamen ${sportCode}`}
-        description={
-          isCustomCabor && customStats
-            ? customStats.subtitle
-            : 'Visualisasi data terstruktur perolehan gol tim, indeks sportivitas, serta peringkat performa individu atlet.'
-        }
+        category="INFOGRAFIS & ANALISIS PERTANDINGAN • FUTSAL"
+        title="Statistik & Performa Turnamen Futsal"
+        description="Visualisasi data terstruktur perolehan gol tim, indeks sportivitas, serta peringkat performa individu atlet."
       />
-
-      {/* Render Custom Cabor Stats (Voli / Esport) */}
-      {isCustomCabor && customStats ? (
-        <div className="space-y-6">
-          <div className="p-6 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] space-y-4 shadow-xs">
-            <div className="flex items-center justify-between pb-3 border-b border-[var(--border-subtle)]">
-              <div className="flex items-center gap-2">
-                <Trophy className="w-5 h-5 text-[var(--color-arena-accent)]" />
-                <h3 className="font-extrabold text-base text-[var(--text-main)]">
-                  Peringkat Pemain Bintang Terbaik ({sportCode})
-                </h3>
-              </div>
-              <span className="text-xs text-[var(--text-muted)] font-mono">Update Match Terakhir</span>
-            </div>
-
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
-                <thead>
-                  <tr className="bg-[var(--bg-muted)] text-[var(--text-muted)] text-[10px] uppercase font-bold border-b border-[var(--border-subtle)]">
-                    <th className="py-3 px-4 w-12 text-center">Rank</th>
-                    <th className="py-3 px-4">Nama Atlet</th>
-                    <th className="py-3 px-4">Klub / Tim</th>
-                    <th className="py-3 px-4">Kategori Gelar</th>
-                    <th className="py-3 px-4 text-right">Pencapaian Rekor</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-[var(--border-subtle)]">
-                  {customStats.leaders.map((leader) => (
-                    <tr key={leader.rank} className="hover:bg-[var(--bg-muted)]/30">
-                      <td className="py-3 px-4 text-center font-black font-mono">
-                        {leader.rank === 1 ? (
-                          <span className="w-6 h-6 rounded-full bg-amber-400 text-slate-950 inline-flex items-center justify-center text-xs">
-                            1
-                          </span>
-                        ) : (
-                          leader.rank
-                        )}
-                      </td>
-                      <td className="py-3 px-4 font-bold text-[var(--text-main)] text-sm">{leader.name}</td>
-                      <td className="py-3 px-4 text-[var(--text-muted)] font-medium">{leader.team}</td>
-                      <td className="py-3 px-4">
-                        <span className="px-2.5 py-1 rounded-md text-[10px] font-bold bg-[var(--color-arena-primary-light)] text-[var(--color-arena-primary)] border border-[var(--border-subtle)]">
-                          {leader.badge}
-                        </span>
-                      </td>
-                      <td className="py-3 px-4 text-right font-mono font-black text-sm text-[var(--color-arena-primary)]">
-                        {leader.metricValue}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      ) : (
-        /* Render Futsal Charts & Stats */
-        <>
           {/* Quick Stat Pill Cards */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
             <div className="p-4 rounded-xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] shadow-xs">
@@ -118,8 +47,8 @@ export const StatsTab: React.FC<StatsTabProps> = ({ sportCode = 'FUTSAL' }) => {
                 <span className="text-[11px] font-barlow font-bold uppercase tracking-wider">Total Gol Tercipta</span>
                 <Flame className="w-4 h-4 text-amber-500" />
               </div>
-              <div className="text-3xl sm:text-4xl font-teko font-bold text-[var(--text-main)] mt-1 leading-none tracking-wide">55</div>
-              <span className="text-[10px] text-[var(--text-muted)] font-mono">3.67 Gol per Laga</span>
+              <div className="text-3xl sm:text-4xl font-teko font-bold text-[var(--text-main)] mt-1 leading-none tracking-wide">0</div>
+              <span className="text-[10px] text-[var(--text-muted)] font-mono">0.00 Gol per Laga</span>
             </div>
 
             <div className="p-4 rounded-xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] shadow-xs">
@@ -127,8 +56,8 @@ export const StatsTab: React.FC<StatsTabProps> = ({ sportCode = 'FUTSAL' }) => {
                 <span className="text-[11px] font-barlow font-bold uppercase tracking-wider">Laga Selesai</span>
                 <Zap className="w-4 h-4 text-[var(--color-arena-primary)]" />
               </div>
-              <div className="text-3xl sm:text-4xl font-teko font-bold text-[var(--text-main)] mt-1 leading-none tracking-wide">15 / 26</div>
-              <span className="text-[10px] text-[var(--text-muted)] font-mono">Fase Grup Selesai 100%</span>
+              <div className="text-3xl sm:text-4xl font-teko font-bold text-[var(--text-main)] mt-1 leading-none tracking-wide">0 / 17</div>
+              <span className="text-[10px] text-[var(--text-muted)] font-mono">Menunggu Kickoff Hari-1</span>
             </div>
 
             <div className="p-4 rounded-xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] shadow-xs">
@@ -136,8 +65,8 @@ export const StatsTab: React.FC<StatsTabProps> = ({ sportCode = 'FUTSAL' }) => {
                 <span className="text-[11px] font-barlow font-bold uppercase tracking-wider">Kartu Kuning</span>
                 <div className="w-3.5 h-4 bg-amber-400 rounded-xs" />
               </div>
-              <div className="text-3xl sm:text-4xl font-teko font-bold text-amber-600 mt-1 leading-none tracking-wide">12</div>
-              <span className="text-[10px] text-[var(--text-muted)] font-mono">0.80 Kartu per Laga</span>
+              <div className="text-3xl sm:text-4xl font-teko font-bold text-amber-600 mt-1 leading-none tracking-wide">0</div>
+              <span className="text-[10px] text-[var(--text-muted)] font-mono">0.00 Kartu per Laga</span>
             </div>
 
             <div className="p-4 rounded-xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] shadow-xs">
@@ -145,7 +74,7 @@ export const StatsTab: React.FC<StatsTabProps> = ({ sportCode = 'FUTSAL' }) => {
                 <span className="text-[11px] font-barlow font-bold uppercase tracking-wider">Kartu Merah</span>
                 <div className="w-3.5 h-4 bg-red-500 rounded-xs" />
               </div>
-              <div className="text-3xl sm:text-4xl font-teko font-bold text-red-600 mt-1 leading-none tracking-wide">1</div>
+              <div className="text-3xl sm:text-4xl font-teko font-bold text-red-600 mt-1 leading-none tracking-wide">0</div>
               <span className="text-[10px] text-[var(--text-muted)] font-mono">Fair Play Terkendali</span>
             </div>
           </div>
@@ -160,127 +89,57 @@ export const StatsTab: React.FC<StatsTabProps> = ({ sportCode = 'FUTSAL' }) => {
             </div>
           </div>
 
-          {/* Section 2: Tables & Rankings */}
-          <div className="space-y-6 pt-2">
-            {/* Top Scorer & Top Assist Side-by-Side */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Top Scorer */}
-              <div className="p-5 sm:p-6 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] space-y-4 shadow-xs">
-                <div className="flex items-center justify-between pb-3 border-b border-[var(--border-subtle)]">
-                  <div className="flex items-center gap-2">
-                    <Trophy className="w-4 h-4 text-amber-500" />
-                    <h4 className="font-extrabold text-sm sm:text-base text-[var(--text-main)] font-[var(--font-display)] tracking-tight">Peringkat Top Scorer</h4>
-                  </div>
-                  <span className="text-xs text-[var(--text-muted)] font-mono font-bold">Piala Sepatu Emas</span>
-                </div>
-
-                <div className="space-y-2.5">
-                  {topScorers.map((player, idx) => (
-                    <div
-                      key={player.id}
-                      className="p-3 rounded-xl bg-[var(--bg-muted)]/50 border border-[var(--border-subtle)] flex items-center justify-between gap-3"
-                    >
-                      <div className="flex items-center gap-3">
-                        <span className="font-mono tabular-nums font-black text-xs text-[var(--text-muted)] w-5 text-center">
-                          #{idx + 1}
-                        </span>
-                        <div>
-                          <div className="font-barlow font-bold text-sm text-[var(--text-main)] tracking-wide">{player.name}</div>
-                          <div className="text-xs text-[var(--text-muted)] font-barlow">{player.teamName}</div>
-                        </div>
-                      </div>
-                      <span className="font-teko font-bold text-lg text-[var(--color-arena-primary)] leading-none tracking-wide">
-                        {player.goals} Gol
-                      </span>
-                    </div>
-                  ))}
-                </div>
+          {/* Section 2: Top Scorers (Piala Sepatu Emas) */}
+          <div className="p-5 sm:p-6 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] space-y-4 shadow-xs">
+            <div className="flex items-center justify-between pb-3 border-b border-[var(--border-subtle)]">
+              <div className="flex items-center gap-2">
+                <Trophy className="w-4 h-4 text-amber-500" />
+                <h4 className="font-extrabold text-sm sm:text-base text-[var(--text-main)] font-[var(--font-display)] tracking-tight">
+                  Peringkat Top Scorer Turnamen
+                </h4>
               </div>
-
-              {/* Top Assist */}
-              <div className="p-5 sm:p-6 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] space-y-4 shadow-xs">
-                <div className="flex items-center justify-between pb-3 border-b border-[var(--border-subtle)]">
-                  <div className="flex items-center gap-2">
-                    <Award className="w-4 h-4 text-blue-500" />
-                    <h4 className="font-extrabold text-sm sm:text-base text-[var(--text-main)] font-[var(--font-display)] tracking-tight">Peringkat Top Assist</h4>
-                  </div>
-                  <span className="text-xs text-[var(--text-muted)] font-mono font-bold">Playmaker Terbaik</span>
-                </div>
-
-                <div className="space-y-2.5">
-                  {topAssists.map((player, idx) => (
-                    <div
-                      key={player.id}
-                      className="p-3 rounded-xl bg-[var(--bg-muted)]/50 border border-[var(--border-subtle)] flex items-center justify-between gap-3"
-                    >
-                      <div className="flex items-center gap-3">
-                        <span className="font-mono tabular-nums font-black text-xs text-[var(--text-muted)] w-5 text-center">
-                          #{idx + 1}
-                        </span>
-                        <div>
-                          <div className="font-bold text-[var(--text-main)] font-[var(--font-display)]">{player.name}</div>
-                          <div className="text-[10px] text-[var(--text-muted)]">{player.teamName}</div>
-                        </div>
-                      </div>
-                      <span className="font-mono tabular-nums font-black text-sm text-blue-600 dark:text-blue-400">
-                        {player.assists} Assist
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
+              <span className="text-xs text-[var(--text-muted)] font-mono font-bold">Piala Sepatu Emas</span>
             </div>
 
-            {/* Disciplinary Table (Full Width) */}
-            <div className="p-5 sm:p-6 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] space-y-4 shadow-xs">
-              <div className="flex items-center justify-between pb-3 border-b border-[var(--border-subtle)]">
-                <div className="flex items-center gap-2.5">
-                  <ShieldAlert className="w-5 h-5 text-red-500" />
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+              {topScorers.map((player, idx) => (
+                <div
+                  key={player.id}
+                  className={`p-3.5 rounded-xl border flex flex-col justify-between gap-2.5 transition-all ${
+                    idx === 0
+                      ? 'bg-amber-500/10 border-amber-500/30'
+                      : 'bg-[var(--bg-muted)]/50 border-[var(--border-subtle)]'
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <span
+                      className={`font-mono tabular-nums font-black text-xs px-2 py-0.5 rounded-md ${
+                        idx === 0
+                          ? 'bg-amber-500 text-slate-950 font-bold'
+                          : 'bg-[var(--bg-muted)] text-[var(--text-muted)]'
+                      }`}
+                    >
+                      #{idx + 1}
+                    </span>
+                    <span className="font-teko font-bold text-2xl text-[var(--color-arena-primary)] leading-none">
+                      {player.goals} <span className="text-xs font-sans text-[var(--text-muted)] font-normal">Gol</span>
+                    </span>
+                  </div>
                   <div>
-                    <h4 className="font-extrabold text-sm sm:text-base text-[var(--text-main)] font-[var(--font-display)] tracking-tight">Rekapitulasi Kartu &amp; Sanksi Disiplin</h4>
-                    <p className="text-[11px] text-[var(--text-muted)]">Pencatatan kartu kuning, kartu merah, dan status skorsing pemain</p>
+                    <div className="font-barlow font-bold text-sm text-[var(--text-main)] truncate" title={player.name}>
+                      {player.name}
+                    </div>
+                    <div className="text-[11px] text-[var(--text-muted)] font-barlow truncate" title={player.teamName}>
+                      {player.teamName}
+                    </div>
                   </div>
                 </div>
-              </div>
-
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs">
-                  <thead>
-                    <tr className="bg-[var(--bg-muted)] text-[var(--text-muted)] text-[10px] uppercase font-bold border-b border-[var(--border-subtle)] font-mono">
-                      <th className="py-3 px-4 font-sans">Pemain</th>
-                      <th className="py-3 px-4 font-sans">Sekolah / Kontingen</th>
-                      <th className="py-3 px-4 text-center">Kuning (KK)</th>
-                      <th className="py-3 px-4 text-center">Merah (KM)</th>
-                      <th className="py-3 px-4 font-sans">Status Pertandingan</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-[var(--border-subtle)]">
-                    {disciplinedPlayers.map((player) => (
-                      <tr key={player.id} className="hover:bg-[var(--bg-muted)]/30">
-                        <td className="py-3 px-4 font-bold text-[var(--text-main)] font-[var(--font-display)]">{player.name}</td>
-                        <td className="py-3 px-4 text-[var(--text-muted)]">{player.teamName}</td>
-                        <td className="py-3 px-4 text-center font-mono tabular-nums font-bold text-amber-600">{player.yellowCards}</td>
-                        <td className="py-3 px-4 text-center font-mono tabular-nums font-bold text-red-600">{player.redCards}</td>
-                        <td className="py-3 px-4">
-                          {player.isSuspended ? (
-                            <span className="px-2 py-0.5 rounded text-[10px] font-mono font-black bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-300">
-                              Skorsing 1 Laga
-                            </span>
-                          ) : (
-                            <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-800">
-                              Aktif Bertanding
-                            </span>
-                          )}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+              ))}
             </div>
           </div>
-        </>
-      )}
+
+          {/* Section 3: Informasi Akumulasi Kartu Seluruh Tim */}
+          <LiveMatchTeamCardsSummary />
     </div>
   );
 };

@@ -1,0 +1,10 @@
+{
+  "code": "esport",
+  "name": "Esport (Generik)",
+  "version": "1.0.0",
+  "scoring_model": "map_series",
+  "participants": { "kind": "team", "starters": 5, "substitutes_max": 2 },
+  "series": { "best_of": 3, "allowed_best_of": [1, 3, 5] },
+  "points_system": { "win": 3, "loss": 0 },
+  "tiebreakers": ["points", "map_difference", "head_to_head_points"]
+}

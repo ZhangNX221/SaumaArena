@@ -5,29 +5,57 @@ import { Plus, Search, Edit2, Trash2, Trophy } from 'lucide-react';
 import { StandingRow } from '@/types';
 import { ConfirmModal } from '@/components/admin/common/ConfirmModal';
 import { StandingFormModal, StandingFormData } from './StandingFormModal';
+import { usePersistentState } from '@/hooks/usePersistentState';
 
 const DEFAULT_GROUP_A_STANDINGS: StandingRow[] = [
-  { rank: 1, teamId: 'team-min1', teamName: 'MIN 1 KOTA', schoolName: 'Madrasah Ibtidaiyah Negeri 1 Kota', logoUrl: '/teams/default.png', played: 3, won: 2, drawn: 0, lost: 1, goalsFor: 15, goalsAgainst: 14, goalDifference: 1, points: 6, fairPlayScore: 10 },
-  { rank: 2, teamId: 'team-sdn-percobaan', teamName: 'SDN PERCOBAAN 1', schoolName: 'SD Negeri Percobaan 1', logoUrl: '/teams/default.png', played: 3, won: 1, drawn: 1, lost: 1, goalsFor: 16, goalsAgainst: 12, goalDifference: 4, points: 4, fairPlayScore: 9 },
-  { rank: 3, teamId: 'team-alhidayah', teamName: 'MIS AL-HIDAYAH', schoolName: 'Madrasah Ibtidaiyah Swasta Al-Hidayah', logoUrl: '/teams/default.png', played: 3, won: 1, drawn: 1, lost: 1, goalsFor: 12, goalsAgainst: 10, goalDifference: 2, points: 4, fairPlayScore: 8 },
-  { rank: 4, teamId: 'team-bina-insani', teamName: 'SDIT BINA INSANI', schoolName: 'SDIT Bina Insani', logoUrl: '/teams/default.png', played: 3, won: 1, drawn: 0, lost: 2, goalsFor: 6, goalsAgainst: 13, goalDifference: -7, points: 3, fairPlayScore: 10 },
+  { rank: 1, teamId: 'team-sdi-kardina', teamName: 'SDI KARDINA MASSA (A1)', schoolName: 'SD Islam Kardina Massa Blitar', logoUrl: '/teams/default.png', played: 0, won: 0, drawn: 0, lost: 0, goalsFor: 0, goalsAgainst: 0, goalDifference: 0, supporterPoints: 100, points: 0, fairPlayScore: 10 },
+  { rank: 2, teamId: 'team-min7-blitar', teamName: 'MIN 7 BLITAR (A2)', schoolName: 'Madrasah Ibtidaiyah Negeri 7 Blitar', logoUrl: '/teams/default.png', played: 0, won: 0, drawn: 0, lost: 0, goalsFor: 0, goalsAgainst: 0, goalDifference: 0, supporterPoints: 100, points: 0, fairPlayScore: 10 },
+  { rank: 3, teamId: 'team-min8-blitar', teamName: 'MIN 8 BLITAR (A3)', schoolName: 'Madrasah Ibtidaiyah Negeri 8 Blitar', logoUrl: '/teams/default.png', played: 0, won: 0, drawn: 0, lost: 0, goalsFor: 0, goalsAgainst: 0, goalDifference: 0, supporterPoints: 100, points: 0, fairPlayScore: 10 },
 ];
 
 const DEFAULT_GROUP_B_STANDINGS: StandingRow[] = [
-  { rank: 1, teamId: 'team-min2', teamName: 'MIN 2 UNGGULAN', schoolName: 'Madrasah Ibtidaiyah Negeri 2 Unggulan', logoUrl: '/teams/default.png', played: 3, won: 3, drawn: 0, lost: 0, goalsFor: 15, goalsAgainst: 4, goalDifference: 11, points: 9, fairPlayScore: 10 },
-  { rank: 2, teamId: 'team-sdn-harapan', teamName: 'SDN 2 HARAPAN', schoolName: 'SD Negeri 2 Harapan Bangsa', logoUrl: '/teams/default.png', played: 3, won: 1, drawn: 1, lost: 1, goalsFor: 8, goalsAgainst: 9, goalDifference: -1, points: 4, fairPlayScore: 9 },
-  { rank: 3, teamId: 'team-darussalam', teamName: 'MIS DARUSSALAM', schoolName: 'Madrasah Ibtidaiyah Swasta Darussalam', logoUrl: '/teams/default.png', played: 3, won: 1, drawn: 0, lost: 2, goalsFor: 14, goalsAgainst: 13, goalDifference: 1, points: 3, fairPlayScore: 8 },
-  { rank: 4, teamId: 'team-harum', teamName: 'SDIT HARAPAN UMAT', schoolName: 'SDIT Harapan Umat', logoUrl: '/teams/default.png', played: 3, won: 0, drawn: 1, lost: 2, goalsFor: 7, goalsAgainst: 18, goalDifference: -11, points: 1, fairPlayScore: 7 },
+  { rank: 1, teamId: 'team-sdn1-srengat', teamName: 'UPT SDN 1 SRENGAT (B1)', schoolName: 'UPT SD Negeri 1 Srengat Blitar', logoUrl: '/teams/default.png', played: 0, won: 0, drawn: 0, lost: 0, goalsFor: 0, goalsAgainst: 0, goalDifference: 0, supporterPoints: 100, points: 0, fairPlayScore: 10 },
+  { rank: 2, teamId: 'team-min14-blitar', teamName: 'MIN 14 BLITAR (B2)', schoolName: 'Madrasah Ibtidaiyah Negeri 14 Blitar', logoUrl: '/teams/default.png', played: 0, won: 0, drawn: 0, lost: 0, goalsFor: 0, goalsAgainst: 0, goalDifference: 0, supporterPoints: 100, points: 0, fairPlayScore: 10 },
+  { rank: 3, teamId: 'team-mi-mambaululum', teamName: 'MI MAMBAUL ULUM BUNTARAN (B3)', schoolName: 'Madrasah Ibtidaiyah Mambaul Ulum Buntaran', logoUrl: '/teams/default.png', played: 0, won: 0, drawn: 0, lost: 0, goalsFor: 0, goalsAgainst: 0, goalDifference: 0, supporterPoints: 100, points: 0, fairPlayScore: 10 },
+  { rank: 4, teamId: 'team-min13-b', teamName: 'MIN 13 BLITAR (B4)', schoolName: 'Madrasah Ibtidaiyah Negeri 13 Blitar', logoUrl: '/teams/default.png', played: 0, won: 0, drawn: 0, lost: 0, goalsFor: 0, goalsAgainst: 0, goalDifference: 0, supporterPoints: 100, points: 0, fairPlayScore: 10 },
+];
+
+const DEFAULT_GROUP_C_STANDINGS: StandingRow[] = [
+  { rank: 1, teamId: 'team-min2-blitar', teamName: 'MIN 2 BLITAR (C1)', schoolName: 'Madrasah Ibtidaiyah Negeri 2 Blitar', logoUrl: '/teams/default.png', played: 0, won: 0, drawn: 0, lost: 0, goalsFor: 0, goalsAgainst: 0, goalDifference: 0, supporterPoints: 100, points: 0, fairPlayScore: 10 },
+  { rank: 2, teamId: 'team-mi-wahidhasyim', teamName: 'MI WAHID HASYIM BAKUNG (C2)', schoolName: 'Madrasah Ibtidaiyah Wahid Hasyim Bakung', logoUrl: '/teams/default.png', played: 0, won: 0, drawn: 0, lost: 0, goalsFor: 0, goalsAgainst: 0, goalDifference: 0, supporterPoints: 100, points: 0, fairPlayScore: 10 },
+  { rank: 3, teamId: 'team-min13-c', teamName: 'MIN 13 BLITAR (C3)', schoolName: 'Madrasah Ibtidaiyah Negeri 13 Blitar', logoUrl: '/teams/default.png', played: 0, won: 0, drawn: 0, lost: 0, goalsFor: 0, goalsAgainst: 0, goalDifference: 0, supporterPoints: 100, points: 0, fairPlayScore: 10 },
+];
+
+const DEFAULT_GROUP_D_STANDINGS: StandingRow[] = [
+  { rank: 1, teamId: 'team-mi-ploso', teamName: 'MI PLOSO KEDIRI (D1)', schoolName: 'Madrasah Ibtidaiyah Ploso Kediri', logoUrl: '/teams/default.png', played: 0, won: 0, drawn: 0, lost: 0, goalsFor: 0, goalsAgainst: 0, goalDifference: 0, supporterPoints: 100, points: 0, fairPlayScore: 10 },
+  { rank: 2, teamId: 'team-mi-darussalam', teamName: 'MI UNGGULAN DARUSSALAM (D2)', schoolName: 'Madrasah Ibtidaiyah Unggulan Darussalam', logoUrl: '/teams/default.png', played: 0, won: 0, drawn: 0, lost: 0, goalsFor: 0, goalsAgainst: 0, goalDifference: 0, supporterPoints: 100, points: 0, fairPlayScore: 10 },
+  { rank: 3, teamId: 'team-mi-yabunaya', teamName: 'MI YA BUNAYA SRENGAT (D3)', schoolName: 'Madrasah Ibtidaiyah Ya Bunaya Srengat Blitar', logoUrl: '/teams/default.png', played: 0, won: 0, drawn: 0, lost: 0, goalsFor: 0, goalsAgainst: 0, goalDifference: 0, supporterPoints: 100, points: 0, fairPlayScore: 10 },
+  { rank: 4, teamId: 'team-min5-tulungagung', teamName: 'MIN 5 TULUNGAGUNG (D4)', schoolName: 'Madrasah Ibtidaiyah Negeri 5 Tulungagung', logoUrl: '/teams/default.png', played: 0, won: 0, drawn: 0, lost: 0, goalsFor: 0, goalsAgainst: 0, goalDifference: 0, supporterPoints: 100, points: 0, fairPlayScore: 10 },
 ];
 
 export const GroupStandingsTab: React.FC = () => {
-  const [groupA, setGroupA] = useState<StandingRow[]>(DEFAULT_GROUP_A_STANDINGS);
-  const [groupB, setGroupB] = useState<StandingRow[]>(DEFAULT_GROUP_B_STANDINGS);
-  const [selectedGroup, setSelectedGroup] = useState<'A' | 'B'>('A');
+  const [groupA, setGroupA] = usePersistentState<StandingRow[]>('sauma_arena_standings_a', DEFAULT_GROUP_A_STANDINGS);
+  const [groupB, setGroupB] = usePersistentState<StandingRow[]>('sauma_arena_standings_b', DEFAULT_GROUP_B_STANDINGS);
+  const [groupC, setGroupC] = usePersistentState<StandingRow[]>('sauma_arena_standings_c', DEFAULT_GROUP_C_STANDINGS);
+  const [groupD, setGroupD] = usePersistentState<StandingRow[]>('sauma_arena_standings_d', DEFAULT_GROUP_D_STANDINGS);
+  const [selectedGroup, setSelectedGroup] = useState<'A' | 'B' | 'C' | 'D'>('A');
   const [deleteTarget, setDeleteTarget] = useState<{ teamId: string; teamName: string } | null>(null);
 
-  const currentList = selectedGroup === 'A' ? groupA : groupB;
-  const setCurrentList = selectedGroup === 'A' ? setGroupA : setGroupB;
+  const currentList =
+    selectedGroup === 'A'
+      ? groupA
+      : selectedGroup === 'B'
+      ? groupB
+      : selectedGroup === 'C'
+      ? groupC
+      : groupD;
+
+  const setCurrentList = (updater: React.SetStateAction<StandingRow[]>) => {
+    if (selectedGroup === 'A') setGroupA(updater);
+    else if (selectedGroup === 'B') setGroupB(updater);
+    else if (selectedGroup === 'C') setGroupC(updater);
+    else setGroupD(updater);
+  };
 
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -75,6 +103,7 @@ export const GroupStandingsTab: React.FC = () => {
                 goalsFor: gf,
                 goalsAgainst: ga,
                 goalDifference: gd,
+                supporterPoints: Number(formData.supporterPoints) || 0,
                 points: pts,
                 fairPlayScore: Number(formData.fairPlayScore),
               }
@@ -95,6 +124,7 @@ export const GroupStandingsTab: React.FC = () => {
         goalsFor: gf,
         goalsAgainst: ga,
         goalDifference: gd,
+        supporterPoints: Number(formData.supporterPoints) || 0,
         points: pts,
         fairPlayScore: Number(formData.fairPlayScore),
       };
@@ -115,25 +145,21 @@ export const GroupStandingsTab: React.FC = () => {
     <div className="p-6 sm:p-7 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] shadow-xs space-y-6">
       {/* Group Selector & Action Toolbar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[var(--border-subtle)]">
-        <div className="flex rounded-2xl bg-[var(--bg-muted)]/80 p-1.5 border border-[var(--border-subtle)] text-xs font-barlow font-bold uppercase tracking-wider w-fit">
-          <button
-            type="button"
-            onClick={() => setSelectedGroup('A')}
-            className={`px-4 py-1.5 rounded-xl transition-all ${
-              selectedGroup === 'A' ? 'bg-[var(--color-arena-primary)] text-white shadow-xs' : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'
-            }`}
-          >
-            Grup A ({groupA.length})
-          </button>
-          <button
-            type="button"
-            onClick={() => setSelectedGroup('B')}
-            className={`px-4 py-1.5 rounded-xl transition-all ${
-              selectedGroup === 'B' ? 'bg-[var(--color-arena-primary)] text-white shadow-xs' : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'
-            }`}
-          >
-            Grup B ({groupB.length})
-          </button>
+        <div className="flex rounded-2xl bg-[var(--bg-muted)]/80 p-1.5 border border-[var(--border-subtle)] text-xs font-barlow font-bold uppercase tracking-wider w-fit gap-1">
+          {(['A', 'B', 'C', 'D'] as const).map((grp) => (
+            <button
+              key={grp}
+              type="button"
+              onClick={() => setSelectedGroup(grp)}
+              className={`px-3 sm:px-4 py-1.5 rounded-xl transition-all ${
+                selectedGroup === grp
+                  ? 'bg-[var(--color-arena-primary)] text-white shadow-xs'
+                  : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'
+              }`}
+            >
+              Grup {grp}
+            </button>
+          ))}
         </div>
         <button
           type="button"
@@ -159,6 +185,7 @@ export const GroupStandingsTab: React.FC = () => {
               <th className="py-3.5 px-3 text-center">GM</th>
               <th className="py-3.5 px-3 text-center">GK</th>
               <th className="py-3.5 px-3 text-center">SG</th>
+              <th className="py-3.5 px-3 text-center font-bold text-amber-600 dark:text-amber-400" title="Poin Suporter">SP</th>
               <th className="py-3.5 px-3.5 text-center font-bold text-sm text-[var(--color-arena-primary)]">PTS</th>
               <th className="py-3.5 px-3.5 text-right">Aksi</th>
             </tr>
@@ -187,6 +214,9 @@ export const GroupStandingsTab: React.FC = () => {
                 <td className="py-4 px-3 text-center font-mono tabular-nums text-xs">{row.goalsAgainst}</td>
                 <td className="py-4 px-3 text-center font-mono tabular-nums text-xs font-bold">
                   {row.goalDifference > 0 ? `+${row.goalDifference}` : row.goalDifference}
+                </td>
+                <td className="py-4 px-3 text-center font-mono tabular-nums text-xs font-bold text-amber-600 dark:text-amber-400">
+                  {row.supporterPoints ?? 0}
                 </td>
                 <td className="py-4 px-3.5 text-center font-teko font-bold text-lg tabular-nums text-[var(--color-arena-primary)]">
                   {row.points}

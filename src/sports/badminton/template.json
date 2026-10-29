@@ -1,0 +1,20 @@
+{
+  "code": "badminton",
+  "name": "Bulutangkis",
+  "version": "1.0.0",
+  "scoring_model": "rally_set",
+  "participants": {
+    "kind": "individual_or_pair",
+    "per_side_options": [1, 2]
+  },
+  "sets": {
+    "best_of": 3,
+    "points_to_win": 21,
+    "deciding_set_points": 21,
+    "win_by": 2,
+    "max_points": 30
+  },
+  "interval": { "at_leading_points": 11, "seconds": 60 },
+  "points_system": { "win": 1, "loss": 0 },
+  "tiebreakers": ["points", "set_difference", "point_difference", "head_to_head_points"]
+}

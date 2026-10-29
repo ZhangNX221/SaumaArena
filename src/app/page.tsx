@@ -12,6 +12,7 @@ import { StandingsTab } from '@/components/public/tabs/StandingsTab';
 import { BracketTab } from '@/components/public/tabs/BracketTab';
 import { StatsTab } from '@/components/public/tabs/StatsTab';
 import { SupporterTab } from '@/components/public/tabs/SupporterTab';
+import { LiveMatchTab } from '@/components/public/tabs/LiveMatchTab';
 import { TicketModal } from '@/components/public/TicketModal';
 import { AdminDashboard } from '@/components/admin/AdminDashboard';
 import { AdminLogin } from '@/components/admin/AdminLogin';
@@ -72,18 +73,133 @@ export default function Home() {
 
   const toggleDarkMode = () => setDarkMode((prev) => !prev);
 
+  const handleViewChange = (view: 'public' | 'admin' | 'referee') => {
+    setCurrentView(view);
+    try {
+      localStorage.setItem('sauma_current_view', view);
+    } catch {
+      // ignore
+    }
+
+    if (typeof window !== 'undefined') {
+      const url = new URL(window.location.href);
+      if (view === 'public') {
+        url.searchParams.delete('view');
+      } else {
+        url.searchParams.set('view', view);
+      }
+      window.history.replaceState(null, '', url.pathname + url.search);
+    }
+  };
+
+  const handleLoginSuccess = (user: AppUser) => {
+    setCurrentUser(user);
+    setIsAuthenticated(true);
+    let nextView: 'public' | 'admin' | 'referee' = user.role === 'REFEREE' ? 'referee' : 'admin';
+    try {
+      const savedView = localStorage.getItem('sauma_current_view');
+      if (user.role === 'ADMIN' && savedView === 'referee') {
+        nextView = 'referee';
+      }
+    } catch {
+      // ignore
+    }
+    handleViewChange(nextView);
+  };
+
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/auth/logout', { method: 'POST' });
+    } catch {
+      // ignore
+    }
+    setIsAuthenticated(false);
+    setCurrentUser(null);
+    try {
+      localStorage.removeItem('sauma_auth_token');
+      localStorage.removeItem('sauma_auth_user');
+      localStorage.removeItem('sauma_current_view');
+    } catch {
+      // ignore
+    }
+    handleViewChange('public');
+  };
+
+  // Restore authenticated session and view on mount / refresh
+  useEffect(() => {
+    let savedView: 'public' | 'admin' | 'referee' | null = null;
+    let savedUser: AppUser | null = null;
+    let savedToken: string | null = null;
+
+    try {
+      savedView = (localStorage.getItem('sauma_current_view') as any) || null;
+      savedToken = localStorage.getItem('sauma_auth_token');
+      const savedUserStr = localStorage.getItem('sauma_auth_user');
+      if (savedUserStr) {
+        savedUser = JSON.parse(savedUserStr);
+      }
+    } catch {
+      // ignore storage error
+    }
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const viewParam = urlParams.get('view') as 'public' | 'admin' | 'referee' | null;
+
+    const initialTargetView =
+      viewParam === 'admin' || viewParam === 'referee' || viewParam === 'public'
+        ? viewParam
+        : savedView || 'public';
+
+    if (savedUser && savedToken) {
+      setCurrentUser(savedUser);
+      setIsAuthenticated(true);
+      setCurrentView(initialTargetView);
+
+      // Verify token with backend
+      fetch('/api/auth/me', {
+        headers: { Authorization: `Bearer ${savedToken}` },
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.success && data.user) {
+            setCurrentUser(data.user);
+            setIsAuthenticated(true);
+            try {
+              localStorage.setItem('sauma_auth_user', JSON.stringify(data.user));
+            } catch {}
+          } else {
+            // Token is invalid/expired
+            setIsAuthenticated(false);
+            setCurrentUser(null);
+            try {
+              localStorage.removeItem('sauma_auth_token');
+              localStorage.removeItem('sauma_auth_user');
+              localStorage.removeItem('sauma_current_view');
+            } catch {}
+            setCurrentView('public');
+            if (typeof window !== 'undefined') {
+              window.history.replaceState(null, '', window.location.pathname);
+            }
+          }
+        })
+        .catch(() => {
+          // If offline, keep local session
+        });
+    } else {
+      if (initialTargetView !== 'public') {
+        setCurrentView(initialTargetView);
+      }
+    }
+  }, []);
+
   // Admin View: Back-office and full control
   if (currentView === 'admin') {
     if (!isAuthenticated || currentUser?.role !== 'ADMIN') {
       return (
         <AdminLogin
           initialRole="ADMIN"
-          onLoginSuccess={(user) => {
-            setCurrentUser(user);
-            setIsAuthenticated(true);
-            setCurrentView(user.role === 'REFEREE' ? 'referee' : 'admin');
-          }}
-          onBackToPublic={() => setCurrentView('public')}
+          onLoginSuccess={handleLoginSuccess}
+          onBackToPublic={() => handleViewChange('public')}
         />
       );
     }
@@ -91,12 +207,9 @@ export default function Home() {
     return (
       <AdminDashboard
         user={currentUser}
-        onLogout={() => {
-          setIsAuthenticated(false);
-          setCurrentUser(null);
-        }}
-        onBackToPublic={() => setCurrentView('public')}
-        onGoToReferee={() => setCurrentView('referee')}
+        onLogout={handleLogout}
+        onBackToPublic={() => handleViewChange('public')}
+        onGoToReferee={() => handleViewChange('referee')}
         darkMode={darkMode}
         onToggleDarkMode={toggleDarkMode}
         banners={banners}
@@ -113,16 +226,13 @@ export default function Home() {
 
   // Referee View: Field match execution on tablet/smartphone
   if (currentView === 'referee') {
-    if (!isAuthenticated || currentUser?.role !== 'REFEREE') {
+    // Both REFEREE and ADMIN users are authorized to use the referee console
+    if (!isAuthenticated || (currentUser?.role !== 'REFEREE' && currentUser?.role !== 'ADMIN')) {
       return (
         <AdminLogin
           initialRole="REFEREE"
-          onLoginSuccess={(user) => {
-            setCurrentUser(user);
-            setIsAuthenticated(true);
-            setCurrentView(user.role === 'ADMIN' ? 'admin' : 'referee');
-          }}
-          onBackToPublic={() => setCurrentView('public')}
+          onLoginSuccess={handleLoginSuccess}
+          onBackToPublic={() => handleViewChange('public')}
         />
       );
     }
@@ -130,12 +240,9 @@ export default function Home() {
     return (
       <RefereeDashboard
         user={currentUser}
-        onLogout={() => {
-          setIsAuthenticated(false);
-          setCurrentUser(null);
-        }}
-        onBackToPublic={() => setCurrentView('public')}
-        onGoToAdmin={() => setCurrentView('admin')}
+        onLogout={handleLogout}
+        onBackToPublic={() => handleViewChange('public')}
+        onGoToAdmin={() => handleViewChange('admin')}
         darkMode={darkMode}
         onToggleDarkMode={toggleDarkMode}
       />
@@ -145,22 +252,26 @@ export default function Home() {
   // Public View: Spectator portal
   return (
     <div className="min-h-screen flex flex-col bg-[var(--bg-page)] text-[var(--text-main)] transition-colors duration-150">
-      {/* Top Universal Navigation with 3-Way Switcher */}
+      {/* Top Universal Navigation with Login & Pendaftaran Buttons */}
       <Navbar
         currentView={currentView}
-        onViewChange={setCurrentView}
+        onViewChange={handleViewChange}
         darkMode={darkMode}
         onToggleDarkMode={toggleDarkMode}
+        onOpenRegModal={() => setIsRegModalOpen(true)}
       />
 
       <main className="flex-1 pb-24 md:pb-16">
-        <PublicTournamentHeader
-          banners={banners}
-          activeIndex={activeBannerIndex}
-          onSelectBanner={(idx) => setActiveBannerIndex(idx)}
-          onOpenTicketModal={() => setIsTicketModalOpen(true)}
-          onOpenRegModal={() => setIsRegModalOpen(true)}
-        />
+        {/* Banner Turnamen: Pada mode mobile hanya ditampilkan saat berada di tab informasi */}
+        <div className={activeTab === 'info' ? 'block' : 'hidden md:block'}>
+          <PublicTournamentHeader
+            banners={banners}
+            activeIndex={activeBannerIndex}
+            onSelectBanner={(idx) => setActiveBannerIndex(idx)}
+            onOpenTicketModal={() => setIsTicketModalOpen(true)}
+            onOpenRegModal={() => setIsRegModalOpen(true)}
+          />
+        </div>
 
         {/* Desktop Centered Tab Bar */}
         <PublicTabBar
@@ -179,12 +290,22 @@ export default function Home() {
           sportCode={activeSportCode}
         />
 
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 sm:pt-10 pb-20">
+        <section
+          className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20 transition-all ${
+            activeTab === 'info' ? 'pt-8 sm:pt-10' : 'pt-3 sm:pt-10'
+          }`}
+        >
           {activeTab === 'info' && <InfoTab sportCode={activeSportCode} />}
-          {activeTab === 'teams' && <TeamsTab sportCode={activeSportCode} />}
+          {activeTab === 'live' && (
+            <LiveMatchTab
+              sportCode={activeSportCode}
+              onTabChange={(tab) => setActiveTab(tab as PublicTabKey)}
+            />
+          )}
           {activeTab === 'schedule' && <ScheduleTab sportCode={activeSportCode} />}
           {activeTab === 'standings' && <StandingsTab sportCode={activeSportCode} />}
           {activeTab === 'bracket' && <BracketTab sportCode={activeSportCode} />}
+          {activeTab === 'teams' && <TeamsTab sportCode={activeSportCode} />}
           {activeTab === 'stats' && <StatsTab sportCode={activeSportCode} />}
           {activeTab === 'supporter' && <SupporterTab />}
         </section>

@@ -127,7 +127,7 @@ export const SupporterDetailModal: React.FC<SupporterDetailModalProps> = ({
                 <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-[var(--border-subtle)] text-xs">
                   <div className="flex items-center gap-1.5 text-[var(--color-arena-primary)] font-semibold">
                     <Ticket className="w-3.5 h-3.5" />
-                    <span>5. Tiket Terverifikasi Gate: +{item.checkedInTickets} poin</span>
+                    <span>5. Tiket per Pertandingan: +{item.checkedInTickets} poin</span>
                   </div>
                   <div className="text-[11px] font-medium text-[var(--text-muted)]">
                     Catatan Juri: &ldquo;{item.notes || 'Penonton kondusif dan tertib.'}&rdquo;

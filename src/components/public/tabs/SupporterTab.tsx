@@ -4,17 +4,19 @@ import React, { useState } from 'react';
 import { Crown, Award, Ticket, ShieldAlert, ChevronRight, ChevronDown, ChevronUp, Search, Info } from 'lucide-react';
 import { initialSupporterAssessments, initialTeams } from '@/mocks/tournamentData';
 import { getTeamLogoUrl } from '@/mocks/teamLogos';
-import { SupporterAssessment } from '@/types';
+import { SupporterAssessment, Team } from '@/types';
+import { usePersistentState } from '@/hooks/usePersistentState';
 import { SupporterDetailModal } from './SupporterDetailModal';
 import { PublicPageHeader } from '../layout/PublicPageHeader';
 
 export const SupporterTab: React.FC = () => {
-  const [assessments] = useState<SupporterAssessment[]>(initialSupporterAssessments);
+  const [assessments] = usePersistentState<SupporterAssessment[]>('sauma_arena_supporter_scores', initialSupporterAssessments);
+  const [teams] = usePersistentState<Team[]>('sauma_arena_teams', initialTeams);
   const [selectedSchool, setSelectedSchool] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
 
   // Agregasi skor suporter per sekolah/tim (Poin 1 s/d 5 & Sanksi)
-  const leaderboard = initialTeams
+  const leaderboard = teams
     .map((team) => {
       const teamAssessments = assessments.filter((a) => a.teamId === team.id);
 
@@ -134,9 +136,9 @@ export const SupporterTab: React.FC = () => {
                   <span className="w-5 h-5 rounded-md bg-[var(--color-arena-primary)] text-white font-black text-[10px] flex items-center justify-center shrink-0 font-mono">
                     5
                   </span>
-                  <span className="text-[var(--text-main)] font-semibold">Tiket Penonton Ter-scan di Gate</span>
+                  <span className="text-[var(--text-main)] font-semibold">Tiket Penonton per Pertandingan</span>
                 </div>
-                <span className="stadium-badge-positive">+1 / Tiket</span>
+                <span className="stadium-badge-positive">+1 / Pertandingan</span>
               </div>
             </div>
           </div>

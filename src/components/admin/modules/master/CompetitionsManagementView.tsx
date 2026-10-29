@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { Trophy, Calendar, MapPin, Users, Plus, CheckCircle2, AlertCircle, Edit2, X, Sparkles } from 'lucide-react';
 import { CompetitionFormModal } from './CompetitionFormModal';
 import { AdminPageHeaderCard } from '@/components/admin/common/AdminPageHeaderCard';
+import { usePersistentState } from '@/hooks/usePersistentState';
 
 export interface CompetitionItem {
   id: string;
@@ -25,44 +26,21 @@ const INITIAL_COMPETITIONS: CompetitionItem[] = [
     name: 'Milad Matsanega Futsal Competition I (MMFC I)',
     edition: 'Edisi 2026 (Utama)',
     sportLabel: 'Futsal FFI',
-    dates: '24 - 28 Oktober 2026',
-    venue: 'Matsanega Futsal Court (Indoor Vinyl)',
-    registeredTeamsCount: 10,
+    dates: '3 - 4 November 2026',
+    venue: 'Lapangan Futsal Seabless Srengat (Vinyl)',
+    registeredTeamsCount: 14,
     maxTeamsCount: 16,
     status: 'ACTIVE',
     organizer: 'Panitia Milad Matsanega & Ekstrakurikuler Futsal',
     description: 'Kejuaraan futsal antarmadrasah tingkat SD/MI memperebutkan Piala Bergilir Matsanega I.',
   },
-  {
-    id: 'comp-2',
-    name: 'Matsanega E-Sport Arena Cup 2026 (MLBB)',
-    edition: 'Seri Pelajar I',
-    sportLabel: 'E-Sport MLBB',
-    dates: '10 - 12 November 2026',
-    venue: 'Matsanega ICT Center / Aula Utama',
-    registeredTeamsCount: 8,
-    maxTeamsCount: 16,
-    status: 'OPEN_REGISTRATION',
-    organizer: 'Divisi E-Sport Matsanega Arena',
-    description: 'Turnamen Mobile Legends Bang Bang tingkat pelajar SD/MI se-derajat.',
-  },
-  {
-    id: 'comp-3',
-    name: 'Piala Rektor Bola Voli Antar-Pelajar 2026',
-    edition: 'Invitasi Tahunan',
-    sportLabel: 'Bola Voli',
-    dates: '01 - 04 Desember 2026',
-    venue: 'Gelanggang Olahraga Outdoor Arena',
-    registeredTeamsCount: 6,
-    maxTeamsCount: 12,
-    status: 'UPCOMING',
-    organizer: 'PBVSI Wilayah & Pengurus Matsanega',
-    description: 'Kompetisi bola voli putra dan putri jenjang madrasah se-Jawa Timur.',
-  },
 ];
 
 export const CompetitionsManagementView: React.FC = () => {
-  const [competitions, setCompetitions] = useState<CompetitionItem[]>(INITIAL_COMPETITIONS);
+  const [competitions, setCompetitions] = usePersistentState<CompetitionItem[]>(
+    'sauma_arena_competitions',
+    INITIAL_COMPETITIONS
+  );
   const [activeCompId, setActiveCompId] = useState<string>('comp-1');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingComp, setEditingComp] = useState<CompetitionItem | null>(null);

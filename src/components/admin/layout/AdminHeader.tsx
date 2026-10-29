@@ -6,6 +6,8 @@ import {
   LogOut,
   Moon,
   Sun,
+  Tablet,
+  Globe,
 } from 'lucide-react';
 import { SportCode, AppUser } from '@/types';
 import { AdminSubmenuId } from '../AdminSidebar';
@@ -27,6 +29,8 @@ export const AdminHeader: React.FC<AdminHeaderProps> = ({
   onOpenMobileSidebar,
   user,
   onLogout,
+  onBackToPublic,
+  onGoToReferee,
   darkMode,
   onToggleDarkMode,
   currentMeta,
@@ -52,8 +56,31 @@ export const AdminHeader: React.FC<AdminHeaderProps> = ({
         </div>
       </div>
 
-      {/* Right Actions: Dark Mode Toggle & User Profile */}
+      {/* Right Actions: Switch to Referee, Switch to Public, Dark Mode Toggle & User Profile */}
       <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+        {onGoToReferee && (
+          <button
+            type="button"
+            onClick={onGoToReferee}
+            className="btn-tactile flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl border border-sky-500/30 bg-sky-500/10 hover:bg-sky-500/20 text-sky-700 dark:text-sky-300 font-barlow font-bold uppercase tracking-wider text-xs transition-all min-h-[38px]"
+            title="Buka Konsol Juri / Tablet Lapangan"
+          >
+            <Tablet className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-sky-600 dark:text-sky-400 shrink-0" />
+            <span className="hidden sm:inline">Konsol Juri</span>
+          </button>
+        )}
+
+        {onBackToPublic && (
+          <button
+            type="button"
+            onClick={onBackToPublic}
+            className="btn-tactile flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] hover:bg-[var(--bg-surface)] text-[var(--text-main)] font-barlow font-bold uppercase tracking-wider text-xs transition-all min-h-[38px]"
+            title="Lihat Tampilan Publik / Penonton"
+          >
+            <Globe className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[var(--text-muted)] shrink-0" />
+            <span className="hidden md:inline">Portal Publik</span>
+          </button>
+        )}
 
         {onToggleDarkMode && (
           <button

@@ -14,6 +14,7 @@ export interface StandingFormData {
   lost: number;
   goalsFor: number;
   goalsAgainst: number;
+  supporterPoints: number;
   points: number;
   fairPlayScore: number;
 }
@@ -23,7 +24,7 @@ interface StandingFormModalProps {
   onClose: () => void;
   onSubmit: (data: StandingFormData) => void;
   editingRow: StandingRow | null;
-  selectedGroup: 'A' | 'B';
+  selectedGroup: 'A' | 'B' | 'C' | 'D';
 }
 
 export const StandingFormModal: React.FC<StandingFormModalProps> = ({
@@ -42,6 +43,7 @@ export const StandingFormModal: React.FC<StandingFormModalProps> = ({
     lost: 0,
     goalsFor: 0,
     goalsAgainst: 0,
+    supporterPoints: 0,
     points: 0,
     fairPlayScore: 10,
   });
@@ -57,6 +59,7 @@ export const StandingFormModal: React.FC<StandingFormModalProps> = ({
         lost: editingRow.lost,
         goalsFor: editingRow.goalsFor,
         goalsAgainst: editingRow.goalsAgainst,
+        supporterPoints: editingRow.supporterPoints ?? 0,
         points: editingRow.points,
         fairPlayScore: editingRow.fairPlayScore,
       });
@@ -70,6 +73,7 @@ export const StandingFormModal: React.FC<StandingFormModalProps> = ({
         lost: 0,
         goalsFor: 0,
         goalsAgainst: 0,
+        supporterPoints: 0,
         points: 0,
         fairPlayScore: 10,
       });
@@ -177,9 +181,9 @@ export const StandingFormModal: React.FC<StandingFormModalProps> = ({
             </div>
           </div>
 
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-4 gap-2">
             <div>
-              <label className="font-barlow font-bold uppercase tracking-wider text-[11px] text-[var(--text-main)] block mb-1">Gol Memasukkan</label>
+              <label className="font-barlow font-bold uppercase tracking-wider text-[11px] text-[var(--text-main)] block mb-1">GM</label>
               <input
                 type="number"
                 min="0"
@@ -189,7 +193,7 @@ export const StandingFormModal: React.FC<StandingFormModalProps> = ({
               />
             </div>
             <div>
-              <label className="font-barlow font-bold uppercase tracking-wider text-[11px] text-[var(--text-main)] block mb-1">Gol Kemasukan</label>
+              <label className="font-barlow font-bold uppercase tracking-wider text-[11px] text-[var(--text-main)] block mb-1">GK</label>
               <input
                 type="number"
                 min="0"
@@ -199,7 +203,17 @@ export const StandingFormModal: React.FC<StandingFormModalProps> = ({
               />
             </div>
             <div>
-              <label className="font-barlow font-bold uppercase tracking-wider text-[11px] text-[var(--color-arena-primary)] block mb-1">Total Poin</label>
+              <label className="font-barlow font-bold uppercase tracking-wider text-[11px] text-amber-600 block mb-1" title="Poin Suporter">Poin SP</label>
+              <input
+                type="number"
+                min="0"
+                value={formData.supporterPoints}
+                onChange={(e) => setFormData({ ...formData, supporterPoints: Number(e.target.value) })}
+                className="w-full px-2 py-1.5 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-amber-600 font-teko font-bold text-base text-center"
+              />
+            </div>
+            <div>
+              <label className="font-barlow font-bold uppercase tracking-wider text-[11px] text-[var(--color-arena-primary)] block mb-1">Total PTS</label>
               <input
                 type="number"
                 min="0"

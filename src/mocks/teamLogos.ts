@@ -176,11 +176,65 @@ export const TEAM_SVGS: Record<string, string> = {
 </svg>`,
 };
 
+// Tournament Team Mappings
+TEAM_SVGS['team-sdi-kardina'] = TEAM_SVGS['team-min1'];
+TEAM_SVGS['team-min7-blitar'] = TEAM_SVGS['team-sdn-percobaan'];
+TEAM_SVGS['team-min8-blitar'] = TEAM_SVGS['team-alhidayah'];
+TEAM_SVGS['team-sdn1-srengat'] = TEAM_SVGS['team-bina-insani'];
+TEAM_SVGS['team-min14-blitar'] = TEAM_SVGS['team-maarif'];
+TEAM_SVGS['team-mi-mambaululum'] = TEAM_SVGS['team-tarbiyah'];
+TEAM_SVGS['team-min13-b'] = TEAM_SVGS['team-min2'];
+TEAM_SVGS['team-min2-blitar'] = TEAM_SVGS['team-min2'];
+TEAM_SVGS['team-mi-wahidhasyim'] = TEAM_SVGS['team-alhidayah'];
+TEAM_SVGS['team-min13-c'] = TEAM_SVGS['team-sdn-harapan'];
+TEAM_SVGS['team-mi-ploso'] = TEAM_SVGS['team-bina-insani'];
+TEAM_SVGS['team-mi-darussalam'] = TEAM_SVGS['team-darussalam'];
+TEAM_SVGS['team-mi-yabunaya'] = TEAM_SVGS['team-harum'];
+TEAM_SVGS['team-min5-tulungagung'] = TEAM_SVGS['team-sdn-percobaan'];
+
+
+// Real Team Logo Assets (from src/Logo) - Transparent Background PNGs
+export const REAL_TEAM_LOGOS: Record<string, { name: string; url: string }> = {
+  'team-sdi-kardina': { name: 'SDI Kardina Massa Blitar', url: '/logos/sdi-kardina-massa.png' },
+  'team-min7-blitar': { name: 'MIN 7 Blitar', url: '/logos/min-7-blitar.png' },
+  'team-min8-blitar': { name: 'MIN 8 Blitar', url: '/logos/min-8-blitar.png' },
+  'team-sdn1-srengat': { name: 'UPT SDN 1 Srengat Blitar', url: '/logos/sdn-srengat-1.png' },
+  'team-min14-blitar': { name: 'MIN 14 Blitar', url: '/logos/min-14-blitar.png' },
+  'team-mi-mambaululum': { name: 'MI Mambaul Ulum Buntaran', url: '/logos/manbaul-ulum.png' },
+  'team-min13-b': { name: 'MIN 13 Blitar', url: '/logos/min-13-blitar.png' },
+  'team-min2-blitar': { name: 'MIN 2 Blitar', url: '/logos/min-2-blitar.png' },
+  'team-mi-wahidhasyim': { name: 'MI Wahid Hasyim Bakung', url: '/logos/mi-wahid-hasyim.png' },
+  'team-min13-c': { name: 'MIN 13 Blitar', url: '/logos/min-13-blitar.png' },
+  'team-mi-ploso': { name: 'MIN Ploso Mojo Kediri', url: '/logos/min-ploso-kediri.png' },
+  'team-mi-darussalam': { name: 'MI Unggulan Darussalam', url: '/logos/mi-darussalam.png' },
+  'team-mi-yabunaya': { name: 'MI Ya Bunayya Srengat', url: '/logos/mi-yaa-bunayya.png' },
+  'team-min5-tulungagung': { name: 'MIN 5 Tulungagung', url: '/logos/min-5-tulungagung.png' },
+};
+
+export const OFFICIAL_PRESET_LOGOS = [
+  { label: 'SDI Kardina Massa Blitar', url: '/logos/sdi-kardina-massa.png' },
+  { label: 'MIN 7 Blitar', url: '/logos/min-7-blitar.png' },
+  { label: 'MIN 8 Blitar', url: '/logos/min-8-blitar.png' },
+  { label: 'UPT SDN 1 Srengat Blitar', url: '/logos/sdn-srengat-1.png' },
+  { label: 'MIN 14 Blitar', url: '/logos/min-14-blitar.png' },
+  { label: 'MI Mambaul Ulum Buntaran', url: '/logos/manbaul-ulum.png' },
+  { label: 'MIN 13 Blitar', url: '/logos/min-13-blitar.png' },
+  { label: 'MIN 2 Blitar', url: '/logos/min-2-blitar.png' },
+  { label: 'MI Wahid Hasyim Bakung', url: '/logos/mi-wahid-hasyim.png' },
+  { label: 'MIN Ploso Mojo Kediri', url: '/logos/min-ploso-kediri.png' },
+  { label: 'MI Unggulan Darussalam', url: '/logos/mi-darussalam.png' },
+  { label: 'MI Ya Bunayya Srengat', url: '/logos/mi-yaa-bunayya.png' },
+  { label: 'MIN 5 Tulungagung', url: '/logos/min-5-tulungagung.png' },
+];
+
 /**
- * Returns a self-contained SVG Data URI for the given team ID.
- * Falls back to MIN 1 logo if not found.
+ * Returns the official photo logo URL for the given team ID.
+ * Falls back to SVG data URI if real logo is not mapped.
  */
 export const getTeamLogoUrl = (teamId: string): string => {
+  if (REAL_TEAM_LOGOS[teamId]?.url) {
+    return REAL_TEAM_LOGOS[teamId].url;
+  }
   const svg = TEAM_SVGS[teamId] || TEAM_SVGS['team-min1'];
   return encodeSvg(svg);
 };

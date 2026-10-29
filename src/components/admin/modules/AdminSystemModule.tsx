@@ -103,55 +103,16 @@ export const AdminSystemModule: React.FC<AdminSystemModuleProps> = ({
 
   return (
     <div className="space-y-8 animate-fadeIn">
-      {/* Title Card */}
-      <AdminPageHeaderCard
-        icon={subTab === 'event_settings' ? Globe : Users}
-        category={
-          subTab === 'event_settings'
-            ? 'PENGATURAN SISTEM • INFORMASI PUBLIK'
-            : 'PENGATURAN SISTEM • AKUN PETUGAS'
-        }
-        title={
-          subTab === 'event_settings'
-            ? 'Pengaturan Portal & Informasi Publik'
-            : 'Akun Juri & Panitia Turnamen'
-        }
-        description={
-          subTab === 'event_settings'
-            ? 'Kustomisasi identitas publik turnamen, banner carousel, mitra pendukung, serta siaran pengumuman ke meja lapangan.'
-            : 'Kelola akun wasit dan pencatat meja, spesialisasi cabang olahraga, serta lisensi penugasan pertandingan.'
-        }
-        action={
-          <div className="flex items-center gap-1 p-1.5 rounded-2xl bg-[var(--bg-muted)]/80 border border-[var(--border-subtle)] text-xs font-barlow font-bold uppercase tracking-wider w-fit">
-            <button
-              type="button"
-              onClick={() => onSelectSubTab('event_settings')}
-              className={`btn-tactile px-3.5 py-2 rounded-xl transition-all ${
-                subTab === 'event_settings'
-                  ? 'bg-[var(--color-arena-primary)] text-white shadow-xs'
-                  : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'
-              }`}
-            >
-              Pengaturan Publik
-            </button>
-            <button
-              type="button"
-              onClick={() => onSelectSubTab('referee_staff_accounts')}
-              className={`btn-tactile px-3.5 py-2 rounded-xl transition-all ${
-                subTab === 'referee_staff_accounts'
-                  ? 'bg-[var(--color-arena-primary)] text-white shadow-xs'
-                  : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'
-              }`}
-            >
-              Akun Juri &amp; Panitia ({users.length})
-            </button>
-          </div>
-        }
-      />
-
       {/* Sub-tab 1: Referee & Staff Accounts */}
       {subTab === 'referee_staff_accounts' && (
-        <div className="space-y-4">
+        <div className="space-y-6">
+          <AdminPageHeaderCard
+            icon={Users}
+            category="PENGATURAN SISTEM • AKUN PETUGAS"
+            title="Akun Juri & Panitia Turnamen"
+            description="Kelola akun wasit dan pencatat meja, spesialisasi cabang olahraga, serta lisensi penugasan pertandingan."
+          />
+          <div className="space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
               <h3 className="text-sm font-barlow font-bold uppercase tracking-wide text-[var(--text-main)]">
@@ -274,7 +235,8 @@ export const AdminSystemModule: React.FC<AdminSystemModuleProps> = ({
             editingUser={editingUser}
           />
         </div>
-      )}
+      </div>
+    )}
 
       {/* Sub-tab 2: Event Settings & Public Configurations */}
       {subTab === 'event_settings' && (
@@ -282,52 +244,52 @@ export const AdminSystemModule: React.FC<AdminSystemModuleProps> = ({
           {/* Title Card */}
           <AdminPageHeaderCard
             icon={Globe}
-            category="PENGATURAN • KONFIGURASI PUBLIK"
+            category="PENGATURAN SISTEM • INFORMASI PUBLIK"
             title="Pengaturan Portal & Informasi Publik"
-            description="Kelola mitra dan sponsor resmi turnamen, konfigurasi banner header cabor, serta siaran pengumuman digital."
-            action={
-              <div className="flex flex-wrap items-center gap-1 p-1.5 rounded-2xl bg-[var(--bg-muted)]/80 border border-[var(--border-subtle)] text-xs font-barlow font-bold uppercase tracking-wider w-fit">
-                <button
-                  type="button"
-                  onClick={() => setPublicSection('partners')}
-                  className={`btn-tactile flex items-center gap-1.5 px-3.5 py-2 rounded-xl transition-all ${
-                    publicSection === 'partners'
-                      ? 'bg-[var(--color-arena-primary)] text-white shadow-xs'
-                      : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'
-                  }`}
-                >
-                  <Award className="w-3.5 h-3.5" />
-                  <span>Mitra &amp; Sponsor</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setPublicSection('banners')}
-                  className={`btn-tactile flex items-center gap-1.5 px-3.5 py-2 rounded-xl transition-all ${
-                    publicSection === 'banners'
-                      ? 'bg-[var(--color-arena-primary)] text-white shadow-xs'
-                      : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'
-                  }`}
-                >
-                  <Globe className="w-3.5 h-3.5" />
-                  <span>Banner Turnamen</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setPublicSection('broadcast')}
-                  className={`btn-tactile flex items-center gap-1.5 px-3.5 py-2 rounded-xl transition-all ${
-                    publicSection === 'broadcast'
-                      ? 'bg-[var(--color-arena-primary)] text-white shadow-xs'
-                      : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'
-                  }`}
-                >
-                  <Megaphone className="w-3.5 h-3.5" />
-                  <span>Siaran Meja</span>
-                </button>
-              </div>
-            }
+            description="Kustomisasi identitas publik turnamen, banner carousel, mitra pendukung, serta siaran pengumuman ke meja lapangan."
           />
+
+          {/* Sub-tab Navigation Bar */}
+          <div className="flex flex-wrap items-center gap-1.5 p-1.5 rounded-2xl bg-[var(--bg-muted)]/80 border border-[var(--border-subtle)] text-xs font-barlow font-bold uppercase tracking-wider w-fit">
+            <button
+              type="button"
+              onClick={() => setPublicSection('partners')}
+              className={`btn-tactile flex items-center gap-1.5 px-3.5 py-2 rounded-xl transition-all ${
+                publicSection === 'partners'
+                  ? 'bg-[var(--color-arena-primary)] text-white shadow-xs'
+                  : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'
+              }`}
+            >
+              <Award className="w-3.5 h-3.5" />
+              <span>Mitra &amp; Sponsor</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setPublicSection('banners')}
+              className={`btn-tactile flex items-center gap-1.5 px-3.5 py-2 rounded-xl transition-all ${
+                publicSection === 'banners'
+                  ? 'bg-[var(--color-arena-primary)] text-white shadow-xs'
+                  : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'
+              }`}
+            >
+              <Globe className="w-3.5 h-3.5" />
+              <span>Banner Turnamen</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setPublicSection('broadcast')}
+              className={`btn-tactile flex items-center gap-1.5 px-3.5 py-2 rounded-xl transition-all ${
+                publicSection === 'broadcast'
+                  ? 'bg-[var(--color-arena-primary)] text-white shadow-xs'
+                  : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'
+              }`}
+            >
+              <Megaphone className="w-3.5 h-3.5" />
+              <span>Siaran Meja</span>
+            </button>
+          </div>
 
           {/* 1. Mitra & Sponsor Turnamen */}
           {publicSection === 'partners' && <PublicPartnersTab />}

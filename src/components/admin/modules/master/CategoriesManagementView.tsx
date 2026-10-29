@@ -5,6 +5,7 @@ import { Plus, Search, Edit2, Trash2, CheckCircle2, X, Layers } from 'lucide-rea
 import { SportConfig } from '@/types';
 import { ConfirmModal } from '@/components/admin/common/ConfirmModal';
 import { ModalPortal } from '@/components/common/ModalPortal';
+import { usePersistentState } from '@/hooks/usePersistentState';
 
 export interface CategoryItem {
   id: string;
@@ -22,7 +23,7 @@ interface CategoriesManagementViewProps {
 
 export const CategoriesManagementView: React.FC<CategoriesManagementViewProps> = ({ sports }) => {
   // Initialize flat categories from sports
-  const [categories, setCategories] = useState<CategoryItem[]>(() => {
+  const defaultCategories: CategoryItem[] = React.useMemo(() => {
     const list: CategoryItem[] = [];
     sports.forEach((sp) => {
       sp.categories.forEach((cat, idx) => {
@@ -37,7 +38,12 @@ export const CategoriesManagementView: React.FC<CategoriesManagementViewProps> =
       });
     });
     return list;
-  });
+  }, [sports]);
+
+  const [categories, setCategories] = usePersistentState<CategoryItem[]>(
+    'sauma_arena_categories',
+    defaultCategories
+  );
 
   const [search, setSearch] = useState('');
   const [selectedSportFilter, setSelectedSportFilter] = useState('ALL');

@@ -3,8 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import { Users, ShieldCheck, Search, X } from 'lucide-react';
 import { initialTeams } from '@/mocks/tournamentData';
-import { CABOR_TEAMS_DATA } from '@/mocks/caborContentData';
 import { getTeamLogoUrl } from '@/mocks/teamLogos';
+import { usePersistentState } from '@/hooks/usePersistentState';
 import { Team, SportCode } from '@/types';
 import { ModalPortal } from '@/components/common/ModalPortal';
 import { PublicPageHeader } from '../layout/PublicPageHeader';
@@ -14,13 +14,10 @@ interface TeamsTabProps {
 }
 
 export const TeamsTab: React.FC<TeamsTabProps> = ({ sportCode = 'FUTSAL' }) => {
-  const isCustomCabor = sportCode === 'VOLI' || sportCode === 'ESPORT';
-  const customTeams = CABOR_TEAMS_DATA[sportCode] || [];
-
-  const [teams] = useState<Team[]>(initialTeams);
+  const [teams] = usePersistentState<Team[]>('sauma_arena_teams', initialTeams);
   const [selectedTeam, setSelectedTeam] = useState<Team | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedGroup, setSelectedGroup] = useState<'ALL' | 'A' | 'B'>('ALL');
+  const [selectedGroup, setSelectedGroup] = useState<'ALL' | 'A' | 'B' | 'C' | 'D'>('ALL');
 
   useEffect(() => {
     if (!selectedTeam) return;
@@ -40,62 +37,44 @@ export const TeamsTab: React.FC<TeamsTabProps> = ({ sportCode = 'FUTSAL' }) => {
     return matchesSearch && matchesGroup;
   });
 
-  const filteredCustomTeams = customTeams.filter((team) => {
-    const matchesSearch =
-      team.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      team.schoolName.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesGroup = selectedGroup === 'ALL' || team.group === selectedGroup;
-    return matchesSearch && matchesGroup;
-  });
-
-  const totalTeamsCount = isCustomCabor ? customTeams.length : teams.length;
-
   return (
     <div className="space-y-8 animate-fadeIn">
       {/* Public Page Header */}
       <PublicPageHeader
         icon={Users}
-        category={`KONTINGEN & TIM • ${sportCode}`}
+        category="KONTINGEN & TIM • FUTSAL"
         title="Daftar Tim &amp; Skuad Atlet"
         description="Daftar kontingen dan tim terverifikasi, komposisi pemain resmi, serta susunan ofisial pelatih turnamen."
       />
 
       {/* Filter and Search Bar */}
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
-        <div className="flex items-center gap-1.5 p-1 rounded-xl bg-[var(--bg-muted)] border border-[var(--border-subtle)] text-xs font-semibold w-fit">
+        <div className="flex flex-wrap items-center gap-1.5 p-1 rounded-xl bg-[var(--bg-muted)] border border-[var(--border-subtle)] text-xs font-semibold w-fit">
           <button
             type="button"
             onClick={() => setSelectedGroup('ALL')}
-            className={`px-4 py-2 rounded-lg transition-all min-h-[38px] ${
+            className={`px-3.5 py-2 rounded-lg transition-all min-h-[38px] ${
               selectedGroup === 'ALL'
                 ? 'bg-[var(--bg-surface)] text-[var(--text-main)] shadow-xs font-bold'
                 : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'
             }`}
           >
-            Semua Tim ({totalTeamsCount})
+            Semua Tim ({teams.length})
           </button>
-          <button
-            type="button"
-            onClick={() => setSelectedGroup('A')}
-            className={`px-4 py-2 rounded-lg transition-all min-h-[38px] ${
-              selectedGroup === 'A'
-                ? 'bg-[var(--bg-surface)] text-[var(--text-main)] shadow-xs font-bold'
-                : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'
-            }`}
-          >
-            Grup A
-          </button>
-          <button
-            type="button"
-            onClick={() => setSelectedGroup('B')}
-            className={`px-4 py-2 rounded-lg transition-all min-h-[38px] ${
-              selectedGroup === 'B'
-                ? 'bg-[var(--bg-surface)] text-[var(--text-main)] shadow-xs font-bold'
-                : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'
-            }`}
-          >
-            Grup B
-          </button>
+          {(['A', 'B', 'C', 'D'] as const).map((grp) => (
+            <button
+              key={grp}
+              type="button"
+              onClick={() => setSelectedGroup(grp)}
+              className={`px-3.5 py-2 rounded-lg transition-all min-h-[38px] ${
+                selectedGroup === grp
+                  ? 'bg-[var(--bg-surface)] text-[var(--text-main)] shadow-xs font-bold'
+                  : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'
+              }`}
+            >
+              Grup {grp}
+            </button>
+          ))}
         </div>
 
         {/* Search Input */}
@@ -110,74 +89,27 @@ export const TeamsTab: React.FC<TeamsTabProps> = ({ sportCode = 'FUTSAL' }) => {
           />
         </div>
       </div>
-
-      {/* Render Custom Cabor Teams (Voli / Esport) */}
-      {isCustomCabor ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {filteredCustomTeams.map((ct) => (
-            <div
-              key={ct.id}
-              className="p-6 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] shadow-xs hover:border-[var(--color-arena-primary)] transition-all flex flex-col justify-between space-y-5"
-            >
-              <div className="space-y-4">
-                <div className="flex items-start justify-between">
-                  <div className="w-14 h-14 rounded-xl bg-white dark:bg-slate-800/80 border border-[var(--border-subtle)] p-2.5 flex items-center justify-center shadow-xs overflow-hidden">
-                    <img src={ct.logoUrl} alt={ct.name} className="w-full h-full object-contain" loading="lazy" />
-                  </div>
-                  <span className="px-2.5 py-1 rounded-md text-[11px] font-mono font-bold bg-[var(--color-arena-primary-light)] text-[var(--color-arena-primary)] border border-[var(--border-subtle)]">
-                    Grup {ct.group}
-                  </span>
+      {/* Render Futsal Teams */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {filteredFutsalTeams.map((team) => (
+          <div
+            key={team.id}
+            className="p-6 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] shadow-xs hover:border-[var(--color-arena-primary)] transition-all flex flex-col justify-between space-y-5"
+          >
+            <div className="space-y-4">
+              <div className="flex items-start justify-between gap-3">
+                <div className="w-20 h-20 sm:w-24 sm:h-24 flex items-center justify-center shrink-0">
+                  <img
+                    src={team.logoUrl || getTeamLogoUrl(team.id)}
+                    alt={team.name}
+                    className="w-full h-full object-contain filter drop-shadow-xs"
+                    loading="lazy"
+                  />
                 </div>
-
-                <div>
-                  <h3 className="font-barlow font-bold text-lg text-[var(--text-main)] tracking-wide truncate">
-                    {ct.name}
-                  </h3>
-                  <p className="text-xs text-[var(--text-muted)] font-medium truncate mt-0.5">{ct.schoolName}</p>
-                  <p className="text-[11px] text-[var(--text-faint)] font-mono">Kota Malang</p>
-                </div>
-
-                <div className="text-xs text-[var(--text-muted)] pt-3 border-t border-[var(--border-subtle)] space-y-1.5">
-                  <div className="flex justify-between items-center">
-                    <span>Kapten Tim:</span>
-                    <strong className="text-[var(--text-main)] font-semibold truncate max-w-[130px]">{ct.captain}</strong>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span>Status:</span>
-                    <strong className="text-emerald-600 dark:text-emerald-400 font-bold">Terverifikasi Sah</strong>
-                  </div>
-                </div>
+                <span className="px-2.5 py-1 rounded-md text-[11px] font-mono font-bold bg-[var(--color-arena-primary-light)] text-[var(--color-arena-primary)] border border-[var(--border-subtle)]">
+                  Grup {team.group}
+                </span>
               </div>
-
-              <div className="p-2.5 rounded-xl bg-[var(--bg-muted)] text-[11px] text-center font-bold text-[var(--color-arena-primary)] flex items-center justify-center gap-1.5">
-                <ShieldCheck className="w-3.5 h-3.5" />
-                <span>Roster Resmi Cabor {sportCode}</span>
-              </div>
-            </div>
-          ))}
-        </div>
-      ) : (
-        /* Render Futsal Teams */
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredFutsalTeams.map((team) => (
-            <div
-              key={team.id}
-              className="p-6 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] shadow-xs hover:border-[var(--color-arena-primary)] transition-all flex flex-col justify-between space-y-5"
-            >
-              <div className="space-y-4">
-                <div className="flex items-start justify-between">
-                  <div className="w-14 h-14 rounded-xl bg-white dark:bg-slate-800/80 border border-[var(--border-subtle)] p-2.5 flex items-center justify-center shadow-xs overflow-hidden">
-                    <img
-                      src={team.logoUrl || getTeamLogoUrl(team.id)}
-                      alt={team.name}
-                      className="w-full h-full object-contain"
-                      loading="lazy"
-                    />
-                  </div>
-                  <span className="px-2.5 py-1 rounded-md text-[11px] font-mono font-bold bg-[var(--color-arena-primary-light)] text-[var(--color-arena-primary)] border border-[var(--border-subtle)]">
-                    Grup {team.group}
-                  </span>
-                </div>
 
                 <div>
                   <h3 className="font-barlow font-bold text-lg text-[var(--text-main)] tracking-wide truncate">
@@ -212,7 +144,6 @@ export const TeamsTab: React.FC<TeamsTabProps> = ({ sportCode = 'FUTSAL' }) => {
             </div>
           ))}
         </div>
-      )}
 
       {/* Team Roster Modal for Futsal */}
       {selectedTeam && (
@@ -221,11 +152,11 @@ export const TeamsTab: React.FC<TeamsTabProps> = ({ sportCode = 'FUTSAL' }) => {
             <div className="bg-[var(--bg-surface)] rounded-2xl border border-[var(--border-subtle)] max-w-2xl w-full p-6 sm:p-7 shadow-2xl space-y-6 max-h-[90vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
               <div className="flex items-center justify-between pb-4 border-b border-[var(--border-subtle)] shrink-0">
                 <div className="flex items-center gap-3.5">
-                  <div className="w-12 h-12 rounded-xl bg-white dark:bg-slate-800/80 border border-[var(--border-subtle)] p-2 flex items-center justify-center shadow-xs overflow-hidden shrink-0">
+                  <div className="w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center shrink-0">
                     <img
                       src={selectedTeam.logoUrl || getTeamLogoUrl(selectedTeam.id)}
                       alt={selectedTeam.name}
-                      className="w-full h-full object-contain"
+                      className="w-full h-full object-contain filter drop-shadow-xs"
                       loading="lazy"
                     />
                   </div>

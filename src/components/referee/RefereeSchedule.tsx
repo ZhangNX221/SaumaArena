@@ -3,7 +3,9 @@
 import React, { useState } from 'react';
 import { Clock, MapPin, ChevronRight, Play, Calendar } from 'lucide-react';
 import { REFEREE_DUTIES } from '@/mocks/multiSportData';
-import { RefereeMatchDuty, AppUser } from '@/types';
+import { initialMatches } from '@/mocks/tournamentData';
+import { RefereeMatchDuty, AppUser, Match } from '@/types';
+import { usePersistentState } from '@/hooks/usePersistentState';
 
 interface RefereeScheduleProps {
   onSelectDutyMatch: (duty: RefereeMatchDuty) => void;
@@ -18,13 +20,16 @@ export const RefereeSchedule: React.FC<RefereeScheduleProps> = ({
 }) => {
   const [activeSegment, setActiveSegment] = useState<'TODAY' | 'UPCOMING' | 'HISTORY'>(initialTab);
 
+  const [duties] = usePersistentState<RefereeMatchDuty[]>('sauma_arena_duties', REFEREE_DUTIES);
+  const [matches] = usePersistentState<Match[]>('sauma_arena_matches', initialMatches);
+
   const myDuties = user
-    ? REFEREE_DUTIES.filter(
+    ? duties.filter(
         (d) => d.refereeId === user.id || user.assignedMatchIds?.includes(d.matchId)
       )
-    : REFEREE_DUTIES;
+    : duties;
 
-  const activeDuties = myDuties.length > 0 ? myDuties : REFEREE_DUTIES;
+  const activeDuties = myDuties.length > 0 ? myDuties : duties;
 
   // Filter based on 3 tabs: Hari Ini, Mendatang, Selesai
   const todayDuties = activeDuties.filter(

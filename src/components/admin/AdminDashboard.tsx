@@ -7,17 +7,14 @@ import { AdminHeader } from './layout/AdminHeader';
 import { AdminOverviewModule } from './modules/AdminOverviewModule';
 import { AdminMasterDataModule } from './modules/AdminMasterDataModule';
 import { AdminParticipantsModule } from './modules/AdminParticipantsModule';
-import { AdminMatchOpsModule } from './modules/AdminMatchOpsModule';
 import { AdminTicketingModule } from './modules/AdminTicketingModule';
 import { AdminSystemModule } from './modules/AdminSystemModule';
 import { CompetitionsManagementView } from './modules/master/CompetitionsManagementView';
 import { AthletesPlayersTab } from './modules/participants/AthletesPlayersTab';
-import { ResultsVerificationTab } from './modules/matches/ResultsVerificationTab';
-import { MatchAssignmentsTab } from './modules/officials/MatchAssignmentsTab';
-import { AuditLogsTab } from './modules/system/AuditLogsTab';
 import { ReportsExportTab } from './modules/system/ReportsExportTab';
 import { AccountSettingsView } from './modules/system/AccountSettingsView';
 import { BackupRestoreTab } from './modules/system/BackupRestoreTab';
+import { MatchSettingsView } from './modules/system/MatchSettingsView';
 import { FEATURES } from '@/config/features';
 
 interface AdminDashboardProps {
@@ -43,19 +40,11 @@ const MENU_LABELS: Record<AdminSubmenuId, { category: string; title: string }> =
   registration_verify: { category: 'PESERTA', title: 'Verifikasi Berkas' },
   contingents_teams: { category: 'PESERTA', title: 'Daftar Tim' },
   athletes_players: { category: 'PESERTA', title: 'Daftar Atlet' },
-  athletes_id_cards: { category: 'PESERTA', title: 'Kartu Atlet' },
-  schedule_plotting: { category: 'PERTANDINGAN', title: 'Jadwal Bagan' },
-  drawing_bracket: { category: 'PERTANDINGAN', title: 'Bagan Turnamen' },
-  live_score_control: { category: 'PERTANDINGAN', title: 'Skor Langsung' },
-  results_verification: { category: 'PERTANDINGAN', title: 'Verifikasi Hasil' },
-  group_standings: { category: 'PERTANDINGAN', title: 'Klasemen' },
-  protests_sanctions: { category: 'PERTANDINGAN', title: 'Protes Sanksi' },
   referee_staff_accounts: { category: 'PENGATURAN', title: 'Akun Petugas' },
-  match_assignments: { category: 'PERTANDINGAN', title: 'Penugasan Pertandingan' },
   event_settings: { category: 'PENGATURAN', title: 'Pengaturan Publik' },
+  match_settings: { category: 'PENGATURAN', title: 'Pengaturan Pertandingan' },
   account_settings: { category: 'PENGATURAN', title: 'Pengaturan Akun' },
   backup_restore: { category: 'PENGATURAN', title: 'Pengaturan Database' },
-  audit_logs: { category: 'PENGATURAN', title: 'Riwayat Perubahan' },
   reports_export: { category: 'PENGATURAN', title: 'Laporan Ekspor' },
   ticket_management: { category: 'TIKET MASUK', title: 'Kuota Tiket' },
   transaction_history: { category: 'TIKET MASUK', title: 'Riwayat Transaksi' },
@@ -75,7 +64,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   onSaveBanners,
 }) => {
   const [activeSubmenu, setActiveSubmenu] = useState<AdminSubmenuId>('overview_stats');
-  const [selectedSport, setSelectedSport] = useState<SportCode>('ALL');
+  const [selectedSport, setSelectedSport] = useState<SportCode>('FUTSAL');
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [activeCompetition, setActiveCompetition] = useState(
     'Milad Matsanega Futsal Competition I (MMFC I)'
@@ -124,6 +113,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           onSelectSubmenu={setActiveSubmenu}
           user={user}
           onLogout={onLogout}
+          onBackToPublic={onBackToPublic}
+          onGoToReferee={onGoToReferee}
           darkMode={darkMode}
           onToggleDarkMode={onToggleDarkMode}
           currentMeta={currentMeta}
@@ -173,7 +164,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               <AdminParticipantsModule
                 subTab="verification"
                 onSelectSubTab={(t) =>
-                  setActiveSubmenu(t === 'verification' ? 'registration_verify' : t === 'contingents' ? 'contingents_teams' : 'athletes_id_cards')
+                  setActiveSubmenu(t === 'verification' ? 'registration_verify' : 'contingents_teams')
                 }
                 selectedSport={selectedSport}
               />
@@ -182,7 +173,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               <AdminParticipantsModule
                 subTab="contingents"
                 onSelectSubTab={(t) =>
-                  setActiveSubmenu(t === 'verification' ? 'registration_verify' : t === 'contingents' ? 'contingents_teams' : 'athletes_id_cards')
+                  setActiveSubmenu(t === 'verification' ? 'registration_verify' : 'contingents_teams')
                 }
                 selectedSport={selectedSport}
               />
@@ -190,58 +181,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             {activeSubmenu === 'athletes_players' && (
               <AthletesPlayersTab />
             )}
-            {activeSubmenu === 'athletes_id_cards' && (
-              <AdminParticipantsModule
-                subTab="id_cards"
-                onSelectSubTab={(t) =>
-                  setActiveSubmenu(t === 'verification' ? 'registration_verify' : t === 'contingents' ? 'contingents_teams' : 'athletes_id_cards')
-                }
-                selectedSport={selectedSport}
-              />
-            )}
 
-            {/* 4. Pertandingan */}
-            {activeSubmenu === 'schedule_plotting' && (
-              <AdminMatchOpsModule
-                subTab="schedule"
-                onSelectSubTab={(t) =>
-                  setActiveSubmenu(t === 'brackets' ? 'drawing_bracket' : t === 'schedule' ? 'schedule_plotting' : t === 'override' ? 'live_score_control' : 'group_standings')
-                }
-                selectedSport={selectedSport}
-              />
-            )}
-            {activeSubmenu === 'drawing_bracket' && (
-              <AdminMatchOpsModule
-                subTab="brackets"
-                onSelectSubTab={(t) =>
-                  setActiveSubmenu(t === 'brackets' ? 'drawing_bracket' : t === 'schedule' ? 'schedule_plotting' : t === 'override' ? 'live_score_control' : 'group_standings')
-                }
-                selectedSport={selectedSport}
-              />
-            )}
-            {activeSubmenu === 'live_score_control' && (
-              <AdminMatchOpsModule
-                subTab="override"
-                onSelectSubTab={(t) =>
-                  setActiveSubmenu(t === 'brackets' ? 'drawing_bracket' : t === 'schedule' ? 'schedule_plotting' : t === 'override' ? 'live_score_control' : 'group_standings')
-                }
-                selectedSport={selectedSport}
-              />
-            )}
-            {(activeSubmenu === 'results_verification' || activeSubmenu === 'protests_sanctions') && (
-              <ResultsVerificationTab
-                activeSubTab={activeSubmenu === 'protests_sanctions' ? 'SANCTIONS' : 'VERIFICATION'}
-              />
-            )}
-            {activeSubmenu === 'group_standings' && (
-              <AdminMatchOpsModule
-                subTab="standings"
-                onSelectSubTab={(t) =>
-                  setActiveSubmenu(t === 'brackets' ? 'drawing_bracket' : t === 'schedule' ? 'schedule_plotting' : t === 'override' ? 'live_score_control' : 'group_standings')
-                }
-                selectedSport={selectedSport}
-              />
-            )}
 
             {/* 5. Pengaturan & Akun */}
             {(activeSubmenu === 'account_settings' || activeSubmenu === 'referee_staff_accounts') && (
@@ -265,11 +205,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 onSaveBanners={onSaveBanners}
               />
             )}
-            {activeSubmenu === 'match_assignments' && (
-              <MatchAssignmentsTab />
-            )}
-            {activeSubmenu === 'audit_logs' && (
-              <AuditLogsTab />
+            {activeSubmenu === 'match_settings' && (
+              <MatchSettingsView />
             )}
             {activeSubmenu === 'reports_export' && (
               <ReportsExportTab />

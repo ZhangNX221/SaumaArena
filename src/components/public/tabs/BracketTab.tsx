@@ -22,15 +22,8 @@ type StageFilter = 'ALL' | 'QF' | 'SF' | 'FINAL';
 export const BracketTab: React.FC<BracketTabProps> = ({ sportCode = 'FUTSAL' }) => {
   const [activeStageFilter, setActiveStageFilter] = useState<StageFilter>('ALL');
 
-  const caborLabel =
-    sportCode === 'VOLI' ? 'Bola Voli' : sportCode === 'ESPORT' ? 'E-Sport MLBB' : 'Futsal';
-
-  const championTeamName =
-    sportCode === 'VOLI'
-      ? 'Rajawali Spikers (MIN 1)'
-      : sportCode === 'ESPORT'
-      ? 'MIN 1 Cyber Knights'
-      : 'Madrasah Ibtidaiyah Negeri 1 Kota';
+  const caborLabel = 'Futsal';
+  const championTeamName = 'Menunggu Pemenang Laga Final (P17)';
 
   const renderMatchCard = (m: BracketMatch, isHighlighted = false) => (
     <div
@@ -57,21 +50,27 @@ export const BracketTab: React.FC<BracketTabProps> = ({ sportCode = 'FUTSAL' }) 
           }`}
         >
           <div className="flex items-center gap-2 truncate">
-            <img
-              src={getTeamLogoUrl(m.teamA.id)}
-              alt={m.teamA.name}
-              className="w-4 h-4 rounded-sm object-contain shrink-0"
-              loading="lazy"
-            />
+            {m.teamA.id.startsWith('tbd') ? (
+              <div className="w-4 h-4 rounded-xs bg-[var(--bg-muted)] border border-[var(--border-subtle)] flex items-center justify-center text-[9px] text-[var(--text-muted)] shrink-0 font-mono font-bold">
+                -
+              </div>
+            ) : (
+              <img
+                src={getTeamLogoUrl(m.teamA.id)}
+                alt={m.teamA.name}
+                className="w-4 h-4 rounded-sm object-contain shrink-0"
+                loading="lazy"
+              />
+            )}
             <span className="truncate font-barlow font-bold text-sm tracking-wide">{m.teamA.name}</span>
             {m.teamA.isWinner && <Check className="w-3 h-3 text-emerald-600 shrink-0" />}
           </div>
           <span
             className={`font-teko font-bold text-base tabular-nums leading-none ${
-              m.teamA.isWinner ? 'text-emerald-600 dark:text-emerald-400 font-bold' : ''
+              m.teamA.isWinner ? 'text-emerald-600 dark:text-emerald-400 font-bold' : 'text-[var(--text-muted)]'
             }`}
           >
-            {m.teamA.score}
+            {m.status === 'COMPLETED' ? m.teamA.score : '-'}
           </span>
         </div>
 
@@ -83,21 +82,27 @@ export const BracketTab: React.FC<BracketTabProps> = ({ sportCode = 'FUTSAL' }) 
           }`}
         >
           <div className="flex items-center gap-2 truncate">
-            <img
-              src={getTeamLogoUrl(m.teamB.id)}
-              alt={m.teamB.name}
-              className="w-4 h-4 rounded-sm object-contain shrink-0"
-              loading="lazy"
-            />
+            {m.teamB.id.startsWith('tbd') ? (
+              <div className="w-4 h-4 rounded-xs bg-[var(--bg-muted)] border border-[var(--border-subtle)] flex items-center justify-center text-[9px] text-[var(--text-muted)] shrink-0 font-mono font-bold">
+                -
+              </div>
+            ) : (
+              <img
+                src={getTeamLogoUrl(m.teamB.id)}
+                alt={m.teamB.name}
+                className="w-4 h-4 rounded-sm object-contain shrink-0"
+                loading="lazy"
+              />
+            )}
             <span className="truncate font-barlow font-bold text-sm tracking-wide">{m.teamB.name}</span>
             {m.teamB.isWinner && <Check className="w-3 h-3 text-emerald-600 shrink-0" />}
           </div>
           <span
             className={`font-teko font-bold text-base tabular-nums leading-none ${
-              m.teamB.isWinner ? 'text-emerald-600 dark:text-emerald-400 font-bold' : ''
+              m.teamB.isWinner ? 'text-emerald-600 dark:text-emerald-400 font-bold' : 'text-[var(--text-muted)]'
             }`}
           >
-            {m.teamB.score}
+            {m.status === 'COMPLETED' ? m.teamB.score : '-'}
           </span>
         </div>
       </div>
@@ -113,6 +118,21 @@ export const BracketTab: React.FC<BracketTabProps> = ({ sportCode = 'FUTSAL' }) 
         title="Bagan Gugur &amp; Fase Eliminasi"
         description={`Alur gugur tunggal babak perempat final, semifinal, hingga laga penentuan juara utama turnamen ${caborLabel}.`}
       />
+
+      {/* Notice Bagan Menunggu Rekapitulasi Grup */}
+      <div className="p-4 rounded-xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] flex items-start sm:items-center gap-3 text-xs shadow-xs">
+        <div className="w-8 h-8 rounded-lg bg-[var(--color-arena-primary)]/10 text-[var(--color-arena-primary)] flex items-center justify-center shrink-0 mt-0.5 sm:mt-0">
+          <GitBranch className="w-4 h-4" />
+        </div>
+        <div className="space-y-0.5">
+          <span className="font-barlow font-bold uppercase tracking-wide text-[var(--text-main)] block">
+            Bagan Fase Eliminasi &bull; Diisi Sesuai Rekapitulasi Klasemen Grup
+          </span>
+          <p className="text-[11px] text-[var(--text-muted)] leading-relaxed">
+            Slot babak semifinal (4 besar) dan final saat ini dikosongkan dan akan diperbarui oleh juri/panitia setelah babak penyisihan 4 grup (A, B, C, D) selesai dipertandingkan pada Hari ke-2 turnamen.
+          </p>
+        </div>
+      </div>
 
       {/* Mobile Stage Selector Filter */}
       <div className="sm:hidden flex items-center justify-between gap-2">
@@ -160,9 +180,9 @@ export const BracketTab: React.FC<BracketTabProps> = ({ sportCode = 'FUTSAL' }) 
           >
             {/* Stage Header 1 */}
             <div className="h-[42px] flex items-center justify-between pb-3 mb-4 border-b border-[var(--border-subtle)] text-xs font-black uppercase tracking-wider text-[var(--text-muted)]">
-              <span>Perempat Final</span>
+              <span>Slot Juara Grup</span>
               <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-[var(--bg-muted)]">
-                4 Laga
+                4 Grup (A-D)
               </span>
             </div>
             {/* 4 Quarter Final Cards (height 480px, evenly spaced) */}
@@ -289,50 +309,77 @@ export const BracketTab: React.FC<BracketTabProps> = ({ sportCode = 'FUTSAL' }) 
 
                 {/* Finalists Rows */}
                 <div className="space-y-2 text-xs">
-                  {/* Champion (Winner) */}
-                  <div className="flex items-center justify-between p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/25 text-[var(--text-main)]">
+                  {/* Finalist A */}
+                  <div className={`flex items-center justify-between p-2.5 rounded-xl border transition-colors ${
+                    GRAND_FINAL.teamA.isWinner
+                      ? 'bg-amber-500/10 border-amber-500/25 text-[var(--text-main)]'
+                      : 'bg-[var(--bg-muted)]/60 text-[var(--text-muted)] border-[var(--border-subtle)]'
+                  }`}>
                     <div className="flex items-center gap-2.5 min-w-0">
                       <div className="relative shrink-0">
-                        <img
-                          src={getTeamLogoUrl(GRAND_FINAL.teamA.id)}
-                          alt={GRAND_FINAL.teamA.name}
-                          className="w-6 h-6 rounded-md object-contain"
-                        />
-                        <Crown className="w-3.5 h-3.5 text-amber-500 absolute -top-2 -right-1.5" />
+                        {GRAND_FINAL.teamA.id.startsWith('tbd') ? (
+                          <div className="w-6 h-6 rounded-md bg-[var(--bg-surface)] border border-[var(--border-subtle)] flex items-center justify-center text-xs font-mono font-bold text-[var(--text-muted)]">
+                            -
+                          </div>
+                        ) : (
+                          <img
+                            src={getTeamLogoUrl(GRAND_FINAL.teamA.id)}
+                            alt={GRAND_FINAL.teamA.name}
+                            className="w-6 h-6 rounded-md object-contain"
+                          />
+                        )}
+                        {GRAND_FINAL.teamA.isWinner && (
+                          <Crown className="w-3.5 h-3.5 text-amber-500 absolute -top-2 -right-1.5" />
+                        )}
                       </div>
                       <div className="truncate">
-                        <span className="font-barlow font-bold text-sm block truncate">
+                        <span className="font-barlow font-bold text-sm block truncate text-[var(--text-main)]">
                           {GRAND_FINAL.teamA.name}
                         </span>
-                        <span className="text-[10px] font-bold text-amber-600 dark:text-amber-400">
-                          Juara 1 Turnamen
+                        <span className="text-[10px] font-bold text-[var(--text-muted)]">
+                          {GRAND_FINAL.teamA.isWinner ? 'Juara 1 Turnamen' : 'Finalis 1 (Pemenang P15)'}
                         </span>
                       </div>
                     </div>
-                    <span className="font-teko font-bold text-2xl text-amber-600 dark:text-amber-400 tabular-nums leading-none">
-                      {GRAND_FINAL.teamA.score}
+                    <span className="font-teko font-bold text-2xl text-[var(--color-arena-accent)] tabular-nums leading-none">
+                      {GRAND_FINAL.status === 'COMPLETED' ? GRAND_FINAL.teamA.score : '-'}
                     </span>
                   </div>
 
-                  {/* Runner Up */}
-                  <div className="flex items-center justify-between p-2.5 rounded-xl bg-[var(--bg-muted)]/60 text-[var(--text-muted)] border border-[var(--border-subtle)]">
+                  {/* Finalist B */}
+                  <div className={`flex items-center justify-between p-2.5 rounded-xl border transition-colors ${
+                    GRAND_FINAL.teamB.isWinner
+                      ? 'bg-amber-500/10 border-amber-500/25 text-[var(--text-main)]'
+                      : 'bg-[var(--bg-muted)]/60 text-[var(--text-muted)] border-[var(--border-subtle)]'
+                  }`}>
                     <div className="flex items-center gap-2.5 min-w-0">
-                      <img
-                        src={getTeamLogoUrl(GRAND_FINAL.teamB.id)}
-                        alt={GRAND_FINAL.teamB.name}
-                        className="w-5 h-5 rounded-md object-contain shrink-0"
-                      />
+                      <div className="relative shrink-0">
+                        {GRAND_FINAL.teamB.id.startsWith('tbd') ? (
+                          <div className="w-6 h-6 rounded-md bg-[var(--bg-surface)] border border-[var(--border-subtle)] flex items-center justify-center text-xs font-mono font-bold text-[var(--text-muted)]">
+                            -
+                          </div>
+                        ) : (
+                          <img
+                            src={getTeamLogoUrl(GRAND_FINAL.teamB.id)}
+                            alt={GRAND_FINAL.teamB.name}
+                            className="w-5 h-5 rounded-md object-contain shrink-0"
+                          />
+                        )}
+                        {GRAND_FINAL.teamB.isWinner && (
+                          <Crown className="w-3.5 h-3.5 text-amber-500 absolute -top-2 -right-1.5" />
+                        )}
+                      </div>
                       <div className="truncate">
                         <span className="font-barlow font-bold text-sm text-[var(--text-main)] block truncate">
                           {GRAND_FINAL.teamB.name}
                         </span>
                         <span className="text-[10px] text-[var(--text-muted)]">
-                          Runner-Up (Juara 2)
+                          {GRAND_FINAL.teamB.isWinner ? 'Juara 1 Turnamen' : 'Finalis 2 (Pemenang P16)'}
                         </span>
                       </div>
                     </div>
-                    <span className="font-teko font-bold text-xl tabular-nums leading-none">
-                      {GRAND_FINAL.teamB.score}
+                    <span className="font-teko font-bold text-xl tabular-nums leading-none text-[var(--text-muted)]">
+                      {GRAND_FINAL.status === 'COMPLETED' ? GRAND_FINAL.teamB.score : '-'}
                     </span>
                   </div>
                 </div>

@@ -1,0 +1,27 @@
+{
+  "code": "volleyball",
+  "name": "Bola Voli",
+  "version": "1.0.0",
+  "scoring_model": "rally_set",
+  "participants": {
+    "kind": "team",
+    "on_field": 6,
+    "squad_min": 6,
+    "squad_max": 14
+  },
+  "sets": {
+    "best_of": 5,
+    "points_to_win": 25,
+    "deciding_set_points": 15,
+    "win_by": 2,
+    "max_points": null
+  },
+  "points_system": {
+    "by_result": [
+      { "sets": "3-0", "winner": 3, "loser": 0 },
+      { "sets": "3-1", "winner": 3, "loser": 0 },
+      { "sets": "3-2", "winner": 2, "loser": 1 }
+    ]
+  },
+  "tiebreakers": ["points", "wins", "set_ratio", "point_ratio", "head_to_head_points"]
+}

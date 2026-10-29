@@ -23,7 +23,7 @@ export const TicketSuccessPass: React.FC<TicketSuccessPassProps> = ({
   };
 
   const handleShareWA = () => {
-    const text = `Halo, ini E-Tiket Masuk resmi Milad Matsanega Futsal Competition I (MMFC I 2026). Kode Tiket: ${ticketCode} atas nama ${order.buyerName} (${order.quantity} orang). Venue: Matsanega Futsal Court, MTsN 1 Kota Malang.`;
+    const text = `Halo, ini E-Tiket Masuk resmi Milad Matsanega Futsal Competition I (MMFC I 2026). Kode Tiket: ${ticketCode} atas nama ${order.buyerName} (${order.quantity} orang). Venue: Lapangan Futsal Seabless Srengat, Blitar.`;
     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
   };
 
@@ -109,15 +109,15 @@ export const TicketSuccessPass: React.FC<TicketSuccessPassProps> = ({
             <div className="flex items-start gap-2 text-slate-700">
               <MapPin className="w-4 h-4 text-[var(--color-arena-primary)] shrink-0 mt-0.5" />
               <div>
-                <div className="font-bold text-slate-900">Matsanega Futsal Court</div>
-                <div className="text-[11px] text-slate-500">Kampus MTsN 1 Kota Malang, Jawa Timur</div>
+                <div className="font-bold text-slate-900">Lapangan Futsal Seabless Srengat</div>
+                <div className="text-[11px] text-slate-500">Kec. Srengat, Kabupaten Blitar, Jawa Timur</div>
               </div>
             </div>
 
             <div className="flex items-start gap-2 text-slate-700">
               <Calendar className="w-4 h-4 text-[var(--color-arena-primary)] shrink-0 mt-0.5" />
               <div>
-                <div className="font-bold text-slate-900">24 - 28 Oktober 2026</div>
+                <div className="font-bold text-slate-900">3 - 4 November 2026</div>
                 <div className="text-[11px] text-slate-500">Buka Gate Pukul 07:30 WIB s/d Selesai Laga</div>
               </div>
             </div>

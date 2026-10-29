@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { ShieldCheck, Eye, Moon, Sun, Search, X } from 'lucide-react';
+import { LogIn, Users, Moon, Sun, Search, X } from 'lucide-react';
 import { SaumaArenaLogo } from '@/components/brand/SaumaArenaLogo';
 import { initialTeams } from '@/mocks/tournamentData';
 
@@ -10,6 +10,7 @@ interface NavbarProps {
   onViewChange: (view: 'public' | 'admin' | 'referee') => void;
   darkMode: boolean;
   onToggleDarkMode: () => void;
+  onOpenRegModal?: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -17,6 +18,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   onViewChange,
   darkMode,
   onToggleDarkMode,
+  onOpenRegModal,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchActive, setIsSearchActive] = useState(false);
@@ -140,64 +142,44 @@ export const Navbar: React.FC<NavbarProps> = ({
             </div>
           )}
 
-          {/* Right Controls: 3-Way Segmented View Switcher & Theme Toggle */}
-          <div className="flex items-center gap-3 shrink-0">
-            <div
-              role="tablist"
-              aria-label="Mode Tampilan"
-              className="flex items-center p-1 rounded-xl bg-[var(--bg-muted)] border border-[var(--border-subtle)] text-xs font-barlow font-bold tracking-wide"
+          {/* Right Controls: Tombol Login, Tombol Pendaftaran & Theme Toggle */}
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+            {/* Tombol Login (menggantikan tombol tiket masuk) */}
+            <button
+              type="button"
+              onClick={() => {
+                if (currentView === 'public') {
+                  onViewChange('admin');
+                } else {
+                  onViewChange('public');
+                }
+              }}
+              className="btn-tactile flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full font-barlow font-bold uppercase tracking-wider text-xs sm:text-sm bg-[#EAF2FB] hover:bg-[#D8E8F8] active:scale-95 text-[#0D2A4A] dark:bg-[#102235] dark:text-sky-300 dark:hover:bg-[#162D45] border border-[#CDE1F5] dark:border-[#1E3B5B] transition-all min-h-[38px] shadow-2xs shrink-0"
+              title={currentView === 'public' ? 'Login ke Portal Admin / Juri' : 'Kembali ke Tampilan Publik'}
             >
-              <button
-                type="button"
-                role="tab"
-                aria-selected={currentView === 'public'}
-                onClick={() => onViewChange('public')}
-                className={`btn-tactile flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all duration-150 min-h-[40px] ${
-                  currentView === 'public'
-                    ? 'bg-[var(--bg-surface)] text-[var(--color-arena-primary)] shadow-xs font-bold'
-                    : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'
-                }`}
-              >
-                <Eye className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">Publik</span>
-              </button>
+              <LogIn className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#1D64C8] dark:text-sky-400 shrink-0" />
+              <span>{currentView === 'public' ? 'Login' : 'Publik'}</span>
+            </button>
 
-              <button
-                type="button"
-                role="tab"
-                aria-selected={currentView === 'admin'}
-                onClick={() => onViewChange('admin')}
-                className={`btn-tactile flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all duration-150 min-h-[40px] ${
-                  currentView === 'admin'
-                    ? 'bg-[var(--color-arena-primary)] text-white shadow-xs font-bold'
-                    : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'
-                }`}
-              >
-                <ShieldCheck className="w-3.5 h-3.5 text-[var(--color-arena-accent)]" />
-                <span className="hidden sm:inline">Admin</span>
-              </button>
-
-              <button
-                type="button"
-                role="tab"
-                aria-selected={currentView === 'referee'}
-                onClick={() => onViewChange('referee')}
-                className={`btn-tactile flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all duration-150 min-h-[40px] ${
-                  currentView === 'referee'
-                    ? 'bg-[var(--color-arena-accent)] text-slate-900 shadow-xs font-black'
-                    : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'
-                }`}
-              >
-                <span className="w-2 h-2 rounded-full bg-red-500" />
-                <span className="hidden sm:inline">Juri</span>
-              </button>
-            </div>
+            {/* Tombol Pendaftaran Tim */}
+            <button
+              type="button"
+              onClick={onOpenRegModal}
+              className="btn-tactile flex items-center gap-1.5 sm:gap-2 px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-full font-barlow font-bold uppercase tracking-wider text-xs sm:text-sm bg-[var(--color-arena-primary)] hover:bg-[#1D4ED8] active:scale-95 text-white shadow-xs transition-all min-h-[38px] shrink-0"
+              title="Daftarkan Tim Peserta Turnamen"
+            >
+              <Users className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
+              <span>
+                <span className="inline sm:hidden">Daftar</span>
+                <span className="hidden sm:inline">Pendaftaran Tim</span>
+              </span>
+            </button>
 
             {/* Dark / Light Mode Toggle */}
             <button
               type="button"
               onClick={onToggleDarkMode}
-              className="btn-tactile flex items-center justify-center w-9 h-9 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-muted)] transition-colors"
+              className="btn-tactile flex items-center justify-center w-9 h-9 rounded-full border border-[var(--border-subtle)] bg-[var(--bg-surface)] text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-muted)] transition-colors shrink-0"
               title={darkMode ? 'Beralih ke Mode Terang' : 'Beralih ke Mode Gelap'}
               aria-label="Toggle tema gelap atau terang"
             >

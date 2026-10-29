@@ -1,0 +1,31 @@
+{
+  "code": "futsal",
+  "name": "Futsal",
+  "version": "1.0.0",
+  "scoring_model": "timed_goals",
+  "participants": {
+    "kind": "team",
+    "on_field": 5,
+    "min_on_field_to_continue": 3,
+    "squad_min": 5,
+    "squad_max": 14,
+    "starters": 5
+  },
+  "periods": {
+    "count": 2,
+    "minutes": 20,
+    "clock": "stopped",
+    "allow_stoppage_time": false
+  },
+  "fouls": {
+    "accumulated_threshold_per_period": 5
+  },
+  "discipline": {
+    "cards": ["yellow", "red"],
+    "second_yellow_is_red": true,
+    "suspension": { "yellow_accumulation": 2, "red_card_matches": 1 }
+  },
+  "points_system": { "win": 3, "draw": 1, "loss": 0 },
+  "tiebreakers": ["points", "goal_difference", "goals_for", "head_to_head_points", "fair_play", "draw_lots"],
+  "draw_allowed": { "group": true, "knockout": false }
+}

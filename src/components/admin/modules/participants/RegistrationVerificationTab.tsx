@@ -10,6 +10,7 @@ import {
   RegistrationFormData,
 } from './RegistrationDossierModal';
 import { INITIAL_REGISTRATIONS } from '@/mocks/registrationMockData';
+import { usePersistentState } from '@/hooks/usePersistentState';
 
 export type { RegistrationDossier };
 
@@ -18,7 +19,10 @@ interface RegistrationVerificationTabProps {
 }
 
 export const RegistrationVerificationTab: React.FC<RegistrationVerificationTabProps> = ({ selectedSport = 'ALL' }) => {
-  const [registrations, setRegistrations] = useState<RegistrationDossier[]>(INITIAL_REGISTRATIONS);
+  const [registrations, setRegistrations] = usePersistentState<RegistrationDossier[]>(
+    'sauma_arena_registrations',
+    INITIAL_REGISTRATIONS
+  );
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);

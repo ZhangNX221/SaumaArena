@@ -17,9 +17,10 @@ import {
   LogOut,
   User,
 } from 'lucide-react';
-import { AppUser, Match, MatchEvent } from '@/types';
+import { AppUser, Match, MatchEvent, RefereeMatchDuty } from '@/types';
 import { initialMatches } from '@/mocks/tournamentData';
 import { REFEREE_DUTIES } from '@/mocks/multiSportData';
+import { usePersistentState } from '@/hooks/usePersistentState';
 import { RefereeSidebar, RefereeTabKey } from './RefereeSidebar';
 import { RefereeBottomNav } from './RefereeBottomNav';
 import { RefereeMatchCenter } from './RefereeMatchCenter';
@@ -28,7 +29,8 @@ import { RefereeRulebook } from './RefereeRulebook';
 import { RefereeProfile } from './RefereeProfile';
 import { RefereeDashboardHome } from './RefereeDashboardHome';
 import { RefereeReportsView } from './RefereeReportsView';
-import { RefereeRosterView } from './RefereeRosterView';
+import { RefereeStandingsView } from './RefereeStandingsView';
+import { RefereeSupporterScoringView } from './RefereeSupporterScoringView';
 
 interface RefereeDashboardProps {
   user: AppUser;
@@ -51,22 +53,31 @@ export const RefereeDashboard: React.FC<RefereeDashboardProps> = ({
   const [activeTab, setActiveTab] = useState<RefereeTabKey>('dashboard');
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   
-  // Real match state: automatically linked to the match assigned to this referee
-  const assignedMatch =
-    initialMatches.find((m) => m.refereeIds?.includes(currentUser.id)) ||
-    (currentUser.assignedMatchIds && initialMatches.find((m) => currentUser.assignedMatchIds?.includes(m.id))) ||
-    initialMatches[0];
+  // Persistent synchronized matches and duties with Admin
+  const [matches, setMatches] = usePersistentState<Match[]>('sauma_arena_matches', initialMatches);
+  const [duties] = usePersistentState<RefereeMatchDuty[]>('sauma_arena_duties', REFEREE_DUTIES);
 
-  const [liveMatch, setLiveMatch] = useState<Match>(assignedMatch);
-  const [recentEvents, setRecentEvents] = useState<MatchEvent[]>(assignedMatch.events);
-  const [notificationDismissed, setNotificationDismissed] = useState(false);
+  // Real match state: automatically linked to the match assigned to this referee
+  const myAssignedDuty = duties.find((d) => d.refereeId === currentUser.id);
+  const initialMatchId =
+    myAssignedDuty?.matchId ||
+    matches.find((m) => m.refereeIds?.includes(currentUser.id))?.id ||
+    (currentUser.assignedMatchIds && matches.find((m) => currentUser.assignedMatchIds?.includes(m.id))?.id) ||
+    matches[0]?.id ||
+    'match-1';
+
+  const [selectedMatchId, setSelectedMatchId] = useState<string>(initialMatchId);
+  const liveMatch = matches.find((m) => m.id === selectedMatchId) || matches[0];
   const [isOnline, setIsOnline] = useState(true);
 
   const handleUpdateProfile = (updated: Partial<AppUser>) => {
-    setCurrentUser((prev) => ({
-      ...prev,
-      ...updated,
-    }));
+    setCurrentUser((prev) => {
+      const next = { ...prev, ...updated };
+      try {
+        localStorage.setItem('sauma_auth_user', JSON.stringify(next));
+      } catch {}
+      return next;
+    });
   };
 
   React.useEffect(() => {
@@ -82,26 +93,46 @@ export const RefereeDashboard: React.FC<RefereeDashboardProps> = ({
   }, []);
 
   const handleUpdateScore = (team: 'A' | 'B', delta: number) => {
-    setLiveMatch((prev) => ({
-      ...prev,
-      scoreA: team === 'A' ? Math.max(0, prev.scoreA + delta) : prev.scoreA,
-      scoreB: team === 'B' ? Math.max(0, prev.scoreB + delta) : prev.scoreB,
-    }));
+    setMatches((prev) =>
+      prev.map((m) => {
+        if (m.id !== liveMatch.id) return m;
+        const newScoreA = team === 'A' ? Math.max(0, m.scoreA + delta) : m.scoreA;
+        const newScoreB = team === 'B' ? Math.max(0, m.scoreB + delta) : m.scoreB;
+        return {
+          ...m,
+          scoreA: newScoreA,
+          scoreB: newScoreB,
+          status: 'LIVE' as const,
+        };
+      })
+    );
   };
 
   const handleAddIncident = (event: Omit<MatchEvent, 'id'>) => {
     const newEv: MatchEvent = { ...event, id: `EV-${Date.now()}` };
-    setRecentEvents((prev) => [newEv, ...prev]);
-    setLiveMatch((prev) => ({ ...prev, events: [newEv, ...prev.events] }));
+    setMatches((prev) =>
+      prev.map((m) => {
+        if (m.id !== liveMatch.id) return m;
+        return {
+          ...m,
+          events: [newEv, ...(m.events || [])],
+        };
+      })
+    );
   };
 
   const handleFinalizeBAP = (bapData: { winner: string; notes: string }) => {
-    setLiveMatch((prev) => ({
-      ...prev,
-      status: 'COMPLETED',
-      bapSigned: true,
-      bapSigner: currentUser.name,
-    }));
+    setMatches((prev) =>
+      prev.map((m) => {
+        if (m.id !== liveMatch.id) return m;
+        return {
+          ...m,
+          status: 'COMPLETED' as const,
+          bapSigned: true,
+          bapSigner: currentUser.name,
+        };
+      })
+    );
   };
 
   return (
@@ -114,6 +145,7 @@ export const RefereeDashboard: React.FC<RefereeDashboardProps> = ({
         isOpenMobile={isMobileSidebarOpen}
         onCloseMobile={() => setIsMobileSidebarOpen(false)}
         onBackToPublic={onBackToPublic}
+        onGoToAdmin={onGoToAdmin}
         onLogout={onLogout}
       />
 
@@ -168,6 +200,18 @@ export const RefereeDashboard: React.FC<RefereeDashboardProps> = ({
                 </>
               )}
             </div>
+
+            {currentUser.role === 'ADMIN' && onGoToAdmin && (
+              <button
+                type="button"
+                onClick={onGoToAdmin}
+                className="btn-tactile flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl border border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20 text-amber-800 dark:text-amber-300 font-barlow font-bold uppercase tracking-wider text-xs transition-all min-h-[38px]"
+                title="Kembali ke Dashboard Administrator"
+              >
+                <ShieldCheck className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-600 dark:text-amber-400 shrink-0" />
+                <span className="hidden sm:inline">Panel Admin</span>
+              </button>
+            )}
 
             {onToggleDarkMode && (
               <button
@@ -241,8 +285,7 @@ export const RefereeDashboard: React.FC<RefereeDashboardProps> = ({
               user={currentUser}
               initialTab="TODAY"
               onSelectDutyMatch={(duty) => {
-                const found = initialMatches.find((m) => m.id === duty.matchId) || initialMatches[0];
-                setLiveMatch(found);
+                setSelectedMatchId(duty.matchId);
                 setActiveTab('match_center');
               }}
             />
@@ -254,14 +297,13 @@ export const RefereeDashboard: React.FC<RefereeDashboardProps> = ({
               user={currentUser}
               initialTab="UPCOMING"
               onSelectDutyMatch={(duty) => {
-                const found = initialMatches.find((m) => m.id === duty.matchId) || initialMatches[0];
-                setLiveMatch(found);
+                setSelectedMatchId(duty.matchId);
                 setActiveTab('match_center');
               }}
             />
           )}
 
-          {/* TAB 3: CATAT SKOR (DULU MATCH CENTER - 4-STEP WORKFLOW) */}
+          {/* TAB: CATAT SKOR */}
           {activeTab === 'match_center' && (
             <RefereeMatchCenter
               currentMatch={liveMatch}
@@ -272,12 +314,16 @@ export const RefereeDashboard: React.FC<RefereeDashboardProps> = ({
             />
           )}
 
-          {/* TAB 4: SUSUNAN PEMAIN & VERIFIKASI KEHADIRAN (TABEL TERPISAH) */}
-          {activeTab === 'roster' && (
-            <RefereeRosterView
+          {/* TAB: KLASEMEN & BAGAN */}
+          {activeTab === 'standings' && (
+            <RefereeStandingsView />
+          )}
+
+          {/* TAB: PENILAIAN SKOR SUPORTER */}
+          {(activeTab === 'supporter_scoring' || activeTab === 'roster') && (
+            <RefereeSupporterScoringView
               user={currentUser}
               currentMatch={liveMatch}
-              onGoToScoring={() => setActiveTab('match_center')}
             />
           )}
 

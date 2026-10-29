@@ -7,9 +7,14 @@ import { PRESET_USERS, REFEREE_DUTIES } from '@/mocks/multiSportData';
 import { Match, RefereeMatchDuty } from '@/types';
 import { ModalPortal } from '@/components/common/ModalPortal';
 import { AdminPageHeaderCard } from '@/components/admin/common/AdminPageHeaderCard';
+import { usePersistentState } from '@/hooks/usePersistentState';
 
-export const MatchAssignmentsTab: React.FC = () => {
-  const [duties, setDuties] = useState<RefereeMatchDuty[]>(REFEREE_DUTIES);
+export interface MatchAssignmentsTabProps {
+  hideHeader?: boolean;
+}
+
+export const MatchAssignmentsTab: React.FC<MatchAssignmentsTabProps> = ({ hideHeader = false }) => {
+  const [duties, setDuties] = usePersistentState<RefereeMatchDuty[]>('sauma_arena_duties', REFEREE_DUTIES);
   const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
   const [selectedDuty, setSelectedDuty] = useState<RefereeMatchDuty | null>(null);
   const [selectedRefereeId, setSelectedRefereeId] = useState<string>('USR-JURI-1');
@@ -46,19 +51,21 @@ export const MatchAssignmentsTab: React.FC = () => {
   return (
     <div className="space-y-6 animate-fadeIn pb-12">
       {/* Header */}
-      <AdminPageHeaderCard
-        icon={UserCog}
-        category="PERANGKAT PERTANDINGAN • PENUGASAN JURI"
-        title="Penugasan Wasit &amp; Juri Lapangan"
-        description="Plotting wasit utama, asisten wasit, dan pencatat meja untuk seluruh pertandingan turnamen sesuai jadwal &amp; lisensi resmi."
-        action={
-          <div className="flex items-center gap-2">
-            <span className="px-3 py-1 rounded-xl bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20 text-xs font-barlow font-bold uppercase tracking-wider">
-              {refereeUsers.length} Wasit Bersertifikat
-            </span>
-          </div>
-        }
-      />
+      {!hideHeader && (
+        <AdminPageHeaderCard
+          icon={UserCog}
+          category="PERANGKAT PERTANDINGAN • PENUGASAN JURI"
+          title="Penugasan Wasit &amp; Juri Lapangan"
+          description="Plotting wasit utama, asisten wasit, dan pencatat meja untuk seluruh pertandingan turnamen sesuai jadwal &amp; lisensi resmi."
+          action={
+            <div className="flex items-center gap-2">
+              <span className="px-3 py-1 rounded-xl bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20 text-xs font-barlow font-bold uppercase tracking-wider">
+                {refereeUsers.length} Wasit Bersertifikat
+              </span>
+            </div>
+          }
+        />
+      )}
 
       {/* Duty Assignment Cards */}
       <div className="space-y-3">

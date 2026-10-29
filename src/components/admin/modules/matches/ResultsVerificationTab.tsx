@@ -6,6 +6,7 @@ import { initialMatches } from '@/mocks/tournamentData';
 import { Match } from '@/types';
 import { ModalPortal } from '@/components/common/ModalPortal';
 import { AdminPageHeaderCard } from '@/components/admin/common/AdminPageHeaderCard';
+import { usePersistentState } from '@/hooks/usePersistentState';
 
 interface SanctionItem {
   id: string;
@@ -49,8 +50,8 @@ export const ResultsVerificationTab: React.FC<ResultsVerificationTabProps> = ({
   activeSubTab = 'VERIFICATION',
 }) => {
   const [currentTab, setCurrentTab] = useState<'VERIFICATION' | 'SANCTIONS'>(activeSubTab);
-  const [matches, setMatches] = useState<Match[]>(initialMatches);
-  const [sanctions, setSanctions] = useState<SanctionItem[]>(INITIAL_SANCTIONS);
+  const [matches, setMatches] = usePersistentState<Match[]>('sauma_arena_matches', initialMatches);
+  const [sanctions, setSanctions] = usePersistentState<SanctionItem[]>('sauma_arena_sanctions', INITIAL_SANCTIONS);
   const [isSanctionModalOpen, setIsSanctionModalOpen] = useState(false);
 
   // New sanction state
@@ -96,40 +97,40 @@ export const ResultsVerificationTab: React.FC<ResultsVerificationTabProps> = ({
         category="OPERASIONAL PERTANDINGAN • PENGESAHAN HASIL"
         title="Verifikasi Hasil &amp; Sanksi Pertandingan"
         description="Verifikasi resmi Berita Acara Pertandingan (BAP) dari wasit lapangan, pengesahan poin klasemen, serta pencatatan sanksi &amp; protes."
-        action={
-          <div className="flex items-center gap-1 p-1.5 rounded-xl bg-[var(--bg-muted)] border border-[var(--border-subtle)] text-xs font-barlow font-bold uppercase tracking-wider w-fit shrink-0">
-            <button
-              type="button"
-              onClick={() => setCurrentTab('VERIFICATION')}
-              className={`btn-tactile px-3.5 py-1.5 rounded-lg transition-all flex items-center gap-1.5 ${
-                currentTab === 'VERIFICATION'
-                  ? 'bg-[var(--color-arena-primary)] text-white shadow-xs'
-                  : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'
-              }`}
-            >
-              <span>Verifikasi BAP</span>
-              {pendingVerificationMatches.length > 0 && (
-                <span className="px-1.5 py-0.2 rounded-full bg-red-500 text-white text-[10px]">
-                  {pendingVerificationMatches.length}
-                </span>
-              )}
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setCurrentTab('SANCTIONS')}
-              className={`btn-tactile px-3.5 py-1.5 rounded-lg transition-all flex items-center gap-1.5 ${
-                currentTab === 'SANCTIONS'
-                  ? 'bg-[var(--color-arena-primary)] text-white shadow-xs'
-                  : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'
-              }`}
-            >
-              <AlertOctagon className="w-3.5 h-3.5" />
-              <span>Protes &amp; Sanksi ({sanctions.length})</span>
-            </button>
-          </div>
-        }
       />
+
+      {/* Sub-tab Navigation Bar */}
+      <div className="flex items-center gap-1.5 p-1 rounded-2xl bg-[var(--bg-muted)]/80 border border-[var(--border-subtle)] text-xs font-barlow font-bold uppercase tracking-wider w-fit">
+        <button
+          type="button"
+          onClick={() => setCurrentTab('VERIFICATION')}
+          className={`btn-tactile px-3.5 py-2 rounded-xl transition-all flex items-center gap-1.5 ${
+            currentTab === 'VERIFICATION'
+              ? 'bg-[var(--color-arena-primary)] text-white shadow-xs'
+              : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'
+          }`}
+        >
+          <span>Verifikasi BAP</span>
+          {pendingVerificationMatches.length > 0 && (
+            <span className="px-1.5 py-0.2 rounded-full bg-red-500 text-white text-[10px]">
+              {pendingVerificationMatches.length}
+            </span>
+          )}
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setCurrentTab('SANCTIONS')}
+          className={`btn-tactile px-3.5 py-2 rounded-xl transition-all flex items-center gap-1.5 ${
+            currentTab === 'SANCTIONS'
+              ? 'bg-[var(--color-arena-primary)] text-white shadow-xs'
+              : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'
+          }`}
+        >
+          <AlertOctagon className="w-3.5 h-3.5" />
+          <span>Protes &amp; Sanksi ({sanctions.length})</span>
+        </button>
+      </div>
 
       {/* TAB 1: VERIFIKASI BERITA ACARA (BAP) */}
       {currentTab === 'VERIFICATION' && (

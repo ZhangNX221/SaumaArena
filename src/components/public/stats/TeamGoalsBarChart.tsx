@@ -12,12 +12,12 @@ interface TeamGoalData {
 }
 
 const DATA: TeamGoalData[] = [
-  { team: 'SDN Percobaan 1', shortName: 'SDN Percobaan', goals: 16, matches: 3 },
-  { team: 'MIN 1 Kota', shortName: 'MIN 1 Kota', goals: 15, matches: 3, isFocal: true },
-  { team: 'MIN 2 Unggulan', shortName: 'MIN 2 Unggulan', goals: 15, matches: 3 },
-  { team: 'MIS Darussalam', shortName: 'MIS Darussalam', goals: 14, matches: 3 },
-  { team: 'MIS Al-Hidayah', shortName: 'MIS Al-Hidayah', goals: 12, matches: 3 },
-  { team: 'SDN 2 Harapan', shortName: 'SDN 2 Harapan', goals: 8, matches: 3 },
+  { team: 'SDI KARDINA MASSA', shortName: 'SDI Kardina', goals: 0, matches: 0, isFocal: true },
+  { team: 'MIN 7 BLITAR', shortName: 'MIN 7 Blitar', goals: 0, matches: 0 },
+  { team: 'UPT SDN 1 SRENGAT', shortName: 'SDN 1 Srengat', goals: 0, matches: 0 },
+  { team: 'MIN 14 BLITAR', shortName: 'MIN 14 Blitar', goals: 0, matches: 0 },
+  { team: 'MIN 2 BLITAR', shortName: 'MIN 2 Blitar', goals: 0, matches: 0 },
+  { team: 'MI WAHID HASYIM', shortName: 'Wahid Hasyim', goals: 0, matches: 0 },
 ];
 
 export const TeamGoalsBarChart: React.FC = () => {
@@ -50,9 +50,9 @@ export const TeamGoalsBarChart: React.FC = () => {
         </div>
         <div className="text-left sm:text-right shrink-0">
           <span className="text-xs font-barlow font-bold uppercase tracking-wider text-[var(--color-arena-accent)]">
-            Total 55 Gol Tercipta
+            Total 0 Gol Tercipta
           </span>
-          <span className="text-[10px] text-[var(--text-muted)] block">Rata-rata 3.67 Gol/Laga</span>
+          <span className="text-[10px] text-[var(--text-muted)] block">Rata-rata 0.00 Gol/Laga</span>
         </div>
       </div>
 
@@ -66,7 +66,7 @@ export const TeamGoalsBarChart: React.FC = () => {
         >
           <title id="team-goals-title">Distribusi Gol Kontingen Turnamen</title>
           <desc id="team-goals-desc">
-            Grafik perbandingan total gol tim kontingen MMFC I dengan MIN 1 Malang sebagai tim tersubur (14 gol).
+            Grafik perbandingan total gol tim kontingen MMFC I. Seluruh laga belum dimulai (0 gol).
           </desc>
 
           {/* Background Grid Lines & Y-Axis Labels */}

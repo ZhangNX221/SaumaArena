@@ -49,12 +49,7 @@ export const PublicTournamentHeader: React.FC<PublicTournamentHeaderProps> = ({
 
   const sportKey = (activeBanner.sportLabel || activeBanner.categoryBadge || 'FUTSAL').toUpperCase();
   const SPORT_COMPETITIONS: Record<string, string[]> = {
-    FUTSAL: ['Turnamen Futsal Matsanega 2026', 'Piala Walikota Futsal Pelajar'],
-    'E-SPORT': ['Matsanega E-Sport Arena Cup 2026 (MLBB)', 'MLBB Junior Invitational Series'],
-    'E-SPORT MLBB': ['Matsanega E-Sport Arena Cup 2026 (MLBB)', 'MLBB Junior Invitational Series'],
-    ESPORT: ['Matsanega E-Sport Arena Cup 2026 (MLBB)', 'MLBB Junior Invitational Series'],
-    VOLI: ['Piala Rektor Bola Voli Pelajar 2026'],
-    'BOLA VOLI': ['Piala Rektor Bola Voli Pelajar 2026'],
+    FUTSAL: ['Milad Matsanega Futsal Competition I (MMFC I)'],
   };
 
   const matchedCompetitions = 

@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import {
   Info,
+  Radio,
   Calendar,
   Menu,
   Ticket,
@@ -40,11 +41,12 @@ interface MenuItem {
 
 const ALL_MENU_ITEMS: MenuItem[] = [
   { key: 'info', label: 'Informasi', desc: 'Aturan, durasi & venue', icon: Info },
-  { key: 'schedule', label: 'Jadwal & Hasil', desc: 'Skor langsung & hasil pertandingan', icon: Calendar, badge: 'LIVE' },
-  { key: 'standings', label: 'Klasemen', desc: 'Peringkat grup & klasemen', icon: ListOrdered },
-  { key: 'bracket', label: 'Bagan', desc: 'Bagan turnamen eliminasi', icon: GitBranch },
-  { key: 'teams', label: 'Tim & Pemain', desc: 'Daftar kontingen & susunan pemain', icon: Users },
-  { key: 'stats', label: 'Statistik', desc: 'Top scorer, assist & kartu', icon: Activity },
+  { key: 'live', label: 'Live', desc: 'Papan skor & live match', icon: Radio, badge: 'LIVE' },
+  { key: 'schedule', label: 'Jadwal', desc: 'Agenda laga & hasil pertandingan', icon: Calendar },
+  { key: 'standings', label: 'Grub', desc: 'Peringkat grup & klasemen', icon: ListOrdered },
+  { key: 'bracket', label: 'Bracket', desc: 'Bagan turnamen eliminasi', icon: GitBranch },
+  { key: 'teams', label: 'Tim', desc: 'Daftar kontingen & skuad', icon: Users },
+  { key: 'stats', label: 'Statistik', desc: 'Top scorer & disiplin kartu', icon: Activity },
   { key: 'supporter', label: 'Suporter', desc: 'Voting suporter turnamen', icon: Megaphone, badge: 'HOT', isHot: true },
 ];
 
@@ -70,47 +72,47 @@ export const MobilePublicNav: React.FC<MobilePublicNavProps> = ({
         className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-[var(--bg-surface)]/95 backdrop-blur-md border-t border-[var(--border-subtle)] px-2 py-1 shadow-2xl transition-colors safe-area-pb"
       >
         <div className="flex items-center justify-around gap-1 max-w-md mx-auto">
-          {/* 1. Menu Informasi */}
+          {/* 1. Menu Live */}
           <button
             type="button"
-            onClick={() => onTabChange('info')}
-            className={`btn-tactile flex-1 flex flex-col items-center justify-center py-1.5 px-1 rounded-xl transition-all duration-150 min-h-[48px] ${
-              activeTab === 'info' && !isDrawerOpen
-                ? 'text-[var(--color-arena-primary)] font-bold'
+            onClick={() => handleSelectTab('live')}
+            className={`btn-tactile flex-1 flex flex-col items-center justify-center py-1.5 px-1 rounded-xl transition-all duration-150 min-h-[48px] relative ${
+              activeTab === 'live' && !isDrawerOpen
+                ? 'text-red-500 font-bold'
                 : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'
             }`}
           >
-            <Info className={`w-5 h-5 mb-0.5 ${activeTab === 'info' && !isDrawerOpen ? 'stroke-[2.5]' : ''}`} />
-            <span className="text-[10px] leading-tight font-medium">Informasi</span>
-            {activeTab === 'info' && !isDrawerOpen && (
-              <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-arena-primary)] mt-0.5" />
+            <div className="relative">
+              <Radio className={`w-5 h-5 mb-0.5 ${activeTab === 'live' && !isDrawerOpen ? 'stroke-[2.5]' : ''}`} />
+              <span className="absolute -top-0.5 -right-1 w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+            </div>
+            <span className="text-[10px] leading-tight font-medium">Live</span>
+            {activeTab === 'live' && !isDrawerOpen && (
+              <span className="w-1.5 h-1.5 rounded-full bg-red-500 mt-0.5" />
             )}
           </button>
 
-          {/* 2. Menu Jadwal & Hasil */}
+          {/* 2. Menu Jadwal */}
           <button
             type="button"
-            onClick={() => onTabChange('schedule')}
+            onClick={() => handleSelectTab('schedule')}
             className={`btn-tactile flex-1 flex flex-col items-center justify-center py-1.5 px-1 rounded-xl transition-all duration-150 min-h-[48px] relative ${
               activeTab === 'schedule' && !isDrawerOpen
                 ? 'text-[var(--color-arena-primary)] font-bold'
                 : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'
             }`}
           >
-            <div className="relative">
-              <Calendar className={`w-5 h-5 mb-0.5 ${activeTab === 'schedule' && !isDrawerOpen ? 'stroke-[2.5]' : ''}`} />
-              <span className="absolute -top-0.5 -right-1 w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-            </div>
+            <Calendar className={`w-5 h-5 mb-0.5 ${activeTab === 'schedule' && !isDrawerOpen ? 'stroke-[2.5]' : ''}`} />
             <span className="text-[10px] leading-tight font-medium">Jadwal</span>
             {activeTab === 'schedule' && !isDrawerOpen && (
               <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-arena-primary)] mt-0.5" />
             )}
           </button>
 
-          {/* 3. Menu Utama (Drawer Switcher Menggantikan Sidebar) */}
+          {/* 3. Menu Utama (Drawer Switcher di Tengah) */}
           <button
             type="button"
-            onClick={() => setIsDrawerOpen(true)}
+            onClick={() => setIsDrawerOpen(!isDrawerOpen)}
             className={`btn-tactile flex-1 flex flex-col items-center justify-center py-1 px-1 rounded-2xl transition-all duration-150 min-h-[48px] ${
               isDrawerOpen
                 ? 'text-white bg-[var(--color-arena-primary)] font-bold shadow-md'
@@ -129,26 +131,38 @@ export const MobilePublicNav: React.FC<MobilePublicNavProps> = ({
             <span className="text-[10px] leading-tight font-bold mt-0.5">Menu</span>
           </button>
 
-          {/* 4. Menu Tiket (Hanya jika FEATURES.ticketing = true) */}
-          {FEATURES.ticketing && (
-            <button
-              type="button"
-              onClick={onOpenTicketModal}
-              className="btn-tactile flex-1 flex flex-col items-center justify-center py-1.5 px-1 rounded-xl text-[var(--text-muted)] hover:text-[var(--text-main)] transition-all duration-150 min-h-[48px]"
-            >
-              <Ticket className="w-5 h-5 mb-0.5 text-blue-600 dark:text-sky-400" />
-              <span className="text-[10px] leading-tight font-medium">Tiket</span>
-            </button>
-          )}
-
-          {/* 5. Menu Pendaftaran Tim */}
+          {/* 4. Menu Grub */}
           <button
             type="button"
-            onClick={onOpenRegModal}
-            className="btn-tactile flex-1 flex flex-col items-center justify-center py-1.5 px-1 rounded-xl text-[var(--text-muted)] hover:text-[var(--text-main)] transition-all duration-150 min-h-[48px]"
+            onClick={() => handleSelectTab('standings')}
+            className={`btn-tactile flex-1 flex flex-col items-center justify-center py-1.5 px-1 rounded-xl transition-all duration-150 min-h-[48px] relative ${
+              activeTab === 'standings' && !isDrawerOpen
+                ? 'text-[var(--color-arena-primary)] font-bold'
+                : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'
+            }`}
           >
-            <UserPlus className="w-5 h-5 mb-0.5 text-emerald-600 dark:text-emerald-400" />
-            <span className="text-[10px] leading-tight font-medium">Daftar</span>
+            <ListOrdered className={`w-5 h-5 mb-0.5 ${activeTab === 'standings' && !isDrawerOpen ? 'stroke-[2.5]' : ''}`} />
+            <span className="text-[10px] leading-tight font-medium">Grub</span>
+            {activeTab === 'standings' && !isDrawerOpen && (
+              <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-arena-primary)] mt-0.5" />
+            )}
+          </button>
+
+          {/* 5. Menu Statistik */}
+          <button
+            type="button"
+            onClick={() => handleSelectTab('stats')}
+            className={`btn-tactile flex-1 flex flex-col items-center justify-center py-1.5 px-1 rounded-xl transition-all duration-150 min-h-[48px] relative ${
+              activeTab === 'stats' && !isDrawerOpen
+                ? 'text-[var(--color-arena-primary)] font-bold'
+                : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'
+            }`}
+          >
+            <Activity className={`w-5 h-5 mb-0.5 ${activeTab === 'stats' && !isDrawerOpen ? 'stroke-[2.5]' : ''}`} />
+            <span className="text-[10px] leading-tight font-medium">Statistik</span>
+            {activeTab === 'stats' && !isDrawerOpen && (
+              <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-arena-primary)] mt-0.5" />
+            )}
           </button>
         </div>
       </nav>

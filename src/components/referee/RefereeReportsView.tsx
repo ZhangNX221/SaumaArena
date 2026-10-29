@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { AppUser } from '@/types';
 import { BAPRecord, IncidentReport, INITIAL_BAPS, INITIAL_INCIDENTS } from '@/mocks/refereeReportsData';
+import { usePersistentState } from '@/hooks/usePersistentState';
 import { BAPPreviewModal } from './reports/BAPPreviewModal';
 
 interface RefereeReportsViewProps {
@@ -21,8 +22,8 @@ interface RefereeReportsViewProps {
 
 export const RefereeReportsView: React.FC<RefereeReportsViewProps> = ({ user }) => {
   const [activeTab, setActiveTab] = useState<'BAP_LIST' | 'INCIDENT_FORM'>('BAP_LIST');
-  const [bapList] = useState<BAPRecord[]>(INITIAL_BAPS);
-  const [incidentReports, setIncidentReports] = useState<IncidentReport[]>(INITIAL_INCIDENTS);
+  const [bapList] = usePersistentState<BAPRecord[]>('sauma_arena_baps', INITIAL_BAPS);
+  const [incidentReports, setIncidentReports] = usePersistentState<IncidentReport[]>('sauma_arena_incidents', INITIAL_INCIDENTS);
 
   // Form states
   const [selectedMatch, setSelectedMatch] = useState('match-101');

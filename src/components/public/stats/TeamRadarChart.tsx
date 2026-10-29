@@ -10,11 +10,11 @@ interface RadarAxis {
 }
 
 const AXES: RadarAxis[] = [
-  { label: 'Serangan', min1Score: 9.5, kaumanScore: 8.8 },
-  { label: 'Pertahanan', min1Score: 7.8, kaumanScore: 9.2 },
-  { label: 'Kedisiplinan', min1Score: 8.5, kaumanScore: 7.6 },
-  { label: 'Efisiensi', min1Score: 9.2, kaumanScore: 8.0 },
-  { label: 'Penguasaan', min1Score: 8.8, kaumanScore: 8.4 },
+  { label: 'Serangan', min1Score: 0, kaumanScore: 0 },
+  { label: 'Pertahanan', min1Score: 0, kaumanScore: 0 },
+  { label: 'Kedisiplinan', min1Score: 0, kaumanScore: 0 },
+  { label: 'Efisiensi', min1Score: 0, kaumanScore: 0 },
+  { label: 'Penguasaan', min1Score: 0, kaumanScore: 0 },
 ];
 
 export const TeamRadarChart: React.FC = () => {

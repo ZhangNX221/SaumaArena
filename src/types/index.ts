@@ -68,7 +68,7 @@ export interface Team {
   city: string;
   logoUrl: string;
   coachName: string;
-  group: 'A' | 'B';
+  group: 'A' | 'B' | 'C' | 'D' | string;
   rosterLocked: boolean;
   registrationStatus: 'VERIFIED' | 'PENDING' | 'REJECTED';
   rejectionNote?: string;
@@ -98,7 +98,7 @@ export interface Match {
   tournamentId: string;
   matchNumber: number;
   stage: 'GROUP' | 'QUARTER_FINAL' | 'SEMI_FINAL' | 'BRONZE' | 'FINAL';
-  group?: 'A' | 'B';
+  group?: 'A' | 'B' | 'C' | 'D' | string;
   bracketNodeId?: string;
   teamAId: string;
   teamBId: string;
@@ -137,6 +137,7 @@ export interface StandingRow {
   goalsFor: number;
   goalsAgainst: number;
   goalDifference: number;
+  supporterPoints?: number; // Poin Suporter (SP)
   points: number;
   fairPlayScore: number;
   qualificationStatus?: 'QUALIFIED' | 'ELIMINATED' | 'IN_CONTENTION';

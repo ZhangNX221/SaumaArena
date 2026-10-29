@@ -10,6 +10,10 @@ import {
   BookOpen,
   User,
   X,
+  ListOrdered,
+  Megaphone,
+  ShieldCheck,
+  Globe,
 } from 'lucide-react';
 import { AppUser } from '@/types';
 import { SaumaArenaLogo } from '@/components/brand/SaumaArenaLogo';
@@ -19,6 +23,8 @@ export type RefereeTabKey =
   | 'dashboard'
   | 'duty'
   | 'match_center'
+  | 'standings'
+  | 'supporter_scoring'
   | 'roster'
   | 'reports'
   | 'rulebook'
@@ -32,6 +38,7 @@ interface RefereeSidebarProps {
   isOpenMobile?: boolean;
   onCloseMobile?: () => void;
   onBackToPublic?: () => void;
+  onGoToAdmin?: () => void;
   onLogout?: () => void;
 }
 
@@ -43,13 +50,18 @@ const REFEREE_ICON_MAP: Record<string, React.ComponentType<{ className?: string 
   FileText,
   BookOpen,
   User,
+  ListOrdered,
+  Megaphone,
 };
 
 export const RefereeSidebar: React.FC<RefereeSidebarProps> = ({
   activeTab,
   onSelectTab,
+  user,
   isOpenMobile = false,
   onCloseMobile = () => {},
+  onBackToPublic,
+  onGoToAdmin,
 }) => {
   const menuItems: MenuItemConfig[] = getRefereeMenuConfig(1);
 
@@ -135,6 +147,39 @@ export const RefereeSidebar: React.FC<RefereeSidebarProps> = ({
             );
           })}
         </nav>
+
+        {/* Bottom Quick Switchers */}
+        <div className="p-3 border-t border-[#1f374f] space-y-1.5 bg-[#07131f]/60 shrink-0">
+          {user?.role === 'ADMIN' && onGoToAdmin && (
+            <button
+              type="button"
+              onClick={() => {
+                onGoToAdmin();
+                onCloseMobile();
+              }}
+              className="btn-tactile w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-barlow font-bold uppercase tracking-wider text-amber-300 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 transition-all active:scale-[0.98]"
+              title="Kembali ke Meja Kerja Administrator"
+            >
+              <ShieldCheck className="w-4 h-4 text-amber-400 shrink-0" />
+              <span className="truncate">Kembali ke Admin</span>
+            </button>
+          )}
+
+          {onBackToPublic && (
+            <button
+              type="button"
+              onClick={() => {
+                onBackToPublic();
+                onCloseMobile();
+              }}
+              className="btn-tactile w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-barlow font-bold uppercase tracking-wider text-slate-300 hover:text-white hover:bg-slate-800 border border-[#1f374f] transition-all active:scale-[0.98]"
+              title="Lihat Tampilan Portal Publik"
+            >
+              <Globe className="w-4 h-4 text-slate-400 shrink-0" />
+              <span className="truncate">Portal Publik</span>
+            </button>
+          )}
+        </div>
       </aside>
     </>
   );
