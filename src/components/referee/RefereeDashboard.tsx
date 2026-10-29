@@ -359,7 +359,16 @@ export const RefereeDashboard: React.FC<RefereeDashboardProps> = ({
         </main>
 
         {/* Bottom Navigation for Mobile / Smartphone Field Access */}
-        <RefereeBottomNav activeTab={activeTab} onSelectTab={setActiveTab} />
+        <RefereeBottomNav
+          activeTab={activeTab}
+          onSelectTab={setActiveTab}
+          user={currentUser}
+          onBackToPublic={onBackToPublic}
+          onGoToAdmin={onGoToAdmin}
+          onLogout={onLogout}
+          darkMode={darkMode}
+          onToggleDarkMode={onToggleDarkMode}
+        />
       </div>
     </div>
   );
