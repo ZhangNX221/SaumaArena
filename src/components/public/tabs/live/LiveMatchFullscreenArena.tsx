@@ -4,6 +4,7 @@ import React from 'react';
 import { Clock, Minimize, ChevronDown, Trophy, Shield, Activity, Flame } from 'lucide-react';
 import { Match } from '@/types';
 import { getTeamLogoUrl } from '@/mocks/teamLogos';
+import { MatchSelectorDropdown } from '@/components/common/MatchSelectorDropdown';
 
 interface LiveMatchFullscreenArenaProps {
   match: Match;
@@ -101,20 +102,13 @@ export const LiveMatchFullscreenArena: React.FC<LiveMatchFullscreenArenaProps> =
         <div className="flex items-center gap-2.5 sm:gap-3 shrink-0">
           {/* Match Selector Dropdown */}
           {matches && matches.length > 0 && onSelectMatch && (
-            <div className="relative">
-              <select
-                value={selectedMatchId || match.id}
-                onChange={(e) => onSelectMatch(e.target.value)}
-                className="appearance-none pl-3.5 pr-8 py-2 sm:py-2.5 rounded-xl bg-slate-900/95 hover:bg-slate-800 border-2 border-slate-700 text-white font-barlow font-bold text-xs sm:text-sm uppercase tracking-wider cursor-pointer focus:outline-none transition-colors shadow-md"
-                aria-label="Pilih laga tayang jumbotron"
-              >
-                {matches.map((m) => (
-                  <option key={m.id} value={m.id} className="bg-slate-950 text-white">
-                    Laga #{m.matchNumber}: {m.teamAName} vs {m.teamBName} ({m.scoreA} - {m.scoreB})
-                  </option>
-                ))}
-              </select>
-              <ChevronDown className="w-4 h-4 text-slate-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+            <div className="w-56 sm:w-64 max-w-full">
+              <MatchSelectorDropdown
+                matches={matches}
+                selectedMatchId={selectedMatchId || match.id}
+                onSelectMatch={onSelectMatch}
+                variant="arena"
+              />
             </div>
           )}
 

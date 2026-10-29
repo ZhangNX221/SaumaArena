@@ -6,6 +6,7 @@ import { Match, MatchEvent, EventType } from '@/types';
 import { MatchGoalsTable } from './MatchGoalsTable';
 import { TeamScoreFoulCard } from './TeamScoreFoulCard';
 import { playTimerStartSound } from '@/utils/arenaSound';
+import { MatchSelectorDropdown } from '@/components/common/MatchSelectorDropdown';
 
 interface ScoringTimedGoalsProps {
   currentMatch: Match;
@@ -161,75 +162,72 @@ export const ScoringTimedGoals: React.FC<ScoringTimedGoalsProps> = ({
   };
 
   return (
-    <div className="rounded-xl bg-[var(--bg-surface)] text-[var(--text-main)] border-2 border-slate-300 dark:border-slate-800 p-4 sm:p-5 shadow-sm space-y-3.5 animate-fadeIn">
+    <div className="rounded-xl bg-[var(--bg-surface)] text-[var(--text-main)] border-2 border-slate-300 dark:border-slate-800 p-4 sm:p-5 shadow-sm space-y-3.5 animate-fadeIn max-w-full overflow-hidden">
       {/* 1. Top Meta Bar: Papan Skor & Stopwatch Lapangan + Selector Laga Dropdown + Babak + Tombol Reset + Bel */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 text-xs pb-3 border-b border-slate-200 dark:border-slate-800">
-        <div className="flex items-center gap-2">
-          <span className="font-bebas text-base sm:text-lg uppercase tracking-wider text-[var(--text-main)] leading-none">
-            Papan Skor &amp; Stopwatch Lapangan
-          </span>
-          <span className="hidden sm:inline-flex text-[10px] text-[var(--text-muted)] font-mono px-2 py-0.5 rounded bg-[var(--bg-muted)] border border-slate-300 dark:border-slate-700">
+      <div className="flex flex-col gap-3 text-xs pb-3 border-b border-slate-200 dark:border-slate-800">
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2 min-w-0">
+            <span className="w-2.5 h-2.5 rounded-full bg-amber-500 shrink-0" />
+            <span className="font-bebas text-base sm:text-xl uppercase tracking-wider text-[var(--text-main)] leading-none truncate">
+              Papan Skor &amp; Stopwatch Lapangan
+            </span>
+          </div>
+          <span className="hidden sm:inline-flex text-[10px] text-[var(--text-muted)] font-mono px-2 py-0.5 rounded bg-[var(--bg-muted)] border border-slate-300 dark:border-slate-700 shrink-0">
             Admin: {adminDurationMinutes} Menit
           </span>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 w-full">
           {/* Selector Laga Meja Wasit Dropdown */}
           {matches && matches.length > 0 && onSelectMatch && (
-            <div className="relative">
-              <select
-                value={currentMatch.id}
-                onChange={(e) => onSelectMatch(e.target.value)}
-                className="appearance-none pl-3 pr-8 py-2 rounded-xl bg-[var(--bg-muted)] hover:bg-[var(--bg-muted)]/80 border border-slate-300 dark:border-slate-700 text-[var(--text-main)] font-barlow font-bold text-xs uppercase tracking-wider cursor-pointer focus:outline-none transition-colors"
-                aria-label="Pilih laga meja wasit"
-              >
-                {matches.map((m) => (
-                  <option key={m.id} value={m.id} className="bg-[var(--bg-surface)] text-[var(--text-main)]">
-                    Laga #{m.matchNumber}: {m.teamAName} vs {m.teamBName} ({m.scoreA} - {m.scoreB})
-                  </option>
-                ))}
-              </select>
-              <ChevronDown className="w-3.5 h-3.5 text-[var(--text-muted)] absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+            <div className="flex-1 min-w-0 max-w-full">
+              <MatchSelectorDropdown
+                matches={matches}
+                selectedMatchId={currentMatch.id}
+                onSelectMatch={onSelectMatch}
+              />
             </div>
           )}
 
-          {/* Tombol Babak (Clickable untuk ganti babak) */}
-          <button
-            type="button"
-            onClick={handleCyclePeriod}
-            className="btn-tactile px-3 py-2 rounded-xl bg-[var(--bg-muted)] hover:bg-slate-200 dark:hover:bg-slate-700 text-[var(--color-arena-accent)] font-barlow font-bold uppercase tracking-wider text-xs border border-slate-300 dark:border-slate-700 transition-colors cursor-pointer"
-            title="Klik untuk Ganti Babak Pertandingan"
-          >
-            {currentPeriod}
-          </button>
-
-          {/* Tombol Reset Pertandingan Laga Ini */}
-          {onResetMatch && (
+          <div className="flex items-center gap-2 shrink-0 self-end sm:self-auto flex-wrap">
+            {/* Tombol Babak (Clickable untuk ganti babak) */}
             <button
               type="button"
-              onClick={onResetMatch}
-              className="btn-tactile px-3 py-2 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-600 dark:text-red-400 font-barlow font-bold uppercase tracking-wider text-xs border border-red-500/30 flex items-center gap-1.5 transition-colors cursor-pointer"
-              title="Reset Skor, Waktu, dan Pelanggaran Laga Ini ke 0-0"
+              onClick={handleCyclePeriod}
+              className="btn-tactile px-3 py-2 rounded-xl bg-[var(--bg-muted)] hover:bg-slate-200 dark:hover:bg-slate-700 text-[var(--color-arena-accent)] font-barlow font-bold uppercase tracking-wider text-xs border border-slate-300 dark:border-slate-700 transition-colors cursor-pointer min-h-[38px] flex items-center"
+              title="Klik untuk Ganti Babak Pertandingan"
             >
-              <RotateCcw className="w-3.5 h-3.5" />
-              <span>Reset</span>
+              {currentPeriod}
             </button>
-          )}
 
-          {/* Tombol Bel Kick-off */}
-          <button
-            type="button"
-            onClick={handleRingBell}
-            className={`btn-tactile px-2.5 py-2 rounded-xl font-barlow font-bold uppercase text-xs border flex items-center gap-1.5 transition-all shadow-xs cursor-pointer ${
-              isBellRinging
-                ? 'bg-red-600 text-white border-red-400 animate-pulse ring-2 ring-red-400'
-                : 'bg-amber-50 dark:bg-amber-950/40 hover:bg-amber-100 text-amber-800 dark:text-amber-300 border-amber-300 dark:border-amber-800'
-            }`}
-            title="Bunyikan Bel Kick-off / Mulai Pertandingan"
-          >
-            <BellRing className={`w-3.5 h-3.5 ${isBellRinging ? 'animate-bounce text-white' : 'text-amber-500'}`} />
-            <span className="hidden sm:inline">{isBellRinging ? 'Bel Berbunyi!' : 'Bel Kick-off'}</span>
-          </button>
+            {/* Tombol Reset Pertandingan Laga Ini */}
+            {onResetMatch && (
+              <button
+                type="button"
+                onClick={onResetMatch}
+                className="btn-tactile px-3 py-2 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-600 dark:text-red-400 font-barlow font-bold uppercase tracking-wider text-xs border border-red-500/30 flex items-center gap-1.5 transition-colors cursor-pointer min-h-[38px]"
+                title="Reset Skor, Waktu, dan Pelanggaran Laga Ini ke 0-0"
+              >
+                <RotateCcw className="w-3.5 h-3.5" />
+                <span>Reset</span>
+              </button>
+            )}
+
+            {/* Tombol Bel Kick-off */}
+            <button
+              type="button"
+              onClick={handleRingBell}
+              className={`btn-tactile px-2.5 py-2 rounded-xl font-barlow font-bold uppercase text-xs border flex items-center gap-1.5 transition-all shadow-xs cursor-pointer min-h-[38px] ${
+                isBellRinging
+                  ? 'bg-red-600 text-white border-red-400 animate-pulse ring-2 ring-red-400'
+                  : 'bg-amber-50 dark:bg-amber-950/40 hover:bg-amber-100 text-amber-800 dark:text-amber-300 border-amber-300 dark:border-amber-800'
+              }`}
+              title="Bunyikan Bel Kick-off / Mulai Pertandingan"
+            >
+              <BellRing className={`w-3.5 h-3.5 ${isBellRinging ? 'animate-bounce text-white' : 'text-amber-500'}`} />
+              <span className="hidden sm:inline">{isBellRinging ? 'Bel Berbunyi!' : 'Bel Kick-off'}</span>
+            </button>
+          </div>
         </div>
       </div>
 

@@ -3,6 +3,7 @@
 import React from 'react';
 import { Clock, Maximize, Minimize, ChevronDown } from 'lucide-react';
 import { Match } from '@/types';
+import { MatchSelectorDropdown } from '@/components/common/MatchSelectorDropdown';
 
 interface LiveMatchScoreboardProps {
   match: Match;
@@ -69,68 +70,64 @@ export const LiveMatchScoreboard: React.FC<LiveMatchScoreboardProps> = ({
 
   return (
     <div
-      className={`rounded-2xl bg-[var(--bg-surface)] text-[var(--text-main)] border border-[var(--border-subtle)] p-4 sm:p-6 shadow-sm space-y-4 animate-fadeIn transition-colors duration-150 ${
+      className={`rounded-2xl bg-[var(--bg-surface)] text-[var(--text-main)] border border-[var(--border-subtle)] p-4 sm:p-6 shadow-sm space-y-4 animate-fadeIn transition-colors duration-150 max-w-full overflow-hidden ${
         isFullscreen ? 'p-6 sm:p-8' : ''
       }`}
     >
       {/* Top Header Bar: Judul, Selector Laga Dropdown, Period & Tombol Layar Penuh */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 text-xs pb-3.5 border-b border-[var(--border-subtle)]">
-        <div className="flex items-center gap-2">
-          <span
-            className={`w-2.5 h-2.5 rounded-full ${
-              isMatchLive ? 'bg-red-500 animate-pulse' : isMatchCompleted ? 'bg-emerald-500' : 'bg-amber-500'
-            }`}
-          />
-          <span className="font-bebas text-lg sm:text-2xl uppercase tracking-wider text-[var(--text-main)] leading-none">
-            Papan Skor &amp; Stopwatch Lapangan
-          </span>
+      <div className="flex flex-col gap-3 text-xs pb-3.5 border-b border-[var(--border-subtle)]">
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2 min-w-0">
+            <span
+              className={`w-2.5 h-2.5 rounded-full shrink-0 ${
+                isMatchLive ? 'bg-red-500 animate-pulse ring-2 ring-red-400/40' : isMatchCompleted ? 'bg-emerald-500' : 'bg-amber-500'
+              }`}
+            />
+            <span className="font-bebas text-lg sm:text-2xl uppercase tracking-wider text-[var(--text-main)] leading-none truncate">
+              Papan Skor &amp; Stopwatch Lapangan
+            </span>
+          </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2.5">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 w-full">
           {/* Selector Laga Tayang */}
           {matches && matches.length > 0 && onSelectMatch && (
-            <div className="relative">
-              <select
-                value={selectedMatchId || match.id}
-                onChange={(e) => onSelectMatch(e.target.value)}
-                className="appearance-none pl-3 pr-8 py-2 rounded-xl bg-[var(--bg-muted)] hover:bg-[var(--bg-muted)]/80 border border-[var(--border-subtle)] text-[var(--text-main)] font-barlow font-bold text-xs uppercase tracking-wider cursor-pointer focus:outline-none transition-colors"
-                aria-label="Pilih laga tayang"
-              >
-                {matches.map((m) => (
-                  <option key={m.id} value={m.id} className="bg-[var(--bg-surface)] text-[var(--text-main)]">
-                    Laga #{m.matchNumber}: {m.teamAName} vs {m.teamBName} ({m.scoreA} - {m.scoreB})
-                  </option>
-                ))}
-              </select>
-              <ChevronDown className="w-3.5 h-3.5 text-[var(--text-muted)] absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+            <div className="flex-1 min-w-0 max-w-full">
+              <MatchSelectorDropdown
+                matches={matches}
+                selectedMatchId={selectedMatchId || match.id}
+                onSelectMatch={onSelectMatch}
+              />
             </div>
           )}
 
-          <span className="px-3 py-2 rounded-xl bg-[var(--bg-muted)] text-[var(--color-arena-accent)] font-barlow font-bold uppercase tracking-wider text-xs border border-[var(--border-subtle)]">
-            {currentPeriod}
-          </span>
+          <div className="flex items-center gap-2 shrink-0 self-end sm:self-auto flex-wrap">
+            <span className="px-3 py-2 rounded-xl bg-[var(--bg-muted)] text-[var(--color-arena-accent)] font-barlow font-bold uppercase tracking-wider text-xs border border-[var(--border-subtle)] shrink-0 min-h-[38px] flex items-center">
+              {currentPeriod}
+            </span>
 
-          {/* Tombol Layar Penuh */}
-          {onToggleFullscreen && (
-            <button
-              type="button"
-              onClick={onToggleFullscreen}
-              className="btn-tactile px-3.5 py-2 rounded-xl bg-[var(--color-arena-primary)] hover:bg-[var(--color-arena-primary-hover)] active:scale-95 text-white font-barlow font-bold uppercase text-xs flex items-center gap-1.5 transition-all shadow-xs shrink-0 cursor-pointer min-h-[38px]"
-              title={isFullscreen ? 'Keluar Layar Penuh (ESC)' : 'Mode Layar Penuh (Jumbotron / TV)'}
-            >
-              {isFullscreen ? (
-                <>
-                  <Minimize className="w-3.5 h-3.5" />
-                  <span className="hidden sm:inline">Keluar</span>
-                </>
-              ) : (
-                <>
-                  <Maximize className="w-3.5 h-3.5" />
-                  <span>Layar Penuh</span>
-                </>
-              )}
-            </button>
-          )}
+            {/* Tombol Layar Penuh */}
+            {onToggleFullscreen && (
+              <button
+                type="button"
+                onClick={onToggleFullscreen}
+                className="btn-tactile px-3.5 py-2 rounded-xl bg-[var(--color-arena-primary)] hover:bg-[var(--color-arena-primary-hover)] active:scale-95 text-white font-barlow font-bold uppercase text-xs flex items-center gap-1.5 transition-all shadow-xs shrink-0 cursor-pointer min-h-[38px]"
+                title={isFullscreen ? 'Keluar Layar Penuh (ESC)' : 'Mode Layar Penuh (Jumbotron / TV)'}
+              >
+                {isFullscreen ? (
+                  <>
+                    <Minimize className="w-3.5 h-3.5" />
+                    <span className="hidden sm:inline">Keluar</span>
+                  </>
+                ) : (
+                  <>
+                    <Maximize className="w-3.5 h-3.5" />
+                    <span>Layar Penuh</span>
+                  </>
+                )}
+              </button>
+            )}
+          </div>
         </div>
       </div>
 
