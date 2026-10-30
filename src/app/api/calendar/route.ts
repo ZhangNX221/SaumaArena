@@ -24,8 +24,8 @@ export async function GET(request: Request) {
       [competitionId]
     );
 
-    const startDateYmd = comp?.start_date || '2026-11-03';
-    const endDateYmd = comp?.end_date || '2026-11-04';
+    const startDateYmd = comp?.start_date || '2026-11-02';
+    const endDateYmd = comp?.end_date || '2026-11-03';
     const compName = comp?.name || 'Milad Matsanega Futsal Competition I (MMFC I)';
 
     // 2. Ambil data seluruh pertandingan
@@ -144,7 +144,7 @@ export async function POST(request: Request) {
   try {
     const body = await request.json().catch(() => ({}));
     const {
-      startDateYmd = '2026-11-03',
+      startDateYmd = '2026-11-02',
       firstMatchTime = '07:30',
       matchDurationMinutes = 30,
       breakMinutes = 5,

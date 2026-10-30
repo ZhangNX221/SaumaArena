@@ -408,12 +408,12 @@ export const StandingFormModal: React.FC<StandingFormModalProps> = ({
               </div>
             </div>
 
-            {/* 4. Poin Suporter (SP) */}
+            {/* 4. Point Supporter (PS) */}
             <div className="p-3.5 rounded-xl bg-[var(--bg-muted)]/50 border border-[var(--border-subtle)] space-y-2">
               <div className="flex items-center justify-between">
-                <span className="font-barlow font-bold uppercase tracking-wider text-[11px] text-[var(--text-main)] flex items-center gap-1.5">
+                <span className="font-barlow font-bold uppercase tracking-wider text-[11px] text-[var(--text-main)] flex items-center gap-1.5" title="Point Supporter">
                   <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-                  Poin Suporter Madrasah (SP)
+                  Point Supporter (PS)
                 </span>
                 <span className="text-[10px] text-amber-600 font-mono font-bold">
                   {supporterPoints} Poin
@@ -529,7 +529,7 @@ export const StandingFormModal: React.FC<StandingFormModalProps> = ({
                   <span className="font-teko font-bold text-lg text-[var(--color-arena-primary)] leading-none block">
                     {finalPoints} PTS
                   </span>
-                  <span className="text-[9px] text-amber-600 font-bold">SP: {supporterPoints}</span>
+                  <span className="text-[9px] text-amber-600 font-bold" title="Point Supporter">PS: {supporterPoints}</span>
                 </div>
               </div>
             </div>

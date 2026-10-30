@@ -2,6 +2,42 @@ import { TournamentPartner, PartnerCategory } from '@/types';
 
 export const DEFAULT_TOURNAMENT_PARTNERS: TournamentPartner[] = [
   {
+    id: 'partner-mtsn3',
+    name: 'MTsN 3 Blitar',
+    role: 'Penyelenggara Utama Turnamen',
+    category: 'ORGANIZER',
+    iconType: 'custom',
+    logoUrl: '/partners/mtsn-3-blitar.jpg',
+    websiteUrl: 'https://mtsn3blitar.sch.id',
+    isActive: true,
+    order: 1,
+    description: 'Madrasah Tsanawiyah Negeri 3 Blitar (Matsanega) - Penyelenggara turnamen Matsanega Futsal Championship.',
+  },
+  {
+    id: 'partner-ma-maarif',
+    name: "MA Ma'arif Udanawu Blitar",
+    role: 'Mitra Pendidikan & Sponsor',
+    category: 'SPONSOR',
+    iconType: 'custom',
+    logoUrl: '/partners/ma-maarif-udanawu.jpg',
+    websiteUrl: 'https://mamaarifudanawu.sch.id',
+    isActive: true,
+    order: 2,
+    description: "Madrasah Aliyah Ma'arif Udanawu Blitar - Lembaga pendidikan dan mitra sponsor pendukung kejuaraan.",
+  },
+  {
+    id: 'partner-koni',
+    name: 'KONI',
+    role: 'Komite Olahraga Nasional Indonesia',
+    category: 'FEDERATION',
+    iconType: 'custom',
+    logoUrl: '/partners/koni.webp',
+    websiteUrl: 'https://koni.or.id',
+    isActive: true,
+    order: 3,
+    description: 'Komite Olahraga Nasional Indonesia - Otoritas koordinasi dan pembinaan prestasi induk organisasi cabang olahraga.',
+  },
+  {
     id: 'partner-1',
     name: 'Kemenpora RI',
     role: 'Kementerian Pemuda & Olahraga',
@@ -10,20 +46,8 @@ export const DEFAULT_TOURNAMENT_PARTNERS: TournamentPartner[] = [
     logoUrl: '/partners/kemenpora.svg',
     websiteUrl: 'https://www.kemenpora.go.id',
     isActive: true,
-    order: 1,
+    order: 4,
     description: 'Instansi pembina dan pengawas regulasi olahraga nasional Republik Indonesia',
-  },
-  {
-    id: 'partner-2',
-    name: 'KONI Pusat',
-    role: 'Komite Olahraga Nasional',
-    category: 'FEDERATION',
-    iconType: 'custom',
-    logoUrl: '/partners/koni.svg',
-    websiteUrl: 'https://koni.or.id',
-    isActive: true,
-    order: 2,
-    description: 'Otoritas koordinasi dan pembinaan prestasi induk organisasi cabang olahraga',
   },
   {
     id: 'partner-3',
@@ -34,7 +58,7 @@ export const DEFAULT_TOURNAMENT_PARTNERS: TournamentPartner[] = [
     logoUrl: '/partners/ffi.svg',
     websiteUrl: 'https://federasifutsal.id',
     isActive: true,
-    order: 3,
+    order: 5,
     description: 'Badan federasi resmi pengawas teknis, regulasi pertandingan, dan wasit lisensi',
   },
   {
@@ -46,7 +70,7 @@ export const DEFAULT_TOURNAMENT_PARTNERS: TournamentPartner[] = [
     logoUrl: '/partners/dispora.svg',
     websiteUrl: 'https://dispora.go.id',
     isActive: true,
-    order: 4,
+    order: 6,
     description: 'Instansi pemerintah daerah fasilitator sarana arena dan pembinaan atlet muda',
   },
   {
@@ -58,7 +82,7 @@ export const DEFAULT_TOURNAMENT_PARTNERS: TournamentPartner[] = [
     logoUrl: '/partners/pmi.svg',
     websiteUrl: 'https://pmi.or.id',
     isActive: true,
-    order: 5,
+    order: 7,
     description: 'Lembaga pertolongan pertama dan tim medis siaga keselamatan atlet di arena',
   },
   {
@@ -70,7 +94,7 @@ export const DEFAULT_TOURNAMENT_PARTNERS: TournamentPartner[] = [
     logoUrl: '/partners/mandiri.svg',
     websiteUrl: 'https://www.bankmandiri.co.id',
     isActive: true,
-    order: 6,
+    order: 8,
     description: 'Mitra perbankan resmi dan gerbang pembayaran tiket turnamen digital terintegrasi',
   },
   {
@@ -82,7 +106,7 @@ export const DEFAULT_TOURNAMENT_PARTNERS: TournamentPartner[] = [
     logoUrl: '/partners/pocari.svg',
     websiteUrl: 'https://pocarisweat.id',
     isActive: true,
-    order: 7,
+    order: 9,
     description: 'Penyedia hidrasi ion resmi bagi seluruh atlet, wasit, dan perangkat pertandingan',
   },
   {
@@ -94,12 +118,12 @@ export const DEFAULT_TOURNAMENT_PARTNERS: TournamentPartner[] = [
     logoUrl: '/partners/specs.svg',
     websiteUrl: 'https://specs.id',
     isActive: true,
-    order: 8,
+    order: 10,
     description: 'Penyedia bola pertandingan resmi bersertifikasi dan apparel resmi turnamen',
   },
 ];
 
-export const STORAGE_KEY_PARTNERS = 'sauma_arena_tournament_partners_v2';
+export const STORAGE_KEY_PARTNERS = 'sauma_arena_tournament_partners_v3';
 
 export const PARTNER_CATEGORY_LABELS: Record<PartnerCategory, { label: string; badgeClass: string }> = {
   ORGANIZER: {
@@ -133,18 +157,20 @@ export function getStoredPartners(): TournamentPartner[] {
   try {
     const raw = localStorage.getItem(STORAGE_KEY_PARTNERS);
     if (!raw) {
-      // Clean legacy storage key if exists and save new defaults
+      // Clean legacy storage keys if exist and save new defaults
       localStorage.removeItem('sauma_arena_tournament_partners');
+      localStorage.removeItem('sauma_arena_tournament_partners_v2');
       localStorage.setItem(STORAGE_KEY_PARTNERS, JSON.stringify(DEFAULT_TOURNAMENT_PARTNERS));
       return DEFAULT_TOURNAMENT_PARTNERS;
     }
     const parsed = JSON.parse(raw);
     if (Array.isArray(parsed) && parsed.length > 0) {
-      // Auto-migrate if stored array still holds old generic placeholders
+      // Auto-migrate if stored array is missing new partners or still holds old generic placeholders
+      const hasMtsn = parsed.some((p) => p.name?.includes('MTsN 3') || p.id === 'partner-mtsn3');
       const hasOldGenericNames = parsed.some(
         (p) => p.name === 'Komite Pelaksana Turnamen' || p.name === 'Komite Disiplin & Etika'
       );
-      if (hasOldGenericNames) {
+      if (!hasMtsn || hasOldGenericNames) {
         localStorage.setItem(STORAGE_KEY_PARTNERS, JSON.stringify(DEFAULT_TOURNAMENT_PARTNERS));
         return DEFAULT_TOURNAMENT_PARTNERS;
       }
@@ -170,6 +196,7 @@ export function resetStoredPartners(): TournamentPartner[] {
   if (typeof window !== 'undefined') {
     try {
       localStorage.removeItem(STORAGE_KEY_PARTNERS);
+      localStorage.removeItem('sauma_arena_tournament_partners_v2');
       localStorage.removeItem('sauma_arena_tournament_partners');
       window.dispatchEvent(new CustomEvent('sauma_partners_updated', { detail: DEFAULT_TOURNAMENT_PARTNERS }));
     } catch (e) {

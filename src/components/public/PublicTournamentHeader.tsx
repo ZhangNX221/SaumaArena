@@ -290,7 +290,7 @@ export const PublicTournamentHeader: React.FC<PublicTournamentHeaderProps> = ({
                   Format Waktu
                 </span>
                 <span className="font-bold text-xs sm:text-sm lg:text-base text-white tracking-wide block truncate leading-tight">
-                  2 × 15 Menit per Laga
+                  Durasi pertandingan 2 x 10 menit
                 </span>
               </div>
             </div>

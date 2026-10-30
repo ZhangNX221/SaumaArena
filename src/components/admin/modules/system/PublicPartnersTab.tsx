@@ -117,7 +117,7 @@ export const PublicPartnersTab: React.FC = () => {
     const restored = resetStoredPartners();
     setPartners(restored);
     setIsResetModalOpen(false);
-    triggerToast('Daftar mitra berhasil direset ke 8 mitra resmi default.');
+    triggerToast('Daftar mitra berhasil direset ke daftar mitra resmi default.');
   };
 
   const filteredPartners = partners.filter((p) => {
@@ -347,8 +347,8 @@ export const PublicPartnersTab: React.FC = () => {
       {/* Modal Konfirmasi Reset Default */}
       <ConfirmModal
         isOpen={isResetModalOpen}
-        title="Reset ke 8 Mitra Default"
-        message="Daftar mitra akan dikembalikan ke konfigurasi 8 mitra resmi awal turnamen (Panitia, Kemenag, Komite, OSIS, AFK, Dispora, Sauma Arena, dan Bank Jatim Syariah). Lanjutkan?"
+        title="Reset ke Mitra Resmi Default"
+        message="Daftar mitra akan dikembalikan ke konfigurasi resmi awal turnamen (MTsN 3 Blitar, MA Ma'arif Udanawu, KONI, Kemenpora RI, dan mitra lainnya). Lanjutkan?"
         confirmLabel="Ya, Reset Default"
         cancelLabel="Batal"
         onConfirm={handleReset}

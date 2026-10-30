@@ -81,7 +81,7 @@ export const TournamentRundownTable: React.FC = () => {
                 : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'
             }`}
           >
-            HARI-1 (Selasa, 3 Nov)
+            HARI-1 (Senin, 2 Nov)
           </button>
           <button
             type="button"
@@ -92,7 +92,7 @@ export const TournamentRundownTable: React.FC = () => {
                 : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'
             }`}
           >
-            HARI-2 (Rabu, 4 Nov)
+            HARI-2 (Selasa, 3 Nov)
           </button>
         </div>
       </div>

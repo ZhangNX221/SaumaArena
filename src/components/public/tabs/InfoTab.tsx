@@ -153,21 +153,21 @@ export const InfoTab: React.FC<InfoTabProps> = ({ sportCode = 'FUTSAL' }) => {
 
               <div>
                 <h4 className="text-3xl sm:text-4xl font-teko font-bold text-[var(--text-main)] tracking-wide leading-none uppercase">
-                  2 × 15 Menit
+                  2 × 10 Menit
                 </h4>
                 <p className="text-xs font-mono font-bold text-sky-700 dark:text-sky-400 mt-1">
-                  Kotor di Fase Grup &bull; Bersih di Babak Gugur
+                  Durasi pertandingan 2 x 10 menit
                 </p>
               </div>
 
               <p className="text-xs text-[var(--text-muted)] leading-relaxed font-sans">
-                Waktu kotor (running clock) berlaku di babak penyisihan grup. Pada partai semifinal dan grand final, waktu bersih (stop clock) diberlakukan saat bola keluar. Bila imbang di babak gugur, penentuan langsung adu penalti 3 penendang.
+                Durasi pertandingan 2 x 10 menit kotor (running clock) berlaku di babak penyisihan grup. Pada partai semifinal dan grand final, sistem waktu efektif diberlakukan. Bila imbang di babak gugur, penentuan langsung adu penalti 3 penendang.
               </p>
             </div>
 
             <div className="relative z-10 pt-3 border-t border-slate-200 dark:border-slate-800 flex flex-wrap gap-1.5 text-[10px] font-mono font-bold">
               <span className="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-[var(--text-main)] border border-slate-300 dark:border-slate-700">
-                GRUP: 2×15M KOTOR
+                GRUP: 2×10M KOTOR
               </span>
               <span className="px-2 py-0.5 rounded bg-blue-50 text-blue-800 dark:bg-blue-950/40 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
                 FINAL: BERSIH
@@ -362,7 +362,7 @@ export const InfoTab: React.FC<InfoTabProps> = ({ sportCode = 'FUTSAL' }) => {
                 <div>
                   <strong className="text-[var(--text-main)] font-barlow text-sm block">Gate Timur 1 (Suporter Madrasah)</strong>
                   <span className="text-[11px] text-[#1D63B8] dark:text-sky-400 font-semibold font-mono">
-                    Scan QR Rombongan (+1 Poin Tiket Suporter)
+                    Scan QR Rombongan (+1 / match Poin Suporter)
                   </span>
                 </div>
                 <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-blue-50 text-blue-800 dark:bg-blue-950/40 dark:text-blue-300 border border-blue-200 dark:border-blue-800">

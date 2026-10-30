@@ -149,7 +149,7 @@ export interface StandingRow {
   goalsFor: number;
   goalsAgainst: number;
   goalDifference: number;
-  supporterPoints?: number; // Poin Suporter (SP)
+  supporterPoints?: number; // Point Supporter (PS)
   points: number;
   fairPlayScore: number;
   qualificationStatus?: 'QUALIFIED' | 'ELIMINATED' | 'IN_CONTENTION';
@@ -165,7 +165,7 @@ export interface SupporterAssessment {
   schoolMascot: boolean;     // +20
   supporterUniform: boolean; // +15
   cheerMin3Chants: boolean;  // +10
-  checkedInTickets: number;  // +1 per tiket
+  checkedInTickets: number;  // +1 / match (Kehadiran suporter)
   // Kriteria Penalti
   incidentViolentChaos: boolean;      // -50
   incidentThrowObjects: boolean;      // -25

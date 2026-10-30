@@ -141,7 +141,7 @@ export const RefereeSchedule: React.FC<RefereeScheduleProps> = ({
           </span>
         </div>
         <div className="text-[11px] font-barlow font-bold text-[var(--color-arena-accent)] uppercase tracking-wider">
-          Jadwal Laga: Selasa, 3 November 2026
+          Jadwal Laga: Senin, 2 November 2026
         </div>
       </div>
 
@@ -158,7 +158,7 @@ export const RefereeSchedule: React.FC<RefereeScheduleProps> = ({
                   Tidak Ada Jadwal Laga Hari Ini
                 </h3>
                 <p className="text-xs text-[var(--text-muted)] font-sans leading-relaxed">
-                  Hari ini (<strong className="text-[var(--text-main)]">{todayFormattedStr}</strong>) tidak ada jadwal laga wasit yang berlangsung. Seluruh laga babak penyisihan grup MMFC I dijadwalkan dimulai pada hari <strong className="text-[var(--text-main)]">Selasa, 3 November 2026</strong>.
+                  Hari ini (<strong className="text-[var(--text-main)]">{todayFormattedStr}</strong>) tidak ada jadwal laga wasit yang berlangsung. Seluruh laga babak penyisihan grup MMFC I dijadwalkan dimulai pada hari <strong className="text-[var(--text-main)]">Senin, 2 November 2026</strong>.
                 </p>
               </div>
               {upcomingDuties.length > 0 && (

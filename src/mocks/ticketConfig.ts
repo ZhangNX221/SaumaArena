@@ -19,7 +19,7 @@ export const TICKET_CATEGORIES: TicketCategoryItem[] = [
     minQty: 1,
     defaultQty: 1,
     description: 'Tarif khusus pelajar SD/MI/SMP/MTs mengenakan seragam sekolah/almamater.',
-    benefits: ['Tarif subsidi Milad Matsanega I', 'Wajib menunjukkan kartu pelajar / seragam', '+1 Poin Suporter'],
+    benefits: ['Tarif subsidi Milad Matsanega I', 'Wajib menunjukkan kartu pelajar / seragam', '+1 / match Poin Suporter'],
   },
   {
     id: 'ROMBONGAN',

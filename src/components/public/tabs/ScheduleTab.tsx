@@ -47,8 +47,8 @@ export const ScheduleTab: React.FC<ScheduleTabProps> = ({ sportCode = 'FUTSAL' }
   }, []);
 
   const filteredMatches = matches.filter((m) => {
-    if (dateFilter === 'H1') return m.scheduledTime.includes('Selasa, 3 Nov') || m.matchNumber <= 10;
-    if (dateFilter === 'H2') return m.scheduledTime.includes('Rabu, 4 Nov') || m.matchNumber >= 11;
+    if (dateFilter === 'H1') return m.scheduledTime.includes('Senin, 2 Nov') || m.matchNumber <= 10;
+    if (dateFilter === 'H2') return m.scheduledTime.includes('Selasa, 3 Nov') || m.scheduledTime.includes('Rabu, 4 Nov') || m.matchNumber >= 11;
     return true;
   });
 
@@ -120,7 +120,7 @@ export const ScheduleTab: React.FC<ScheduleTabProps> = ({ sportCode = 'FUTSAL' }
             }`}
           >
             <span className="w-2 h-2 rounded-full bg-red-600 animate-pulse" />
-            <span>Selasa, 3 Nov 2026</span>
+            <span>Senin, 2 Nov 2026</span>
           </button>
           <button
             type="button"
@@ -131,7 +131,7 @@ export const ScheduleTab: React.FC<ScheduleTabProps> = ({ sportCode = 'FUTSAL' }
                 : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'
             }`}
           >
-            Rabu, 4 Nov 2026
+            Selasa, 3 Nov 2026
           </button>
         </div>
 

@@ -16,7 +16,7 @@ export interface QuickMetric {
 
 // Data Regulasi Mendalam Khusus Futsal (FFI / FIFA Futsal Laws of the Game 2026)
 export const FUTSAL_CHEAT_SHEET: QuickMetric[] = [
-  { label: 'Durasi Laga', value: '2 x 20 Menit', detail: 'Penyisihan: waktu kotor • Final: waktu bersih' },
+  { label: 'Durasi Laga', value: '2 x 10 Menit', detail: 'Durasi pertandingan 2 x 10 menit' },
   { label: 'Hak Time-Out', value: '1x / Babak (60s)', detail: 'Hanya saat bola mati & dikuasai tim pemohon' },
   { label: 'Akumulasi Foul', value: 'Maks. 5 Foul', detail: 'Foul ke-6 dst = Titik ke-2 (10m) tanpa pagar' },
   { label: 'Jarak Pagar Betis', value: '5 Meter', detail: 'Wajib dipatuhi pada kick-in, corner & free-kick' },
@@ -32,7 +32,7 @@ export const FUTSAL_ARTICLES: RuleArticle[] = [
     title: 'Durasi Pertandingan, Time-out & Penghentian Waktu Darurat',
     summary: 'Ketentuan durasi normal, mekanisme penghentian stopwatch resmi, serta tata cara permohonan time-out meja.',
     points: [
-      'Durasi normal 2 x 20 menit (waktu kotor pada fase penyisihan grup; waktu bersih efektif mulai fase semifinal & final).',
+      'Durasi pertandingan 2 x 10 menit (waktu kotor pada fase penyisihan grup; waktu bersih efektif mulai fase semifinal & final).',
       'Setiap tim berhak atas 1 (satu) kali time-out berdurasi 60 detik di setiap babak. Time-out yang tidak diambil di babak pertama hangus dan tidak dapat diakumulasi.',
       'Permohonan time-out hanya dapat diajukan oleh Pelatih Kepala kepada Meja Pencatat Waktu (Wasit 3) menggunakan papan penanda time-out resmi.',
       'Time-out hanya diberikan saat bola keluar lapangan (dead ball) dan berada dalam penguasaan tim yang mengajukan.',

@@ -29,8 +29,8 @@ export const LiveMatchInactiveView: React.FC<LiveMatchInactiveViewProps> = ({
   onActivatePreview,
   onTabChange,
 }) => {
-  // Hitung mundur menuju kick-off laga pembuka (Selasa, 3 November 2026 07:30 WIB)
-  const targetDate = new Date('2026-11-03T07:30:00+07:00').getTime();
+  // Hitung mundur menuju kick-off laga pembuka (Senin, 2 November 2026 07:30 WIB)
+  const targetDate = new Date('2026-11-02T07:30:00+07:00').getTime();
   const [timeLeft, setTimeLeft] = useState({
     days: 0,
     hours: 0,
@@ -126,7 +126,7 @@ export const LiveMatchInactiveView: React.FC<LiveMatchInactiveViewProps> = ({
 
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-[var(--bg-muted)] border border-[var(--border-subtle)] text-xs text-[var(--text-muted)] font-mono">
             <Clock className="w-3.5 h-3.5 text-[var(--color-arena-accent)]" />
-            <span>Selasa, 3 Nov 2026 &bull; 07:30 WIB</span>
+            <span>Senin, 2 Nov 2026 &bull; 07:30 WIB</span>
           </div>
         </div>
 

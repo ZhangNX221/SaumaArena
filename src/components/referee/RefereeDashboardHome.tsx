@@ -183,7 +183,7 @@ export const RefereeDashboardHome: React.FC<RefereeDashboardHomeProps> = ({
               </h2>
               <p className="text-xs text-[var(--text-muted)] font-sans">
                 Hari ini: <strong className="text-[var(--text-main)]">{todayFormattedStr}</strong>
-                {todayDuties.length === 0 && ' • Kickoff Laga: Selasa, 3 November 2026'}
+                {todayDuties.length === 0 && ' • Kickoff Laga: Senin, 2 November 2026'}
               </p>
             </div>
             <button

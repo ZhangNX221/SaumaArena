@@ -57,7 +57,7 @@ export const RefereeSupporterScoringView: React.FC<RefereeSupporterScoringViewPr
     (schoolMascot ? 20 : 0) +
     (supporterUniform ? 15 : 0) +
     (cheerMin3Chants ? 10 : 0) +
-    Math.max(0, checkedInTickets);
+    (checkedInTickets > 0 ? 1 : 0); // Aturan Penilaian Suporter: +1 / match
 
   const penaltyScore =
     (incidentViolentChaos ? 50 : 0) +
@@ -320,38 +320,24 @@ export const RefereeSupporterScoringView: React.FC<RefereeSupporterScoringViewPr
                 </div>
               </label>
 
-              {/* Jumlah Tiket */}
+              {/* Aturan Penilaian Suporter: Kehadiran (+1 / match) */}
               <div className="flex items-center justify-between p-3 rounded-xl bg-[var(--bg-muted)]/50 border border-[var(--border-subtle)]">
                 <div className="space-y-0.5">
                   <span className="font-barlow font-bold text-xs uppercase text-[var(--text-main)] block">
-                    Jumlah Tiket / Suporter Hadir
+                    Penilaian Kehadiran Suporter (+1 / match)
                   </span>
                   <p className="text-[11px] text-[var(--text-muted)]">
-                    Dihitung otomatis +1 poin per penonton bertiket yang hadir di venue.
+                    Diberikan +1 poin per pertandingan (match) yang dihadiri oleh rombongan suporter madrasah.
                   </p>
                 </div>
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setCheckedInTickets((v) => Math.max(0, v - 5))}
-                    className="w-7 h-7 rounded-lg bg-[var(--bg-surface)] border border-[var(--border-subtle)] font-bold text-xs hover:bg-[var(--bg-muted)] active:scale-95 cursor-pointer"
-                  >
-                    -
-                  </button>
+                <div className="flex items-center gap-3">
+                  <span className="text-xs font-mono font-bold text-emerald-600">+1 / match</span>
                   <input
-                    type="number"
-                    min="0"
-                    value={checkedInTickets}
-                    onChange={(e) => setCheckedInTickets(Number(e.target.value) || 0)}
-                    className="w-14 text-center px-2 py-1 rounded-lg bg-[var(--bg-surface)] border border-[var(--border-subtle)] text-xs font-mono font-bold"
+                    type="checkbox"
+                    checked={checkedInTickets > 0}
+                    onChange={(e) => setCheckedInTickets(e.target.checked ? 1 : 0)}
+                    className="w-4 h-4 rounded text-[var(--color-arena-primary)] focus:ring-0 cursor-pointer"
                   />
-                  <button
-                    type="button"
-                    onClick={() => setCheckedInTickets((v) => v + 5)}
-                    className="w-7 h-7 rounded-lg bg-[var(--bg-surface)] border border-[var(--border-subtle)] font-bold text-xs hover:bg-[var(--bg-muted)] active:scale-95 cursor-pointer"
-                  >
-                    +
-                  </button>
                 </div>
               </div>
             </div>
@@ -502,8 +488,8 @@ export const RefereeSupporterScoringView: React.FC<RefereeSupporterScoringViewPr
                 <span className="font-mono font-bold text-[var(--text-main)]">{cheerMin3Chants ? '+10' : '0'}</span>
               </div>
               <div className="flex justify-between text-[var(--text-muted)]">
-                <span>Kehadiran Tiket</span>
-                <span className="font-mono font-bold text-[var(--text-main)]">+{checkedInTickets}</span>
+                <span>Kehadiran (+1 / match)</span>
+                <span className="font-mono font-bold text-[var(--text-main)]">+{checkedInTickets > 0 ? 1 : 0}</span>
               </div>
               <div className="flex justify-between text-red-600 pt-1 border-t border-[var(--border-subtle)] font-bold">
                 <span>Total Penalti</span>
@@ -582,7 +568,7 @@ export const RefereeSupporterScoringView: React.FC<RefereeSupporterScoringViewPr
                     (a.schoolMascot ? 20 : 0) +
                     (a.supporterUniform ? 15 : 0) +
                     (a.cheerMin3Chants ? 10 : 0) +
-                    (a.checkedInTickets || 0);
+                    (a.checkedInTickets ? 1 : 0);
 
                   const pen =
                     (a.incidentViolentChaos ? 50 : 0) +
