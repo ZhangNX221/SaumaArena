@@ -156,7 +156,7 @@ export function getStoredPartners(): TournamentPartner[] {
   if (typeof window === 'undefined') return DEFAULT_TOURNAMENT_PARTNERS;
   try {
     const raw = localStorage.getItem(STORAGE_KEY_PARTNERS);
-    if (!raw) {
+    if (raw === null) {
       // Clean legacy storage keys if exist and save new defaults
       localStorage.removeItem('sauma_arena_tournament_partners');
       localStorage.removeItem('sauma_arena_tournament_partners_v2');
@@ -164,13 +164,13 @@ export function getStoredPartners(): TournamentPartner[] {
       return DEFAULT_TOURNAMENT_PARTNERS;
     }
     const parsed = JSON.parse(raw);
-    if (Array.isArray(parsed) && parsed.length > 0) {
-      // Auto-migrate if stored array is missing new partners or still holds old generic placeholders
-      const hasMtsn = parsed.some((p) => p.name?.includes('MTsN 3') || p.id === 'partner-mtsn3');
+    if (Array.isArray(parsed)) {
+      if (parsed.length === 0) return [];
+      // Auto-migrate if stored array still holds old generic placeholders
       const hasOldGenericNames = parsed.some(
         (p) => p.name === 'Komite Pelaksana Turnamen' || p.name === 'Komite Disiplin & Etika'
       );
-      if (!hasMtsn || hasOldGenericNames) {
+      if (hasOldGenericNames) {
         localStorage.setItem(STORAGE_KEY_PARTNERS, JSON.stringify(DEFAULT_TOURNAMENT_PARTNERS));
         return DEFAULT_TOURNAMENT_PARTNERS;
       }
@@ -195,13 +195,11 @@ export function saveStoredPartners(partners: TournamentPartner[]): void {
 export function resetStoredPartners(): TournamentPartner[] {
   if (typeof window !== 'undefined') {
     try {
-      localStorage.removeItem(STORAGE_KEY_PARTNERS);
-      localStorage.removeItem('sauma_arena_tournament_partners_v2');
-      localStorage.removeItem('sauma_arena_tournament_partners');
-      window.dispatchEvent(new CustomEvent('sauma_partners_updated', { detail: DEFAULT_TOURNAMENT_PARTNERS }));
+      localStorage.setItem(STORAGE_KEY_PARTNERS, JSON.stringify([]));
+      window.dispatchEvent(new CustomEvent('sauma_partners_updated', { detail: [] }));
     } catch (e) {
       console.error('Gagal mereset data mitra:', e);
     }
   }
-  return DEFAULT_TOURNAMENT_PARTNERS;
+  return [];
 }

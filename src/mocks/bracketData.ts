@@ -28,6 +28,7 @@ export interface BracketSizeOption {
 }
 
 export const STORAGE_KEY_BRACKET_SIZE = 'sauma_arena_bracket_size';
+export const STORAGE_KEY_HAS_BRONZE_MATCH = 'sauma_arena_has_bronze_match';
 
 export const BRACKET_SIZE_OPTIONS: BracketSizeOption[] = [
   {
@@ -92,6 +93,28 @@ export function saveStoredBracketSize(size: BracketSize): void {
     window.dispatchEvent(new CustomEvent('sauma_bracket_size_updated', { detail: size }));
   } catch (e) {
     console.error('Gagal menyimpan ukuran bagan:', e);
+  }
+}
+
+export function getStoredHasBronzeMatch(): boolean {
+  if (typeof window === 'undefined') return true;
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY_HAS_BRONZE_MATCH);
+    if (raw === null) return true;
+    return JSON.parse(raw) === true;
+  } catch {
+    return true;
+  }
+}
+
+export function saveStoredHasBronzeMatch(enabled: boolean): void {
+  if (typeof window === 'undefined') return;
+  try {
+    localStorage.setItem(STORAGE_KEY_HAS_BRONZE_MATCH, JSON.stringify(enabled));
+    window.dispatchEvent(new CustomEvent('sauma_state_sync', { detail: { key: STORAGE_KEY_HAS_BRONZE_MATCH, value: enabled } }));
+    window.dispatchEvent(new CustomEvent('sauma_has_bronze_match_updated', { detail: enabled }));
+  } catch (e) {
+    console.error('Gagal menyimpan pengaturan perebutan juara 3:', e);
   }
 }
 

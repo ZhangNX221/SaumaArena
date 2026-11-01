@@ -6,6 +6,7 @@ import {
   BracketMatch,
   BracketSize,
   STORAGE_KEY_BRACKET_SIZE,
+  STORAGE_KEY_HAS_BRONZE_MATCH,
   ROUND_OF_24,
   ROUND_OF_16,
   QUARTER_FINALS,
@@ -34,6 +35,7 @@ export const BracketTab: React.FC<BracketTabProps> = ({ sportCode = 'FUTSAL' }) 
 
   // Akses state tersinkronisasi bagan dari Admin & Meja Juri
   const [bracketSize, setBracketSize] = usePersistentState<BracketSize>(STORAGE_KEY_BRACKET_SIZE, 4);
+  const [hasBronzeMatch, setHasBronzeMatch] = usePersistentState<boolean>(STORAGE_KEY_HAS_BRONZE_MATCH, true);
   const [r24] = usePersistentState<BracketMatch[]>('sauma_arena_bracket_r24', ROUND_OF_24);
   const [r16] = usePersistentState<BracketMatch[]>('sauma_arena_bracket_r16', ROUND_OF_16);
   const [qf] = usePersistentState<BracketMatch[]>('sauma_arena_bracket_qf', QUARTER_FINALS);
@@ -45,12 +47,17 @@ export const BracketTab: React.FC<BracketTabProps> = ({ sportCode = 'FUTSAL' }) 
     fetch('/api/settings?sport=futsal')
       .then((res) => res.json())
       .then((json) => {
-        if (json.success && json.data?.bracketSize !== undefined) {
-          setBracketSize(json.data.bracketSize);
+        if (json.success) {
+          if (json.data?.bracketSize !== undefined) {
+            setBracketSize(json.data.bracketSize);
+          }
+          if (json.data?.hasBronzeMatch !== undefined) {
+            setHasBronzeMatch(Boolean(json.data.hasBronzeMatch));
+          }
         }
       })
       .catch(() => {});
-  }, [setBracketSize]);
+  }, [setBracketSize, setHasBronzeMatch]);
 
   const caborLabel = 'Futsal';
 
@@ -70,7 +77,7 @@ export const BracketTab: React.FC<BracketTabProps> = ({ sportCode = 'FUTSAL' }) 
     ...(bracketSize >= 16 ? [{ id: 'R16' as StageFilter, label: '16 Besar' }] : []),
     ...(bracketSize >= 8 ? [{ id: 'QF' as StageFilter, label: '8 Besar (QF)' }] : []),
     ...(bracketSize >= 4 ? [{ id: 'SF' as StageFilter, label: 'Semifinal (SF)' }] : []),
-    { id: 'FINAL' as StageFilter, label: 'Grand Final & Bronze' },
+    { id: 'FINAL' as StageFilter, label: hasBronzeMatch ? 'Grand Final & Bronze' : 'Grand Final' },
   ];
 
   return (
@@ -167,6 +174,7 @@ export const BracketTab: React.FC<BracketTabProps> = ({ sportCode = 'FUTSAL' }) 
           gf={gf}
           championTeamName={championTeamName}
           bronzeMatch={BRONZE_MATCH}
+          hasBronzeMatch={hasBronzeMatch}
         />
       )}
 
@@ -268,13 +276,15 @@ export const BracketTab: React.FC<BracketTabProps> = ({ sportCode = 'FUTSAL' }) 
               </div>
 
               {/* Bronze */}
-              <div className="space-y-2 pt-2 max-w-xl mx-auto">
-                <div className="flex items-center gap-1.5 text-xs font-barlow font-bold uppercase tracking-wider text-amber-400">
-                  <Medal className="w-4 h-4" />
-                  <span>Perebutan Juara 3</span>
+              {hasBronzeMatch && (
+                <div className="space-y-2 pt-2 max-w-xl mx-auto">
+                  <div className="flex items-center gap-1.5 text-xs font-barlow font-bold uppercase tracking-wider text-amber-400">
+                    <Medal className="w-4 h-4" />
+                    <span>Perebutan Juara 3</span>
+                  </div>
+                  <PublicBracketMatchCard match={BRONZE_MATCH} />
                 </div>
-                <PublicBracketMatchCard match={BRONZE_MATCH} />
-              </div>
+              )}
             </div>
           )}
         </div>

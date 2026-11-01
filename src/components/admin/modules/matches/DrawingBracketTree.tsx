@@ -14,6 +14,7 @@ interface DrawingBracketTreeProps {
   gf: BracketMatch;
   bronze: BracketMatch;
   championTeamName: string;
+  hasBronzeMatch?: boolean;
   onSelectMatch: (node: BracketMatch, stage: BracketStageKey) => void;
 }
 
@@ -24,6 +25,7 @@ export const DrawingBracketTree: React.FC<DrawingBracketTreeProps> = ({
   gf,
   bronze,
   championTeamName,
+  hasBronzeMatch = true,
   onSelectMatch,
 }) => {
   return (
@@ -151,16 +153,18 @@ export const DrawingBracketTree: React.FC<DrawingBracketTreeProps> = ({
                 championTeamName={championTeamName}
                 onClick={() => onSelectMatch(gf, 'GF')}
               />
-              <div className="space-y-2 pt-1">
-                <div className="flex items-center gap-1.5 text-xs font-barlow font-bold uppercase tracking-wider text-amber-400">
-                  <Medal className="w-4 h-4" />
-                  <span>Perebutan Juara 3</span>
+              {hasBronzeMatch && (
+                <div className="space-y-2 pt-1">
+                  <div className="flex items-center gap-1.5 text-xs font-barlow font-bold uppercase tracking-wider text-amber-400">
+                    <Medal className="w-4 h-4" />
+                    <span>Perebutan Juara 3</span>
+                  </div>
+                  <InteractiveBracketCard
+                    match={bronze}
+                    onClick={() => onSelectMatch(bronze, 'BRONZE' as BracketStageKey)}
+                  />
                 </div>
-                <InteractiveBracketCard
-                  match={bronze}
-                  onClick={() => onSelectMatch(bronze, 'BRONZE' as BracketStageKey)}
-                />
-              </div>
+              )}
             </div>
           </div>
         </div>

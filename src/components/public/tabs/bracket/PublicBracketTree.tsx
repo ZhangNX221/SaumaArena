@@ -13,6 +13,7 @@ interface PublicBracketTreeProps {
   gf: BracketMatch;
   championTeamName: string;
   bronzeMatch: BracketMatch;
+  hasBronzeMatch?: boolean;
 }
 
 export const PublicBracketTree: React.FC<PublicBracketTreeProps> = ({
@@ -22,6 +23,7 @@ export const PublicBracketTree: React.FC<PublicBracketTreeProps> = ({
   gf,
   championTeamName,
   bronzeMatch,
+  hasBronzeMatch = true,
 }) => {
   const canvasWidth = bracketSize >= 8 ? 972 : 676;
   const canvasHeight = 600;
@@ -282,13 +284,15 @@ export const PublicBracketTree: React.FC<PublicBracketTreeProps> = ({
                 <PublicGrandFinalCard gf={gf} championTeamName={championTeamName} />
 
                 {/* Perebutan Juara 3 */}
-                <div className="space-y-2 pt-1">
-                  <div className="flex items-center gap-1.5 text-xs font-barlow font-bold uppercase tracking-wider text-amber-400">
-                    <Medal className="w-4 h-4" />
-                    <span>Perebutan Juara 3</span>
+                {hasBronzeMatch && (
+                  <div className="space-y-2 pt-1">
+                    <div className="flex items-center gap-1.5 text-xs font-barlow font-bold uppercase tracking-wider text-amber-400">
+                      <Medal className="w-4 h-4" />
+                      <span>Perebutan Juara 3</span>
+                    </div>
+                    <PublicBracketMatchCard match={bronzeMatch} />
                   </div>
-                  <PublicBracketMatchCard match={bronzeMatch} />
-                </div>
+                )}
               </div>
             </div>
           </div>

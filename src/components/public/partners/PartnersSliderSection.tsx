@@ -21,6 +21,7 @@ export const PartnersSliderSection: React.FC<PartnersSliderSectionProps> = ({ pa
 
   // Responsive visible count: 2 on mobile, 3 on tablet, 5 on desktop
   useEffect(() => {
+    if (totalItems === 0) return;
     const handleResize = () => {
       if (window.innerWidth < 640) {
         setVisibleCount(2);

@@ -12,6 +12,7 @@ import {
   BracketMatch,
   BracketSize,
   STORAGE_KEY_BRACKET_SIZE,
+  STORAGE_KEY_HAS_BRONZE_MATCH,
 } from '@/mocks/bracketData';
 import { initialTeams } from '@/mocks/tournamentData';
 import { usePersistentState } from '@/hooks/usePersistentState';
@@ -24,6 +25,7 @@ type StageFilter = 'ALL' | 'R24' | 'R16' | 'QF' | 'SF' | 'FINAL';
 
 export const DrawingBracketTab: React.FC = () => {
   const [bracketSize] = usePersistentState<BracketSize>(STORAGE_KEY_BRACKET_SIZE, 4);
+  const [hasBronzeMatch] = usePersistentState<boolean>(STORAGE_KEY_HAS_BRONZE_MATCH, true);
   const [r24, setR24] = usePersistentState<BracketMatch[]>('sauma_arena_bracket_r24', ROUND_OF_24);
   const [r16, setR16] = usePersistentState<BracketMatch[]>('sauma_arena_bracket_r16', ROUND_OF_16);
   const [qf, setQf] = usePersistentState<BracketMatch[]>('sauma_arena_bracket_qf', QUARTER_FINALS);
@@ -233,7 +235,7 @@ export const DrawingBracketTab: React.FC = () => {
     ...(bracketSize >= 16 ? [{ id: 'R16' as StageFilter, label: '16 Besar' }] : []),
     ...(bracketSize >= 8 ? [{ id: 'QF' as StageFilter, label: '8 Besar (QF)' }] : []),
     ...(bracketSize >= 4 ? [{ id: 'SF' as StageFilter, label: 'Semifinal (SF)' }] : []),
-    { id: 'FINAL' as StageFilter, label: 'Grand Final & Bronze' },
+    { id: 'FINAL' as StageFilter, label: hasBronzeMatch ? 'Grand Final & Bronze' : 'Grand Final' },
   ];
 
   return (
@@ -328,6 +330,7 @@ export const DrawingBracketTab: React.FC = () => {
         gf={gf}
         bronze={bronze}
         championTeamName={championTeamName}
+        hasBronzeMatch={hasBronzeMatch}
         onSelectMatch={(node, stage) => setEditModalMatch({ node, stage })}
       />
 

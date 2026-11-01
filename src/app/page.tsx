@@ -75,7 +75,7 @@ export default function Home() {
         .then((res) => res.json())
         .then((json) => {
           if (!json.success || !json.data) return;
-          const { teamCardLayout, bracketSize, statsConfig, supporterWeights, sportRules, protocols, banners: dbBanners, standingsSnapshot } = json.data;
+          const { teamCardLayout, bracketSize, hasBronzeMatch, statsConfig, supporterWeights, sportRules, protocols, banners: dbBanners, standingsSnapshot } = json.data;
 
           const syncItem = (key: string, val: any) => {
             if (val === undefined || val === null) return;
@@ -87,6 +87,7 @@ export default function Home() {
 
           if (teamCardLayout) syncItem('sauma_arena_team_card_layout', teamCardLayout);
           if (bracketSize !== undefined) syncItem('sauma_arena_bracket_size', bracketSize);
+          if (hasBronzeMatch !== undefined) syncItem('sauma_arena_has_bronze_match', hasBronzeMatch);
           if (statsConfig) syncItem('sauma_arena_public_stats_config', statsConfig);
           if (supporterWeights) syncItem('sauma_supporter_rules_config', supporterWeights);
           if (sportRules) syncItem('sauma_arena_sport_rules', sportRules);
@@ -99,6 +100,10 @@ export default function Home() {
             ['A', 'B', 'C', 'D'].forEach((g) => {
               if (standingsSnapshot[g]) syncItem(`sauma_arena_standings_${g.toLowerCase()}`, standingsSnapshot[g]);
             });
+          }
+          if (json.data.partners) {
+            syncItem('sauma_arena_tournament_partners_v3', json.data.partners);
+            window.dispatchEvent(new CustomEvent('sauma_partners_updated', { detail: json.data.partners }));
           }
         })
         .catch(() => {});
@@ -373,13 +378,12 @@ export default function Home() {
       <TicketModal
         isOpen={FEATURES.ticketing && isTicketModalOpen}
         onClose={() => setIsTicketModalOpen(false)}
-        onTicketGenerated={(code, school) => console.log(`Tiket: ${code} - ${school}`)}
+        onTicketGenerated={(c, s) => console.log(`Tiket: ${c} - ${s}`)}
       />
-
       <TeamRegistrationModal
         isOpen={isRegModalOpen}
         onClose={() => setIsRegModalOpen(false)}
-        onSuccess={(regData) => console.log('Pendaftaran:', regData)}
+        onSuccess={(d) => console.log('Pendaftaran:', d)}
       />
 
       <PublicFooter

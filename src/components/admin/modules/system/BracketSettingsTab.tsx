@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import {
   GitBranch,
   Trophy,
+  Medal,
   CheckCircle2,
   RotateCcw,
   Save,
@@ -16,8 +17,11 @@ import {
   BracketSize,
   BRACKET_SIZE_OPTIONS,
   STORAGE_KEY_BRACKET_SIZE,
+  STORAGE_KEY_HAS_BRONZE_MATCH,
   getStoredBracketSize,
   saveStoredBracketSize,
+  getStoredHasBronzeMatch,
+  saveStoredHasBronzeMatch,
 } from '@/mocks/bracketData';
 
 interface BracketSettingsTabProps {
@@ -27,24 +31,37 @@ interface BracketSettingsTabProps {
 export const BracketSettingsTab: React.FC<BracketSettingsTabProps> = ({ onSaved }) => {
   const [selectedSize, setSelectedSize] = useState<BracketSize>(8);
   const [activeSize, setActiveSize] = useState<BracketSize>(8);
+  const [hasBronzeMatch, setHasBronzeMatch] = useState<boolean>(true);
+  const [activeHasBronzeMatch, setActiveHasBronzeMatch] = useState<boolean>(true);
   const [savedSuccess, setSavedSuccess] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
-    const current = getStoredBracketSize();
-    setSelectedSize(current);
-    setActiveSize(current);
+    const currentSize = getStoredBracketSize();
+    const currentBronze = getStoredHasBronzeMatch();
+    setSelectedSize(currentSize);
+    setActiveSize(currentSize);
+    setHasBronzeMatch(currentBronze);
+    setActiveHasBronzeMatch(currentBronze);
 
     // Ambil dari database jika ada
     fetch('/api/settings')
       .then((res) => res.json())
       .then((json) => {
-        if (json?.success && json?.data?.bracketSize && isMounted) {
-          setSelectedSize(json.data.bracketSize);
-          setActiveSize(json.data.bracketSize);
-          saveStoredBracketSize(json.data.bracketSize);
+        if (json?.success && isMounted) {
+          if (json.data?.bracketSize !== undefined) {
+            setSelectedSize(json.data.bracketSize);
+            setActiveSize(json.data.bracketSize);
+            saveStoredBracketSize(json.data.bracketSize);
+          }
+          if (json.data?.hasBronzeMatch !== undefined) {
+            const bronzeVal = Boolean(json.data.hasBronzeMatch);
+            setHasBronzeMatch(bronzeVal);
+            setActiveHasBronzeMatch(bronzeVal);
+            saveStoredHasBronzeMatch(bronzeVal);
+          }
         }
       })
       .catch((e) => console.warn('Gagal memuat pengaturan bagan:', e));
@@ -64,19 +81,24 @@ export const BracketSettingsTab: React.FC<BracketSettingsTabProps> = ({ onSaved 
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
         credentials: 'include',
-        body: JSON.stringify({ bracketSize: selectedSize }),
+        body: JSON.stringify({
+          bracketSize: selectedSize,
+          hasBronzeMatch,
+        }),
       });
       const data = await res.json();
       if (!res.ok || !data.success) {
         throw new Error(data.error || 'Gagal menyimpan pengaturan bagan ke database.');
       }
       saveStoredBracketSize(selectedSize);
+      saveStoredHasBronzeMatch(hasBronzeMatch);
       setActiveSize(selectedSize);
+      setActiveHasBronzeMatch(hasBronzeMatch);
       setSavedSuccess(true);
       onSaved?.(selectedSize);
       setTimeout(() => setSavedSuccess(false), 3000);
     } catch (err: any) {
-      console.error('Gagal sinkron bracketSize ke database:', err);
+      console.error('Gagal sinkron pengaturan bagan ke database:', err);
       setErrorMessage(err.message || 'Gagal menyimpan ke database.');
       setTimeout(() => setErrorMessage(null), 4000);
     } finally {
@@ -86,8 +108,11 @@ export const BracketSettingsTab: React.FC<BracketSettingsTabProps> = ({ onSaved 
 
   const handleReset = () => {
     saveStoredBracketSize(8);
+    saveStoredHasBronzeMatch(true);
     setSelectedSize(8);
     setActiveSize(8);
+    setHasBronzeMatch(true);
+    setActiveHasBronzeMatch(true);
     setSavedSuccess(true);
     onSaved?.(8);
     setTimeout(() => setSavedSuccess(false), 2500);
@@ -105,7 +130,7 @@ export const BracketSettingsTab: React.FC<BracketSettingsTabProps> = ({ onSaved 
           <div className="flex items-center gap-2.5">
             <CheckCircle2 className="w-5 h-5 text-emerald-600 dark:text-emerald-400 shrink-0" />
             <span className="font-semibold">
-              Format bagan berhasil diperbarui ke <strong>{selectedConfig.title}</strong>!
+              Format bagan ({selectedConfig.title}) &amp; Laga Juara 3 ({hasBronzeMatch ? 'Diadakan' : 'Ditiadakan'}) berhasil diperbarui!
             </span>
           </div>
           <span className="text-[11px] font-mono opacity-80">Tersinkron Otomatis</span>
@@ -130,11 +155,73 @@ export const BracketSettingsTab: React.FC<BracketSettingsTabProps> = ({ onSaved 
             </div>
           </div>
 
-          <div className="flex items-center gap-2 self-start sm:self-auto">
-            <span className="text-[11px] text-[var(--text-muted)]">Format Aktif Saat Ini:</span>
+          <div className="flex items-center gap-2 flex-wrap self-start sm:self-auto">
+            <span className="text-[11px] text-[var(--text-muted)]">Status Aktif:</span>
             <span className="px-2.5 py-1 rounded-lg bg-[var(--color-arena-primary)]/15 border border-[var(--color-arena-primary)]/30 text-[var(--color-arena-primary)] font-barlow font-black text-xs uppercase tracking-wider">
               {activeSize} Besar
             </span>
+            <span className={`px-2.5 py-1 rounded-lg border font-barlow font-black text-xs uppercase tracking-wider ${
+              activeHasBronzeMatch
+                ? 'bg-amber-500/15 border-amber-500/30 text-amber-600 dark:text-amber-400'
+                : 'bg-slate-500/15 border-slate-500/30 text-slate-500 dark:text-slate-400'
+            }`}>
+              {activeHasBronzeMatch ? 'Juara 3: Ada' : 'Juara 3: Nonaktif'}
+            </span>
+          </div>
+        </div>
+
+        {/* Toggle Opsi Perebutan Juara 3 */}
+        <div className="p-4 sm:p-5 rounded-xl bg-[var(--bg-muted)]/50 border border-[var(--border-subtle)] space-y-3">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex items-start gap-3">
+              <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center shrink-0 mt-0.5">
+                <Medal className="w-5 h-5" />
+              </div>
+              <div className="space-y-1">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h4 className="font-barlow font-bold uppercase tracking-wider text-sm text-[var(--text-main)]">
+                    Laga Perebutan Juara Ke-3 (Bronze Match)
+                  </h4>
+                  <span
+                    className={`px-2 py-0.5 rounded-full text-[10px] font-barlow font-bold uppercase tracking-wider border ${
+                      hasBronzeMatch
+                        ? 'bg-amber-500/15 border-amber-500/30 text-amber-600 dark:text-amber-400'
+                        : 'bg-slate-500/15 border-slate-500/30 text-slate-500 dark:text-slate-400'
+                    }`}
+                  >
+                    {hasBronzeMatch ? 'Diadakan (Aktif)' : 'Ditiadakan (Nonaktif)'}
+                  </span>
+                </div>
+                <p className="text-xs text-[var(--text-muted)] leading-relaxed max-w-2xl">
+                  {hasBronzeMatch
+                    ? 'Laga perebutan juara 3 diadakan antara 2 tim yang kalah di semifinal. Card pertandingan akan ditampilkan di bagan eliminasi publik & meja juri.'
+                    : 'Laga perebutan juara 3 ditiadakan. Card pertandingan perebutan juara 3 dihilangkan dari bagan eliminasi publik & meja juri.'}
+                </p>
+              </div>
+            </div>
+
+            {/* Switch Toggle */}
+            <div className="flex items-center gap-3 self-end sm:self-center shrink-0">
+              <span className="text-xs font-semibold text-[var(--text-muted)] hidden sm:inline">
+                {hasBronzeMatch ? 'Aktif' : 'Nonaktif'}
+              </span>
+              <button
+                type="button"
+                role="switch"
+                aria-checked={hasBronzeMatch}
+                onClick={() => setHasBronzeMatch((prev) => !prev)}
+                className={`relative inline-flex h-7 w-12 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-hidden ${
+                  hasBronzeMatch ? 'bg-amber-500' : 'bg-slate-300 dark:bg-slate-700'
+                }`}
+              >
+                <span
+                  aria-hidden="true"
+                  className={`pointer-events-none inline-block h-6 w-6 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${
+                    hasBronzeMatch ? 'translate-x-5' : 'translate-x-0'
+                  }`}
+                />
+              </button>
+            </div>
           </div>
         </div>
 

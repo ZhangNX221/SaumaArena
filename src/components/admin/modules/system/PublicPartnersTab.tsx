@@ -5,8 +5,7 @@ import {
   Plus,
   RotateCcw,
   CheckCircle2,
-  Eye,
-  EyeOff,
+  Save,
   Search,
   SlidersHorizontal,
 } from 'lucide-react';
@@ -25,7 +24,8 @@ export const PublicPartnersTab: React.FC = () => {
   const [partners, setPartners] = useState<TournamentPartner[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<string>('ALL');
-  const [showLivePreview, setShowLivePreview] = useState(true);
+  const [showLivePreview] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
 
   // Modal states
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -113,11 +113,49 @@ export const PublicPartnersTab: React.FC = () => {
     triggerToast('Urutan tampilan mitra berhasil diperbarui.');
   };
 
-  const handleReset = () => {
-    const restored = resetStoredPartners();
-    setPartners(restored);
+  const handleReset = async () => {
+    const cleared = resetStoredPartners();
+    setPartners(cleared);
     setIsResetModalOpen(false);
-    triggerToast('Daftar mitra berhasil direset ke daftar mitra resmi default.');
+
+    try {
+      const token = typeof window !== 'undefined' ? localStorage.getItem('sauma_auth_token') : null;
+      if (token) {
+        await fetch('/api/settings', {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ partners: cleared }),
+        });
+      }
+    } catch {}
+
+    triggerToast('Seluruh data logo mitra resmi turnamen telah dihapus.');
+  };
+
+  const handleSaveAll = async () => {
+    setIsSaving(true);
+    saveStoredPartners(partners);
+    try {
+      const token = typeof window !== 'undefined' ? localStorage.getItem('sauma_auth_token') : null;
+      if (token) {
+        await fetch('/api/settings', {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ partners }),
+        });
+      }
+      triggerToast('Data logo mitra & penyelenggara resmi turnamen berhasil disimpan!');
+    } catch {
+      triggerToast('Data logo mitra berhasil disimpan secara lokal.');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const filteredPartners = partners.filter((p) => {
@@ -155,33 +193,31 @@ export const PublicPartnersTab: React.FC = () => {
           <div className="flex items-center gap-2 flex-wrap">
             <button
               type="button"
-              onClick={() => setShowLivePreview((prev) => !prev)}
-              className={`btn-tactile flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-bold transition-all ${
-                showLivePreview
-                  ? 'border-[var(--color-arena-primary)] bg-[var(--color-arena-primary-light)] text-[var(--color-arena-primary)] dark:bg-sky-950/40 dark:text-sky-300'
-                  : 'border-[var(--border-subtle)] text-[var(--text-muted)] bg-[var(--bg-surface)]'
-              }`}
-            >
-              {showLivePreview ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
-              <span>{showLivePreview ? 'Tutup Pratinjau' : 'Lihat Pratinjau'}</span>
-            </button>
-
-            <button
-              type="button"
               onClick={() => setIsResetModalOpen(true)}
-              className="btn-tactile flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-[var(--border-subtle)] text-[var(--text-muted)] hover:text-[var(--text-main)] text-xs font-bold"
+              className="btn-tactile flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-red-500/30 text-red-600 dark:text-red-400 hover:bg-red-500/10 text-xs font-bold transition-all cursor-pointer"
+              title="Hapus semua data logo mitra"
             >
               <RotateCcw className="w-3.5 h-3.5" />
-              <span>Reset Default</span>
+              <span>Reset Logo</span>
             </button>
 
             <button
               type="button"
               onClick={handleOpenAdd}
-              className="btn-tactile flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-[var(--color-arena-primary)] text-white text-xs font-barlow font-bold uppercase tracking-wider shadow-xs hover:bg-[var(--color-arena-primary-hover)] shrink-0"
+              className="btn-tactile flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-[var(--bg-surface)] hover:bg-[var(--bg-muted)] text-[var(--text-main)] text-xs font-barlow font-bold uppercase tracking-wider shrink-0 cursor-pointer"
             >
               <Plus className="w-3.5 h-3.5" />
               <span>Tambah Mitra</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={handleSaveAll}
+              disabled={isSaving}
+              className="btn-tactile flex items-center gap-1.5 px-4 py-1.5 rounded-xl bg-[var(--color-arena-primary)] text-white text-xs font-barlow font-bold uppercase tracking-wider shadow-xs hover:bg-[var(--color-arena-primary-hover)] shrink-0 disabled:opacity-50 cursor-pointer"
+            >
+              <Save className="w-3.5 h-3.5" />
+              <span>{isSaving ? 'Menyimpan...' : 'Simpan'}</span>
             </button>
           </div>
         </div>
@@ -344,12 +380,12 @@ export const PublicPartnersTab: React.FC = () => {
         onCancel={() => setDeleteTarget(null)}
       />
 
-      {/* Modal Konfirmasi Reset Default */}
+      {/* Modal Konfirmasi Hapus Semua Data Logo */}
       <ConfirmModal
         isOpen={isResetModalOpen}
-        title="Reset ke Mitra Resmi Default"
-        message="Daftar mitra akan dikembalikan ke konfigurasi resmi awal turnamen (MTsN 3 Blitar, MA Ma'arif Udanawu, KONI, Kemenpora RI, dan mitra lainnya). Lanjutkan?"
-        confirmLabel="Ya, Reset Default"
+        title="Hapus Semua Data Logo Mitra"
+        message="Apakah Anda yakin ingin menghapus seluruh data logo mitra dan sponsor resmi turnamen? Tindakan ini akan mengosongkan seluruh data logo mitra dari tampilan publik."
+        confirmLabel="Ya, Hapus Semua Logo"
         cancelLabel="Batal"
         onConfirm={handleReset}
         onCancel={() => setIsResetModalOpen(false)}

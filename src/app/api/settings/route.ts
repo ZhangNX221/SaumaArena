@@ -36,6 +36,7 @@ export async function GET(request: Request) {
 
     const sportRules = overrides.sport_rules || DEFAULT_SPORT_RULES;
     const bracketSize = overrides.bracket_size ?? 4;
+    const hasBronzeMatch = overrides.has_bronze_match ?? true;
     const teamCardLayout = overrides.team_card_layout ?? 'MINIMAL';
     const statsConfig = overrides.stats_display_config ?? null;
     const protocols = overrides.protocols ?? {
@@ -49,6 +50,7 @@ export async function GET(request: Request) {
     const broadcastMessage = overrides.broadcast_message ?? '';
     const banners = overrides.banners ?? null;
     const standingsSnapshot = overrides.standings_override ?? null;
+    const partners = overrides.partners ?? null;
 
     return NextResponse.json({
       success: true,
@@ -75,6 +77,7 @@ export async function GET(request: Request) {
           : null,
         sportRules,
         bracketSize,
+        hasBronzeMatch,
         teamCardLayout,
         statsConfig,
         protocols,
@@ -82,6 +85,7 @@ export async function GET(request: Request) {
         broadcastMessage,
         banners,
         standingsSnapshot,
+        partners,
       },
     });
   } catch (error: any) {
@@ -107,6 +111,7 @@ export async function PUT(request: Request) {
       sportRules,
       matchSettings,
       bracketSize,
+      hasBronzeMatch,
       teamCardLayout,
       statsConfig,
       protocols,
@@ -114,6 +119,7 @@ export async function PUT(request: Request) {
       broadcastMessage,
       banners,
       standingsSnapshot,
+      partners,
     } = body;
 
     const normalizedSport = String(sportCode).toLowerCase();
@@ -199,6 +205,7 @@ export async function PUT(request: Request) {
 
     if (sportRules !== undefined) currentOverrides.sport_rules = sportRules;
     if (bracketSize !== undefined) currentOverrides.bracket_size = bracketSize;
+    if (hasBronzeMatch !== undefined) currentOverrides.has_bronze_match = Boolean(hasBronzeMatch);
     if (teamCardLayout !== undefined) currentOverrides.team_card_layout = teamCardLayout;
     if (statsConfig !== undefined) currentOverrides.stats_display_config = statsConfig;
     if (protocols !== undefined) currentOverrides.protocols = protocols;
@@ -206,6 +213,7 @@ export async function PUT(request: Request) {
     if (broadcastMessage !== undefined) currentOverrides.broadcast_message = broadcastMessage;
     if (banners !== undefined) currentOverrides.banners = banners;
     if (standingsSnapshot !== undefined) currentOverrides.standings_override = standingsSnapshot;
+    if (partners !== undefined) currentOverrides.partners = partners;
 
     run(
       'UPDATE competitions SET rules_overrides = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
