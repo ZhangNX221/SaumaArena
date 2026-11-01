@@ -26,7 +26,7 @@ export const StandingsTab: React.FC<StandingsTabProps> = ({ sportCode = 'FUTSAL'
   const [groupC, setGroupC] = usePersistentState<AppStandingRow[]>('sauma_arena_standings_c', DEFAULT_GROUP_C_STANDINGS);
   const [groupD, setGroupD] = usePersistentState<AppStandingRow[]>('sauma_arena_standings_d', DEFAULT_GROUP_D_STANDINGS);
 
-  // Self-healing: bersihkan imbuhan kode grup seperti (A1), (B1), dst dan sinkronkan data tim awal
+  // Self-healing: bersihkan imbuhan kode grup seperti (A1), (B1), dst dan sinkronkan data tim resmi
   useEffect(() => {
     const sanitizeRow = (r: AppStandingRow) => ({
       ...r,
@@ -40,17 +40,37 @@ export const StandingsTab: React.FC<StandingsTabProps> = ({ sportCode = 'FUTSAL'
     if (needsSanitize(groupC)) setGroupC((l) => l.map(sanitizeRow));
     if (needsSanitize(groupD)) setGroupD((l) => l.map(sanitizeRow));
 
-    // Sinkronkan urutan Grup D resmi jika masih urutan lama dan belum main
-    if (groupD.length === 4 && groupD.every((r) => r.played === 0) && groupD[0]?.teamId !== 'team-mi-ploso') {
+    // Sinkronkan pembagian tim resmi MMFC I jika belum ada laga dimainkan
+    const isUnplayed = (list: AppStandingRow[]) => list.every((r) => r.played === 0);
+    const matchesTeamIds = (list: AppStandingRow[], defaults: AppStandingRow[]) =>
+      list.length === defaults.length && list.every((r, i) => r.teamId === defaults[i]?.teamId);
+
+    if (isUnplayed(groupA) && !matchesTeamIds(groupA, DEFAULT_GROUP_A_STANDINGS)) {
+      setGroupA(DEFAULT_GROUP_A_STANDINGS);
+    }
+    if (isUnplayed(groupB) && !matchesTeamIds(groupB, DEFAULT_GROUP_B_STANDINGS)) {
+      setGroupB(DEFAULT_GROUP_B_STANDINGS);
+    }
+    if (isUnplayed(groupC) && !matchesTeamIds(groupC, DEFAULT_GROUP_C_STANDINGS)) {
+      setGroupC(DEFAULT_GROUP_C_STANDINGS);
+    }
+    if (isUnplayed(groupD) && !matchesTeamIds(groupD, DEFAULT_GROUP_D_STANDINGS)) {
       setGroupD(DEFAULT_GROUP_D_STANDINGS);
     }
-    // Perbarui nama tim resmi jika ada penyesuaian (misal YA BUNAYYA / MAMBAUL ULUM BUNTARAN)
-    if (groupB.some((r) => r.teamId === 'team-mi-mambaululum' && !r.teamName.includes('(TULUNGAGUNG)'))) {
-      setGroupB((l) => l.map((r) => r.teamId === 'team-mi-mambaululum' ? { ...r, teamName: 'MI MAMBAUL ULUM BUNTARAN (TULUNGAGUNG)' } : r));
-    }
-    if (groupD.some((r) => r.teamId === 'team-mi-yabunaya' && r.teamName.includes('YAA'))) {
-      setGroupD((l) => l.map((r) => r.teamId === 'team-mi-yabunaya' ? { ...r, teamName: 'MI YA BUNAYYA SRENGAT', schoolName: 'Madrasah Ibtidaiyah Ya Bunayya Srengat Blitar' } : r));
-    }
+
+    // Ambil snapshot klasemen resmi dari SQLite backend jika tersedia
+    fetch('/api/standings')
+      .then((res) => res.json())
+      .then((res) => {
+        if (res.success && res.data?.groupStandingsSnapshot) {
+          const snap = res.data.groupStandingsSnapshot;
+          if (snap.A && Array.isArray(snap.A) && snap.A.length > 0) setGroupA(snap.A);
+          if (snap.B && Array.isArray(snap.B) && snap.B.length > 0) setGroupB(snap.B);
+          if (snap.C && Array.isArray(snap.C) && snap.C.length > 0) setGroupC(snap.C);
+          if (snap.D && Array.isArray(snap.D) && snap.D.length > 0) setGroupD(snap.D);
+        }
+      })
+      .catch((err) => console.warn('[StandingsTab] Gagal fetch snapshot klasemen:', err));
   }, []);
 
   // Sorting dan penomoran ranking dinamis sesuai aturan resmi turnamen MMFC I:

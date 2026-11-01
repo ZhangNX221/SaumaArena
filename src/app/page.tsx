@@ -40,27 +40,54 @@ export default function Home() {
   useEffect(() => {
     try {
       const savedTheme = localStorage.getItem('sauma_theme');
-      if (savedTheme === 'light') {
-        setDarkMode(false);
-      } else if (savedTheme === 'dark') {
-        setDarkMode(true);
-      }
-    } catch {
-      // ignore
-    }
-  }, []);
-  useEffect(() => {
-    try {
+      if (savedTheme) setDarkMode(savedTheme === 'dark');
       const savedBanners = localStorage.getItem('sauma_arena_cabor_banners');
       if (savedBanners) {
         const parsed = JSON.parse(savedBanners);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          setBanners(parsed);
-        }
+        if (Array.isArray(parsed) && parsed.length > 0) setBanners(parsed);
       }
-    } catch {
-      // fallback to DEFAULT_CABOR_BANNERS
-    }
+    } catch {}
+  }, []);
+
+  // Sinkronisasi Universal: Muat konfigurasi resmi dari database SQLite ke state lokal
+  useEffect(() => {
+    const syncDatabaseState = () => {
+      fetch('/api/settings?sport=futsal')
+        .then((res) => res.json())
+        .then((json) => {
+          if (!json.success || !json.data) return;
+          const { teamCardLayout, bracketSize, statsConfig, supporterWeights, sportRules, protocols, banners: dbBanners, standingsSnapshot } = json.data;
+
+          const syncItem = (key: string, val: any) => {
+            if (val === undefined || val === null) return;
+            try {
+              localStorage.setItem(key, JSON.stringify(val));
+              window.dispatchEvent(new CustomEvent('sauma_state_sync', { detail: { key, value: val } }));
+            } catch {}
+          };
+
+          if (teamCardLayout) syncItem('sauma_arena_team_card_layout', teamCardLayout);
+          if (bracketSize !== undefined) syncItem('sauma_arena_bracket_size', bracketSize);
+          if (statsConfig) syncItem('sauma_arena_public_stats_config', statsConfig);
+          if (supporterWeights) syncItem('sauma_supporter_rules_config', supporterWeights);
+          if (sportRules) syncItem('sauma_arena_sport_rules', sportRules);
+          if (protocols) syncItem('sauma_arena_protocols', protocols);
+          if (dbBanners?.length) {
+            setBanners(dbBanners);
+            syncItem('sauma_arena_cabor_banners', dbBanners);
+          }
+          if (standingsSnapshot) {
+            ['A', 'B', 'C', 'D'].forEach((g) => {
+              if (standingsSnapshot[g]) syncItem(`sauma_arena_standings_${g.toLowerCase()}`, standingsSnapshot[g]);
+            });
+          }
+        })
+        .catch(() => {});
+    };
+
+    syncDatabaseState();
+    window.addEventListener('focus', syncDatabaseState);
+    return () => window.removeEventListener('focus', syncDatabaseState);
   }, []);
 
   const handleSaveBanners = (newBanners: PublicHeaderConfig[]) => {
@@ -69,6 +96,18 @@ export default function Home() {
       localStorage.setItem('sauma_arena_cabor_banners', JSON.stringify(newBanners));
     } catch {
       // ignore
+    }
+
+    const token = typeof window !== 'undefined' ? localStorage.getItem('sauma_auth_token') : null;
+    if (token) {
+      fetch('/api/settings', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ banners: newBanners }),
+      }).catch(() => {});
     }
   };
 

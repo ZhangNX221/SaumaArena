@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   Trophy,
   BarChart3,
@@ -22,10 +22,21 @@ interface StatsTabProps {
 }
 
 export const StatsTab: React.FC<StatsTabProps> = ({ sportCode = 'FUTSAL' }) => {
-  const [statsConfig] = usePersistentState<PublicStatsDisplayConfig>(
+  const [statsConfig, setStatsConfig] = usePersistentState<PublicStatsDisplayConfig>(
     STORAGE_KEY_STATS_CONFIG,
     DEFAULT_PUBLIC_STATS_CONFIG
   );
+
+  useEffect(() => {
+    fetch('/api/settings?sport=futsal')
+      .then((res) => res.json())
+      .then((json) => {
+        if (json.success && json.data?.statsConfig) {
+          setStatsConfig(json.data.statsConfig);
+        }
+      })
+      .catch(() => {});
+  }, [setStatsConfig]);
 
   // Ambil seluruh pemain Futsal
   const allPlayers = initialTeams.flatMap((t) =>

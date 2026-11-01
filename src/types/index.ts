@@ -461,7 +461,7 @@ export const DEFAULT_PUBLIC_STATS_CONFIG: PublicStatsDisplayConfig = {
   showQuickMetrics: true,
   showTeamGoalsChart: true,
   showDisciplineChart: true,
-  showTopScorers: true,
+  showTopScorers: false,
   showGoalDistribution: false,
-  showCleanSheet: true,
+  showCleanSheet: false,
 };

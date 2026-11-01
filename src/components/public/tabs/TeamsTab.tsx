@@ -14,11 +14,28 @@ interface TeamsTabProps {
 }
 
 export const TeamsTab: React.FC<TeamsTabProps> = ({ sportCode = 'FUTSAL' }) => {
-  const [teams] = usePersistentState<Team[]>('sauma_arena_teams', initialTeams);
-  const [teamCardLayout] = usePersistentState<TeamCardLayout>(STORAGE_KEY_TEAM_CARD_LAYOUT, 'STANDARD');
+  const [teams, setTeams] = usePersistentState<Team[]>('sauma_arena_teams', initialTeams);
+  const [teamCardLayout, setTeamCardLayout] = usePersistentState<TeamCardLayout>(STORAGE_KEY_TEAM_CARD_LAYOUT, 'MINIMAL');
   const [selectedTeam, setSelectedTeam] = useState<Team | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedGroup, setSelectedGroup] = useState<'ALL' | 'A' | 'B' | 'C' | 'D'>('ALL');
+
+  useEffect(() => {
+    if (teams.length !== initialTeams.length) {
+      setTeams(initialTeams);
+    }
+  }, [teams.length, setTeams]);
+
+  useEffect(() => {
+    fetch('/api/settings?sport=futsal')
+      .then((res) => res.json())
+      .then((json) => {
+        if (json.success && json.data?.teamCardLayout) {
+          setTeamCardLayout(json.data.teamCardLayout);
+        }
+      })
+      .catch(() => {});
+  }, [setTeamCardLayout]);
 
   useEffect(() => {
     if (!selectedTeam) return;

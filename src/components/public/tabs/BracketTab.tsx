@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Trophy, Medal, GitBranch, Layers } from 'lucide-react';
 import {
   BracketMatch,
@@ -33,13 +33,24 @@ export const BracketTab: React.FC<BracketTabProps> = ({ sportCode = 'FUTSAL' }) 
   const [activeStageFilter, setActiveStageFilter] = useState<StageFilter>('ALL');
 
   // Akses state tersinkronisasi bagan dari Admin & Meja Juri
-  const [bracketSize] = usePersistentState<BracketSize>(STORAGE_KEY_BRACKET_SIZE, 8);
+  const [bracketSize, setBracketSize] = usePersistentState<BracketSize>(STORAGE_KEY_BRACKET_SIZE, 4);
   const [r24] = usePersistentState<BracketMatch[]>('sauma_arena_bracket_r24', ROUND_OF_24);
   const [r16] = usePersistentState<BracketMatch[]>('sauma_arena_bracket_r16', ROUND_OF_16);
   const [qf] = usePersistentState<BracketMatch[]>('sauma_arena_bracket_qf', QUARTER_FINALS);
   const [sf] = usePersistentState<BracketMatch[]>('sauma_arena_bracket_sf', SEMI_FINALS);
   const [gf] = usePersistentState<BracketMatch>('sauma_arena_bracket_gf', GRAND_FINAL);
   const [championId] = usePersistentState<string>('sauma_arena_bracket_champ', '');
+
+  useEffect(() => {
+    fetch('/api/settings?sport=futsal')
+      .then((res) => res.json())
+      .then((json) => {
+        if (json.success && json.data?.bracketSize !== undefined) {
+          setBracketSize(json.data.bracketSize);
+        }
+      })
+      .catch(() => {});
+  }, [setBracketSize]);
 
   const caborLabel = 'Futsal';
 

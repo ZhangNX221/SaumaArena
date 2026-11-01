@@ -11,8 +11,15 @@ import { PublicPageHeader } from '../layout/PublicPageHeader';
 
 export const SupporterTab: React.FC = () => {
   const [assessments] = usePersistentState<SupporterAssessment[]>('sauma_arena_supporter_scores', initialSupporterAssessments);
-  const [teams] = usePersistentState<Team[]>('sauma_arena_teams', initialTeams);
+  const [teams, setTeams] = usePersistentState<Team[]>('sauma_arena_teams', initialTeams);
   const [searchQuery, setSearchQuery] = useState('');
+
+  // Sinkronkan daftar tim jika data lokal belum memuat 14 kontingen lengkap
+  React.useEffect(() => {
+    if (teams.length !== initialTeams.length) {
+      setTeams(initialTeams);
+    }
+  }, [teams.length, setTeams]);
 
   // Agregasi skor suporter per sekolah/tim (Poin Positif 1-4 & Sanksi 1-4 dengan label 1 kata)
   const leaderboard: SupporterLeaderboardRow[] = teams

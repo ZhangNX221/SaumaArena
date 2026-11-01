@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Award, ShieldAlert, Info } from 'lucide-react';
 import { usePersistentState } from '@/hooks/usePersistentState';
 import {
@@ -10,10 +10,21 @@ import {
 } from '@/config/supporterRules';
 
 export const SupporterRulesInfo: React.FC = () => {
-  const [rawConfig] = usePersistentState<any>(
+  const [rawConfig, setRawConfig] = usePersistentState<any>(
     STORAGE_KEY_SUPPORTER_WEIGHTS,
     DEFAULT_ASSESSMENT_CONFIG
   );
+
+  useEffect(() => {
+    fetch('/api/settings?sport=futsal')
+      .then((res) => res.json())
+      .then((json) => {
+        if (json.success && json.data?.supporterWeights) {
+          setRawConfig(json.data.supporterWeights);
+        }
+      })
+      .catch(() => {});
+  }, [setRawConfig]);
 
   const config = normalizeAssessmentConfig(rawConfig);
 

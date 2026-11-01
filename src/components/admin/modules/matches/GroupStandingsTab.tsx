@@ -17,10 +17,7 @@ import { StandingFormModal, StandingFormData } from './StandingFormModal';
 import { usePersistentState } from '@/hooks/usePersistentState';
 import { initialMatches } from '@/mocks/tournamentData';
 import {
-  DEFAULT_GROUP_A_STANDINGS,
-  DEFAULT_GROUP_B_STANDINGS,
-  DEFAULT_GROUP_C_STANDINGS,
-  DEFAULT_GROUP_D_STANDINGS,
+  DEFAULT_GROUP_A_STANDINGS, DEFAULT_GROUP_B_STANDINGS, DEFAULT_GROUP_C_STANDINGS, DEFAULT_GROUP_D_STANDINGS,
 } from '@/mocks/defaultStandingsData';
 import { recalculateGroupStandingsFromMatches, pushGroupStandingsToBackend } from '@/lib/apiSync';
 
@@ -40,6 +37,36 @@ export const GroupStandingsTab: React.FC = () => {
     const map = { A: setGroupA, B: setGroupB, C: setGroupC, D: setGroupD };
     map[selectedGroup](updater);
   };
+
+  useEffect(() => {
+    const isUnplayed = (list: StandingRow[]) => list.every((r) => r.played === 0);
+    const matchesIds = (list: StandingRow[], d: StandingRow[]) => list.length === d.length && list.every((r, i) => r.teamId === d[i]?.teamId);
+
+    if (isUnplayed(groupA) && !matchesIds(groupA, DEFAULT_GROUP_A_STANDINGS)) setGroupA(DEFAULT_GROUP_A_STANDINGS);
+    if (isUnplayed(groupB) && !matchesIds(groupB, DEFAULT_GROUP_B_STANDINGS)) setGroupB(DEFAULT_GROUP_B_STANDINGS);
+    if (isUnplayed(groupC) && !matchesIds(groupC, DEFAULT_GROUP_C_STANDINGS)) setGroupC(DEFAULT_GROUP_C_STANDINGS);
+    if (isUnplayed(groupD) && !matchesIds(groupD, DEFAULT_GROUP_D_STANDINGS)) setGroupD(DEFAULT_GROUP_D_STANDINGS);
+
+    const sanitize = (r: StandingRow) => ({
+      ...r,
+      teamName: r.teamName.replace(/\s*\([A-D][1-4]\)\s*$/i, '').trim(),
+      supporterPoints: r.supporterPoints === 100 ? 0 : (r.supporterPoints ?? 0),
+    });
+    [setGroupA, setGroupB, setGroupC, setGroupD].forEach((s) => s((l) => l.map(sanitize)));
+
+    fetch('/api/standings')
+      .then((res) => res.json())
+      .then((res) => {
+        const snap = res?.data?.groupStandingsSnapshot;
+        if (snap) {
+          if (snap.A?.length) setGroupA(snap.A);
+          if (snap.B?.length) setGroupB(snap.B);
+          if (snap.C?.length) setGroupC(snap.C);
+          if (snap.D?.length) setGroupD(snap.D);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -180,25 +207,6 @@ export const GroupStandingsTab: React.FC = () => {
     setTimeout(() => setSyncToast(null), 3500);
   };
 
-  // Reset otomatis jika masih terdapat poin suporter 100 atau imbuhan kode (A1, B1, dst) dari cache lama serta sinkronisasi urutan tim
-  useEffect(() => {
-    const sanitizeRow = (r: StandingRow) => ({
-      ...r,
-      teamName: r.teamName.replace(/\s*\([A-D][1-4]\)\s*$/i, '').trim(),
-      supporterPoints: r.supporterPoints === 100 ? 0 : (r.supporterPoints ?? 0),
-    });
-    const needsSanitize = (list: StandingRow[]) =>
-      list.some((r) => r.supporterPoints === 100 || /\s*\([A-D][1-4]\)\s*$/i.test(r.teamName));
-
-    if (needsSanitize(groupA)) setGroupA((l) => l.map(sanitizeRow));
-    if (needsSanitize(groupB)) setGroupB((l) => l.map(sanitizeRow));
-    if (needsSanitize(groupC)) setGroupC((l) => l.map(sanitizeRow));
-    if (needsSanitize(groupD)) setGroupD((l) => l.map(sanitizeRow));
-
-    if (groupD.length === 4 && groupD.every((r) => r.played === 0) && groupD[0]?.teamId !== 'team-mi-ploso') {
-      setGroupD(DEFAULT_GROUP_D_STANDINGS);
-    }
-  }, []);
 
   const handleResetAllSupporterPoints = () => {
     const resetPs = (list: StandingRow[]) => list.map((r) => ({ ...r, supporterPoints: 0 }));

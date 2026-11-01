@@ -35,18 +35,20 @@ export async function GET(request: Request) {
     }
 
     const sportRules = overrides.sport_rules || DEFAULT_SPORT_RULES;
-    const bracketSize = overrides.bracket_size ?? 8;
-    const teamCardLayout = overrides.team_card_layout ?? 'STANDARD';
+    const bracketSize = overrides.bracket_size ?? 4;
+    const teamCardLayout = overrides.team_card_layout ?? 'MINIMAL';
     const statsConfig = overrides.stats_display_config ?? null;
     const protocols = overrides.protocols ?? {
       woScoreA: 3,
       woScoreB: 0,
-      lateToleranceMinutes: 15,
+      lateToleranceMinutes: 10,
       bapVerificationMode: 'MANUAL',
       allowOvertimeInGroup: false,
     };
     const supporterWeights = normalizeAssessmentConfig(overrides.supporter_weights);
     const broadcastMessage = overrides.broadcast_message ?? '';
+    const banners = overrides.banners ?? null;
+    const standingsSnapshot = overrides.standings_override ?? null;
 
     return NextResponse.json({
       success: true,
@@ -78,6 +80,8 @@ export async function GET(request: Request) {
         protocols,
         supporterWeights,
         broadcastMessage,
+        banners,
+        standingsSnapshot,
       },
     });
   } catch (error: any) {
@@ -108,6 +112,8 @@ export async function PUT(request: Request) {
       protocols,
       supporterWeights,
       broadcastMessage,
+      banners,
+      standingsSnapshot,
     } = body;
 
     const normalizedSport = String(sportCode).toLowerCase();
@@ -198,6 +204,8 @@ export async function PUT(request: Request) {
     if (protocols !== undefined) currentOverrides.protocols = protocols;
     if (supporterWeights !== undefined) currentOverrides.supporter_weights = supporterWeights;
     if (broadcastMessage !== undefined) currentOverrides.broadcast_message = broadcastMessage;
+    if (banners !== undefined) currentOverrides.banners = banners;
+    if (standingsSnapshot !== undefined) currentOverrides.standings_override = standingsSnapshot;
 
     run(
       'UPDATE competitions SET rules_overrides = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
