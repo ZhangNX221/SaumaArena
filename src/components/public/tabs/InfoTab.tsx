@@ -2,14 +2,12 @@
 
 import React, { useState, useEffect } from 'react';
 import {
-  Download,
   MapPin,
   Clock,
   Award,
   CheckCircle2,
   ExternalLink,
   Info,
-  FileText,
   AlertTriangle,
   Trophy,
 } from 'lucide-react';
@@ -26,8 +24,6 @@ interface InfoTabProps {
 
 export const InfoTab: React.FC<InfoTabProps> = ({ sportCode = 'FUTSAL' }) => {
   const caborMeta = CABOR_INFO_DATA[sportCode] || CABOR_INFO_DATA.FUTSAL;
-  const [downloadNotice, setDownloadNotice] = useState<string | null>(null);
-  const [isDownloading, setIsDownloading] = useState(false);
   const [partners, setPartners] = useState<TournamentPartner[]>([]);
 
   useEffect(() => {
@@ -46,19 +42,11 @@ export const InfoTab: React.FC<InfoTabProps> = ({ sportCode = 'FUTSAL' }) => {
     };
   }, []);
 
-  const handleDownload = () => {
-    setIsDownloading(true);
-    setTimeout(() => {
-      setIsDownloading(false);
-      setDownloadNotice(
-        `Berkas regulasi ${caborMeta.juknisFileName || 'Juknis-MMFC-I-2026.pdf'} (2.4 MB) berhasil diunduh.`
-      );
-      setTimeout(() => setDownloadNotice(null), 4000);
-    }, 600);
-  };
-
   return (
     <div className="space-y-8 animate-fadeIn pb-6">
+      {/* Penyelenggara & Mitra Resmi Turnamen (Diposisikan di Atas Center di Bawah Banner) */}
+      <PartnersSliderSection partners={partners} />
+
       {/* Public Page Header */}
       <PublicPageHeader
         icon={Info}
@@ -67,67 +55,21 @@ export const InfoTab: React.FC<InfoTabProps> = ({ sportCode = 'FUTSAL' }) => {
         description="Format kompetisi, durasi waktu pertandingan, regulasi disiplin kartu wasit, jadwal verifikasi berkas kontingen, serta alur akses stadion."
       />
 
-      {/* Download Alert Notice */}
-      {downloadNotice && (
-        <div className="p-4 rounded-xl bg-blue-50 text-blue-900 dark:bg-blue-950/40 dark:text-blue-200 border-2 border-blue-200 dark:border-blue-800 text-xs font-semibold flex items-center justify-between gap-3 shadow-sm animate-fadeIn">
-          <div className="flex items-center gap-2.5">
-            <CheckCircle2 className="w-4 h-4 text-[#1D63B8] dark:text-sky-400 shrink-0" />
-            <span>{downloadNotice}</span>
-          </div>
-          <button
-            type="button"
-            onClick={() => setDownloadNotice(null)}
-            className="text-blue-700 dark:text-blue-300 hover:text-[#1D63B8] text-xs font-bold underline cursor-pointer"
-          >
-            Tutup
-          </button>
-        </div>
-      )}
-
       {/* HIGH-CONTRAST SPORT BENTO GRID: Format Pertandingan & Regulasi MMFC I */}
       <div className="space-y-5">
-        {/* Top Bento Action Bar: Juknis Futsal Headline & Primary CTA */}
-        <div className="relative rounded-2xl bg-[var(--bg-surface)] border-2 border-slate-300 dark:border-slate-700/80 p-6 sm:p-8 shadow-sm hover:shadow-md transition-all overflow-hidden tactical-pitch-pattern">
+        {/* Top Bento Action Bar: Format Turnamen Headline */}
+        <div className="relative rounded-2xl bg-[var(--bg-surface)] border-2 border-slate-300 dark:border-slate-700/80 p-6 sm:p-8 shadow-sm hover:shadow-md transition-all overflow-hidden">
           {/* Subtle brand glow in dark mode */}
           <div className="absolute -top-16 -right-16 w-64 h-64 bg-sky-500/10 rounded-full blur-3xl pointer-events-none" />
 
-          <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-            <div className="space-y-2 max-w-2xl">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-blue-50 border border-blue-200 dark:bg-blue-950/50 dark:border-blue-800 text-[#1D63B8] dark:text-sky-400 text-[11px] font-barlow font-bold uppercase tracking-wider">
-                <FileText className="w-3.5 h-3.5 text-[#1D63B8] dark:text-sky-400" />
-                <span>Buku Panduan Pertandingan Resmi (Dispora &amp; Asosiasi Futsal)</span>
-              </div>
-              <h3 className="text-2xl sm:text-3xl text-[var(--text-main)] font-bebas uppercase tracking-wide leading-tight">
-                {caborMeta.formatTitle || 'Format Turnamen & Regulasi Futsal MMFC I'}
-              </h3>
-              <p className="text-xs sm:text-sm text-[var(--text-muted)] leading-relaxed font-sans">
-                {caborMeta.formatSubtitle ||
-                  '14 Tim Kontingen SD/MI dibagi ke dalam 4 Grup (A, B, C, D) dengan sistem setengah kompetisi. Juara grup otomatis melaju ke Babak 4 Besar (Semifinal) dan Grand Final.'}
-              </p>
-            </div>
-
-            <div className="shrink-0 flex flex-col sm:flex-row lg:flex-col items-start sm:items-center lg:items-end gap-2.5">
-              <button
-                type="button"
-                onClick={handleDownload}
-                disabled={isDownloading}
-                className="btn-tactile w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-6 py-3 rounded-xl bg-[#0C2340] hover:bg-[#154D92] text-white text-xs sm:text-sm font-barlow font-bold uppercase tracking-wider shadow-md hover:shadow-lg transition-all min-h-[46px] group cursor-pointer border border-blue-400/30"
-              >
-                <Download
-                  className={`w-4 h-4 text-sky-400 transition-transform duration-200 ${
-                    isDownloading ? 'animate-bounce' : 'group-hover:translate-y-0.5'
-                  }`}
-                />
-                <span>
-                  {isDownloading
-                    ? 'Menyiapkan Unduhan...'
-                    : `Unduh Juknis ${caborMeta.sportName} (PDF) • 2.4 MB`}
-                </span>
-              </button>
-              <span className="text-[11px] text-[var(--text-muted)] font-mono">
-                Edisi Revisi Technical Meeting Resmi • Dokumen Terverifikasi
-              </span>
-            </div>
+          <div className="relative z-10 space-y-2 max-w-3xl">
+            <h3 className="text-2xl sm:text-3xl text-[var(--text-main)] font-bebas uppercase tracking-wide leading-tight">
+              {caborMeta.formatTitle || 'Format Turnamen & Regulasi Futsal MMFC I'}
+            </h3>
+            <p className="text-xs sm:text-sm text-[var(--text-muted)] leading-relaxed font-sans">
+              {caborMeta.formatSubtitle ||
+                '14 Tim Kontingen SD/MI dibagi ke dalam 4 Grup (A, B, C, D) dengan sistem setengah kompetisi. Juara grup otomatis melaju ke Babak 4 Besar (Semifinal) dan Grand Final.'}
+            </p>
           </div>
         </div>
 
@@ -382,9 +324,6 @@ export const InfoTab: React.FC<InfoTabProps> = ({ sportCode = 'FUTSAL' }) => {
           </div>
         </div>
       </div>
-
-      {/* Penyelenggara & Mitra Resmi Turnamen */}
-      <PartnersSliderSection partners={partners} />
     </div>
   );
 };

@@ -153,7 +153,7 @@ export const PartnerCard: React.FC<PartnerCardProps> = ({
         target="_blank"
         rel="noopener noreferrer"
         aria-label={`${partner.name} (${partner.role})`}
-        className="block focus:outline-none focus:ring-2 focus:ring-[var(--color-arena-primary)] rounded-2xl h-full"
+        className="block focus:outline-none focus:ring-2 focus:ring-[var(--color-arena-primary)] rounded-2xl h-full w-full"
       >
         {cardContent}
       </a>

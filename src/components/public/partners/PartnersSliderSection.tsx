@@ -87,17 +87,15 @@ export const PartnersSliderSection: React.FC<PartnersSliderSectionProps> = ({ pa
   const itemWidthPercent = 100 / visibleCount;
 
   return (
-    <div className="pt-8 border-t border-[var(--border-subtle)] space-y-4">
-      {/* Section Header with Navigation Controls */}
-      <div className="flex items-center justify-between">
-        <div>
-          <span className="text-xs font-barlow uppercase font-bold tracking-wider text-[var(--text-faint)]">
-            PENYELENGGARA &amp; MITRA RESMI TURNAMEN
-          </span>
-        </div>
+    <div className="space-y-4 pb-6 border-b border-[var(--border-subtle)]">
+      {/* Centered Section Header with Navigation Controls */}
+      <div className="flex flex-col items-center justify-center text-center relative w-full">
+        <span className="text-xs font-barlow uppercase font-bold tracking-wider text-[var(--text-faint)]">
+          PENYELENGGARA &amp; MITRA RESMI TURNAMEN
+        </span>
 
         {shouldSlide && (
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1.5 absolute right-0 top-1/2 -translate-y-1/2">
             <button
               type="button"
               onClick={handlePrev}
@@ -129,7 +127,7 @@ export const PartnersSliderSection: React.FC<PartnersSliderSectionProps> = ({ pa
         >
           <div
             onTransitionEnd={handleTransitionEnd}
-            className="flex"
+            className="flex justify-center"
             style={{
               transform: `translateX(-${currentIndex * itemWidthPercent}%)`,
               transition: isTransitioning ? 'transform 500ms ease-in-out' : 'none',
@@ -170,10 +168,12 @@ export const PartnersSliderSection: React.FC<PartnersSliderSectionProps> = ({ pa
           </div>
         </div>
       ) : (
-        /* Static 5-column grid if total items <= 5 */
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+        /* Perfectly Centered Cards if total items <= 5 */
+        <div className="flex flex-wrap items-stretch justify-center gap-3 sm:gap-4 max-w-4xl mx-auto w-full">
           {activePartners.map((partner) => (
-            <PartnerCard key={partner.id} partner={partner} variant="showcase" isInteractive={true} />
+            <div key={partner.id} className="w-full sm:w-60 md:w-64 max-w-xs flex">
+              <PartnerCard partner={partner} variant="showcase" isInteractive={true} />
+            </div>
           ))}
         </div>
       )}
