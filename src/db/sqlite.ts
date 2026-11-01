@@ -3,6 +3,7 @@ import path from 'node:path';
 import fs from 'node:fs';
 import { SCHEMA_SQL } from './schema';
 import { seedDatabase } from './seed';
+import { initialTeams } from '../mocks/mockTeams';
 import {
   DEFAULT_GROUP_A_STANDINGS,
   DEFAULT_GROUP_B_STANDINGS,
@@ -121,9 +122,25 @@ export function getDatabase(): DatabaseSync {
       }
     }
 
-    // Auto-migration: Update nama tim resmi di tabel teams SQLite
+    // Auto-migration: Update nama tim resmi & master pemain default (5 pemain per tim) di tabel SQLite
     db.prepare("UPDATE teams SET name = 'MI MAMBAUL ULUM BUNTARAN (TULUNGAGUNG)' WHERE id = 'team-mi-mambaululum'").run();
+    db.prepare("UPDATE teams SET name = 'MIN 13 BLITAR A', short_name = 'MIN 13 A', school_name = 'Madrasah Ibtidaiyah Negeri 13 Blitar' WHERE id = 'team-min13-b'").run();
+    db.prepare("UPDATE teams SET name = 'MIN 13 BLITAR B', short_name = 'MIN 13 B', school_name = 'Madrasah Ibtidaiyah Negeri 13 Blitar' WHERE id = 'team-min13-c'").run();
     db.prepare("UPDATE teams SET name = 'MI YA BUNAYYA SRENGAT', short_name = 'YA BUNAYYA', school_name = 'Madrasah Ibtidaiyah Ya Bunayya Srengat Blitar' WHERE id = 'team-mi-yabunaya'").run();
+
+    // Hapus data pemain lama/acak dan ganti dengan rata 5 pemain default per tim (Pemain 1 - Pemain 5)
+    db.prepare("DELETE FROM players WHERE full_name NOT LIKE 'Pemain %' OR team_id IS NULL").run();
+    const insertPlayerStmt = db.prepare(`
+      INSERT OR REPLACE INTO players (id, team_id, full_name, birth_date, gender, jersey_number, position, is_active)
+      VALUES (?, ?, ?, ?, ?, ?, ?, 1)
+    `);
+    for (const t of initialTeams) {
+      if (t.players && t.players.length > 0) {
+        for (const p of t.players) {
+          insertPlayerStmt.run(p.id, t.id, p.name, '2012-05-10', 'M', p.number, p.position);
+        }
+      }
+    }
   } catch {
     // ignore
   }

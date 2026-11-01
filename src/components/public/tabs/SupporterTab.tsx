@@ -16,10 +16,10 @@ export const SupporterTab: React.FC = () => {
 
   // Sinkronkan daftar tim jika data lokal belum memuat 14 kontingen lengkap
   React.useEffect(() => {
-    if (teams.length !== initialTeams.length) {
+    if (teams.length !== initialTeams.length || teams.some((t, i) => t.coachName !== initialTeams[i]?.coachName)) {
       setTeams(initialTeams);
     }
-  }, [teams.length, setTeams]);
+  }, [teams, setTeams]);
 
   // Agregasi skor suporter per sekolah/tim (Poin Positif 1-4 & Sanksi 1-4 dengan label 1 kata)
   const leaderboard: SupporterLeaderboardRow[] = teams

@@ -1,4 +1,4 @@
-import { Team } from '@/types';
+import { Team, Player } from '@/types';
 import { getTeamLogoUrl } from './teamLogos';
 
 export const TEAM_CODE_MAP: Record<string, string> = {
@@ -29,6 +29,14 @@ export const getTeamCode = (
   return 'TM-??';
 };
 
+const createDefaultPlayers = (prefix: string, teamIndex: number): Player[] => [
+  { id: `p-${prefix}-1`, name: 'Pemain 1', number: 1, position: 'Kiper', photoUrl: '', nisn: `013${String(teamIndex).padStart(2, '0')}0101`, documentStatus: 'APPROVED', yellowCards: 0, redCards: 0, goals: 0, assists: 0 },
+  { id: `p-${prefix}-2`, name: 'Pemain 2', number: 2, position: 'Anchor', photoUrl: '', nisn: `013${String(teamIndex).padStart(2, '0')}0102`, documentStatus: 'APPROVED', yellowCards: 0, redCards: 0, goals: 0, assists: 0 },
+  { id: `p-${prefix}-3`, name: 'Pemain 3', number: 3, position: 'Flank', photoUrl: '', nisn: `013${String(teamIndex).padStart(2, '0')}0103`, documentStatus: 'APPROVED', yellowCards: 0, redCards: 0, goals: 0, assists: 0 },
+  { id: `p-${prefix}-4`, name: 'Pemain 4', number: 4, position: 'Flank', photoUrl: '', nisn: `013${String(teamIndex).padStart(2, '0')}0104`, documentStatus: 'APPROVED', yellowCards: 0, redCards: 0, goals: 0, assists: 0 },
+  { id: `p-${prefix}-5`, name: 'Pemain 5', number: 5, position: 'Pivot', photoUrl: '', nisn: `013${String(teamIndex).padStart(2, '0')}0105`, documentStatus: 'APPROVED', yellowCards: 0, redCards: 0, goals: 0, assists: 0 },
+];
+
 export const initialTeams: Team[] = [
   // Group A
   {
@@ -39,17 +47,12 @@ export const initialTeams: Team[] = [
     schoolName: 'SD Islam Kardina Massa Blitar',
     city: 'Blitar',
     logoUrl: getTeamLogoUrl('team-sdi-kardina'),
-    coachName: 'Ust. Bambang Wijaya, S.Pd',
+    coachName: 'Coach SDI KARDINA MASSA',
     group: 'A',
     rosterLocked: true,
     registrationStatus: 'VERIFIED',
-    players: [
-      { id: 'p-km1', name: 'Muhammad Faiz', number: 10, position: 'Flank', photoUrl: '', nisn: '0134567801', documentStatus: 'APPROVED', yellowCards: 0, redCards: 0, goals: 0, assists: 0 },
-      { id: 'p-km2', name: 'Rayhan Pratama', number: 7, position: 'Pivot', photoUrl: '', nisn: '0134567802', documentStatus: 'APPROVED', yellowCards: 0, redCards: 0, goals: 0, assists: 0 },
-      { id: 'p-km3', name: 'Dimas Arya', number: 1, position: 'Kiper', photoUrl: '', nisn: '0134567803', documentStatus: 'APPROVED', yellowCards: 0, redCards: 0, goals: 0, assists: 0 },
-      { id: 'p-km4', name: 'Bilal Ramadan', number: 4, position: 'Anchor', photoUrl: '', nisn: '0134567804', documentStatus: 'APPROVED', yellowCards: 0, redCards: 0, goals: 0, assists: 0 },
-    ],
-    officials: [{ id: 'off-km1', name: 'Bambang Wijaya', role: 'Pelatih Kepala', phone: '081234567801' }],
+    players: createDefaultPlayers('km', 1),
+    officials: [{ id: 'off-km1', name: 'Coach SDI KARDINA MASSA', role: 'Pelatih Kepala', phone: '081234567801' }],
   },
   {
     id: 'team-min7-blitar',
@@ -59,16 +62,12 @@ export const initialTeams: Team[] = [
     schoolName: 'Madrasah Ibtidaiyah Negeri 7 Blitar',
     city: 'Blitar',
     logoUrl: getTeamLogoUrl('team-min7-blitar'),
-    coachName: 'Ahmad Fauzi, S.Pd.I',
+    coachName: 'Coach MIN 7 BLITAR',
     group: 'A',
     rosterLocked: true,
     registrationStatus: 'VERIFIED',
-    players: [
-      { id: 'p-m7-1', name: 'Faturrahman', number: 9, position: 'Pivot', photoUrl: '', nisn: '0135678901', documentStatus: 'APPROVED', yellowCards: 0, redCards: 0, goals: 0, assists: 0 },
-      { id: 'p-m7-2', name: 'Kevin Sanjaya', number: 8, position: 'Flank', photoUrl: '', nisn: '0135678902', documentStatus: 'APPROVED', yellowCards: 0, redCards: 0, goals: 0, assists: 0 },
-      { id: 'p-m7-3', name: 'Bagas Pratama', number: 12, position: 'Kiper', photoUrl: '', nisn: '0135678903', documentStatus: 'APPROVED', yellowCards: 0, redCards: 0, goals: 0, assists: 0 },
-    ],
-    officials: [{ id: 'off-m7-1', name: 'Ahmad Fauzi', role: 'Pelatih Kepala', phone: '081234567802' }],
+    players: createDefaultPlayers('m7', 2),
+    officials: [{ id: 'off-m7-1', name: 'Coach MIN 7 BLITAR', role: 'Pelatih Kepala', phone: '081234567802' }],
   },
   {
     id: 'team-min8-blitar',
@@ -78,15 +77,12 @@ export const initialTeams: Team[] = [
     schoolName: 'Madrasah Ibtidaiyah Negeri 8 Blitar',
     city: 'Blitar',
     logoUrl: getTeamLogoUrl('team-min8-blitar'),
-    coachName: 'Subhan Malik, S.Pd',
+    coachName: 'Coach MIN 8 BLITAR',
     group: 'A',
     rosterLocked: true,
     registrationStatus: 'VERIFIED',
-    players: [
-      { id: 'p-m8-1', name: 'Danu Wijaya', number: 11, position: 'Pivot', photoUrl: '', nisn: '0136789011', documentStatus: 'APPROVED', yellowCards: 0, redCards: 0, goals: 0, assists: 0 },
-      { id: 'p-m8-2', name: 'Naufal Hilmi', number: 1, position: 'Kiper', photoUrl: '', nisn: '0136789012', documentStatus: 'APPROVED', yellowCards: 0, redCards: 0, goals: 0, assists: 0 },
-    ],
-    officials: [{ id: 'off-m8-1', name: 'Subhan Malik', role: 'Pelatih Kepala', phone: '081234567803' }],
+    players: createDefaultPlayers('m8', 3),
+    officials: [{ id: 'off-m8-1', name: 'Coach MIN 8 BLITAR', role: 'Pelatih Kepala', phone: '081234567803' }],
   },
 
   // Group B
@@ -98,16 +94,12 @@ export const initialTeams: Team[] = [
     schoolName: 'UPT SD Negeri 1 Srengat Blitar',
     city: 'Blitar',
     logoUrl: getTeamLogoUrl('team-sdn1-srengat'),
-    coachName: 'Dwi Cahyono, S.Or',
+    coachName: 'Coach UPT SDN 1 SRENGAT',
     group: 'B',
     rosterLocked: true,
     registrationStatus: 'VERIFIED',
-    players: [
-      { id: 'p-s1-1', name: 'Aditya Pratama', number: 10, position: 'Pivot', photoUrl: '', nisn: '0137890101', documentStatus: 'APPROVED', yellowCards: 0, redCards: 0, goals: 0, assists: 0 },
-      { id: 'p-s1-2', name: 'Arya Mahendra', number: 5, position: 'Anchor', photoUrl: '', nisn: '0137890102', documentStatus: 'APPROVED', yellowCards: 0, redCards: 0, goals: 0, assists: 0 },
-      { id: 'p-s1-3', name: 'Ilham Saputra', number: 1, position: 'Kiper', photoUrl: '', nisn: '0137890103', documentStatus: 'APPROVED', yellowCards: 0, redCards: 0, goals: 0, assists: 0 },
-    ],
-    officials: [{ id: 'off-s1-1', name: 'Dwi Cahyono', role: 'Pelatih Kepala', phone: '081234567804' }],
+    players: createDefaultPlayers('s1', 4),
+    officials: [{ id: 'off-s1-1', name: 'Coach UPT SDN 1 SRENGAT', role: 'Pelatih Kepala', phone: '081234567804' }],
   },
   {
     id: 'team-min14-blitar',
@@ -117,15 +109,12 @@ export const initialTeams: Team[] = [
     schoolName: 'Madrasah Ibtidaiyah Negeri 14 Blitar',
     city: 'Blitar',
     logoUrl: getTeamLogoUrl('team-min14-blitar'),
-    coachName: 'Hendrik Pratama, S.Pd',
+    coachName: 'Coach MIN 14 BLITAR',
     group: 'B',
     rosterLocked: true,
     registrationStatus: 'VERIFIED',
-    players: [
-      { id: 'p-m14-1', name: 'Haikal Kamil', number: 7, position: 'Flank', photoUrl: '', nisn: '0138901201', documentStatus: 'APPROVED', yellowCards: 0, redCards: 0, goals: 0, assists: 0 },
-      { id: 'p-m14-2', name: 'Zidan Ali', number: 3, position: 'Anchor', photoUrl: '', nisn: '0138901202', documentStatus: 'APPROVED', yellowCards: 0, redCards: 0, goals: 0, assists: 0 },
-    ],
-    officials: [{ id: 'off-m14-1', name: 'Hendrik Pratama', role: 'Pelatih Kepala', phone: '081234567805' }],
+    players: createDefaultPlayers('m14', 5),
+    officials: [{ id: 'off-m14-1', name: 'Coach MIN 14 BLITAR', role: 'Pelatih Kepala', phone: '081234567805' }],
   },
   {
     id: 'team-mi-mambaululum',
@@ -135,33 +124,27 @@ export const initialTeams: Team[] = [
     schoolName: 'Madrasah Ibtidaiyah Mambaul Ulum Buntaran Tulungagung',
     city: 'Tulungagung',
     logoUrl: getTeamLogoUrl('team-mi-mambaululum'),
-    coachName: 'H. Syamsudin, S.Pd.I',
+    coachName: 'Coach MI MAMBAUL ULUM BUNTARAN (TULUNGAGUNG)',
     group: 'B',
     rosterLocked: true,
     registrationStatus: 'VERIFIED',
-    players: [
-      { id: 'p-mu-1', name: 'Farhan Azka', number: 9, position: 'Pivot', photoUrl: '', nisn: '0139012301', documentStatus: 'APPROVED', yellowCards: 0, redCards: 0, goals: 0, assists: 0 },
-      { id: 'p-mu-2', name: 'Gilang Ramadhan', number: 8, position: 'Flank', photoUrl: '', nisn: '0139012302', documentStatus: 'APPROVED', yellowCards: 0, redCards: 0, goals: 0, assists: 0 },
-    ],
-    officials: [{ id: 'off-mu-1', name: 'H. Syamsudin', role: 'Pelatih Kepala', phone: '081234567806' }],
+    players: createDefaultPlayers('mu', 6),
+    officials: [{ id: 'off-mu-1', name: 'Coach MI MAMBAUL ULUM BUNTARAN (TULUNGAGUNG)', role: 'Pelatih Kepala', phone: '081234567806' }],
   },
   {
     id: 'team-min13-b',
     code: 'TM-07',
     name: 'MIN 13 BLITAR A',
     shortName: 'MIN 13 A',
-    schoolName: 'Madrasah Ibtidaiyah Negeri 13 Blitar (Tim A)',
+    schoolName: 'Madrasah Ibtidaiyah Negeri 13 Blitar',
     city: 'Blitar',
     logoUrl: getTeamLogoUrl('team-min13-b'),
-    coachName: 'Rahmat Hidayat, S.Pd',
+    coachName: 'Coach MIN 13 BLITAR A',
     group: 'B',
     rosterLocked: true,
     registrationStatus: 'VERIFIED',
-    players: [
-      { id: 'p-m13b-1', name: 'Bintang Ramadhan', number: 10, position: 'Flank', photoUrl: '', nisn: '0140123401', documentStatus: 'APPROVED', yellowCards: 0, redCards: 0, goals: 0, assists: 0 },
-      { id: 'p-m13b-2', name: 'Kenzo Alfarizi', number: 6, position: 'Anchor', photoUrl: '', nisn: '0140123402', documentStatus: 'APPROVED', yellowCards: 0, redCards: 0, goals: 0, assists: 0 },
-    ],
-    officials: [{ id: 'off-m13b-1', name: 'Rahmat Hidayat', role: 'Pelatih Kepala', phone: '081234567807' }],
+    players: createDefaultPlayers('m13b', 7),
+    officials: [{ id: 'off-m13b-1', name: 'Coach MIN 13 BLITAR A', role: 'Pelatih Kepala', phone: '081234567807' }],
   },
 
   // Group C
@@ -173,16 +156,12 @@ export const initialTeams: Team[] = [
     schoolName: 'Madrasah Ibtidaiyah Negeri 2 Blitar',
     city: 'Blitar',
     logoUrl: getTeamLogoUrl('team-min2-blitar'),
-    coachName: 'Ust. Roni Hartono, S.Or',
+    coachName: 'Coach MIN 2 BLITAR',
     group: 'C',
     rosterLocked: true,
     registrationStatus: 'VERIFIED',
-    players: [
-      { id: 'p-m2-1', name: 'Rafa Althaf', number: 7, position: 'Pivot', photoUrl: '', nisn: '0141234501', documentStatus: 'APPROVED', yellowCards: 0, redCards: 0, goals: 0, assists: 0 },
-      { id: 'p-m2-2', name: 'Faris Pratama', number: 10, position: 'Flank', photoUrl: '', nisn: '0141234502', documentStatus: 'APPROVED', yellowCards: 0, redCards: 0, goals: 0, assists: 0 },
-      { id: 'p-m2-3', name: 'Dimas Setiawan', number: 1, position: 'Kiper', photoUrl: '', nisn: '0141234503', documentStatus: 'APPROVED', yellowCards: 0, redCards: 0, goals: 0, assists: 0 },
-    ],
-    officials: [{ id: 'off-m2-1', name: 'Roni Hartono', role: 'Pelatih Kepala', phone: '081234567808' }],
+    players: createDefaultPlayers('m2', 8),
+    officials: [{ id: 'off-m2-1', name: 'Coach MIN 2 BLITAR', role: 'Pelatih Kepala', phone: '081234567808' }],
   },
   {
     id: 'team-mi-wahidhasyim',
@@ -192,33 +171,27 @@ export const initialTeams: Team[] = [
     schoolName: 'Madrasah Ibtidaiyah Wahid Hasyim Bakung',
     city: 'Blitar',
     logoUrl: getTeamLogoUrl('team-mi-wahidhasyim'),
-    coachName: 'K.H. Lukman Hakim, M.Pd',
+    coachName: 'Coach MI WAHID HASYIM BAKUNG',
     group: 'C',
     rosterLocked: true,
     registrationStatus: 'VERIFIED',
-    players: [
-      { id: 'p-wh-1', name: 'Bagas Aditya', number: 9, position: 'Pivot', photoUrl: '', nisn: '0142345601', documentStatus: 'APPROVED', yellowCards: 0, redCards: 0, goals: 0, assists: 0 },
-      { id: 'p-wh-2', name: 'Reza Saputra', number: 8, position: 'Flank', photoUrl: '', nisn: '0142345602', documentStatus: 'APPROVED', yellowCards: 0, redCards: 0, goals: 0, assists: 0 },
-    ],
-    officials: [{ id: 'off-wh-1', name: 'Lukman Hakim', role: 'Pelatih Kepala', phone: '081234567809' }],
+    players: createDefaultPlayers('wh', 9),
+    officials: [{ id: 'off-wh-1', name: 'Coach MI WAHID HASYIM BAKUNG', role: 'Pelatih Kepala', phone: '081234567809' }],
   },
   {
     id: 'team-min13-c',
     code: 'TM-10',
     name: 'MIN 13 BLITAR B',
     shortName: 'MIN 13 B',
-    schoolName: 'Madrasah Ibtidaiyah Negeri 13 Blitar (Tim B)',
+    schoolName: 'Madrasah Ibtidaiyah Negeri 13 Blitar',
     city: 'Blitar',
     logoUrl: getTeamLogoUrl('team-min13-c'),
-    coachName: 'M. Syafi\'i, S.Pd',
+    coachName: 'Coach MIN 13 BLITAR B',
     group: 'C',
     rosterLocked: true,
     registrationStatus: 'VERIFIED',
-    players: [
-      { id: 'p-m13c-1', name: 'Rizky Ramadhan', number: 11, position: 'Flank', photoUrl: '', nisn: '0143456701', documentStatus: 'APPROVED', yellowCards: 0, redCards: 0, goals: 0, assists: 0 },
-      { id: 'p-m13c-2', name: 'Arga Maulana', number: 2, position: 'Anchor', photoUrl: '', nisn: '0143456702', documentStatus: 'APPROVED', yellowCards: 0, redCards: 0, goals: 0, assists: 0 },
-    ],
-    officials: [{ id: 'off-m13c-1', name: 'M. Syafi\'i', role: 'Pelatih Kepala', phone: '081234567810' }],
+    players: createDefaultPlayers('m13c', 10),
+    officials: [{ id: 'off-m13c-1', name: 'Coach MIN 13 BLITAR B', role: 'Pelatih Kepala', phone: '081234567810' }],
   },
 
   // Group D
@@ -230,16 +203,12 @@ export const initialTeams: Team[] = [
     schoolName: 'Madrasah Ibtidaiyah Ploso Kediri',
     city: 'Kediri',
     logoUrl: getTeamLogoUrl('team-mi-ploso'),
-    coachName: 'Ust. Nurul Huda, S.Pd.I',
+    coachName: 'Coach MI PLOSO KEDIRI',
     group: 'D',
     rosterLocked: true,
     registrationStatus: 'VERIFIED',
-    players: [
-      { id: 'p-pl-1', name: 'Syamil Robbani', number: 10, position: 'Pivot', photoUrl: '', nisn: '0144567801', documentStatus: 'APPROVED', yellowCards: 0, redCards: 0, goals: 0, assists: 0 },
-      { id: 'p-pl-2', name: 'Danang Wijaya', number: 7, position: 'Flank', photoUrl: '', nisn: '0144567802', documentStatus: 'APPROVED', yellowCards: 0, redCards: 0, goals: 0, assists: 0 },
-      { id: 'p-pl-3', name: 'Alif Kurniawan', number: 1, position: 'Kiper', photoUrl: '', nisn: '0144567803', documentStatus: 'APPROVED', yellowCards: 0, redCards: 0, goals: 0, assists: 0 },
-    ],
-    officials: [{ id: 'off-pl-1', name: 'Nurul Huda', role: 'Pelatih Kepala', phone: '081234567811' }],
+    players: createDefaultPlayers('pl', 11),
+    officials: [{ id: 'off-pl-1', name: 'Coach MI PLOSO KEDIRI', role: 'Pelatih Kepala', phone: '081234567811' }],
   },
   {
     id: 'team-mi-darussalam',
@@ -249,15 +218,12 @@ export const initialTeams: Team[] = [
     schoolName: 'Madrasah Ibtidaiyah Unggulan Darussalam',
     city: 'Blitar',
     logoUrl: getTeamLogoUrl('team-mi-darussalam'),
-    coachName: 'Zainal Arifin, S.Pd',
+    coachName: 'Coach MI UNGGULAN DARUSSALAM',
     group: 'D',
     rosterLocked: true,
     registrationStatus: 'VERIFIED',
-    players: [
-      { id: 'p-ds-1', name: 'Habib Mustofa', number: 8, position: 'Flank', photoUrl: '', nisn: '0145678901', documentStatus: 'APPROVED', yellowCards: 0, redCards: 0, goals: 0, assists: 0 },
-      { id: 'p-ds-2', name: 'Zidane Al-Ghifari', number: 4, position: 'Anchor', photoUrl: '', nisn: '0145678902', documentStatus: 'APPROVED', yellowCards: 0, redCards: 0, goals: 0, assists: 0 },
-    ],
-    officials: [{ id: 'off-ds-1', name: 'Zainal Arifin', role: 'Pelatih Kepala', phone: '081234567812' }],
+    players: createDefaultPlayers('ds', 12),
+    officials: [{ id: 'off-ds-1', name: 'Coach MI UNGGULAN DARUSSALAM', role: 'Pelatih Kepala', phone: '081234567812' }],
   },
   {
     id: 'team-mi-yabunaya',
@@ -267,15 +233,12 @@ export const initialTeams: Team[] = [
     schoolName: 'Madrasah Ibtidaiyah Ya Bunayya Srengat Blitar',
     city: 'Blitar',
     logoUrl: getTeamLogoUrl('team-mi-yabunaya'),
-    coachName: 'M. Ali Ridho, S.Pd',
+    coachName: 'Coach MI YA BUNAYYA SRENGAT',
     group: 'D',
     rosterLocked: true,
     registrationStatus: 'VERIFIED',
-    players: [
-      { id: 'p-yb-1', name: 'Naufal Izzan', number: 9, position: 'Pivot', photoUrl: '', nisn: '0146789001', documentStatus: 'APPROVED', yellowCards: 0, redCards: 0, goals: 0, assists: 0 },
-      { id: 'p-yb-2', name: 'Raihan Putra', number: 5, position: 'Flank', photoUrl: '', nisn: '0146789002', documentStatus: 'APPROVED', yellowCards: 0, redCards: 0, goals: 0, assists: 0 },
-    ],
-    officials: [{ id: 'off-yb-1', name: 'M. Ali Ridho', role: 'Pelatih Kepala', phone: '081234567813' }],
+    players: createDefaultPlayers('yb', 13),
+    officials: [{ id: 'off-yb-1', name: 'Coach MI YA BUNAYYA SRENGAT', role: 'Pelatih Kepala', phone: '081234567813' }],
   },
   {
     id: 'team-min5-tulungagung',
@@ -285,15 +248,11 @@ export const initialTeams: Team[] = [
     schoolName: 'Madrasah Ibtidaiyah Negeri 5 Tulungagung',
     city: 'Tulungagung',
     logoUrl: getTeamLogoUrl('team-min5-tulungagung'),
-    coachName: 'Eko Wahyudi, S.Or',
+    coachName: 'Coach MIN 5 TULUNGAGUNG',
     group: 'D',
     rosterLocked: true,
     registrationStatus: 'VERIFIED',
-    players: [
-      { id: 'p-m5-1', name: 'Wahyu Ramadhani', number: 10, position: 'Pivot', photoUrl: '', nisn: '0147890101', documentStatus: 'APPROVED', yellowCards: 0, redCards: 0, goals: 0, assists: 0 },
-      { id: 'p-m5-2', name: 'Bayu Tri Laksono', number: 1, position: 'Kiper', photoUrl: '', nisn: '0147890102', documentStatus: 'APPROVED', yellowCards: 0, redCards: 0, goals: 0, assists: 0 },
-    ],
-    officials: [{ id: 'off-m5-1', name: 'Eko Wahyudi', role: 'Pelatih Kepala', phone: '081234567814' }],
+    players: createDefaultPlayers('m5', 14),
+    officials: [{ id: 'off-m5-1', name: 'Coach MIN 5 TULUNGAGUNG', role: 'Pelatih Kepala', phone: '081234567814' }],
   },
 ];
-

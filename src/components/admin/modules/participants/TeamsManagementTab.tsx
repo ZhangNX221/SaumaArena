@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Plus, Search, Edit2, Trash2 } from 'lucide-react';
 import { initialTeams, getTeamCode } from '@/mocks/tournamentData';
 import { Team } from '@/types';
@@ -17,6 +17,12 @@ export const TeamsManagementTab: React.FC = () => {
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTeam, setEditingTeam] = useState<Team | null>(null);
+
+  useEffect(() => {
+    if (teams.length !== initialTeams.length || teams.some((t, i) => !t.players || t.players.length !== 5 || t.coachName !== initialTeams[i]?.coachName)) {
+      setTeams(initialTeams);
+    }
+  }, [teams, setTeams]);
 
   const handleOpenAdd = () => {
     setEditingTeam(null);

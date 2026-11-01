@@ -21,10 +21,23 @@ export const TeamsTab: React.FC<TeamsTabProps> = ({ sportCode = 'FUTSAL' }) => {
   const [selectedGroup, setSelectedGroup] = useState<'ALL' | 'A' | 'B' | 'C' | 'D'>('ALL');
 
   useEffect(() => {
-    if (teams.length !== initialTeams.length) {
+    const isOutdated =
+      teams.length !== initialTeams.length ||
+      teams.some(
+        (t, i) =>
+          !t.players ||
+          t.players.length !== 5 ||
+          t.players[0]?.name !== 'Pemain 1' ||
+          t.coachName !== initialTeams[i]?.coachName
+      );
+
+    if (isOutdated) {
       setTeams(initialTeams);
+      try {
+        localStorage.setItem('sauma_arena_teams', JSON.stringify(initialTeams));
+      } catch {}
     }
-  }, [teams.length, setTeams]);
+  }, [teams, setTeams]);
 
   useEffect(() => {
     fetch('/api/settings?sport=futsal')

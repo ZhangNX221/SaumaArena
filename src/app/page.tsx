@@ -18,6 +18,7 @@ import { AdminDashboard } from '@/components/admin/AdminDashboard';
 import { AdminLogin } from '@/components/admin/AdminLogin';
 import { RefereeDashboard } from '@/components/referee/RefereeDashboard';
 import { AppUser, PublicHeaderConfig } from '@/types';
+import { initialTeams } from '@/mocks/tournamentData';
 import { PRESET_USERS } from '@/mocks/multiSportData';
 import { DEFAULT_HEADER_CONFIG, DEFAULT_CABOR_BANNERS } from '@/mocks/headerConfig';
 import { TeamRegistrationModal } from '@/components/public/registration/TeamRegistrationModal';
@@ -45,6 +46,24 @@ export default function Home() {
       if (savedBanners) {
         const parsed = JSON.parse(savedBanners);
         if (Array.isArray(parsed) && parsed.length > 0) setBanners(parsed);
+      }
+      const savedTeams = localStorage.getItem('sauma_arena_teams');
+      if (savedTeams) {
+        const parsed = JSON.parse(savedTeams);
+        const isOutdated =
+          !Array.isArray(parsed) ||
+          parsed.length !== initialTeams.length ||
+          parsed.some(
+            (t: any, i: number) =>
+              !t.players ||
+              t.players.length !== 5 ||
+              t.players[0]?.name !== 'Pemain 1' ||
+              t.coachName !== initialTeams[i]?.coachName
+          );
+        if (isOutdated) {
+          localStorage.setItem('sauma_arena_teams', JSON.stringify(initialTeams));
+          window.dispatchEvent(new CustomEvent('sauma_state_sync', { detail: { key: 'sauma_arena_teams', value: initialTeams } }));
+        }
       }
     } catch {}
   }, []);
@@ -115,41 +134,25 @@ export default function Home() {
 
   // Sync dark mode class with root html element
   useEffect(() => {
-    if (darkMode) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
+    document.documentElement.classList.toggle('dark', darkMode);
   }, [darkMode]);
 
   const toggleDarkMode = () => {
     setDarkMode((prev) => {
       const next = !prev;
-      try {
-        localStorage.setItem('sauma_theme', next ? 'dark' : 'light');
-      } catch {
-        // ignore
-      }
+      try { localStorage.setItem('sauma_theme', next ? 'dark' : 'light'); } catch {}
       return next;
     });
   };
 
   const handleViewChange = (view: 'public' | 'admin' | 'referee') => {
     setCurrentView(view);
-    try {
-      localStorage.setItem('sauma_current_view', view);
-    } catch {
-      // ignore
-    }
-
+    try { localStorage.setItem('sauma_current_view', view); } catch {}
     if (typeof window !== 'undefined') {
       const url = new URL(window.location.href);
-      if (view === 'public') {
-        url.searchParams.delete('view');
-      } else {
-        url.searchParams.set('view', view);
-      }
-      window.history.replaceState(null, '', url.pathname + url.search);
+      if (view === 'public') url.searchParams.delete('view');
+      else url.searchParams.set('view', view);
+      window.history.pushState({}, '', url.toString());
     }
   };
 
@@ -342,7 +345,7 @@ export default function Home() {
           onOpenRegModal={() => setIsRegModalOpen(true)}
         />
 
-        {/* Mobile Navigation Bar (Info, Jadwal, Menu Drawer, Tiket, Daftar Tim) */}
+        {/* Mobile Navigation Bar */}
         <MobilePublicNav
           activeTab={activeTab}
           onTabChange={setActiveTab}
@@ -357,12 +360,7 @@ export default function Home() {
           }`}
         >
           {activeTab === 'info' && <InfoTab sportCode={activeSportCode} />}
-          {activeTab === 'live' && (
-            <LiveMatchTab
-              sportCode={activeSportCode}
-              onTabChange={(tab) => setActiveTab(tab as PublicTabKey)}
-            />
-          )}
+          {activeTab === 'live' && <LiveMatchTab sportCode={activeSportCode} onTabChange={(tab) => setActiveTab(tab as PublicTabKey)} />}
           {activeTab === 'schedule' && <ScheduleTab sportCode={activeSportCode} />}
           {activeTab === 'standings' && <StandingsTab sportCode={activeSportCode} />}
           {activeTab === 'bracket' && <BracketTab sportCode={activeSportCode} />}
@@ -375,17 +373,13 @@ export default function Home() {
       <TicketModal
         isOpen={FEATURES.ticketing && isTicketModalOpen}
         onClose={() => setIsTicketModalOpen(false)}
-        onTicketGenerated={(code, school) => {
-          console.log(`Tiket berhasil dibuat: ${code} untuk ${school}`);
-        }}
+        onTicketGenerated={(code, school) => console.log(`Tiket: ${code} - ${school}`)}
       />
 
       <TeamRegistrationModal
         isOpen={isRegModalOpen}
         onClose={() => setIsRegModalOpen(false)}
-        onSuccess={(regData) => {
-          console.log('Pendaftaran tim baru diterima:', regData);
-        }}
+        onSuccess={(regData) => console.log('Pendaftaran:', regData)}
       />
 
       <PublicFooter

@@ -36,8 +36,8 @@ export const TeamCardDisplaySettingsTab: React.FC = () => {
     schoolName: 'SD Islam Kardina Massa Blitar',
     city: 'Blitar',
     group: 'A',
-    coachName: 'Ust. Bambang Wijayanto',
-    players: [{}, {}, {}, {}],
+    coachName: 'Coach SDI KARDINA MASSA',
+    players: [{}, {}, {}, {}, {}],
   };
 
   const handleSave = async () => {
