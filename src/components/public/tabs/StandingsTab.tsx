@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { HelpCircle, ChevronLeft, ChevronRight, ListOrdered, ShieldCheck, Crown } from 'lucide-react';
 import { getTeamLogoUrl } from '@/mocks/teamLogos';
 import { SportCode, Match, StandingRow as AppStandingRow } from '@/types';
@@ -21,10 +21,25 @@ interface StandingsTabProps {
 
 export const StandingsTab: React.FC<StandingsTabProps> = ({ sportCode = 'FUTSAL' }) => {
   // Akses state tersinkronisasi klasemen dari Admin & Meja Juri
-  const [groupA] = usePersistentState<AppStandingRow[]>('sauma_arena_standings_a', DEFAULT_GROUP_A_STANDINGS);
-  const [groupB] = usePersistentState<AppStandingRow[]>('sauma_arena_standings_b', DEFAULT_GROUP_B_STANDINGS);
-  const [groupC] = usePersistentState<AppStandingRow[]>('sauma_arena_standings_c', DEFAULT_GROUP_C_STANDINGS);
-  const [groupD] = usePersistentState<AppStandingRow[]>('sauma_arena_standings_d', DEFAULT_GROUP_D_STANDINGS);
+  const [groupA, setGroupA] = usePersistentState<AppStandingRow[]>('sauma_arena_standings_a', DEFAULT_GROUP_A_STANDINGS);
+  const [groupB, setGroupB] = usePersistentState<AppStandingRow[]>('sauma_arena_standings_b', DEFAULT_GROUP_B_STANDINGS);
+  const [groupC, setGroupC] = usePersistentState<AppStandingRow[]>('sauma_arena_standings_c', DEFAULT_GROUP_C_STANDINGS);
+  const [groupD, setGroupD] = usePersistentState<AppStandingRow[]>('sauma_arena_standings_d', DEFAULT_GROUP_D_STANDINGS);
+
+  // Self-healing: bersihkan imbuhan kode grup seperti (A1), (B1), dst dari cache/storage lama
+  useEffect(() => {
+    const sanitizeRow = (r: AppStandingRow) => ({
+      ...r,
+      teamName: r.teamName.replace(/\s*\([A-D][1-4]\)\s*$/i, '').trim(),
+    });
+    const needsSanitize = (list: AppStandingRow[]) =>
+      list.some((r) => /\s*\([A-D][1-4]\)\s*$/i.test(r.teamName));
+
+    if (needsSanitize(groupA)) setGroupA((l) => l.map(sanitizeRow));
+    if (needsSanitize(groupB)) setGroupB((l) => l.map(sanitizeRow));
+    if (needsSanitize(groupC)) setGroupC((l) => l.map(sanitizeRow));
+    if (needsSanitize(groupD)) setGroupD((l) => l.map(sanitizeRow));
+  }, []);
 
   // Sorting dan penomoran ranking dinamis sesuai aturan resmi turnamen MMFC I:
   // 1. Poin tertinggi (PTS)
@@ -137,10 +152,10 @@ export const StandingsTab: React.FC<StandingsTabProps> = ({ sportCode = 'FUTSAL'
                             />
                             <div className="truncate max-w-[140px] sm:max-w-[180px]">
                               <span className="font-bold text-[var(--text-main)] block truncate">
-                                {row.teamName}
+                                {row.teamName.replace(/\s*\([A-D][1-4]\)\s*$/i, '').trim()}
                               </span>
                               <span className="text-[10px] text-[var(--text-muted)] truncate block">
-                                {row.schoolName || row.teamName}
+                                {row.schoolName || row.teamName.replace(/\s*\([A-D][1-4]\)\s*$/i, '').trim()}
                               </span>
                             </div>
                           </div>

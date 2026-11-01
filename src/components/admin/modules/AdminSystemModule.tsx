@@ -62,20 +62,14 @@ export const AdminSystemModule: React.FC<AdminSystemModuleProps> = ({
   };
 
   const handleSaveUser = (data: UserFormData) => {
+    const roleLabel = data.role === 'ADMIN' ? 'Panitia Pertandingan' : `Juri Resmi ${data.specialization}`;
+    const avatarText = data.name.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase();
+
     if (editingUser) {
       setUsers((prev) =>
         prev.map((u) =>
           u.id === editingUser.id
-            ? {
-                ...u,
-                name: data.name,
-                email: data.email,
-                role: data.role,
-                roleLabel: data.role === 'ADMIN' ? 'Panitia Pertandingan' : `Juri Resmi ${data.specialization}`,
-                specialization: data.specialization,
-                licenseLevel: data.licenseLevel,
-                avatarText: data.name.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase(),
-              }
+            ? { ...u, name: data.name, email: data.email, role: data.role, roleLabel, specialization: data.specialization, licenseLevel: data.licenseLevel, avatarText }
             : u
         )
       );
@@ -85,21 +79,30 @@ export const AdminSystemModule: React.FC<AdminSystemModuleProps> = ({
         name: data.name,
         email: data.email,
         role: data.role,
-        roleLabel: data.role === 'ADMIN' ? 'Panitia Pertandingan' : `Juri Resmi ${data.specialization}`,
+        roleLabel,
         specialization: data.specialization,
         licenseLevel: data.licenseLevel,
-        avatarText: data.name.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase(),
+        avatarText,
         isAvailable: true,
       };
       setUsers((prev) => [...prev, created]);
     }
-
     setIsAddUserModalOpen(false);
     setEditingUser(null);
   };
 
-  const handleSaveBroadcast = () => {
+  const handleSaveBroadcast = async () => {
     setIsBroadcastSaved(true);
+    try {
+      let token: string | null = null;
+      try { token = localStorage.getItem('sauma_auth_token'); } catch {}
+      await fetch('/api/settings', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+        credentials: 'include',
+        body: JSON.stringify({ broadcastMessage }),
+      });
+    } catch {}
     setTimeout(() => setIsBroadcastSaved(false), 3000);
   };
 

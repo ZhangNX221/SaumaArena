@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Trophy, Medal, GitBranch } from 'lucide-react';
+import { Trophy, Medal, GitBranch, Layers } from 'lucide-react';
 import {
   BracketMatch,
   BracketSize,
@@ -19,14 +19,17 @@ import { PublicPageHeader } from '../layout/PublicPageHeader';
 import { usePersistentState } from '@/hooks/usePersistentState';
 import { PublicBracketMatchCard } from './bracket/PublicBracketMatchCard';
 import { PublicGrandFinalCard } from './bracket/PublicGrandFinalCard';
+import { PublicBracketTree } from './bracket/PublicBracketTree';
 
 interface BracketTabProps {
   sportCode?: SportCode;
 }
 
 type StageFilter = 'ALL' | 'R24' | 'R16' | 'QF' | 'SF' | 'FINAL';
+type ViewMode = 'TREE' | 'LIST';
 
 export const BracketTab: React.FC<BracketTabProps> = ({ sportCode = 'FUTSAL' }) => {
+  const [viewMode, setViewMode] = useState<ViewMode>('TREE');
   const [activeStageFilter, setActiveStageFilter] = useState<StageFilter>('ALL');
 
   // Akses state tersinkronisasi bagan dari Admin & Meja Juri
@@ -49,7 +52,7 @@ export const BracketTab: React.FC<BracketTabProps> = ({ sportCode = 'FUTSAL' }) 
     ? gf.teamB.name
     : 'MENUNGGU PEMENANG LAGA FINAL (P17)';
 
-  // Stage filters matching current bracket size
+  // Stage filters matching current bracket size (untuk mode Daftar)
   const stageFilters: { id: StageFilter; label: string }[] = [
     ...(bracketSize > 2 ? [{ id: 'ALL' as StageFilter, label: 'Semua Babak' }] : []),
     ...(bracketSize >= 24 ? [{ id: 'R24' as StageFilter, label: 'Playoff 24' }] : []),
@@ -89,35 +92,77 @@ export const BracketTab: React.FC<BracketTabProps> = ({ sportCode = 'FUTSAL' }) 
         </span>
       </div>
 
-      {/* Stage Selector Filter */}
-      <div className="flex items-center justify-center gap-2 overflow-x-auto pb-1">
-        <div className="flex items-center gap-1 p-1 rounded-xl bg-[var(--bg-muted)] border border-[var(--border-subtle)] text-xs font-semibold w-full sm:w-auto">
-          {stageFilters.map((stage) => {
-            const isActive = activeStageFilter === stage.id;
-            return (
-              <button
-                key={stage.id}
-                type="button"
-                onClick={() => setActiveStageFilter(stage.id)}
-                className={`flex-1 sm:flex-initial px-3.5 sm:px-4 py-2 rounded-lg font-barlow font-bold uppercase tracking-wider text-xs transition-all cursor-pointer min-h-[36px] whitespace-nowrap ${
-                  isActive
-                    ? stage.id === 'FINAL'
-                      ? 'bg-amber-400 text-slate-950 shadow-xs'
-                      : 'bg-[#0284c7] text-white shadow-xs'
-                    : 'text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-white/50 dark:hover:bg-slate-800'
-                }`}
-              >
-                {stage.label}
-              </button>
-            );
-          })}
+      {/* View Mode Toggle: Bagan Pohon (Interaktif + Zoom) vs Daftar Babak */}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-1.5 p-1 rounded-xl bg-[var(--bg-muted)] border border-[var(--border-subtle)] text-xs font-semibold">
+          <button
+            type="button"
+            onClick={() => setViewMode('TREE')}
+            className={`btn-tactile px-3.5 sm:px-4 py-2 rounded-lg font-barlow font-bold uppercase tracking-wider text-xs transition-all cursor-pointer flex items-center gap-1.5 min-h-[36px] ${
+              viewMode === 'TREE'
+                ? 'bg-[#0284c7] text-white shadow-xs'
+                : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'
+            }`}
+          >
+            <GitBranch className="w-3.5 h-3.5" />
+            <span>Bagan Pohon (Tree)</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setViewMode('LIST')}
+            className={`btn-tactile px-3.5 sm:px-4 py-2 rounded-lg font-barlow font-bold uppercase tracking-wider text-xs transition-all cursor-pointer flex items-center gap-1.5 min-h-[36px] ${
+              viewMode === 'LIST'
+                ? 'bg-[#0284c7] text-white shadow-xs'
+                : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'
+            }`}
+          >
+            <Layers className="w-3.5 h-3.5" />
+            <span>Daftar Babak</span>
+          </button>
         </div>
+
+        {/* Filter Babak (khusus jika memilih mode Daftar Babak) */}
+        {viewMode === 'LIST' && (
+          <div className="flex items-center gap-1 p-1 rounded-xl bg-[var(--bg-muted)] border border-[var(--border-subtle)] text-xs font-semibold overflow-x-auto w-full sm:w-auto">
+            {stageFilters.map((stage) => {
+              const isActive = activeStageFilter === stage.id;
+              return (
+                <button
+                  key={stage.id}
+                  type="button"
+                  onClick={() => setActiveStageFilter(stage.id)}
+                  className={`flex-1 sm:flex-initial px-3 sm:px-4 py-1.5 rounded-lg font-barlow font-bold uppercase tracking-wider text-xs transition-all cursor-pointer min-h-[32px] whitespace-nowrap ${
+                    isActive
+                      ? stage.id === 'FINAL'
+                        ? 'bg-amber-400 text-slate-950 shadow-xs'
+                        : 'bg-[#0284c7] text-white shadow-xs'
+                      : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'
+                  }`}
+                >
+                  {stage.label}
+                </button>
+              );
+            })}
+          </div>
+        )}
       </div>
 
-      {/* 1. ADAPTIVE MOBILE VIEW (block sm:hidden) */}
-      <div className="block sm:hidden space-y-6">
-        <div className="bg-[#060c18] border border-sky-950/90 rounded-2xl p-4 space-y-6 shadow-xl">
-          {/* R24 Mobile */}
+      {/* 1. MODE BAGAN POHON INTERAKTIF (Tampilan Penuh dengan Fitur Zoom In/Out - Mobile & Desktop) */}
+      {viewMode === 'TREE' && (
+        <PublicBracketTree
+          bracketSize={bracketSize}
+          qf={qf}
+          sf={sf}
+          gf={gf}
+          championTeamName={championTeamName}
+          bronzeMatch={BRONZE_MATCH}
+        />
+      )}
+
+      {/* 2. MODE DAFTAR BABAK (Opsional / Card List View) */}
+      {viewMode === 'LIST' && (
+        <div className="bg-[#060c18] border border-sky-950/90 rounded-2xl p-4 sm:p-6 space-y-6 shadow-xl">
+          {/* R24 */}
           {bracketSize >= 24 && (activeStageFilter === 'ALL' || activeStageFilter === 'R24') && (
             <div className="space-y-3">
               <div className="flex items-center justify-between pb-2 border-b border-slate-800">
@@ -128,7 +173,7 @@ export const BracketTab: React.FC<BracketTabProps> = ({ sportCode = 'FUTSAL' }) 
                   {r24.length} Laga
                 </span>
               </div>
-              <div className="grid grid-cols-1 gap-2.5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                 {r24.map((m) => (
                   <PublicBracketMatchCard key={m.id} match={m} />
                 ))}
@@ -136,7 +181,7 @@ export const BracketTab: React.FC<BracketTabProps> = ({ sportCode = 'FUTSAL' }) 
             </div>
           )}
 
-          {/* R16 Mobile */}
+          {/* R16 */}
           {bracketSize >= 16 && (activeStageFilter === 'ALL' || activeStageFilter === 'R16') && (
             <div className="space-y-3">
               <div className="flex items-center justify-between pb-2 border-b border-slate-800">
@@ -147,7 +192,7 @@ export const BracketTab: React.FC<BracketTabProps> = ({ sportCode = 'FUTSAL' }) 
                   {r16.length} Laga
                 </span>
               </div>
-              <div className="grid grid-cols-1 gap-2.5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                 {r16.map((m) => (
                   <PublicBracketMatchCard key={m.id} match={m} />
                 ))}
@@ -155,7 +200,7 @@ export const BracketTab: React.FC<BracketTabProps> = ({ sportCode = 'FUTSAL' }) 
             </div>
           )}
 
-          {/* QF Mobile */}
+          {/* QF */}
           {bracketSize >= 8 && (activeStageFilter === 'ALL' || activeStageFilter === 'QF') && (
             <div className="space-y-3">
               <div className="flex items-center justify-between pb-2 border-b border-slate-800">
@@ -166,7 +211,7 @@ export const BracketTab: React.FC<BracketTabProps> = ({ sportCode = 'FUTSAL' }) 
                   {qf.length} Laga
                 </span>
               </div>
-              <div className="grid grid-cols-1 gap-2.5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                 {qf.map((m) => (
                   <PublicBracketMatchCard key={m.id} match={m} />
                 ))}
@@ -174,7 +219,7 @@ export const BracketTab: React.FC<BracketTabProps> = ({ sportCode = 'FUTSAL' }) 
             </div>
           )}
 
-          {/* SF Mobile */}
+          {/* SF */}
           {bracketSize >= 4 && (activeStageFilter === 'ALL' || activeStageFilter === 'SF') && (
             <div className="space-y-3">
               <div className="flex items-center justify-between pb-2 border-b border-slate-800">
@@ -185,7 +230,7 @@ export const BracketTab: React.FC<BracketTabProps> = ({ sportCode = 'FUTSAL' }) 
                   {sf.length} Laga
                 </span>
               </div>
-              <div className="grid grid-cols-1 gap-2.5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {sf.map((m) => (
                   <PublicBracketMatchCard key={m.id} match={m} isHighlighted={true} />
                 ))}
@@ -193,7 +238,7 @@ export const BracketTab: React.FC<BracketTabProps> = ({ sportCode = 'FUTSAL' }) 
             </div>
           )}
 
-          {/* Final & Bronze Mobile */}
+          {/* Final & Bronze */}
           {(activeStageFilter === 'ALL' || activeStageFilter === 'FINAL') && (
             <div className="space-y-5">
               <div className="space-y-2">
@@ -206,11 +251,13 @@ export const BracketTab: React.FC<BracketTabProps> = ({ sportCode = 'FUTSAL' }) 
                     Perebutan Juara 1
                   </span>
                 </div>
-                <PublicGrandFinalCard gf={gf} championTeamName={championTeamName} />
+                <div className="max-w-xl mx-auto">
+                  <PublicGrandFinalCard gf={gf} championTeamName={championTeamName} />
+                </div>
               </div>
 
-              {/* Bronze Mobile */}
-              <div className="space-y-2 pt-2">
+              {/* Bronze */}
+              <div className="space-y-2 pt-2 max-w-xl mx-auto">
                 <div className="flex items-center gap-1.5 text-xs font-barlow font-bold uppercase tracking-wider text-amber-400">
                   <Medal className="w-4 h-4" />
                   <span>Perebutan Juara 3</span>
@@ -220,163 +267,7 @@ export const BracketTab: React.FC<BracketTabProps> = ({ sportCode = 'FUTSAL' }) 
             </div>
           )}
         </div>
-      </div>
-
-      {/* 2. DESKTOP INTERACTIVE BRACKET (hidden sm:block) - Matches Screenshot */}
-      <div className="hidden sm:block overflow-x-auto pb-4">
-        <div className="w-full bg-[#060c18] border border-sky-950/80 rounded-3xl p-6 lg:p-8 shadow-2xl flex flex-col items-center justify-center">
-          <div className="w-fit space-y-6">
-            {/* Header Bar Across Columns */}
-            <div className="flex items-center gap-0">
-            {bracketSize >= 8 && (
-              <>
-                <div className="w-[260px] shrink-0 flex items-center gap-2">
-                  <span className="font-barlow font-black text-sm uppercase tracking-wide text-white">
-                    8 Besar (Perempat Final)
-                  </span>
-                  <span className="text-[10px] font-mono px-2 py-0.5 rounded-md border border-slate-700 bg-slate-900 text-slate-300 font-bold">
-                    {qf.length} Laga
-                  </span>
-                </div>
-                <div className="w-[36px] shrink-0" />
-              </>
-            )}
-
-            {bracketSize >= 4 && (
-              <>
-                <div className="w-[260px] shrink-0 flex items-center gap-2">
-                  <span className="font-barlow font-black text-sm uppercase tracking-wide text-sky-400">
-                    {bracketSize === 4 ? 'Semifinal (4 Besar)' : 'Babak Semifinal'}
-                  </span>
-                  <span className="text-[10px] font-mono px-2 py-0.5 rounded-md border border-sky-800 bg-sky-950/80 text-sky-300 font-bold">
-                    {sf.length} Laga
-                  </span>
-                </div>
-                <div className="w-[36px] shrink-0" />
-              </>
-            )}
-
-            <div className="w-[380px] shrink-0 flex items-center justify-between">
-              <span className="font-barlow font-black text-sm uppercase tracking-wide text-sky-400 flex items-center gap-1.5">
-                <Trophy className="w-4 h-4" />
-                <span>Grand Final</span>
-              </span>
-              <span className="text-[11px] font-barlow font-bold uppercase tracking-wider text-sky-400/80">
-                Perebutan Juara 1
-              </span>
-            </div>
-          </div>
-
-          {/* Bracket Tree Columns with Aligned Connectors */}
-          <div className="flex items-start gap-0">
-            {/* COLUMN 1: 8 BESAR (QF) */}
-            {bracketSize >= 8 && (
-              <>
-                <div className="w-[260px] shrink-0 space-y-0">
-                  <div className="space-y-6">
-                    {/* Top Pair: QF 0 (Grup A) & QF 1 (Grup C) */}
-                    <div className="space-y-6">
-                      <PublicBracketMatchCard match={qf[0]} />
-                      <PublicBracketMatchCard match={qf[1]} />
-                    </div>
-
-                    {/* Gap between pairs */}
-                    <div className="h-2" />
-
-                    {/* Bottom Pair: QF 2 (Grup B) & QF 3 (Grup D) */}
-                    <div className="space-y-6">
-                      <PublicBracketMatchCard match={qf[2]} />
-                      <PublicBracketMatchCard match={qf[3]} />
-                    </div>
-                  </div>
-                </div>
-
-                {/* CONNECTOR 1: QF -> SF */}
-                <div className="w-[36px] shrink-0 h-[528px] relative pointer-events-none">
-                  <svg
-                    className="w-full h-full text-sky-500"
-                    viewBox="0 0 36 528"
-                    preserveAspectRatio="none"
-                  >
-                    {/* Top pair connector -> SF 1 */}
-                    <path
-                      d="M 0,55 H 18 V 189 H 0 M 18,122 H 36"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                    <circle cx="36" cy="122" r="3" fill="currentColor" />
-
-                    {/* Bottom pair connector -> SF 2 */}
-                    <path
-                      d="M 0,339 H 18 V 473 H 0 M 18,406 H 36"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                    <circle cx="36" cy="406" r="3" fill="currentColor" />
-                  </svg>
-                </div>
-              </>
-            )}
-
-            {/* COLUMN 2: SEMIFINAL (4 BESAR) */}
-            {bracketSize >= 4 && (
-              <>
-                <div className="w-[260px] shrink-0 h-[528px] relative">
-                  {/* SF 1: Centered with Top Pair */}
-                  <div className="absolute top-[67px] w-full">
-                    <PublicBracketMatchCard match={sf[0]} isHighlighted={true} />
-                  </div>
-
-                  {/* SF 2: Centered with Bottom Pair */}
-                  <div className="absolute top-[351px] w-full">
-                    <PublicBracketMatchCard match={sf[1]} isHighlighted={true} />
-                  </div>
-                </div>
-
-                {/* CONNECTOR 2: SF -> GRAND FINAL */}
-                <div className="w-[36px] shrink-0 h-[528px] relative pointer-events-none">
-                  <svg
-                    className="w-full h-full text-sky-400"
-                    viewBox="0 0 36 528"
-                    preserveAspectRatio="none"
-                  >
-                    <path
-                      d="M 0,122 H 18 V 406 H 0 M 18,264 H 36"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                    <circle cx="36" cy="264" r="3.5" fill="currentColor" />
-                  </svg>
-                </div>
-              </>
-            )}
-
-            {/* COLUMN 3: GRAND FINAL & PEREBUTAN JUARA 3 */}
-            <div className="w-[380px] shrink-0 h-[528px] flex flex-col justify-center space-y-6">
-              <PublicGrandFinalCard gf={gf} championTeamName={championTeamName} />
-
-              {/* Perebutan Juara 3 (as in Image 2) */}
-              <div className="space-y-2 pt-1">
-                <div className="flex items-center gap-1.5 text-xs font-barlow font-bold uppercase tracking-wider text-amber-400">
-                  <Medal className="w-4 h-4" />
-                  <span>Perebutan Juara 3</span>
-                </div>
-                <PublicBracketMatchCard match={BRONZE_MATCH} />
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+      )}
     </div>
   );
 };

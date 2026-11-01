@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { MapPin, Clock, ChevronDown, ChevronUp, Calendar, AlertCircle } from 'lucide-react';
+import { MapPin, Clock, Calendar } from 'lucide-react';
 import { initialMatches } from '@/mocks/tournamentData';
 import { CABOR_INFO_DATA } from '@/mocks/caborContentData';
 import { Match, SportCode } from '@/types';
@@ -27,13 +27,52 @@ const parseScheduleInfo = (scheduledTimeStr: string, matchNumber: number) => {
   return { dateStr, time, code };
 };
 
+const isPlaceholderTeam = (name: string, stage?: string) => {
+  if (!name) return true;
+  const upper = name.trim().toUpperCase();
+  return (
+    upper.startsWith('JUARA') ||
+    upper.startsWith('PEMENANG') ||
+    upper.startsWith('P15') ||
+    upper.startsWith('P16') ||
+    upper.startsWith('P17') ||
+    upper.startsWith('TBD') ||
+    upper.startsWith('MENUNGGU') ||
+    (stage !== 'GROUP' && (upper.includes('GRUP') || upper.includes('SEMIFINAL')))
+  );
+};
+
+const KNOCKOUT_HEAL: Record<number, Partial<Match>> = {
+  15: { teamAId: 'placeholder-ga', teamAName: 'JUARA GRUP A', teamBId: 'placeholder-gc', teamBName: 'JUARA GRUP C', teamALogo: '', teamBLogo: '' },
+  16: { teamAId: 'placeholder-gb', teamAName: 'JUARA GRUP B', teamBId: 'placeholder-gd', teamBName: 'JUARA GRUP D', teamALogo: '', teamBLogo: '' },
+  17: { teamAId: 'placeholder-sf1', teamAName: 'JUARA SEMIFINAL 1', teamBId: 'placeholder-sf2', teamBName: 'JUARA SEMIFINAL 2', teamALogo: '', teamBLogo: '' },
+};
+
 export const ScheduleTab: React.FC<ScheduleTabProps> = ({ sportCode = 'FUTSAL' }) => {
   const caborMeta = CABOR_INFO_DATA[sportCode] || CABOR_INFO_DATA.FUTSAL;
 
-  const [matches] = usePersistentState<Match[]>('sauma_arena_matches', initialMatches);
+  const [matches, setMatches] = usePersistentState<Match[]>('sauma_arena_matches', initialMatches);
   const [dateFilter, setDateFilter] = useState<'ALL' | 'H1' | 'H2'>('ALL');
-  const [expandedMatchId, setExpandedMatchId] = useState<string | null>('match-1');
   const [calendarData, setCalendarData] = useState<any>(null);
+
+  // Self-healing: bersihkan logo dan sesuaikan nama tim fase gugur jika data lama tersimpan di localStorage
+  useEffect(() => {
+    const hasOutdatedKnockout = matches.some((m) => {
+      if (m.matchNumber === 15 || m.matchNumber === 16) {
+        return Boolean(m.teamALogo || m.teamBLogo || m.teamAId?.startsWith('team-') || m.teamBId?.startsWith('team-'));
+      }
+      if (m.matchNumber === 17) {
+        return m.teamAName === 'P15' || m.teamBName === 'P16' || Boolean(m.teamALogo || m.teamBLogo);
+      }
+      return false;
+    });
+
+    if (hasOutdatedKnockout) {
+      setMatches((prev) =>
+        prev.map((m) => (KNOCKOUT_HEAL[m.matchNumber] ? { ...m, ...KNOCKOUT_HEAL[m.matchNumber] } : m))
+      );
+    }
+  }, [matches, setMatches]);
 
   useEffect(() => {
     fetch('/api/calendar')
@@ -51,10 +90,6 @@ export const ScheduleTab: React.FC<ScheduleTabProps> = ({ sportCode = 'FUTSAL' }
     if (dateFilter === 'H2') return m.scheduledTime.includes('Selasa, 3 Nov') || m.scheduledTime.includes('Rabu, 4 Nov') || m.matchNumber >= 11;
     return true;
   });
-
-  const toggleExpand = (id: string) => {
-    setExpandedMatchId(expandedMatchId === id ? null : id);
-  };
 
   return (
     <div className="space-y-6 sm:space-y-8 animate-fadeIn pb-6">
@@ -158,8 +193,23 @@ export const ScheduleTab: React.FC<ScheduleTabProps> = ({ sportCode = 'FUTSAL' }
           {filteredMatches.map((match) => {
             const isLive = match.status === 'LIVE';
             const isCompleted = match.status === 'COMPLETED';
-            const isExpanded = expandedMatchId === match.id;
             const { time, code } = parseScheduleInfo(match.scheduledTime, match.matchNumber);
+
+            // Pada Babak Grand Final (Pertandingan #17), tulis tim pemain dengan JUARA SEMIFINAL 1 & 2
+            const isFinalMatch = match.stage === 'FINAL' || match.matchNumber === 17;
+            const teamAName = isFinalMatch && (match.teamAName === 'P15' || match.teamAName.includes('15') || !match.teamAName)
+              ? 'JUARA SEMIFINAL 1'
+              : match.teamAName;
+            const teamBName = isFinalMatch && (match.teamBName === 'P16' || match.teamBName.includes('16') || !match.teamBName)
+              ? 'JUARA SEMIFINAL 2'
+              : match.teamBName;
+
+            const isTeamAPlaceholder = isPlaceholderTeam(teamAName, match.stage);
+            const isTeamBPlaceholder = isPlaceholderTeam(teamBName, match.stage);
+
+            // Hilangkan semua logo jika belum ada pihak yang menang (placeholder/semifinal/final)
+            const showLogoA = !isTeamAPlaceholder && Boolean(match.teamALogo);
+            const showLogoB = !isTeamBPlaceholder && Boolean(match.teamBLogo);
 
             return (
               <div
@@ -225,7 +275,7 @@ export const ScheduleTab: React.FC<ScheduleTabProps> = ({ sportCode = 'FUTSAL' }
                     <div className="flex-1 w-full md:w-auto flex items-center justify-between md:justify-end gap-3 sm:gap-4 text-left md:text-right">
                       <div className="min-w-0 flex-1 md:flex-initial">
                         <h4 className="font-barlow font-bold text-lg sm:text-xl text-[var(--text-main)] leading-tight tracking-wide">
-                          {match.teamAName}
+                          {teamAName}
                         </h4>
                         <div className="mt-1 flex items-center md:justify-end">
                           <span className="inline-flex items-center px-2 py-0.5 rounded-sm text-[11px] font-barlow font-bold uppercase tracking-wider bg-blue-50 dark:bg-sky-950/40 text-[#1D63B8] dark:text-sky-300 border border-blue-200 dark:border-sky-800">
@@ -233,15 +283,17 @@ export const ScheduleTab: React.FC<ScheduleTabProps> = ({ sportCode = 'FUTSAL' }
                           </span>
                         </div>
                       </div>
-                      <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-lg bg-[var(--bg-muted)] border border-slate-300 dark:border-slate-700 flex items-center justify-center p-1.5 shrink-0 shadow-2xs overflow-hidden">
-                        {match.teamALogo ? (
-                          <img src={match.teamALogo} alt={match.teamAName} className="w-full h-full object-contain" />
-                        ) : (
+                      {showLogoA ? (
+                        <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-lg bg-[var(--bg-muted)] border border-slate-300 dark:border-slate-700 flex items-center justify-center p-1.5 shrink-0 shadow-2xs overflow-hidden">
+                          <img src={match.teamALogo} alt={teamAName} className="w-full h-full object-contain" />
+                        </div>
+                      ) : !isTeamAPlaceholder ? (
+                        <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-lg bg-[var(--bg-muted)] border border-slate-300 dark:border-slate-700 flex items-center justify-center p-1.5 shrink-0 shadow-2xs overflow-hidden">
                           <span className="font-barlow font-bold text-base text-[#1D63B8]">
-                            {match.teamAName.split(' ')[0]}
+                            {teamAName.split(' ')[0]}
                           </span>
-                        )}
-                      </div>
+                        </div>
+                      ) : null}
                     </div>
 
                     {/* AREA TENGAH: WAKTU & VS / SKOR */}
@@ -274,18 +326,20 @@ export const ScheduleTab: React.FC<ScheduleTabProps> = ({ sportCode = 'FUTSAL' }
 
                     {/* TIM B (Kanan) */}
                     <div className="flex-1 w-full md:w-auto flex items-center justify-between md:justify-start gap-3 sm:gap-4 text-right md:text-left">
-                      <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-lg bg-[var(--bg-muted)] border border-slate-300 dark:border-slate-700 flex items-center justify-center p-1.5 shrink-0 shadow-2xs overflow-hidden order-2 md:order-1">
-                        {match.teamBLogo ? (
-                          <img src={match.teamBLogo} alt={match.teamBName} className="w-full h-full object-contain" />
-                        ) : (
+                      {showLogoB ? (
+                        <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-lg bg-[var(--bg-muted)] border border-slate-300 dark:border-slate-700 flex items-center justify-center p-1.5 shrink-0 shadow-2xs overflow-hidden order-2 md:order-1">
+                          <img src={match.teamBLogo} alt={teamBName} className="w-full h-full object-contain" />
+                        </div>
+                      ) : !isTeamBPlaceholder ? (
+                        <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-lg bg-[var(--bg-muted)] border border-slate-300 dark:border-slate-700 flex items-center justify-center p-1.5 shrink-0 shadow-2xs overflow-hidden order-2 md:order-1">
                           <span className="font-barlow font-bold text-base text-[var(--color-arena-accent)]">
-                            {match.teamBName.split(' ')[0]}
+                            {teamBName.split(' ')[0]}
                           </span>
-                        )}
-                      </div>
+                        </div>
+                      ) : null}
                       <div className="min-w-0 flex-1 md:flex-initial order-1 md:order-2">
                         <h4 className="font-barlow font-bold text-lg sm:text-xl text-[var(--text-main)] leading-tight tracking-wide">
-                          {match.teamBName}
+                          {teamBName}
                         </h4>
                         <div className="mt-1 flex items-center md:justify-start">
                           <span className="inline-flex items-center px-2 py-0.5 rounded-sm text-[11px] font-barlow font-bold uppercase tracking-wider bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800">

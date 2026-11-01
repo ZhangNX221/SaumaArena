@@ -334,8 +334,8 @@ export const GRAND_FINAL: BracketMatch = {
   schedule: 'Selasa, 3 Nov 2026 • 11:30 - 12:00 WIB',
   court: 'Lapangan Futsal Seabless',
   status: 'SCHEDULED',
-  teamA: { id: 'tbd-fn-1', name: 'Menunggu Pemenang SF 1 (P15)', score: 0 },
-  teamB: { id: 'tbd-fn-2', name: 'Menunggu Pemenang SF 2 (P16)', score: 0 },
+  teamA: { id: 'tbd-fn-1', name: 'JUARA SEMIFINAL 1', score: 0 },
+  teamB: { id: 'tbd-fn-2', name: 'JUARA SEMIFINAL 2', score: 0 },
 };
 
 export const BRONZE_MATCH: BracketMatch = {

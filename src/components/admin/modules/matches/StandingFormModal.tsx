@@ -185,12 +185,12 @@ export const StandingFormModal: React.FC<StandingFormModalProps> = ({
             <div className="space-y-2.5 p-3.5 rounded-xl bg-[var(--bg-muted)]/50 border border-[var(--border-subtle)]">
               <div>
                 <label className="font-barlow font-bold uppercase tracking-wider text-[11px] text-[var(--text-main)] block mb-1">
-                  Nama Tim & Kode Grup
+                  Nama Tim
                 </label>
                 <input
                   type="text"
                   required
-                  placeholder="Contoh: SDI KARDINA MASSA (A1)"
+                  placeholder="Contoh: SDI KARDINA MASSA"
                   value={teamName}
                   onChange={(e) => setTeamName(e.target.value)}
                   className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] text-[var(--text-main)] font-medium focus:outline-none focus:ring-2 focus:ring-[var(--color-arena-primary)]"

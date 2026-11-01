@@ -61,7 +61,7 @@ export const TOURNAMENT_RUNDOWN: RundownItem[] = [
   { id: 'rd-15', day: 'H2', dayDate: 'Selasa, 3 November 2026', matchCode: 'P15', agendaCode: '4 BESAR', time: '10.00 - 10.30', detail: 'JUARA GRUP A vs JUARA GRUP C', category: 'MATCH', notes: 'Semifinal 1' },
   { id: 'rd-16', day: 'H2', dayDate: 'Selasa, 3 November 2026', matchCode: 'P16', agendaCode: '4 BESAR', time: '10.30 - 11.00', detail: 'JUARA GRUP B vs JUARA GRUP D', category: 'MATCH', notes: 'Semifinal 2' },
   { id: 'rd-ishoma2', day: 'H2', dayDate: 'Selasa, 3 November 2026', matchCode: '-', agendaCode: 'JEDA', time: '11.00 - 11.30', detail: 'ISHOMA', category: 'BREAK', notes: 'Istirahat' },
-  { id: 'rd-17', day: 'H2', dayDate: 'Selasa, 3 November 2026', matchCode: 'P17', agendaCode: 'FINAL', time: '11.30 - 12.00', detail: 'P15 vs P16', category: 'MATCH', notes: 'Grand Final' },
+  { id: 'rd-17', day: 'H2', dayDate: 'Selasa, 3 November 2026', matchCode: 'P17', agendaCode: 'FINAL', time: '11.30 - 12.00', detail: 'JUARA SEMIFINAL 1 vs JUARA SEMIFINAL 2', category: 'MATCH', notes: 'Grand Final' },
   { id: 'rd-close', day: 'H2', dayDate: 'Selasa, 3 November 2026', matchCode: '-', agendaCode: 'ACARA', time: '12.00 - 13.00', detail: 'PENUTUPAN', category: 'CEREMONY', notes: 'Penyerahan Trofi' },
 ];
 
@@ -127,9 +127,9 @@ export const initialMatches: Match[] = [
   createMatch('match-14', 14, 'GROUP', 'B', 'team-min13-b', 'MIN 13 BLITAR A', 'team-sdn1-srengat', 'UPT SDN 1 SRENGAT', 'Selasa, 3 Nov 2026 • 09:00 - 09:30 WIB (P14 • B4 vs B1)'),
 
   // --- BABAK 4 BESAR (SEMIFINAL) & FINAL ---
-  createMatch('match-15', 15, 'SEMI_FINAL', undefined, 'team-sdi-kardina', 'JUARA GRUP A', 'team-min2-blitar', 'JUARA GRUP C', 'Selasa, 3 Nov 2026 • 10:00 - 10:30 WIB (P15 • 4 Besar 1)'),
-  createMatch('match-16', 16, 'SEMI_FINAL', undefined, 'team-sdn1-srengat', 'JUARA GRUP B', 'team-mi-ploso', 'JUARA GRUP D', 'Selasa, 3 Nov 2026 • 10:30 - 11:00 WIB (P16 • 4 Besar 2)'),
-  createMatch('match-17', 17, 'FINAL', undefined, 'fn-1', 'P15', 'fn-2', 'P16', 'Selasa, 3 Nov 2026 • 11:30 - 12:00 WIB (P17 • Grand Final)'),
+  createMatch('match-15', 15, 'SEMI_FINAL', undefined, 'placeholder-ga', 'JUARA GRUP A', 'placeholder-gc', 'JUARA GRUP C', 'Selasa, 3 Nov 2026 • 10:00 - 10:30 WIB (P15 • 4 Besar 1)', { teamALogo: '', teamBLogo: '' }),
+  createMatch('match-16', 16, 'SEMI_FINAL', undefined, 'placeholder-gb', 'JUARA GRUP B', 'placeholder-gd', 'JUARA GRUP D', 'Selasa, 3 Nov 2026 • 10:30 - 11:00 WIB (P16 • 4 Besar 2)', { teamALogo: '', teamBLogo: '' }),
+  createMatch('match-17', 17, 'FINAL', undefined, 'placeholder-sf1', 'JUARA SEMIFINAL 1', 'placeholder-sf2', 'JUARA SEMIFINAL 2', 'Selasa, 3 Nov 2026 • 11:30 - 12:00 WIB (P17 • Grand Final)', { teamALogo: '', teamBLogo: '' }),
 ];
 
 export const initialSupporterAssessments: SupporterAssessment[] = [];

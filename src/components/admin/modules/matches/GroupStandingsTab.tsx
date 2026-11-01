@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from 'react';
 import {
   Plus,
-  Search,
   Edit2,
   Trash2,
   Trophy,
@@ -11,7 +10,6 @@ import {
   RotateCcw,
   CheckCircle2,
   Info,
-  ShieldCheck,
 } from 'lucide-react';
 import { StandingRow, Match } from '@/types';
 import { ConfirmModal } from '@/components/admin/common/ConfirmModal';
@@ -192,14 +190,20 @@ export const GroupStandingsTab: React.FC = () => {
     setTimeout(() => setSyncToast(null), 3500);
   };
 
-  // Reset otomatis jika masih terdapat poin suporter bernilai 100 dari cache/storage lama
+  // Reset otomatis jika masih terdapat poin suporter 100 atau imbuhan kode (A1, B1, dst) dari cache lama
   useEffect(() => {
-    const sanitizePs = (list: StandingRow[]) =>
-      list.map((r) => ({ ...r, supporterPoints: r.supporterPoints === 100 ? 0 : (r.supporterPoints ?? 0) }));
-    if (groupA.some((r) => r.supporterPoints === 100)) setGroupA(sanitizePs);
-    if (groupB.some((r) => r.supporterPoints === 100)) setGroupB(sanitizePs);
-    if (groupC.some((r) => r.supporterPoints === 100)) setGroupC(sanitizePs);
-    if (groupD.some((r) => r.supporterPoints === 100)) setGroupD(sanitizePs);
+    const sanitizeRow = (r: StandingRow) => ({
+      ...r,
+      teamName: r.teamName.replace(/\s*\([A-D][1-4]\)\s*$/i, '').trim(),
+      supporterPoints: r.supporterPoints === 100 ? 0 : (r.supporterPoints ?? 0),
+    });
+    const needsSanitize = (list: StandingRow[]) =>
+      list.some((r) => r.supporterPoints === 100 || /\s*\([A-D][1-4]\)\s*$/i.test(r.teamName));
+
+    if (needsSanitize(groupA)) setGroupA((l) => l.map(sanitizeRow));
+    if (needsSanitize(groupB)) setGroupB((l) => l.map(sanitizeRow));
+    if (needsSanitize(groupC)) setGroupC((l) => l.map(sanitizeRow));
+    if (needsSanitize(groupD)) setGroupD((l) => l.map(sanitizeRow));
   }, []);
 
   const handleResetAllSupporterPoints = () => {
@@ -320,7 +324,7 @@ export const GroupStandingsTab: React.FC = () => {
                   </span>
                 </td>
                 <td className="py-4 px-3.5 font-bold text-[var(--text-main)]">
-                  <div>{row.teamName}</div>
+                  <div>{row.teamName.replace(/\s*\([A-D][1-4]\)\s*$/i, '').trim()}</div>
                   <div className="text-[11px] text-[var(--text-muted)] font-normal">{row.schoolName}</div>
                 </td>
                 <td className="py-4 px-3 text-center font-mono tabular-nums text-xs">{row.played}</td>

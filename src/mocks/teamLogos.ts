@@ -229,12 +229,15 @@ export const OFFICIAL_PRESET_LOGOS = [
 
 /**
  * Returns the official photo logo URL for the given team ID.
- * Falls back to SVG data URI if real logo is not mapped.
+ * Falls back to SVG data URI if real logo is not mapped, or empty if placeholder.
  */
 export const getTeamLogoUrl = (teamId: string): string => {
+  if (!teamId || teamId.startsWith('placeholder') || teamId.startsWith('tbd') || teamId.startsWith('fn-')) {
+    return '';
+  }
   if (REAL_TEAM_LOGOS[teamId]?.url) {
     return REAL_TEAM_LOGOS[teamId].url;
   }
-  const svg = TEAM_SVGS[teamId] || TEAM_SVGS['team-min1'];
-  return encodeSvg(svg);
+  const svg = TEAM_SVGS[teamId];
+  return svg ? encodeSvg(svg) : '';
 };

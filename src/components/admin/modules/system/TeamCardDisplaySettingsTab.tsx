@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { LayoutGrid, LayoutTemplate, CheckCircle2, Save, Sparkles, ChevronRight } from 'lucide-react';
 import { usePersistentState } from '@/hooks/usePersistentState';
 import { TeamCardLayout, STORAGE_KEY_TEAM_CARD_LAYOUT } from '@/types';
@@ -11,6 +11,22 @@ export const TeamCardDisplaySettingsTab: React.FC = () => {
   const [layout, setLayout] = usePersistentState<TeamCardLayout>(STORAGE_KEY_TEAM_CARD_LAYOUT, 'STANDARD');
   const [draftLayout, setDraftLayout] = useState<TeamCardLayout>(layout);
   const [isSaved, setIsSaved] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+
+  useEffect(() => {
+    let isMounted = true;
+    fetch('/api/settings')
+      .then((res) => res.json())
+      .then((json) => {
+        if (json?.success && json?.data?.teamCardLayout && isMounted) {
+          setLayout(json.data.teamCardLayout);
+          setDraftLayout(json.data.teamCardLayout);
+        }
+      })
+      .catch((e) => console.warn('Gagal memuat pengaturan kartu:', e));
+    return () => { isMounted = false; };
+  }, []);
 
   // Sample preview team
   const sampleTeam = initialTeams[0] || {
@@ -24,10 +40,35 @@ export const TeamCardDisplaySettingsTab: React.FC = () => {
     players: [{}, {}, {}, {}],
   };
 
-  const handleSave = () => {
-    setLayout(draftLayout);
-    setIsSaved(true);
-    setTimeout(() => setIsSaved(false), 3000);
+  const handleSave = async () => {
+    setIsSaving(true);
+    setErrorMessage(null);
+    try {
+      let token: string | null = null;
+      try { token = localStorage.getItem('sauma_auth_token'); } catch {}
+      const res = await fetch('/api/settings', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        credentials: 'include',
+        body: JSON.stringify({ teamCardLayout: draftLayout }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || 'Gagal menyimpan pengaturan format kartu.');
+      }
+      setLayout(draftLayout);
+      setIsSaved(true);
+      setTimeout(() => setIsSaved(false), 3000);
+    } catch (e: any) {
+      console.error('Gagal sinkron teamCardLayout ke database:', e);
+      setErrorMessage(e.message || 'Gagal menyimpan ke database.');
+      setTimeout(() => setErrorMessage(null), 4000);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -225,6 +266,11 @@ export const TeamCardDisplaySettingsTab: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-2">
+          {errorMessage && (
+            <div className="px-3 py-1.5 rounded-xl bg-red-500/10 text-red-600 dark:text-red-400 font-bold text-xs flex items-center gap-1.5 animate-fadeIn">
+              <span>{errorMessage}</span>
+            </div>
+          )}
           {isSaved && (
             <div className="px-3 py-1.5 rounded-xl bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 font-bold text-xs flex items-center gap-1.5 animate-fadeIn">
               <CheckCircle2 className="w-4 h-4" />
@@ -234,10 +280,11 @@ export const TeamCardDisplaySettingsTab: React.FC = () => {
           <button
             type="button"
             onClick={handleSave}
-            className="btn-tactile px-5 py-2.5 rounded-xl bg-[var(--color-arena-primary)] hover:bg-[var(--color-arena-primary-hover)] text-white font-barlow font-bold uppercase tracking-wider text-xs flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer"
+            disabled={isSaving}
+            className="btn-tactile px-5 py-2.5 rounded-xl bg-[var(--color-arena-primary)] hover:bg-[var(--color-arena-primary-hover)] text-white font-barlow font-bold uppercase tracking-wider text-xs flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer disabled:opacity-50"
           >
             <Save className="w-4 h-4" />
-            <span>Simpan Perubahan Tampilan</span>
+            <span>{isSaving ? 'Menyimpan...' : 'Simpan Perubahan Tampilan'}</span>
           </button>
         </div>
       </div>

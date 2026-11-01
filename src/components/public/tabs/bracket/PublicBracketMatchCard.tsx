@@ -45,7 +45,7 @@ export const PublicBracketMatchCard: React.FC<PublicBracketMatchCardProps> = ({
           }`}
         >
           <div className="flex items-center gap-2 truncate min-w-0">
-            {m.teamA.id.startsWith('tbd') ? (
+            {m.teamA.id.startsWith('tbd') || m.teamA.id.startsWith('placeholder') || m.teamA.id.startsWith('fn-') || !getTeamLogoUrl(m.teamA.id) ? (
               <div className="w-5 h-5 rounded-md bg-slate-800 border border-slate-700/80 flex items-center justify-center text-[10px] text-slate-400 font-mono font-bold shrink-0">
                 -
               </div>
@@ -72,7 +72,7 @@ export const PublicBracketMatchCard: React.FC<PublicBracketMatchCardProps> = ({
           }`}
         >
           <div className="flex items-center gap-2 truncate min-w-0">
-            {m.teamB.id.startsWith('tbd') ? (
+            {m.teamB.id.startsWith('tbd') || m.teamB.id.startsWith('placeholder') || m.teamB.id.startsWith('fn-') || !getTeamLogoUrl(m.teamB.id) ? (
               <div className="w-5 h-5 rounded-md bg-slate-800 border border-slate-700/80 flex items-center justify-center text-[10px] text-slate-400 font-mono font-bold shrink-0">
                 -
               </div>

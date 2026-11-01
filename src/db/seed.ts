@@ -10,7 +10,7 @@ import { initialMatches, initialTickets } from '../mocks/tournamentData';
 export function seedDatabase(db: DatabaseSync): void {
   // 1. Seed Sports
   const insertSport = db.prepare(`
-    INSERT OR REPLACE INTO sports (code, name, scoring_model, default_rules, rules_version)
+    INSERT OR IGNORE INTO sports (code, name, scoring_model, default_rules, rules_version)
     VALUES (?, ?, ?, ?, ?)
   `);
 
@@ -36,7 +36,7 @@ export function seedDatabase(db: DatabaseSync): void {
 
   // 3. Seed Venues
   const insertVenue = db.prepare(`
-    INSERT OR REPLACE INTO venues (id, name, address, notes, courts)
+    INSERT OR IGNORE INTO venues (id, name, address, notes, courts)
     VALUES (?, ?, ?, ?, ?)
   `);
   insertVenue.run(
@@ -100,35 +100,38 @@ export function seedDatabase(db: DatabaseSync): void {
   }
 
   // 6. Seed Default Competition
-  const insertComp = db.prepare(`
-    INSERT OR REPLACE INTO competitions (id, sport_code, name, slug, season, status, rules_snapshot, visibility, start_date, end_date, description)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `);
+  const existingComp = db.prepare('SELECT id FROM competitions WHERE id = ?').get('comp_futsal_2026');
+  if (!existingComp) {
+    const insertComp = db.prepare(`
+      INSERT INTO competitions (id, sport_code, name, slug, season, status, rules_snapshot, visibility, start_date, end_date, description)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `);
 
-  insertComp.run(
-    'comp_futsal_2026',
-    'futsal',
-    'Milad Matsanega Futsal Competition I (MMFC I) 2026',
-    'milad-matsanega-futsal-2026',
-    '2026',
-    'ongoing',
-    JSON.stringify(futsalTemplate),
-    'public',
-    '2026-11-02',
-    '2026-11-03',
-    'Kejuaraan Futsal Antarmadrasah se-Jawa Timur'
-  );
+    insertComp.run(
+      'comp_futsal_2026',
+      'futsal',
+      'Milad Matsanega Futsal Competition I (MMFC I) 2026',
+      'milad-matsanega-futsal-2026',
+      '2026',
+      'ongoing',
+      JSON.stringify(futsalTemplate),
+      'public',
+      '2026-11-02',
+      '2026-11-03',
+      'Kejuaraan Futsal Antarmadrasah se-Jawa Timur'
+    );
+  }
 
   // 7. Seed Stage & Group
   const insertStage = db.prepare(`
-    INSERT OR REPLACE INTO stages (id, competition_id, name, order_index, format)
+    INSERT OR IGNORE INTO stages (id, competition_id, name, order_index, format)
     VALUES (?, ?, ?, ?, ?)
   `);
   insertStage.run('stg_grp_1', 'comp_futsal_2026', 'Penyisihan Grup', 1, 'round_robin');
   insertStage.run('stg_ko_1', 'comp_futsal_2026', 'Babak Gugur', 2, 'single_elimination');
 
   const insertGroup = db.prepare(`
-    INSERT OR REPLACE INTO stage_groups (id, stage_id, name)
+    INSERT OR IGNORE INTO stage_groups (id, stage_id, name)
     VALUES (?, ?, ?)
   `);
   insertGroup.run('grp_a', 'stg_grp_1', 'Grup A');
@@ -138,7 +141,7 @@ export function seedDatabase(db: DatabaseSync): void {
 
   // 8. Register Teams to Competition
   const insertCompTeam = db.prepare(`
-    INSERT OR REPLACE INTO competition_teams (id, competition_id, team_id, group_id, seed, status)
+    INSERT OR IGNORE INTO competition_teams (id, competition_id, team_id, group_id, seed, status)
     VALUES (?, ?, ?, ?, ?, ?)
   `);
   for (let idx = 0; idx < initialTeams.length; idx++) {

@@ -28,19 +28,60 @@ export const BracketSettingsTab: React.FC<BracketSettingsTabProps> = ({ onSaved 
   const [selectedSize, setSelectedSize] = useState<BracketSize>(8);
   const [activeSize, setActiveSize] = useState<BracketSize>(8);
   const [savedSuccess, setSavedSuccess] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
+    let isMounted = true;
     const current = getStoredBracketSize();
     setSelectedSize(current);
     setActiveSize(current);
+
+    // Ambil dari database jika ada
+    fetch('/api/settings')
+      .then((res) => res.json())
+      .then((json) => {
+        if (json?.success && json?.data?.bracketSize && isMounted) {
+          setSelectedSize(json.data.bracketSize);
+          setActiveSize(json.data.bracketSize);
+          saveStoredBracketSize(json.data.bracketSize);
+        }
+      })
+      .catch((e) => console.warn('Gagal memuat pengaturan bagan:', e));
+    return () => { isMounted = false; };
   }, []);
 
-  const handleSave = () => {
-    saveStoredBracketSize(selectedSize);
-    setActiveSize(selectedSize);
-    setSavedSuccess(true);
-    onSaved?.(selectedSize);
-    setTimeout(() => setSavedSuccess(false), 3000);
+  const handleSave = async () => {
+    setIsSaving(true);
+    setErrorMessage(null);
+    try {
+      let token: string | null = null;
+      try { token = localStorage.getItem('sauma_auth_token'); } catch {}
+      const res = await fetch('/api/settings', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        credentials: 'include',
+        body: JSON.stringify({ bracketSize: selectedSize }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || 'Gagal menyimpan pengaturan bagan ke database.');
+      }
+      saveStoredBracketSize(selectedSize);
+      setActiveSize(selectedSize);
+      setSavedSuccess(true);
+      onSaved?.(selectedSize);
+      setTimeout(() => setSavedSuccess(false), 3000);
+    } catch (err: any) {
+      console.error('Gagal sinkron bracketSize ke database:', err);
+      setErrorMessage(err.message || 'Gagal menyimpan ke database.');
+      setTimeout(() => setErrorMessage(null), 4000);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleReset = () => {
@@ -200,7 +241,7 @@ export const BracketSettingsTab: React.FC<BracketSettingsTabProps> = ({ onSaved 
         </div>
 
         {/* Action Buttons */}
-        <div className="flex items-center justify-between pt-3 border-t border-[var(--border-subtle)]">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-3 border-t border-[var(--border-subtle)]">
           <button
             type="button"
             onClick={handleReset}
@@ -210,14 +251,22 @@ export const BracketSettingsTab: React.FC<BracketSettingsTabProps> = ({ onSaved 
             <span>Reset ke 8 Besar</span>
           </button>
 
-          <button
-            type="button"
-            onClick={handleSave}
-            className="btn-tactile px-6 py-2.5 rounded-xl bg-[var(--color-arena-primary)] text-white font-barlow font-bold text-xs uppercase tracking-wider flex items-center gap-2 shadow-sm hover:bg-[var(--color-arena-primary-hover)]"
-          >
-            <Save className="w-4 h-4" />
-            <span>Terapkan Pengaturan Bagan</span>
-          </button>
+          <div className="flex items-center gap-2">
+            {errorMessage && (
+              <span className="text-xs text-red-500 font-bold px-3 py-1.5 rounded-xl bg-red-500/10">
+                {errorMessage}
+              </span>
+            )}
+            <button
+              type="button"
+              onClick={handleSave}
+              disabled={isSaving}
+              className="btn-tactile px-6 py-2.5 rounded-xl bg-[var(--color-arena-primary)] text-white font-barlow font-bold text-xs uppercase tracking-wider flex items-center gap-2 shadow-sm hover:bg-[var(--color-arena-primary-hover)] disabled:opacity-50"
+            >
+              <Save className="w-4 h-4" />
+              <span>{isSaving ? 'Menyimpan...' : 'Terapkan Pengaturan Bagan'}</span>
+            </button>
+          </div>
         </div>
       </div>
     </div>

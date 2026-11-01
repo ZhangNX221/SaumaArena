@@ -54,7 +54,10 @@ export function getDatabase(): DatabaseSync {
   }
 
   // Seed default data if sports table is empty
-  seedDatabase(db);
+  const sportsCount = (db.prepare('SELECT COUNT(*) as count FROM sports').get() as { count: number })?.count || 0;
+  if (sportsCount === 0) {
+    seedDatabase(db);
+  }
 
   dbInstance = db;
   return db;

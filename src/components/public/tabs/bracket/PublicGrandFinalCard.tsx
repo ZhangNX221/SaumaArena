@@ -39,7 +39,7 @@ export const PublicGrandFinalCard: React.FC<PublicGrandFinalCardProps> = ({
         >
           <div className="flex items-center gap-3 min-w-0 truncate">
             <div className="w-7 h-7 rounded-lg bg-slate-800 border border-slate-700/80 flex items-center justify-center text-xs text-slate-400 font-mono font-bold shrink-0 relative">
-              {gf.teamA.id.startsWith('tbd') ? (
+              {gf.teamA.id.startsWith('tbd') || gf.teamA.id.startsWith('placeholder') || gf.teamA.id.startsWith('fn-') || !getTeamLogoUrl(gf.teamA.id) ? (
                 '-'
               ) : (
                 <img
@@ -57,7 +57,7 @@ export const PublicGrandFinalCard: React.FC<PublicGrandFinalCardProps> = ({
                 {gf.teamA.name}
               </span>
               <span className="text-[10px] text-slate-400 block mt-0.5">
-                {gf.teamA.isWinner ? 'Juara 1 Turnamen' : 'Finalis 1 (Pemenang P15)'}
+                {gf.teamA.isWinner ? 'Juara 1 Turnamen' : 'Finalis 1 (Pemenang Semifinal 1)'}
               </span>
             </div>
           </div>
@@ -76,7 +76,7 @@ export const PublicGrandFinalCard: React.FC<PublicGrandFinalCardProps> = ({
         >
           <div className="flex items-center gap-3 min-w-0 truncate">
             <div className="w-7 h-7 rounded-lg bg-slate-800 border border-slate-700/80 flex items-center justify-center text-xs text-slate-400 font-mono font-bold shrink-0 relative">
-              {gf.teamB.id.startsWith('tbd') ? (
+              {gf.teamB.id.startsWith('tbd') || gf.teamB.id.startsWith('placeholder') || gf.teamB.id.startsWith('fn-') || !getTeamLogoUrl(gf.teamB.id) ? (
                 '-'
               ) : (
                 <img
@@ -94,7 +94,7 @@ export const PublicGrandFinalCard: React.FC<PublicGrandFinalCardProps> = ({
                 {gf.teamB.name}
               </span>
               <span className="text-[10px] text-slate-400 block mt-0.5">
-                {gf.teamB.isWinner ? 'Juara 1 Turnamen' : 'Finalis 2 (Pemenang P16)'}
+                {gf.teamB.isWinner ? 'Juara 1 Turnamen' : 'Finalis 2 (Pemenang Semifinal 2)'}
               </span>
             </div>
           </div>

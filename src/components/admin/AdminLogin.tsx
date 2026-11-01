@@ -105,8 +105,8 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({
         return;
       }
 
-      // Persist auth token dan user session ke localStorage
-      if (rememberMe && data.token) {
+      // Persist auth token dan user session ke localStorage agar seluruh request terotentikasi
+      if (data.token) {
         try {
           localStorage.setItem('sauma_auth_token', data.token);
           localStorage.setItem('sauma_auth_user', JSON.stringify(data.user));
@@ -114,6 +114,9 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({
             'sauma_current_view',
             data.user.role === 'REFEREE' ? 'referee' : 'admin'
           );
+          if (rememberMe) {
+            localStorage.setItem('sauma_remember_me', 'true');
+          }
         } catch {
           // ignore storage error
         }
