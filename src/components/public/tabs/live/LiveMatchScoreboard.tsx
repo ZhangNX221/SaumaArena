@@ -187,8 +187,8 @@ export const LiveMatchScoreboard: React.FC<LiveMatchScoreboardProps> = ({
           </span>
 
           {/* Kotak Timer Stadion Berukuran Besar */}
-          <div className="p-3 sm:p-4 rounded-2xl bg-[var(--bg-surface)] dark:bg-black/35 border border-[var(--border-subtle)] shadow-inner w-full flex items-center justify-center">
-            <div className="font-scoreboard font-black text-5xl sm:text-6xl lg:text-7xl text-[var(--text-main)] tracking-widest tabular-nums leading-none drop-shadow-sm">
+          <div className="px-6 sm:px-8 py-3.5 sm:py-4 rounded-2xl bg-[var(--bg-surface)] dark:bg-black/35 border border-[var(--border-subtle)] shadow-inner w-full flex items-center justify-center">
+            <div className="font-scoreboard font-black text-4xl sm:text-5xl lg:text-6xl text-[var(--text-main)] tracking-normal tabular-nums leading-none drop-shadow-sm">
               {formatTime(timerSeconds)}
             </div>
           </div>

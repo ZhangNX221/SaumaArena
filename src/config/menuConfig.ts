@@ -111,8 +111,6 @@ export const PUBLIC_MENU_CONFIG: MenuItemConfig[] = [
  * - BERANDA
  * - PERSIAPAN KOMPETISI
  * - PESERTA
- * - PERTANDINGAN
- * - PETUGAS
  * - PENGATURAN
  * - TIKET MASUK (conditional on FEATURES.ticketing)
  */
@@ -194,42 +192,7 @@ export const getAdminMenuConfig = (counts?: {
         },
       ],
     },
-        {
-      id: 'sec_pertandingan',
-      title: 'PERTANDINGAN',
-      icon: 'Swords',
-      items: [
-        {
-          id: 'schedule_plotting',
-          label: 'Jadwal & Hasil Laga',
-          subtitle: 'Plotting jadwal, input skor & status pertandingan',
-          icon: 'Calendar',
-          status: 'active',
-        },
-        {
-          id: 'live_score_override',
-          label: 'Live Score Lapangan',
-          subtitle: 'Kontrol skor real-time & override darurat meja juri',
-          icon: 'Radio',
-          status: 'active',
-        },
-        {
-          id: 'group_standings',
-          label: 'Klasemen Grup',
-          subtitle: 'Perolehan poin grup & status kualifikasi',
-          icon: 'ListOrdered',
-          status: 'active',
-        },
-        {
-          id: 'drawing_bracket',
-          label: 'Bagan Babak Gugur',
-          subtitle: 'Bracket perempat, semifinal & final',
-          icon: 'GitBranch',
-          status: 'active',
-        },
-      ],
-    },
-{
+    {
       id: 'sec_pengaturan',
       title: 'PENGATURAN',
       icon: 'Settings',
@@ -331,8 +294,14 @@ export const getRefereeMenuConfig = (activeDutyCount: number = 1): MenuItemConfi
   },
   {
     id: 'standings',
-    label: 'Klasemen & Bagan',
+    label: 'Klasemen Grub',
     icon: 'ListOrdered',
+    status: 'active',
+  },
+  {
+    id: 'bracket',
+    label: 'Bracket',
+    icon: 'GitBranch',
     status: 'active',
   },
   {

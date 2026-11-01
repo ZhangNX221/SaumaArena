@@ -10,7 +10,7 @@ import { reduceMatchEvents } from '../events';
 import { validateMatchTransition } from '../statemachine';
 import { calculateStandings } from '../standings';
 import { generateRoundRobin, generateSingleElimination } from '../scheduling';
-import { signToken, verifyToken, requireAuth, hashPassword, verifyPassword, changeUserPassword, authenticateUser } from '../../lib/auth';
+import { signToken, verifyToken, requireAuth, hashPassword, verifyPassword, changeUserPassword, authenticateUser, updateUserProfile } from '../../lib/auth';
 import { NextResponse } from 'next/server';
 import footballTemplate from '../../sports/football/template.json';
 import futsalTemplate from '../../sports/futsal/template.json';
@@ -293,4 +293,42 @@ test('Security & Auth: changeUserPassword verification and SQLite persistence', 
   // Kembalikan ke pass1234 agar konsisten untuk environment pengujian berikutnya
   const revert = changeUserPassword('USR-ADMIN', 'rahasiaBaru2026', 'pass1234');
   assert.equal(revert.success, true);
+});
+
+test('Security & Auth: updateUserProfile updates username, validates uniqueness and persists to SQLite', () => {
+  // 1. Gagal jika username duplikat dengan akun juri
+  const failDuplicate = updateUserProfile('USR-ADMIN', { username: 'juri' });
+  assert.equal(failDuplicate.success, false);
+  assert.equal(failDuplicate.statusCode, 409);
+
+  // 2. Gagal jika username < 3 karakter
+  const failShort = updateUserProfile('USR-ADMIN', { username: 'ad' });
+  assert.equal(failShort.success, false);
+  assert.equal(failShort.statusCode, 400);
+
+  // 3. Sukses ubah username admin menjadi admin_super
+  const successChange = updateUserProfile('USR-ADMIN', {
+    username: 'admin_super',
+    name: 'Super Administrator Arena',
+  });
+  assert.equal(successChange.success, true);
+  assert.equal(successChange.user?.username, 'admin_super');
+  assert.equal(successChange.user?.name, 'Super Administrator Arena');
+
+  // 4. Verifikasi login menggunakan username baru 'admin_super'
+  const authNew = authenticateUser('admin_super', 'pass1234');
+  assert.equal(authNew.success, true);
+  assert.equal(authNew.user?.id, 'USR-ADMIN');
+
+  // 5. Kembalikan username ke 'admin' agar konsisten untuk environment berikutnya
+  const revert = updateUserProfile('USR-ADMIN', {
+    username: 'admin',
+    name: 'Administrator',
+  });
+  assert.equal(revert.success, true);
+  assert.equal(revert.user?.username, 'admin');
+
+  // 6. Verifikasi login kembali normal dengan 'admin'
+  const authRestored = authenticateUser('admin', 'pass1234');
+  assert.equal(authRestored.success, true);
 });

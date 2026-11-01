@@ -71,6 +71,11 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
+    // Otorisasi ketat: Hanya ADMIN atau REFEREE yang berhak memasukkan nilai suporter
+    const auth = requireAuth(request, ['ADMIN', 'REFEREE']);
+    if (auth instanceof NextResponse) return auth;
+    const juryId = auth.user.id;
+
     const body = await request.json().catch(() => ({}));
     const {
       teamId,
@@ -95,11 +100,6 @@ export async function POST(request: Request) {
         { status: 404 }
       );
     }
-
-    // Otorisasi ketat: Hanya ADMIN atau REFEREE yang berhak memasukkan nilai suporter
-    const auth = requireAuth(request, ['ADMIN', 'REFEREE']);
-    if (auth instanceof NextResponse) return auth;
-    const juryId = auth.user.id;
 
     const cleanPositive = Math.max(0, Number(positivePoints) || 0);
     const cleanPenalty = Math.max(0, Number(penaltyPoints) || 0);

@@ -1,16 +1,18 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 /**
  * Hook untuk menyimpan dan menyinkronkan state ke localStorage secara otomatis
  * Mendukung sinkronisasi real-time antar-tab (StorageEvent) dan antar-komponen dalam 1 tab (CustomEvent).
+ * Dioptimalkan dengan memoized instance tracking untuk mencegah render cascading redundant.
  */
 export function usePersistentState<T>(
   key: string,
   defaultValue: T
 ): [T, React.Dispatch<React.SetStateAction<T>>] {
   const [state, setState] = useState<T>(defaultValue);
+  const hookInstanceId = useRef<string>(Math.random().toString(36).substring(2, 9));
 
   useEffect(() => {
     try {
@@ -28,7 +30,8 @@ export function usePersistentState<T>(
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === key && e.newValue !== null) {
         try {
-          setState(JSON.parse(e.newValue));
+          const parsed = JSON.parse(e.newValue);
+          setState(parsed);
         } catch {
           // Abaikan parsing error jika nilai baru korup
         }
@@ -37,8 +40,12 @@ export function usePersistentState<T>(
 
     // 2. Dengarkan perubahan dari komponen lain dalam jendela/tab yang sama (Custom Event)
     const handleLocalSync = (e: Event) => {
-      const customEvent = e as CustomEvent<{ key: string; value: T }>;
-      if (customEvent.detail && customEvent.detail.key === key) {
+      const customEvent = e as CustomEvent<{ key: string; value: T; sourceId?: string }>;
+      if (
+        customEvent.detail &&
+        customEvent.detail.key === key &&
+        customEvent.detail.sourceId !== hookInstanceId.current
+      ) {
         setState(customEvent.detail.value);
       }
     };
@@ -59,17 +66,27 @@ export function usePersistentState<T>(
           ? (valueAction as (prev: T) => T)(prevState)
           : valueAction;
 
+      // Optimisasi Kinerja: Jika referensi identik, batalkan penulisan storage dan event dispatch
+      if (prevState === nextState) {
+        return prevState;
+      }
+
       try {
         if (typeof window !== 'undefined') {
-          localStorage.setItem(key, JSON.stringify(nextState));
-          // Pancarkan event sinkronisasi setelah siklus render React selesai
-          queueMicrotask(() => {
-            window.dispatchEvent(
-              new CustomEvent('sauma_state_sync', {
-                detail: { key, value: nextState },
-              })
-            );
-          });
+          const nextJson = JSON.stringify(nextState);
+          const prevJson = localStorage.getItem(key);
+
+          // Hindari I/O disk jika data JSON identik
+          if (prevJson !== nextJson) {
+            localStorage.setItem(key, nextJson);
+            queueMicrotask(() => {
+              window.dispatchEvent(
+                new CustomEvent('sauma_state_sync', {
+                  detail: { key, value: nextState, sourceId: hookInstanceId.current },
+                })
+              );
+            });
+          }
         }
       } catch (err) {
         console.warn(`[usePersistentState] Gagal menyimpan data "${key}":`, err);

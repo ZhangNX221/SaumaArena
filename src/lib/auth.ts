@@ -5,6 +5,11 @@ import { AppUser, UserRole } from '@/types';
 import { PRESET_USERS } from '@/mocks/multiSportData';
 
 const AUTH_SECRET = process.env.AUTH_SECRET || 'sauma_arena_secure_jwt_secret_key_2026_mmfc';
+if (process.env.NODE_ENV === 'production' && !process.env.AUTH_SECRET) {
+  console.warn(
+    '[SECURITY ALERT] AUTH_SECRET environment variable is unset in production. Please set AUTH_SECRET in your .env.local or deployment environment.'
+  );
+}
 const TOKEN_EXPIRY_MS = 7 * 24 * 60 * 60 * 1000; // 7 hari
 
 export interface TokenPayload {
@@ -135,20 +140,14 @@ export function ensureAuthUsersSeeded(): void {
     // Pastikan hanya akun juri tunggal (USR-JURI-1) yang ada, bersihkan juri lain jika ada
     run("DELETE FROM auth_users WHERE role = 'REFEREE' AND id != 'USR-JURI-1'");
 
-    // Seed atau update preset accounts dengan default password 'pass1234'
+    // Seed preset accounts dengan default password 'pass1234' jika belum ada di database
     const defaultPassword = 'pass1234';
     const insertStmt = `
       INSERT INTO auth_users (
         id, username, email, password_hash, salt, role, name,
         role_label, avatar_text, specialization, license_level, assigned_match_ids, is_active
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-      ON CONFLICT(id) DO UPDATE SET
-        username = excluded.username,
-        email = excluded.email,
-        name = excluded.name,
-        role_label = excluded.role_label,
-        assigned_match_ids = excluded.assigned_match_ids,
-        is_active = 1
+      ON CONFLICT(id) DO NOTHING
     `;
 
     for (const preset of PRESET_USERS) {
@@ -338,6 +337,130 @@ export function changeUserPassword(
   return {
     success: true,
     user: formatDbUserToAppUser(updatedDbUser),
+  };
+}
+
+/**
+ * Memperbarui informasi profil dan username pengguna di database SQLite.
+ * Melakukan validasi karakter dan keunikan username/email sebelum menyimpan.
+ */
+export function updateUserProfile(
+  userIdOrUsername: string,
+  updates: {
+    username?: string;
+    name?: string;
+    email?: string;
+  }
+): { success: boolean; user?: AppUser; error?: string; statusCode?: number } {
+  ensureAuthUsersSeeded();
+
+  const cleanIdentifier = userIdOrUsername.trim().toLowerCase();
+  let dbUser = queryOne<DbAuthUser>(
+    'SELECT * FROM auth_users WHERE id = ? OR LOWER(username) = ? OR LOWER(email) = ?',
+    [userIdOrUsername.trim(), cleanIdentifier, cleanIdentifier]
+  );
+
+  if (!dbUser && (cleanIdentifier === 'juri' || cleanIdentifier === 'juri1')) {
+    dbUser = queryOne<DbAuthUser>('SELECT * FROM auth_users WHERE id = ?', ['USR-JURI-1']);
+  }
+
+  if (!dbUser) {
+    return {
+      success: false,
+      error: 'Pengguna tidak ditemukan dalam sistem.',
+      statusCode: 404,
+    };
+  }
+
+  let newUsername = dbUser.username;
+  if (updates.username && updates.username.trim() !== '') {
+    const candidate = updates.username.trim();
+    if (candidate.length < 3) {
+      return {
+        success: false,
+        error: 'Username minimal harus 3 karakter.',
+        statusCode: 400,
+      };
+    }
+    if (!/^[a-zA-Z0-9_.-]+$/.test(candidate)) {
+      return {
+        success: false,
+        error: 'Username hanya boleh terdiri dari huruf, angka, titik, strip, atau garis bawah.',
+        statusCode: 400,
+      };
+    }
+    const existing = queryOne<DbAuthUser>(
+      'SELECT id FROM auth_users WHERE LOWER(username) = LOWER(?) AND id != ?',
+      [candidate, dbUser.id]
+    );
+    if (existing) {
+      return {
+        success: false,
+        error: `Username '${candidate}' sudah digunakan oleh pengguna lain. Silakan gunakan username lain.`,
+        statusCode: 409,
+      };
+    }
+    newUsername = candidate;
+  }
+
+  let newEmail = dbUser.email;
+  if (updates.email && updates.email.trim() !== '') {
+    const candidateEmail = updates.email.trim().toLowerCase();
+    if (!candidateEmail.includes('@') || !candidateEmail.includes('.')) {
+      return {
+        success: false,
+        error: 'Format email resmi tidak valid.',
+        statusCode: 400,
+      };
+    }
+    const existingEmail = queryOne<DbAuthUser>(
+      'SELECT id FROM auth_users WHERE LOWER(email) = LOWER(?) AND id != ?',
+      [candidateEmail, dbUser.id]
+    );
+    if (existingEmail) {
+      return {
+        success: false,
+        error: `Email '${candidateEmail}' sudah terdaftar pada akun lain.`,
+        statusCode: 409,
+      };
+    }
+    newEmail = candidateEmail;
+  }
+
+  let newName = dbUser.name;
+  if (updates.name && updates.name.trim() !== '') {
+    newName = updates.name.trim();
+  }
+
+  const avatarText =
+    newName
+      .split(' ')
+      .filter(Boolean)
+      .map((p) => p[0])
+      .join('')
+      .slice(0, 2)
+      .toUpperCase() || newUsername.slice(0, 2).toUpperCase();
+
+  run(
+    `UPDATE auth_users
+     SET username = ?, name = ?, email = ?, avatar_text = ?, updated_at = CURRENT_TIMESTAMP
+     WHERE id = ?`,
+    [newUsername, newName, newEmail, avatarText, dbUser.id]
+  );
+
+  run('UPDATE profiles SET display_name = ? WHERE id = ?', [newName, dbUser.id]);
+
+  const updatedDb = queryOne<DbAuthUser>('SELECT * FROM auth_users WHERE id = ?', [dbUser.id]) || {
+    ...dbUser,
+    username: newUsername,
+    name: newName,
+    email: newEmail,
+    avatar_text: avatarText,
+  };
+
+  return {
+    success: true,
+    user: formatDbUserToAppUser(updatedDb),
   };
 }
 

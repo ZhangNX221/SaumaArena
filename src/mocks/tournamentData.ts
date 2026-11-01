@@ -1,6 +1,6 @@
 import { Match, SupporterAssessment, Ticket } from '@/types';
 import { getTeamLogoUrl } from './teamLogos';
-export { initialTeams } from './mockTeams';
+export { initialTeams, getTeamCode, TEAM_CODE_MAP } from './mockTeams';
 
 export const tournamentMeta = {
   id: 'trn-mmfc-1-matsanega-2026',

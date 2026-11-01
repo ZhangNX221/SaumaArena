@@ -1,10 +1,39 @@
 import { Team } from '@/types';
 import { getTeamLogoUrl } from './teamLogos';
 
+export const TEAM_CODE_MAP: Record<string, string> = {
+  'team-sdi-kardina': 'TM-01',
+  'team-min7-blitar': 'TM-02',
+  'team-min8-blitar': 'TM-03',
+  'team-sdn1-srengat': 'TM-04',
+  'team-min14-blitar': 'TM-05',
+  'team-mi-mambaululum': 'TM-06',
+  'team-min13-b': 'TM-07',
+  'team-min2-blitar': 'TM-08',
+  'team-mi-wahidhasyim': 'TM-09',
+  'team-min13-c': 'TM-10',
+  'team-mi-ploso': 'TM-11',
+  'team-mi-darussalam': 'TM-12',
+  'team-mi-yabunaya': 'TM-13',
+  'team-min5-tulungagung': 'TM-14',
+};
+
+export const getTeamCode = (
+  team: { id?: string; code?: string } | undefined | null,
+  fallbackIndex?: number
+): string => {
+  if (!team) return 'TM-??';
+  if (team.code) return team.code;
+  if (team.id && TEAM_CODE_MAP[team.id]) return TEAM_CODE_MAP[team.id];
+  if (typeof fallbackIndex === 'number') return `TM-${String(fallbackIndex + 1).padStart(2, '0')}`;
+  return 'TM-??';
+};
+
 export const initialTeams: Team[] = [
   // Group A
   {
     id: 'team-sdi-kardina',
+    code: 'TM-01',
     name: 'SDI KARDINA MASSA',
     shortName: 'KARDINA MASSA',
     schoolName: 'SD Islam Kardina Massa Blitar',
@@ -24,6 +53,7 @@ export const initialTeams: Team[] = [
   },
   {
     id: 'team-min7-blitar',
+    code: 'TM-02',
     name: 'MIN 7 BLITAR',
     shortName: 'MIN 7',
     schoolName: 'Madrasah Ibtidaiyah Negeri 7 Blitar',
@@ -42,6 +72,7 @@ export const initialTeams: Team[] = [
   },
   {
     id: 'team-min8-blitar',
+    code: 'TM-03',
     name: 'MIN 8 BLITAR',
     shortName: 'MIN 8',
     schoolName: 'Madrasah Ibtidaiyah Negeri 8 Blitar',
@@ -61,6 +92,7 @@ export const initialTeams: Team[] = [
   // Group B
   {
     id: 'team-sdn1-srengat',
+    code: 'TM-04',
     name: 'UPT SDN 1 SRENGAT',
     shortName: 'SDN 1 SRENGAT',
     schoolName: 'UPT SD Negeri 1 Srengat Blitar',
@@ -79,6 +111,7 @@ export const initialTeams: Team[] = [
   },
   {
     id: 'team-min14-blitar',
+    code: 'TM-05',
     name: 'MIN 14 BLITAR',
     shortName: 'MIN 14',
     schoolName: 'Madrasah Ibtidaiyah Negeri 14 Blitar',
@@ -96,6 +129,7 @@ export const initialTeams: Team[] = [
   },
   {
     id: 'team-mi-mambaululum',
+    code: 'TM-06',
     name: 'MI MAMBAUL ULUM BUNTARAN TULUNGAGUNG',
     shortName: 'MI MAMBAUL ULUM',
     schoolName: 'Madrasah Ibtidaiyah Mambaul Ulum Buntaran Tulungagung',
@@ -113,6 +147,7 @@ export const initialTeams: Team[] = [
   },
   {
     id: 'team-min13-b',
+    code: 'TM-07',
     name: 'MIN 13 BLITAR A',
     shortName: 'MIN 13 A',
     schoolName: 'Madrasah Ibtidaiyah Negeri 13 Blitar (Tim A)',
@@ -132,6 +167,7 @@ export const initialTeams: Team[] = [
   // Group C
   {
     id: 'team-min2-blitar',
+    code: 'TM-08',
     name: 'MIN 2 BLITAR',
     shortName: 'MIN 2',
     schoolName: 'Madrasah Ibtidaiyah Negeri 2 Blitar',
@@ -150,6 +186,7 @@ export const initialTeams: Team[] = [
   },
   {
     id: 'team-mi-wahidhasyim',
+    code: 'TM-09',
     name: 'MI WAHID HASYIM BAKUNG',
     shortName: 'WAHID HASYIM',
     schoolName: 'Madrasah Ibtidaiyah Wahid Hasyim Bakung',
@@ -167,6 +204,7 @@ export const initialTeams: Team[] = [
   },
   {
     id: 'team-min13-c',
+    code: 'TM-10',
     name: 'MIN 13 BLITAR B',
     shortName: 'MIN 13 B',
     schoolName: 'Madrasah Ibtidaiyah Negeri 13 Blitar (Tim B)',
@@ -186,6 +224,7 @@ export const initialTeams: Team[] = [
   // Group D
   {
     id: 'team-mi-ploso',
+    code: 'TM-11',
     name: 'MI PLOSO KEDIRI',
     shortName: 'MI PLOSO',
     schoolName: 'Madrasah Ibtidaiyah Ploso Kediri',
@@ -204,6 +243,7 @@ export const initialTeams: Team[] = [
   },
   {
     id: 'team-mi-darussalam',
+    code: 'TM-12',
     name: 'MI UNGGULAN DARUSSALAM',
     shortName: 'DARUSSALAM',
     schoolName: 'Madrasah Ibtidaiyah Unggulan Darussalam',
@@ -221,6 +261,7 @@ export const initialTeams: Team[] = [
   },
   {
     id: 'team-mi-yabunaya',
+    code: 'TM-13',
     name: 'MI YAA BUNAYYA SRENGAT',
     shortName: 'YAA BUNAYYA',
     schoolName: 'Madrasah Ibtidaiyah Yaa Bunayya Srengat Blitar',
@@ -238,6 +279,7 @@ export const initialTeams: Team[] = [
   },
   {
     id: 'team-min5-tulungagung',
+    code: 'TM-14',
     name: 'MIN 5 TULUNGAGUNG',
     shortName: 'MIN 5 TA',
     schoolName: 'Madrasah Ibtidaiyah Negeri 5 Tulungagung',

@@ -29,15 +29,43 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({
 }) => {
   const [activeRoleTab, setActiveRoleTab] = useState<UserRole>(initialRole);
   const [username, setUsername] = useState('admin');
-  const [password, setPassword] = useState('pass1234');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
+  // Sync username jika ada pengguna yang sebelumnya tersimpan untuk role terkait
+  React.useEffect(() => {
+    try {
+      const savedUserStr = localStorage.getItem('sauma_auth_user');
+      if (savedUserStr) {
+        const savedUser = JSON.parse(savedUserStr);
+        if (savedUser?.role === activeRoleTab && savedUser?.username) {
+          setUsername(savedUser.username);
+        }
+      }
+    } catch {
+      // ignore
+    }
+  }, [activeRoleTab]);
+
   const handleSelectRoleTab = (role: UserRole) => {
     setActiveRoleTab(role);
     setErrorMessage(null);
+    setPassword(''); // Bersihkan field kata sandi setiap kali berganti peran
+    try {
+      const savedUserStr = localStorage.getItem('sauma_auth_user');
+      if (savedUserStr) {
+        const savedUser = JSON.parse(savedUserStr);
+        if (savedUser?.role === role && savedUser?.username) {
+          setUsername(savedUser.username);
+          return;
+        }
+      }
+    } catch {
+      // ignore
+    }
     if (role === 'ADMIN') {
       setUsername('admin');
     } else {
@@ -247,7 +275,7 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({
                       setPassword(e.target.value);
                       if (errorMessage) setErrorMessage(null);
                     }}
-                    placeholder="••••••••"
+                    placeholder="Masukkan kata sandi..."
                     className="w-full pl-10 pr-10 py-2.5 text-xs sm:text-sm rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] text-[var(--text-main)] focus:outline-none focus:border-[var(--color-arena-primary)] transition-all font-mono"
                   />
                   <button

@@ -62,6 +62,7 @@ export interface Official {
 
 export interface Team {
   id: string;
+  code?: string; // ID Khusus Tim (e.g. TM-01, TM-02, dll.)
   name: string;
   shortName: string;
   schoolName: string;
@@ -441,3 +442,26 @@ export interface OfficialMatchBAP {
 }
 
 export * from './partner';
+
+export type TeamCardLayout = 'STANDARD' | 'MINIMAL';
+export const STORAGE_KEY_TEAM_CARD_LAYOUT = 'sauma_arena_team_card_layout';
+
+export interface PublicStatsDisplayConfig {
+  showQuickMetrics: boolean;
+  showTeamGoalsChart: boolean;
+  showDisciplineChart: boolean;
+  showTopScorers: boolean;
+  showGoalDistribution?: boolean;
+  showCleanSheet?: boolean;
+}
+
+export const STORAGE_KEY_STATS_CONFIG = 'sauma_arena_public_stats_config';
+
+export const DEFAULT_PUBLIC_STATS_CONFIG: PublicStatsDisplayConfig = {
+  showQuickMetrics: true,
+  showTeamGoalsChart: true,
+  showDisciplineChart: true,
+  showTopScorers: true,
+  showGoalDistribution: false,
+  showCleanSheet: true,
+};

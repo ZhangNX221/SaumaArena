@@ -1,12 +1,14 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Award, ShieldAlert, ChevronRight, Search, Info, Crown, Ticket } from 'lucide-react';
+import { Award, ChevronRight, Search, Crown } from 'lucide-react';
 import { initialSupporterAssessments, initialTeams } from '@/mocks/tournamentData';
 import { getTeamLogoUrl } from '@/mocks/teamLogos';
 import { SupporterAssessment, Team } from '@/types';
 import { usePersistentState } from '@/hooks/usePersistentState';
 import { SupporterDetailModal } from './SupporterDetailModal';
+import { SupporterRulesInfo } from './SupporterRulesInfo';
+import { SupporterDesktopTable, SupporterLeaderboardRow } from './SupporterDesktopTable';
 import { PublicPageHeader } from '../layout/PublicPageHeader';
 
 export const SupporterTab: React.FC = () => {
@@ -15,32 +17,38 @@ export const SupporterTab: React.FC = () => {
   const [selectedSchool, setSelectedSchool] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Agregasi skor suporter per sekolah/tim (Poin 1 s/d 5 & Sanksi)
-  const leaderboard = teams
+  // Agregasi skor suporter per sekolah/tim (Poin Positif 1-5 & Sanksi 1-5 dengan label 1 kata)
+  const leaderboard: SupporterLeaderboardRow[] = teams
     .map((team) => {
       const teamAssessments = assessments.filter((a) => a.teamId === team.id);
 
-      let p1Points = 0; // 1. Koreografi (+25)
+      let p1Points = 0; // 1. Koreo (+25)
       let p2Points = 0; // 2. Maskot (+20)
       let p3Points = 0; // 3. Seragam (+15)
       let p4Points = 0; // 4. Yel-yel (+10)
       let p5Points = 0; // 5. Tiket (+1)
-      let penaltyPoints = 0;
+
+      let s1Points = 0; // Ricuh (-50)
+      let s2Points = 0; // Lempar (-25)
+      let s3Points = 0; // Rasis (-15)
+      let s4Points = 0; // Flare (-5)
+      let s5Points = 0; // Sampah (-1)
 
       teamAssessments.forEach((a) => {
         if (a.choreography) p1Points += 25;
         if (a.schoolMascot) p2Points += 20;
         if (a.supporterUniform) p3Points += 15;
         if (a.cheerMin3Chants) p4Points += 10;
-        p5Points += a.checkedInTickets * 1;
+        p5Points += a.checkedInTickets > 0 ? 1 : 0;
 
-        if (a.incidentViolentChaos) penaltyPoints += 50;
-        if (a.incidentThrowObjects) penaltyPoints += 25;
-        if (a.incidentRacismProvocation) penaltyPoints += 15;
-        if (a.incidentSmuggleContraband) penaltyPoints += 5;
-        if (a.incidentLitteringTribun) penaltyPoints += 1;
+        if (a.incidentViolentChaos) s1Points += 50;
+        if (a.incidentThrowObjects) s2Points += 25;
+        if (a.incidentRacismProvocation) s3Points += 15;
+        if (a.incidentSmuggleContraband) s4Points += 5;
+        if (a.incidentLitteringTribun) s5Points += 1;
       });
 
+      const penaltyPoints = s1Points + s2Points + s3Points + s4Points + s5Points;
       const totalScore = p1Points + p2Points + p3Points + p4Points + p5Points - penaltyPoints;
 
       return {
@@ -53,6 +61,11 @@ export const SupporterTab: React.FC = () => {
         p3Points,
         p4Points,
         p5Points,
+        s1Points,
+        s2Points,
+        s3Points,
+        s4Points,
+        s5Points,
         penaltyPoints,
         totalScore,
         matchCount: teamAssessments.length,
@@ -73,107 +86,8 @@ export const SupporterTab: React.FC = () => {
         description="Peringkat kreativitas dan ketertiban suporter tim berdasarkan koreografi, yel-yel, tiket resmi, serta sportivitas di tribun."
       />
 
-      {/* Ketentuan Penilaian */}
-      <div className="rounded-xl border-2 border-slate-300 dark:border-slate-800 bg-[var(--bg-surface)] p-5 sm:p-6 shadow-sm space-y-4">
-        <div className="flex items-center gap-2 pb-3 border-b border-slate-200 dark:border-slate-800">
-          <Info className="w-4 h-4 text-[#1D63B8] dark:text-sky-400 shrink-0" />
-          <h3 className="font-bebas text-base sm:text-lg text-[var(--text-main)] tracking-wider">
-            Ketentuan &amp; Bobot Penilaian Best Supporter MMFC I
-          </h3>
-        </div>
-
-        {/* Rubric Details Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          {/* Poin Positif */}
-          <div className="space-y-2 text-xs">
-            <div className="font-barlow font-bold uppercase tracking-wider text-[#1D63B8] dark:text-sky-400 flex items-center gap-1.5">
-              <Award className="w-3.5 h-3.5" />
-              <span>Poin Apresiasi Kreativitas Tribun</span>
-            </div>
-            <div className="space-y-1.5">
-              <div className="flex items-center justify-between p-2 rounded-lg bg-[var(--bg-muted)] border border-slate-200 dark:border-slate-800">
-                <div className="flex items-center gap-2">
-                  <span className="w-5 h-5 rounded-md bg-[#1D63B8] text-white font-black text-[10px] flex items-center justify-center shrink-0 font-mono">
-                    1
-                  </span>
-                  <span className="font-medium text-[var(--text-main)]">Membentang Koreografi 3D / Kertas</span>
-                </div>
-                <span className="stadium-badge-positive">+25</span>
-              </div>
-
-              <div className="flex items-center justify-between p-2 rounded-lg bg-[var(--bg-muted)] border border-slate-200 dark:border-slate-800">
-                <div className="flex items-center gap-2">
-                  <span className="w-5 h-5 rounded-md bg-[#1D63B8] text-white font-black text-[10px] flex items-center justify-center shrink-0 font-mono">
-                    2
-                  </span>
-                  <span className="font-medium text-[var(--text-main)]">Membawa Maskot Sekolah / Kostum Unik</span>
-                </div>
-                <span className="stadium-badge-positive">+20</span>
-              </div>
-
-              <div className="flex items-center justify-between p-2 rounded-lg bg-[var(--bg-muted)] border border-slate-200 dark:border-slate-800">
-                <div className="flex items-center gap-2">
-                  <span className="w-5 h-5 rounded-md bg-[#1D63B8] text-white font-black text-[10px] flex items-center justify-center shrink-0 font-mono">
-                    3
-                  </span>
-                  <span className="font-medium text-[var(--text-main)]">Menggunakan Seragam Kompak Kontingen</span>
-                </div>
-                <span className="stadium-badge-positive">+15</span>
-              </div>
-
-              <div className="flex items-center justify-between p-2 rounded-lg bg-[var(--bg-muted)] border border-slate-200 dark:border-slate-800">
-                <div className="flex items-center gap-2">
-                  <span className="w-5 h-5 rounded-md bg-[#1D63B8] text-white font-black text-[10px] flex items-center justify-center shrink-0 font-mono">
-                    4
-                  </span>
-                  <span className="font-medium text-[var(--text-main)]">Menyanyikan Yel-Yel Minimal 3 Lagu</span>
-                </div>
-                <span className="stadium-badge-positive">+10</span>
-              </div>
-
-              <div className="flex items-center justify-between p-2 rounded-lg bg-blue-50 dark:bg-sky-950/40 text-[#1D63B8] dark:text-sky-300 font-bold border border-blue-200 dark:border-sky-800">
-                <div className="flex items-center gap-2">
-                  <span className="w-5 h-5 rounded-md bg-[#1D63B8] text-white font-black text-[10px] flex items-center justify-center shrink-0 font-mono">
-                    5
-                  </span>
-                  <span className="text-[var(--text-main)] font-semibold">Tiket Penonton Terverifikasi per Pertandingan</span>
-                </div>
-                <span className="stadium-badge-positive">+1 / Tiket</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Sanksi Pengurangan */}
-          <div className="space-y-2 text-xs">
-            <div className="font-barlow font-bold uppercase tracking-wider text-red-600 dark:text-red-400 flex items-center gap-1.5">
-              <ShieldAlert className="w-3.5 h-3.5" />
-              <span>Sanksi Pelanggaran Ketertiban Tribun</span>
-            </div>
-            <div className="space-y-1.5">
-              <div className="flex justify-between items-center p-2 rounded-lg bg-red-500/10 border border-red-500/20 text-[var(--text-main)]">
-                <span className="font-medium">Kericuhan atau Kekerasan Fisik</span>
-                <span className="stadium-badge-penalty font-mono tabular-nums">-50</span>
-              </div>
-              <div className="flex justify-between items-center p-2 rounded-lg bg-red-500/10 border border-red-500/20 text-[var(--text-main)]">
-                <span className="font-medium">Melempar Benda ke Lapangan Pertandingan</span>
-                <span className="stadium-badge-penalty font-mono tabular-nums">-25</span>
-              </div>
-              <div className="flex justify-between items-center p-2 rounded-lg bg-red-500/10 border border-red-500/20 text-[var(--text-main)]">
-                <span className="font-medium">Tindakan Rasisme atau Provokasi Negatif</span>
-                <span className="stadium-badge-penalty font-mono tabular-nums">-15</span>
-              </div>
-              <div className="flex justify-between items-center p-2 rounded-lg bg-red-500/10 border border-red-500/20 text-[var(--text-main)]">
-                <span className="font-medium">Membawa Barang Terlarang / Flare / Petasan</span>
-                <span className="stadium-badge-penalty font-mono tabular-nums">-5</span>
-              </div>
-              <div className="flex justify-between items-center p-2 rounded-lg bg-red-500/10 border border-red-500/20 text-[var(--text-main)]">
-                <span className="font-medium">Membuang Sampah Sembarangan / Mengotori Tribun</span>
-                <span className="stadium-badge-penalty font-mono tabular-nums">-1</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      {/* Ketentuan & Bobot Penilaian (Subkomponen Ramping) */}
+      <SupporterRulesInfo />
 
       {/* Search and Filter Toolbar */}
       <div className="space-y-4">
@@ -208,10 +122,9 @@ export const SupporterTab: React.FC = () => {
                     : 'bg-[var(--bg-surface)] border-slate-300 dark:border-slate-800'
                 }`}
               >
-                {/* Header Row: Rank, Logo, Name, Teko Score */}
+                {/* Header Row: Rank, Logo, Name, Score */}
                 <div className="flex items-center justify-between gap-3 pb-3 border-b border-slate-200 dark:border-slate-800">
                   <div className="flex items-center gap-3 min-w-0">
-                    {/* Rank Badge */}
                     <div className="shrink-0">
                       {isTop1 ? (
                         <div className="w-8 h-8 rounded-lg bg-[var(--color-arena-accent)] text-slate-950 font-black text-xs flex flex-col items-center justify-center shadow-xs font-mono">
@@ -225,7 +138,6 @@ export const SupporterTab: React.FC = () => {
                       )}
                     </div>
 
-                    {/* Logo & School Name */}
                     <div className="w-9 h-9 rounded-lg bg-[var(--bg-muted)] border border-slate-200 dark:border-slate-700 p-1 flex items-center justify-center shrink-0 overflow-hidden">
                       <img
                         src={row.logoUrl || getTeamLogoUrl(row.teamId)}
@@ -245,7 +157,6 @@ export const SupporterTab: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* Big Total Score */}
                   <div className="text-right shrink-0">
                     <span className="text-2xl font-teko font-bold tabular-nums text-[#1D63B8] dark:text-sky-400 leading-none block">
                       {row.totalScore}
@@ -256,7 +167,7 @@ export const SupporterTab: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Score Breakdown Pills */}
+                {/* Score Breakdown Pills (1 Kata Saja) */}
                 <div className="py-2.5 flex flex-wrap items-center gap-1.5 text-[11px] font-mono">
                   <span className="px-2 py-0.5 rounded-sm bg-blue-50 dark:bg-sky-950/40 text-[#1D63B8] dark:text-sky-300 border border-blue-200 dark:border-sky-800 font-bold">
                     Koreo +{row.p1Points}
@@ -273,14 +184,39 @@ export const SupporterTab: React.FC = () => {
                   <span className="px-2 py-0.5 rounded-sm bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 font-bold">
                     Tiket +{row.p5Points}
                   </span>
-                  {row.penaltyPoints > 0 && (
+                  {row.s1Points > 0 && (
                     <span className="px-2 py-0.5 rounded-sm bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800 font-bold">
-                      Sanksi -{row.penaltyPoints}
+                      Ricuh -{row.s1Points}
+                    </span>
+                  )}
+                  {row.s2Points > 0 && (
+                    <span className="px-2 py-0.5 rounded-sm bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800 font-bold">
+                      Lempar -{row.s2Points}
+                    </span>
+                  )}
+                  {row.s3Points > 0 && (
+                    <span className="px-2 py-0.5 rounded-sm bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800 font-bold">
+                      Rasis -{row.s3Points}
+                    </span>
+                  )}
+                  {row.s4Points > 0 && (
+                    <span className="px-2 py-0.5 rounded-sm bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800 font-bold">
+                      Flare -{row.s4Points}
+                    </span>
+                  )}
+                  {row.s5Points > 0 && (
+                    <span className="px-2 py-0.5 rounded-sm bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800 font-bold">
+                      Sampah -{row.s5Points}
+                    </span>
+                  )}
+                  {row.penaltyPoints > 0 && (
+                    <span className="px-2 py-0.5 rounded-sm bg-red-100 dark:bg-red-900/60 text-red-700 dark:text-red-300 border border-red-300 dark:border-red-700 font-black">
+                      Total Sanksi -{row.penaltyPoints}
                     </span>
                   )}
                 </div>
 
-                {/* Full-width 44px Action Button */}
+                {/* Action Button */}
                 <button
                   type="button"
                   onClick={() => setSelectedSchool(row.teamId)}
@@ -295,140 +231,10 @@ export const SupporterTab: React.FC = () => {
         </div>
 
         {/* 2. DESKTOP/TABLET TABULAR LEADERBOARD (hidden sm:block) */}
-        <div className="hidden sm:block overflow-x-auto rounded-xl border-2 border-slate-300 dark:border-slate-800 bg-[var(--bg-surface)] shadow-sm">
-          <table className="w-full text-left text-xs border-collapse">
-            <thead>
-              <tr className="border-b-2 border-slate-300 dark:border-slate-800 bg-[var(--bg-muted)] text-[var(--text-muted)] font-bold uppercase tracking-wider text-xs font-barlow">
-                <th className="py-3 px-3 w-12 text-center">Pos</th>
-                <th className="py-3 px-4 min-w-[200px] sticky left-0 bg-[var(--bg-muted)] sm:static">Sekolah Suporter</th>
-                <th className="py-3 px-2 text-center">Laga</th>
-                <th className="py-3 px-2 text-center">
-                  <div className="flex flex-col items-center">
-                    <span className="w-5 h-5 rounded-md bg-[var(--bg-surface)] border border-slate-300 dark:border-slate-700 text-[#1D63B8] dark:text-sky-400 font-black text-[11px] flex items-center justify-center shadow-2xs font-mono">1</span>
-                    <span className="text-[10px] text-[var(--text-muted)] font-bold mt-0.5 font-barlow uppercase">Koreo</span>
-                  </div>
-                </th>
-                <th className="py-3 px-2 text-center">
-                  <div className="flex flex-col items-center">
-                    <span className="w-5 h-5 rounded-md bg-[var(--bg-surface)] border border-slate-300 dark:border-slate-700 text-[#1D63B8] dark:text-sky-400 font-black text-[11px] flex items-center justify-center shadow-2xs font-mono">2</span>
-                    <span className="text-[10px] text-[var(--text-muted)] font-bold mt-0.5 font-barlow uppercase">Maskot</span>
-                  </div>
-                </th>
-                <th className="py-3 px-2 text-center">
-                  <div className="flex flex-col items-center">
-                    <span className="w-5 h-5 rounded-md bg-[var(--bg-surface)] border border-slate-300 dark:border-slate-700 text-[#1D63B8] dark:text-sky-400 font-black text-[11px] flex items-center justify-center shadow-2xs font-mono">3</span>
-                    <span className="text-[10px] text-[var(--text-muted)] font-bold mt-0.5 font-barlow uppercase">Seragam</span>
-                  </div>
-                </th>
-                <th className="py-3 px-2 text-center">
-                  <div className="flex flex-col items-center">
-                    <span className="w-5 h-5 rounded-md bg-[var(--bg-surface)] border border-slate-300 dark:border-slate-700 text-[#1D63B8] dark:text-sky-400 font-black text-[11px] flex items-center justify-center shadow-2xs font-mono">4</span>
-                    <span className="text-[10px] text-[var(--text-muted)] font-bold mt-0.5 font-barlow uppercase">Yel-yel</span>
-                  </div>
-                </th>
-                <th className="py-3 px-2 text-center">
-                  <div className="flex flex-col items-center">
-                    <span className="w-5 h-5 rounded-md bg-[var(--bg-surface)] border border-slate-300 dark:border-slate-700 text-[var(--color-arena-accent)] font-black text-[11px] flex items-center justify-center shadow-2xs font-mono">5</span>
-                    <span className="text-[10px] text-[var(--text-muted)] font-bold mt-0.5 font-barlow uppercase">Tiket</span>
-                  </div>
-                </th>
-                <th className="py-3 px-2.5 text-center text-red-600 dark:text-red-400">Sanksi</th>
-                <th className="py-3 px-4 text-right font-bold text-[var(--text-main)]">Total Skor</th>
-                <th className="py-3 px-3 text-center w-14">Rincian</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
-              {leaderboard.map((row, index) => {
-                const rank = index + 1;
-                const isTop1 = rank === 1;
-
-                return (
-                  <tr
-                    key={row.teamId}
-                    className={`hover:bg-[var(--bg-muted)]/60 transition-colors ${
-                      isTop1 ? 'bg-amber-500/5 dark:bg-amber-500/10' : ''
-                    }`}
-                  >
-                    <td className="py-4 px-4 text-center">
-                      {isTop1 ? (
-                        <span className="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-[var(--color-arena-accent)] text-slate-950 font-black text-xs shadow-xs font-mono">
-                          1
-                        </span>
-                      ) : (
-                        <span className="font-extrabold text-sm text-[var(--text-muted)] font-mono">{rank}</span>
-                      )}
-                    </td>
-
-                    <td className="py-4 px-4 font-medium text-[var(--text-main)] sticky left-0 bg-[var(--bg-surface)] sm:static">
-                      <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-lg bg-[var(--bg-muted)] border border-slate-200 dark:border-slate-700 flex items-center justify-center p-1 shrink-0 overflow-hidden shadow-2xs">
-                          <img
-                            src={row.logoUrl || getTeamLogoUrl(row.teamId)}
-                            alt={row.schoolName}
-                            className="w-full h-full object-contain"
-                          />
-                        </div>
-                        <div className="min-w-0">
-                          <div className="font-barlow font-bold text-sm sm:text-base tracking-wide text-[var(--text-main)] truncate max-w-[200px] sm:max-w-none">
-                            {row.schoolName}
-                          </div>
-                          <div className="text-[10px] text-[var(--text-muted)] font-medium">
-                            Basis Suporter Terdaftar
-                          </div>
-                        </div>
-                      </div>
-                    </td>
-
-                    <td className="py-4 px-3 text-center tabular-nums font-mono text-[var(--text-muted)] font-semibold">
-                      {row.matchCount}
-                    </td>
-
-                    <td className="py-4 px-2 text-center tabular-nums font-mono font-bold text-[var(--text-main)]">
-                      +{row.p1Points}
-                    </td>
-
-                    <td className="py-4 px-2 text-center tabular-nums font-mono font-bold text-[var(--text-main)]">
-                      +{row.p2Points}
-                    </td>
-
-                    <td className="py-4 px-2 text-center tabular-nums font-mono font-bold text-[var(--text-main)]">
-                      +{row.p3Points}
-                    </td>
-
-                    <td className="py-4 px-2 text-center tabular-nums font-mono font-bold text-[var(--text-main)]">
-                      +{row.p4Points}
-                    </td>
-
-                    <td className="py-4 px-2 text-center tabular-nums font-mono font-bold text-emerald-700 dark:text-emerald-400">
-                      +{row.p5Points}
-                    </td>
-
-                    <td className="py-4 px-2.5 text-center tabular-nums font-mono font-bold text-red-600 dark:text-red-400">
-                      {row.penaltyPoints > 0 ? `-${row.penaltyPoints}` : '0'}
-                    </td>
-
-                    <td className="py-4 px-5 text-right">
-                      <span className="text-xl sm:text-2xl font-teko font-bold tabular-nums text-[#1D63B8] dark:text-sky-400 leading-none tracking-wide">
-                        {row.totalScore}
-                      </span>
-                    </td>
-
-                    <td className="py-4 px-4 text-center">
-                      <button
-                        type="button"
-                        onClick={() => setSelectedSchool(row.teamId)}
-                        className="btn-tactile inline-flex items-center justify-center w-8 h-8 rounded-lg border border-slate-300 dark:border-slate-700 text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-muted)] transition-colors cursor-pointer"
-                        aria-label={`Rincian nilai ${row.schoolName}`}
-                      >
-                        <ChevronRight className="w-4 h-4" />
-                      </button>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+        <SupporterDesktopTable
+          leaderboard={leaderboard}
+          onSelectSchool={(teamId) => setSelectedSchool(teamId)}
+        />
       </div>
 
       {/* School Detail Modal Subcomponent */}

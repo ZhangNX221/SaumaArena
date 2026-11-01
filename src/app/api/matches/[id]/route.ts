@@ -126,6 +126,13 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
       return NextResponse.json({ success: false, error: 'Pertandingan tidak ditemukan' }, { status: 404 });
     }
 
+    if (match.locked && auth.user.role !== 'ADMIN') {
+      return NextResponse.json(
+        { success: false, error: 'Pertandingan telah dikunci (verified). Hanya Admin yang dapat mengubah hasil pertandingan.' },
+        { status: 403 }
+      );
+    }
+
     const realId = match.id;
     let currentResult: Record<string, any> = {};
     try {
@@ -203,6 +210,13 @@ export async function DELETE(request: Request, context: { params: Promise<{ id: 
 
     if (!match) {
       return NextResponse.json({ success: false, error: 'Pertandingan tidak ditemukan' }, { status: 404 });
+    }
+
+    if (match.locked && auth.user.role !== 'ADMIN') {
+      return NextResponse.json(
+        { success: false, error: 'Pertandingan telah dikunci (verified). Hanya Admin yang dapat mengubah hasil pertandingan.' },
+        { status: 403 }
+      );
     }
 
     run('DELETE FROM matches WHERE id = ?', [match.id]);

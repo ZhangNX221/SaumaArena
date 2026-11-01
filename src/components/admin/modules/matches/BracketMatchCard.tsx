@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { BracketMatch } from '@/mocks/bracketData';
-import { initialTeams } from '@/mocks/tournamentData';
+import { initialTeams, getTeamCode } from '@/mocks/tournamentData';
 
 interface TeamDropdownProps {
   currentId: string;
@@ -26,35 +26,37 @@ export const TeamDropdown: React.FC<TeamDropdownProps> = ({
       <option value="">{isTbd ? currentName : '-- Ganti Pilihan Tim --'}</option>
       <optgroup label="Grup A">
         {initialTeams.filter((t) => t.group === 'A').map((t) => (
-          <option key={t.id} value={t.id}>{t.name} (Grup A)</option>
+          <option key={t.id} value={t.id}>[{getTeamCode(t)}] {t.name} (Grup A)</option>
         ))}
       </optgroup>
       <optgroup label="Grup B">
         {initialTeams.filter((t) => t.group === 'B').map((t) => (
-          <option key={t.id} value={t.id}>{t.name} (Grup B)</option>
+          <option key={t.id} value={t.id}>[{getTeamCode(t)}] {t.name} (Grup B)</option>
         ))}
       </optgroup>
       <optgroup label="Grup C">
         {initialTeams.filter((t) => t.group === 'C').map((t) => (
-          <option key={t.id} value={t.id}>{t.name} (Grup C)</option>
+          <option key={t.id} value={t.id}>[{getTeamCode(t)}] {t.name} (Grup C)</option>
         ))}
       </optgroup>
       <optgroup label="Grup D">
         {initialTeams.filter((t) => t.group === 'D').map((t) => (
-          <option key={t.id} value={t.id}>{t.name} (Grup D)</option>
+          <option key={t.id} value={t.id}>[{getTeamCode(t)}] {t.name} (Grup D)</option>
         ))}
       </optgroup>
     </select>
   );
 };
 
+export type BracketStageKey = 'R24' | 'R16' | 'QF' | 'SF' | 'GF';
+
 interface BracketMatchCardProps {
   node: BracketMatch;
-  stage: 'QF' | 'SF' | 'GF';
+  stage: BracketStageKey;
   accentColor: string;
-  onTeamChange: (stage: 'QF' | 'SF' | 'GF', matchId: string, slot: 'teamA' | 'teamB', teamId: string) => void;
-  onScoreChange: (stage: 'QF' | 'SF' | 'GF', matchId: string, slot: 'teamA' | 'teamB', score: number) => void;
-  onSetWinner: (stage: 'QF' | 'SF' | 'GF', matchId: string, winnerSlot: 'teamA' | 'teamB') => void;
+  onTeamChange: (stage: BracketStageKey, matchId: string, slot: 'teamA' | 'teamB', teamId: string) => void;
+  onScoreChange: (stage: BracketStageKey, matchId: string, slot: 'teamA' | 'teamB', score: number) => void;
+  onSetWinner: (stage: BracketStageKey, matchId: string, winnerSlot: 'teamA' | 'teamB') => void;
 }
 
 export const BracketMatchCard: React.FC<BracketMatchCardProps> = ({

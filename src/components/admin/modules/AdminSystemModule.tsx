@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Users, Settings, Plus, ShieldCheck, Mail, Phone, Award, Megaphone, CheckCircle2, Save, Globe } from 'lucide-react';
+import { Users, Settings, Plus, ShieldCheck, Mail, Phone, Award, Megaphone, CheckCircle2, Save, Globe, LayoutGrid, BarChart3 } from 'lucide-react';
 import { PRESET_USERS } from '@/mocks/multiSportData';
 import { AppUser, SportCode, PublicHeaderConfig } from '@/types';
 import { DEFAULT_HEADER_CONFIG } from '@/mocks/headerConfig';
@@ -9,6 +9,8 @@ import { AdminBannerConfig } from './AdminBannerConfig';
 import { ConfirmModal } from '@/components/admin/common/ConfirmModal';
 import { UserFormModal, UserFormData } from './system/UserFormModal';
 import { PublicPartnersTab } from './system/PublicPartnersTab';
+import { TeamCardDisplaySettingsTab } from './system/TeamCardDisplaySettingsTab';
+import { StatsDisplaySettingsTab } from './system/StatsDisplaySettingsTab';
 import { AdminPageHeaderCard } from '@/components/admin/common/AdminPageHeaderCard';
 
 interface AdminSystemModuleProps {
@@ -36,7 +38,7 @@ export const AdminSystemModule: React.FC<AdminSystemModuleProps> = ({
 
   const [broadcastMessage, setBroadcastMessage] = useState('Pemberitahuan: Seluruh juri cabor Futsal harap berkumpul di Meja Pengawas pukul 14:00 WIB untuk briefing babak gugur.');
   const [isBroadcastSaved, setIsBroadcastSaved] = useState(false);
-  const [publicSection, setPublicSection] = useState<'partners' | 'banners' | 'broadcast'>('partners');
+  const [publicSection, setPublicSection] = useState<'partners' | 'banners' | 'team_cards' | 'stats_config' | 'broadcast'>('partners');
 
   const handleOpenAddUser = () => {
     setEditingUser(null);
@@ -279,6 +281,32 @@ export const AdminSystemModule: React.FC<AdminSystemModuleProps> = ({
 
             <button
               type="button"
+              onClick={() => setPublicSection('team_cards')}
+              className={`btn-tactile flex items-center gap-1.5 px-3.5 py-2 rounded-xl transition-all ${
+                publicSection === 'team_cards'
+                  ? 'bg-[var(--color-arena-primary)] text-white shadow-xs'
+                  : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'
+              }`}
+            >
+              <LayoutGrid className="w-3.5 h-3.5" />
+              <span>Tampilan Card Tim</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setPublicSection('stats_config')}
+              className={`btn-tactile flex items-center gap-1.5 px-3.5 py-2 rounded-xl transition-all ${
+                publicSection === 'stats_config'
+                  ? 'bg-[var(--color-arena-primary)] text-white shadow-xs'
+                  : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'
+              }`}
+            >
+              <BarChart3 className="w-3.5 h-3.5" />
+              <span>Statistik &amp; Performa</span>
+            </button>
+
+            <button
+              type="button"
               onClick={() => setPublicSection('broadcast')}
               className={`btn-tactile flex items-center gap-1.5 px-3.5 py-2 rounded-xl transition-all ${
                 publicSection === 'broadcast'
@@ -304,7 +332,13 @@ export const AdminSystemModule: React.FC<AdminSystemModuleProps> = ({
             />
           )}
 
-          {/* 3. Pesan Broadcast Meja */}
+          {/* 3. Gaya Tampilan Card Tim */}
+          {publicSection === 'team_cards' && <TeamCardDisplaySettingsTab />}
+
+          {/* 4. Pengaturan Grafik Statistik & Performa */}
+          {publicSection === 'stats_config' && <StatsDisplaySettingsTab />}
+
+          {/* 5. Pesan Broadcast Meja */}
           {publicSection === 'broadcast' && (
             <div className="p-5 rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] shadow-xs space-y-4">
               <h3 className="text-sm font-bold text-[var(--text-main)] flex items-center gap-2">

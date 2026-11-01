@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { Plus, Search, Edit2, Trash2 } from 'lucide-react';
-import { initialTeams } from '@/mocks/tournamentData';
+import { initialTeams, getTeamCode } from '@/mocks/tournamentData';
 import { Team } from '@/types';
 import { ConfirmModal } from '@/components/admin/common/ConfirmModal';
 import { TeamEditModal, TeamFormData } from './TeamEditModal';
@@ -46,6 +46,7 @@ export const TeamsManagementTab: React.FC = () => {
           t.id === editingTeam.id
             ? {
                 ...t,
+                code: formData.code ? formData.code.toUpperCase() : t.code,
                 name: formData.name,
                 schoolName: formData.schoolName,
                 city: formData.city,
@@ -57,8 +58,10 @@ export const TeamsManagementTab: React.FC = () => {
         )
       );
     } else {
+      const generatedCode = formData.code ? formData.code.toUpperCase() : `TM-${String(teams.length + 1).padStart(2, '0')}`;
       const newTeam: Team = {
         id: `team-${Date.now()}`,
+        code: generatedCode,
         name: formData.name,
         shortName: formData.name.slice(0, 3).toUpperCase(),
         schoolName: formData.schoolName,
@@ -90,8 +93,10 @@ export const TeamsManagementTab: React.FC = () => {
     setEditingTeam(null);
   };
 
-  const filtered = teams.filter((t) => {
+  const filtered = teams.filter((t, idx) => {
+    const code = getTeamCode(t, idx).toLowerCase();
     const matchSearch =
+      code.includes(search.toLowerCase()) ||
       t.name.toLowerCase().includes(search.toLowerCase()) ||
       t.schoolName.toLowerCase().includes(search.toLowerCase()) ||
       t.city.toLowerCase().includes(search.toLowerCase()) ||
@@ -157,7 +162,7 @@ export const TeamsManagementTab: React.FC = () => {
                 </td>
               </tr>
             ) : (
-              filtered.map((t) => (
+              filtered.map((t, idx) => (
                 <tr key={t.id} className="hover:bg-[var(--bg-muted)]/30 transition-colors">
                   <td className="py-3.5 px-4 font-bold text-[var(--text-main)]">
                     <div className="flex items-center gap-3">
@@ -167,7 +172,12 @@ export const TeamsManagementTab: React.FC = () => {
                         className="w-12 h-12 object-contain shrink-0 filter drop-shadow-2xs"
                       />
                       <div>
-                        <div className="font-bold text-xs sm:text-sm text-[var(--text-main)]">{t.schoolName}</div>
+                        <div className="font-bold text-xs sm:text-sm text-[var(--text-main)] flex items-center gap-2">
+                          <span className="px-1.5 py-0.5 rounded bg-[var(--color-arena-primary-light)] text-[var(--color-arena-primary)] font-mono text-[10px] font-bold">
+                            {getTeamCode(t, idx)}
+                          </span>
+                          <span>{t.schoolName}</span>
+                        </div>
                         <div className="text-[11px] text-[var(--text-muted)] font-normal">{t.city}</div>
                       </div>
                     </div>

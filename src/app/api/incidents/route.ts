@@ -88,6 +88,12 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
+    // Otorisasi ketat: Hanya ADMIN atau REFEREE yang berhak melaporkan insiden Komdis
+    const auth = requireAuth(request, ['ADMIN', 'REFEREE']);
+    if (auth instanceof NextResponse) return auth;
+    const reporterId = auth.user.id;
+    const reporterName = auth.user.name;
+
     const body = await request.json().catch(() => ({}));
     const {
       matchId = null,
@@ -109,12 +115,6 @@ export async function POST(request: Request) {
     const validClass = ['RINGAN', 'SEDANG', 'BERAT', 'FORCE_MAJEURE'].includes(classification.toUpperCase())
       ? classification.toUpperCase()
       : 'SEDANG';
-
-    // Otorisasi ketat: Hanya ADMIN atau REFEREE yang berhak melaporkan insiden Komdis
-    const auth = requireAuth(request, ['ADMIN', 'REFEREE']);
-    if (auth instanceof NextResponse) return auth;
-    const reporterId = auth.user.id;
-    const reporterName = auth.user.name;
 
     const incidentId = `inc_${Date.now()}_${randomUUID().slice(0, 6)}`;
 

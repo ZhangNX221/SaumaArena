@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { X, ChevronLeft, ChevronRight, Plus, Minus, AlertCircle } from 'lucide-react';
 import { TicketCategoryType, PaymentChannelType, TicketOrderData } from '@/types/ticket';
 import { TICKET_CATEGORIES, PAYMENT_CHANNELS } from '@/mocks/ticketConfig';
-import { initialTeams } from '@/mocks/tournamentData';
+import { initialTeams, getTeamCode } from '@/mocks/tournamentData';
 import { TicketCategoryCard } from './TicketCategoryCard';
 import { PaymentMethodSelector } from './PaymentMethodSelector';
 import { PaymentCheckoutScreen } from './PaymentCheckoutScreen';
@@ -213,9 +213,9 @@ export const TicketPurchaseModal: React.FC<TicketPurchaseModalProps> = ({
                 onChange={(e) => setSupportedTeamId(e.target.value)}
                 className="w-full px-3.5 py-2.5 rounded-xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] text-[var(--text-main)] text-xs sm:text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[var(--color-arena-primary)]"
               >
-                {initialTeams.map((team) => (
+                {initialTeams.map((team, idx) => (
                   <option key={team.id} value={team.id}>
-                    {team.schoolName} ({team.shortName})
+                    [{getTeamCode(team, idx)}] {team.schoolName} ({team.shortName})
                   </option>
                 ))}
               </select>

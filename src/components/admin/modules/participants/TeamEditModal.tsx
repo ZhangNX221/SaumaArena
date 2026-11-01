@@ -7,6 +7,7 @@ import { Team } from '@/types';
 import { ModalPortal } from '@/components/common/ModalPortal';
 
 export interface TeamFormData {
+  code?: string;
   name: string;
   schoolName: string;
   city: string;
@@ -31,6 +32,7 @@ export const TeamEditModal: React.FC<TeamEditModalProps> = ({
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [formData, setFormData] = useState<TeamFormData>({
+    code: '',
     name: '',
     schoolName: '',
     city: 'Blitar',
@@ -43,6 +45,7 @@ export const TeamEditModal: React.FC<TeamEditModalProps> = ({
   useEffect(() => {
     if (editingTeam) {
       setFormData({
+        code: editingTeam.code || '',
         name: editingTeam.name,
         schoolName: editingTeam.schoolName,
         city: editingTeam.city,
@@ -53,6 +56,7 @@ export const TeamEditModal: React.FC<TeamEditModalProps> = ({
       });
     } else {
       setFormData({
+        code: '',
         name: '',
         schoolName: '',
         city: 'Blitar',
@@ -195,18 +199,32 @@ export const TeamEditModal: React.FC<TeamEditModalProps> = ({
               />
             </div>
 
-            <div>
-              <label className="font-barlow font-bold uppercase tracking-wider text-[11px] text-[var(--text-main)] block mb-1">
-                Nama Tim / Klub
-              </label>
-              <input
-                type="text"
-                required
-                placeholder="Contoh: SDI KARDINA MASSA"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)]"
-              />
+            <div className="grid grid-cols-3 gap-3">
+              <div className="col-span-1">
+                <label className="font-barlow font-bold uppercase tracking-wider text-[11px] text-[var(--text-main)] block mb-1">
+                  ID Tim (Kode)
+                </label>
+                <input
+                  type="text"
+                  placeholder="TM-01"
+                  value={formData.code || ''}
+                  onChange={(e) => setFormData({ ...formData, code: e.target.value.toUpperCase() })}
+                  className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--color-arena-primary)] font-mono font-bold uppercase"
+                />
+              </div>
+              <div className="col-span-2">
+                <label className="font-barlow font-bold uppercase tracking-wider text-[11px] text-[var(--text-main)] block mb-1">
+                  Nama Tim / Klub
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="Contoh: SDI KARDINA MASSA"
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)]"
+                />
+              </div>
             </div>
 
             <div className="grid grid-cols-2 gap-3">

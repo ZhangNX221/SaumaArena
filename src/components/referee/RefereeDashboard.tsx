@@ -31,6 +31,7 @@ import { RefereeDashboardHome } from './RefereeDashboardHome';
 import { pushMatchToBackend } from '@/lib/apiSync';
 import { RefereeReportsView } from './RefereeReportsView';
 import { RefereeStandingsView } from './RefereeStandingsView';
+import { RefereeBracketView } from './RefereeBracketView';
 import { RefereeSupporterScoringView } from './RefereeSupporterScoringView';
 
 interface RefereeDashboardProps {
@@ -67,7 +68,10 @@ export const RefereeDashboard: React.FC<RefereeDashboardProps> = ({
     matches[0]?.id ||
     'match-1';
 
-  const [selectedMatchId, setSelectedMatchId] = useState<string>(initialMatchId);
+  const [selectedMatchId, setSelectedMatchId] = usePersistentState<string>(
+    'sauma_arena_active_referee_match_id',
+    initialMatchId
+  );
   const liveMatch = matches.find((m) => m.id === selectedMatchId) || matches[0];
   const [isOnline, setIsOnline] = useState(true);
 
@@ -325,9 +329,14 @@ export const RefereeDashboard: React.FC<RefereeDashboardProps> = ({
             />
           )}
 
-          {/* TAB: KLASEMEN & BAGAN */}
+          {/* TAB: KLASEMEN GRUB */}
           {activeTab === 'standings' && (
             <RefereeStandingsView />
+          )}
+
+          {/* TAB: BRACKET */}
+          {activeTab === 'bracket' && (
+            <RefereeBracketView />
           )}
 
           {/* TAB: PENILAIAN SKOR SUPORTER */}

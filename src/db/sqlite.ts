@@ -26,6 +26,18 @@ export function getDatabase(): DatabaseSync {
   // Initialize schema
   db.exec(SCHEMA_SQL);
 
+  // Auto-migration: Ensure teams table has code column & index
+  try {
+    db.exec('ALTER TABLE teams ADD COLUMN code TEXT;');
+  } catch {
+    // Column already exists
+  }
+  try {
+    db.exec('CREATE INDEX IF NOT EXISTS idx_teams_code ON teams(code);');
+  } catch {
+    // Index already exists
+  }
+
   // Normalize match IDs if existing database has legacy m_ prefix
   try {
     db.exec(`

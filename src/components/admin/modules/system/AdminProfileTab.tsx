@@ -1,22 +1,23 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   User,
   Shield,
   Mail,
   Phone,
   CheckCircle2,
-  Bell,
+  AlertCircle,
   Smartphone,
   Save,
   Clock,
   Sparkles,
   Camera,
-  Check,
+  Loader2,
 } from 'lucide-react';
 import { AppUser } from '@/types';
 import { AdminSecurityCard } from './AdminSecurityCard';
+import { AdminAccessPreferencesCard } from './AdminAccessPreferencesCard';
 
 interface AdminProfileTabProps {
   user?: AppUser | null;
@@ -30,25 +31,97 @@ export const AdminProfileTab: React.FC<AdminProfileTabProps> = ({
   onToggleDarkMode,
 }) => {
   // Form profile state
-  const [name, setName] = useState(user?.name || 'Ahmad Taufiq');
+  const [name, setName] = useState(user?.name || 'Administrator');
   const [email, setEmail] = useState(user?.email || 'admin@sauma.arena.id');
-  const [username, setUsername] = useState('admin_sauma');
+  const [username, setUsername] = useState(user?.username || 'admin');
   const [phone, setPhone] = useState('+62 812-3456-7890');
-  const [avatarInitials, setAvatarInitials] = useState('AT');
+  const [avatarInitials, setAvatarInitials] = useState(
+    user?.avatarText || user?.name?.slice(0, 2).toUpperCase() || 'AD'
+  );
   const [avatarColor, setAvatarColor] = useState('from-blue-600 to-indigo-700');
 
-  // Preference state
-  const [soundNotification, setSoundNotification] = useState(true);
-  const [autoVerifyBAP, setAutoVerifyBAP] = useState(false);
-  const [defaultSport, setDefaultSport] = useState('ALL');
-
-  // Feedback states
+  // Feedback & Loading states
+  const [isLoading, setIsLoading] = useState(false);
   const [savedSuccess, setSavedSuccess] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [successMessage, setSuccessMessage] = useState('Profil dan username berhasil disimpan ke database!');
 
-  const handleSaveProfile = (e: React.FormEvent) => {
+  // Sync state ketika data user prop dimuat atau diperbarui
+  useEffect(() => {
+    if (user) {
+      if (user.name) setName(user.name);
+      if (user.email) setEmail(user.email);
+      if (user.username) setUsername(user.username);
+      if (user.avatarText) setAvatarInitials(user.avatarText);
+    }
+  }, [user]);
+
+  const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSavedSuccess(true);
-    setTimeout(() => setSavedSuccess(false), 3000);
+    setErrorMessage('');
+    setSavedSuccess(false);
+
+    if (!username.trim()) {
+      setErrorMessage('Username login tidak boleh kosong.');
+      return;
+    }
+    if (!name.trim()) {
+      setErrorMessage('Nama penanggung jawab tidak boleh kosong.');
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      let token: string | null = null;
+      try {
+        token = localStorage.getItem('sauma_auth_token');
+      } catch {
+        // ignore
+      }
+
+      const res = await fetch('/api/auth/profile', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          username: username.trim(),
+          name: name.trim(),
+          email: email.trim(),
+          userId: user?.id,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        setErrorMessage(data.error || 'Gagal menyimpan perubahan profil ke database.');
+        return;
+      }
+
+      if (data.token) {
+        try {
+          localStorage.setItem('sauma_auth_token', data.token);
+          if (data.user) {
+            localStorage.setItem('sauma_auth_user', JSON.stringify(data.user));
+          }
+        } catch {
+          // ignore
+        }
+      }
+
+      setSuccessMessage(data.message || 'Profil dan username berhasil disimpan ke database!');
+      setSavedSuccess(true);
+      setTimeout(() => setSavedSuccess(false), 4500);
+    } catch (err: any) {
+      console.error('Save profile error:', err);
+      setErrorMessage('Gagal menghubungi server untuk menyimpan data.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const AVATAR_PALETTES = [
@@ -194,20 +267,37 @@ export const AdminProfileTab: React.FC<AdminProfileTabProps> = ({
                 </div>
               </div>
 
+              {errorMessage && (
+                <div className="p-2.5 rounded-xl bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 font-bold flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 shrink-0" />
+                  <span>{errorMessage}</span>
+                </div>
+              )}
+
               {savedSuccess && (
                 <div className="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 dark:text-emerald-400 font-bold flex items-center gap-2">
                   <CheckCircle2 className="w-4 h-4 shrink-0" />
-                  <span>Profil dan kontak admin berhasil diperbarui!</span>
+                  <span>{successMessage}</span>
                 </div>
               )}
 
               <div className="flex justify-end pt-2">
                 <button
                   type="submit"
-                  className="btn-tactile flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[var(--color-arena-primary)] text-white font-barlow font-bold uppercase tracking-wider shadow-xs hover:bg-[var(--color-arena-primary-hover)]"
+                  disabled={isLoading}
+                  className="btn-tactile flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[var(--color-arena-primary)] text-white font-barlow font-bold uppercase tracking-wider shadow-xs hover:bg-[var(--color-arena-primary-hover)] disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <Save className="w-3.5 h-3.5" />
-                  <span>Simpan Perubahan Profil</span>
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      <span>Menyimpan ke Database...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Save className="w-3.5 h-3.5" />
+                      <span>Simpan Perubahan Profil</span>
+                    </>
+                  )}
                 </button>
               </div>
             </form>
@@ -218,94 +308,7 @@ export const AdminProfileTab: React.FC<AdminProfileTabProps> = ({
         </div>
 
         {/* Kolom 3: Hak Akses & Preferensi Kerja */}
-        <div className="space-y-6">
-          {/* Ringkasan Hak Akses */}
-          <div className="p-5 rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] shadow-xs space-y-4">
-            <div className="flex items-center gap-2 border-b border-[var(--border-subtle)] pb-3">
-              <Shield className="w-4 h-4 text-emerald-600" />
-              <h3 className="text-sm font-barlow font-bold uppercase tracking-wider text-[var(--text-main)]">
-                Hak Akses &amp; Otoritas
-              </h3>
-            </div>
-
-            <div className="space-y-2.5 text-xs">
-              <div className="flex items-center justify-between p-2 rounded-xl bg-[var(--bg-muted)]">
-                <span className="text-[var(--text-muted)]">Tingkat Izin:</span>
-                <span className="font-bold text-[var(--text-main)]">Super Admin (Tingkat 1)</span>
-              </div>
-              <div className="flex items-center justify-between p-2 rounded-xl bg-[var(--bg-muted)]">
-                <span className="text-[var(--text-muted)]">Verifikasi Berkas:</span>
-                <span className="font-bold text-emerald-600 flex items-center gap-1">
-                  <Check className="w-3.5 h-3.5" /> Penuh
-                </span>
-              </div>
-              <div className="flex items-center justify-between p-2 rounded-xl bg-[var(--bg-muted)]">
-                <span className="text-[var(--text-muted)]">Override Skor Langsung:</span>
-                <span className="font-bold text-emerald-600 flex items-center gap-1">
-                  <Check className="w-3.5 h-3.5" /> Diizinkan
-                </span>
-              </div>
-              <div className="flex items-center justify-between p-2 rounded-xl bg-[var(--bg-muted)]">
-                <span className="text-[var(--text-muted)]">Backup / Restore DB:</span>
-                <span className="font-bold text-emerald-600 flex items-center gap-1">
-                  <Check className="w-3.5 h-3.5" /> Otoritas Penuh
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* Preferensi Kerja Admin */}
-          <div className="p-5 rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] shadow-xs space-y-4">
-            <div className="flex items-center gap-2 border-b border-[var(--border-subtle)] pb-3">
-              <Bell className="w-4 h-4 text-[var(--color-arena-primary)]" />
-              <h3 className="text-sm font-barlow font-bold uppercase tracking-wider text-[var(--text-main)]">
-                Preferensi Kerja
-              </h3>
-            </div>
-
-            <div className="space-y-3 text-xs">
-              <label className="flex items-center justify-between p-2.5 rounded-xl bg-[var(--bg-muted)] cursor-pointer">
-                <div>
-                  <div className="font-semibold text-[var(--text-main)]">Suara Notifikasi Gol / Poin</div>
-                  <div className="text-[10px] text-[var(--text-muted)]">Audio cue saat skor live terupdate</div>
-                </div>
-                <input
-                  type="checkbox"
-                  checked={soundNotification}
-                  onChange={(e) => setSoundNotification(e.target.checked)}
-                  className="w-4 h-4 rounded text-[var(--color-arena-primary)] focus:ring-0"
-                />
-              </label>
-
-              <label className="flex items-center justify-between p-2.5 rounded-xl bg-[var(--bg-muted)] cursor-pointer">
-                <div>
-                  <div className="font-semibold text-[var(--text-main)]">Persetujuan BAP Otomatis</div>
-                  <div className="text-[10px] text-[var(--text-muted)]">Bila kedua wasit sudah ttd digital</div>
-                </div>
-                <input
-                  type="checkbox"
-                  checked={autoVerifyBAP}
-                  onChange={(e) => setAutoVerifyBAP(e.target.checked)}
-                  className="w-4 h-4 rounded text-[var(--color-arena-primary)] focus:ring-0"
-                />
-              </label>
-
-              <div className="p-2.5 rounded-xl bg-[var(--bg-muted)] space-y-1.5">
-                <div className="font-semibold text-[var(--text-main)]">Filter Cabor Default</div>
-                <select
-                  value={defaultSport}
-                  onChange={(e) => setDefaultSport(e.target.value)}
-                  className="w-full px-2.5 py-1.5 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-surface)] text-[var(--text-main)] text-xs"
-                >
-                  <option value="ALL">Semua Cabang Olahraga</option>
-                  <option value="FUTSAL">Futsal Putra/Putri</option>
-                  <option value="VOLLEY">Bola Voli</option>
-                  <option value="ESPORT">E-Sport MLBB</option>
-                </select>
-              </div>
-            </div>
-          </div>
-        </div>
+        <AdminAccessPreferencesCard />
       </div>
     </div>
   );

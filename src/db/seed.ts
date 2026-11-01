@@ -49,8 +49,8 @@ export function seedDatabase(db: DatabaseSync): void {
 
   // 4. Seed Teams
   const insertTeam = db.prepare(`
-    INSERT OR REPLACE INTO teams (id, name, short_name, logo_url, school_name, kind)
-    VALUES (?, ?, ?, ?, ?, ?)
+    INSERT OR REPLACE INTO teams (id, code, name, short_name, logo_url, school_name, kind)
+    VALUES (?, ?, ?, ?, ?, ?, ?)
   `);
 
   // 5. Seed Players
@@ -61,9 +61,11 @@ export function seedDatabase(db: DatabaseSync): void {
 
   const teamCount = (db.prepare('SELECT COUNT(*) as count FROM teams').get() as { count: number })?.count || 0;
   if (teamCount < 13) {
-    for (const t of initialTeams) {
+    for (let idx = 0; idx < initialTeams.length; idx++) {
+      const t = initialTeams[idx];
       insertTeam.run(
         t.id,
+        t.code || `TM-${String(idx + 1).padStart(2, '0')}`,
         t.name,
         t.shortName || t.name.slice(0, 3).toUpperCase(),
         t.logoUrl || '',
@@ -84,6 +86,17 @@ export function seedDatabase(db: DatabaseSync): void {
         }
       }
     }
+  }
+
+  // Auto-backfill code into teams table if any rows missing code
+  try {
+    const updateTeamCode = db.prepare(`UPDATE teams SET code = ? WHERE id = ?`);
+    for (let idx = 0; idx < initialTeams.length; idx++) {
+      const t = initialTeams[idx];
+      updateTeamCode.run(t.code || `TM-${String(idx + 1).padStart(2, '0')}`, t.id);
+    }
+  } catch {
+    // ignore
   }
 
   // 6. Seed Default Competition

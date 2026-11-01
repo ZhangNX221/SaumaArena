@@ -1,11 +1,11 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Users, ShieldCheck, Search, X } from 'lucide-react';
+import { Users, ShieldCheck, Search, X, ChevronRight } from 'lucide-react';
 import { initialTeams } from '@/mocks/tournamentData';
 import { getTeamLogoUrl } from '@/mocks/teamLogos';
 import { usePersistentState } from '@/hooks/usePersistentState';
-import { Team, SportCode } from '@/types';
+import { Team, SportCode, TeamCardLayout, STORAGE_KEY_TEAM_CARD_LAYOUT } from '@/types';
 import { ModalPortal } from '@/components/common/ModalPortal';
 import { PublicPageHeader } from '../layout/PublicPageHeader';
 
@@ -15,6 +15,7 @@ interface TeamsTabProps {
 
 export const TeamsTab: React.FC<TeamsTabProps> = ({ sportCode = 'FUTSAL' }) => {
   const [teams] = usePersistentState<Team[]>('sauma_arena_teams', initialTeams);
+  const [teamCardLayout] = usePersistentState<TeamCardLayout>(STORAGE_KEY_TEAM_CARD_LAYOUT, 'STANDARD');
   const [selectedTeam, setSelectedTeam] = useState<Team | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedGroup, setSelectedGroup] = useState<'ALL' | 'A' | 'B' | 'C' | 'D'>('ALL');
@@ -92,64 +93,109 @@ export const TeamsTab: React.FC<TeamsTabProps> = ({ sportCode = 'FUTSAL' }) => {
 
       {/* Render Futsal Teams Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredFutsalTeams.map((team) => (
-          <div
-            key={team.id}
-            className="p-5 sm:p-6 rounded-xl bg-[var(--bg-surface)] border-2 border-slate-300 dark:border-slate-800 shadow-sm hover:border-[#1D63B8]/60 transition-all flex flex-col justify-between space-y-4"
-          >
-            <div className="space-y-4">
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-lg bg-[var(--bg-muted)] border border-slate-200 dark:border-slate-700 flex items-center justify-center p-1.5 shrink-0 overflow-hidden shadow-2xs">
+        {filteredFutsalTeams.map((team) => {
+          if (teamCardLayout === 'MINIMAL') {
+            return (
+              <div
+                key={team.id}
+                onClick={() => setSelectedTeam(team)}
+                className="group p-4 sm:p-5 rounded-2xl bg-[var(--bg-surface)] border-2 border-slate-300 dark:border-slate-800 shadow-xs hover:border-[#1D63B8] hover:shadow-md transition-all cursor-pointer flex items-center justify-between gap-4 select-none"
+              >
+                <div className="flex items-center gap-3.5 min-w-0">
+                  <div className="w-14 h-14 rounded-xl bg-[var(--bg-muted)] border border-slate-200 dark:border-slate-700 flex items-center justify-center p-2 shrink-0 overflow-hidden shadow-2xs group-hover:scale-105 transition-transform">
                     <img
                       src={team.logoUrl || getTeamLogoUrl(team.id)}
                       alt={team.name}
-                      className="w-full h-full object-contain"
+                      className="w-full h-full object-contain filter drop-shadow-xs"
                       loading="lazy"
                     />
                   </div>
-                  <div>
-                    <h3 className="font-barlow font-bold text-base sm:text-lg text-[var(--text-main)] leading-tight tracking-wide">
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2 mb-0.5">
+                      {team.code && (
+                        <span className="font-mono text-[10px] font-bold px-1.5 py-0.5 rounded bg-[var(--color-arena-primary-light)] text-[var(--color-arena-primary)]">
+                          {team.code}
+                        </span>
+                      )}
+                      <span className="font-mono text-[10px] font-bold text-[var(--text-muted)]">
+                        Grup {team.group}
+                      </span>
+                    </div>
+                    <h3 className="font-barlow font-bold text-base sm:text-lg text-[var(--text-main)] leading-snug tracking-wide group-hover:text-[#1D63B8] transition-colors truncate">
                       {team.name}
                     </h3>
-                    <p className="text-xs text-[var(--text-muted)]">{team.schoolName}</p>
+                    <p className="text-xs text-[var(--text-muted)] truncate">
+                      {team.schoolName}
+                    </p>
                   </div>
                 </div>
 
-                <span className="font-mono text-xs font-bold px-2 py-0.5 rounded-md bg-blue-50 dark:bg-sky-950/40 text-[#1D63B8] dark:text-sky-300 border border-blue-200 dark:border-sky-800 shrink-0">
-                  Grup {team.group}
-                </span>
-              </div>
-
-              <div className="grid grid-cols-2 gap-2 text-xs pt-2 border-t border-slate-200 dark:border-slate-800 font-sans">
-                <div className="p-2 rounded-lg bg-[var(--bg-muted)] border border-slate-200 dark:border-slate-800">
-                  <span className="text-[10px] text-[var(--text-muted)] font-barlow font-bold uppercase block">
-                    Total Atlet
-                  </span>
-                  <span className="font-mono font-bold text-sm text-[var(--text-main)]">
-                    {team.players.length} Pemain
-                  </span>
-                </div>
-                <div className="p-2 rounded-lg bg-[var(--bg-muted)] border border-slate-200 dark:border-slate-800">
-                  <span className="text-[10px] text-[var(--text-muted)] font-barlow font-bold uppercase block">
-                    Pelatih / Ofisial
-                  </span>
-                  <span className="font-mono font-bold text-xs text-[var(--text-main)] truncate block">
-                    {team.coachName || 'Ofisial Tim'}
-                  </span>
+                <div className="shrink-0 w-8 h-8 rounded-full bg-[var(--bg-muted)] group-hover:bg-[#1D63B8] group-hover:text-white text-[var(--text-muted)] flex items-center justify-center transition-colors">
+                  <ChevronRight className="w-4 h-4" />
                 </div>
               </div>
-            </div>
+            );
+          }
 
-            <button
-              type="button"
-              onClick={() => setSelectedTeam(team)}
-              className="btn-tactile w-full py-2.5 px-3 rounded-lg bg-[var(--bg-muted)] hover:bg-[#1D63B8] hover:text-white border border-slate-300 dark:border-slate-700 text-xs font-barlow font-bold uppercase tracking-wider text-[var(--text-main)] transition-colors min-h-[44px] cursor-pointer"
+          return (
+            <div
+              key={team.id}
+              className="p-5 sm:p-6 rounded-xl bg-[var(--bg-surface)] border-2 border-slate-300 dark:border-slate-800 shadow-sm hover:border-[#1D63B8]/60 transition-all flex flex-col justify-between space-y-4"
             >
-              Lihat Skuad Atlet
-            </button>
-          </div>
-        ))}
+              <div className="space-y-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-lg bg-[var(--bg-muted)] border border-slate-200 dark:border-slate-700 flex items-center justify-center p-1.5 shrink-0 overflow-hidden shadow-2xs">
+                      <img
+                        src={team.logoUrl || getTeamLogoUrl(team.id)}
+                        alt={team.name}
+                        className="w-full h-full object-contain"
+                        loading="lazy"
+                      />
+                    </div>
+                    <div>
+                      <h3 className="font-barlow font-bold text-base sm:text-lg text-[var(--text-main)] leading-tight tracking-wide">
+                        {team.name}
+                      </h3>
+                      <p className="text-xs text-[var(--text-muted)]">{team.schoolName}</p>
+                    </div>
+                  </div>
+
+                  <span className="font-mono text-xs font-bold px-2 py-0.5 rounded-md bg-blue-50 dark:bg-sky-950/40 text-[#1D63B8] dark:text-sky-300 border border-blue-200 dark:border-sky-800 shrink-0">
+                    Grup {team.group}
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2 text-xs pt-2 border-t border-slate-200 dark:border-slate-800 font-sans">
+                  <div className="p-2 rounded-lg bg-[var(--bg-muted)] border border-slate-200 dark:border-slate-800">
+                    <span className="text-[10px] text-[var(--text-muted)] font-barlow font-bold uppercase block">
+                      Total Atlet
+                    </span>
+                    <span className="font-mono font-bold text-sm text-[var(--text-main)]">
+                      {team.players.length} Pemain
+                    </span>
+                  </div>
+                  <div className="p-2 rounded-lg bg-[var(--bg-muted)] border border-slate-200 dark:border-slate-800">
+                    <span className="text-[10px] text-[var(--text-muted)] font-barlow font-bold uppercase block">
+                      Pelatih / Ofisial
+                    </span>
+                    <span className="font-mono font-bold text-xs text-[var(--text-main)] truncate block">
+                      {team.coachName || 'Ofisial Tim'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setSelectedTeam(team)}
+                className="btn-tactile w-full py-2.5 px-3 rounded-lg bg-[var(--bg-muted)] hover:bg-[#1D63B8] hover:text-white border border-slate-300 dark:border-slate-700 text-xs font-barlow font-bold uppercase tracking-wider text-[var(--text-main)] transition-colors min-h-[44px] cursor-pointer"
+              >
+                Lihat Skuad Atlet
+              </button>
+            </div>
+          );
+        })}
       </div>
 
       {/* Skuad Detail Modal */}

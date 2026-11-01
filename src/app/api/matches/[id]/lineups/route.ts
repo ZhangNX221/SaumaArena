@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { query, run, transaction } from '@/db/sqlite';
+import { query, queryOne, run, transaction } from '@/db/sqlite';
 import { requireAuth } from '@/lib/auth';
 import { randomUUID } from 'node:crypto';
 
@@ -30,6 +30,18 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
     const { id } = await context.params;
     const body = await request.json().catch(() => ({}));
     const { lineups = [] } = body; // Array of { teamId, playerId, isStarter, jerseyNumber, position }
+
+    const match = queryOne<any>('SELECT id, locked FROM matches WHERE id = ?', [id]);
+    if (!match) {
+      return NextResponse.json({ success: false, error: 'Pertandingan tidak ditemukan' }, { status: 404 });
+    }
+
+    if (match.locked && auth.user.role !== 'ADMIN') {
+      return NextResponse.json(
+        { success: false, error: 'Pertandingan telah dikunci (verified). Lineup tidak dapat diubah.' },
+        { status: 403 }
+      );
+    }
 
     // Atomic replacement: Delete old lineups, insert new items, and advance status in a single transaction
     transaction(() => {

@@ -69,8 +69,12 @@ export const LiveMatchFullscreenArena: React.FC<LiveMatchFullscreenArenaProps> =
     ));
 
   const events = match.events || [];
-  const goalsA = events.filter((e) => e.type === 'GOAL' && (e.teamId === match.teamAId || e.teamId === 'team-sdi-kardina'));
-  const goalsB = events.filter((e) => e.type === 'GOAL' && (e.teamId === match.teamBId || e.teamId === 'team-min7-blitar'));
+  const goalsA = events.filter(
+    (e) => e.type === 'GOAL' && (e.teamId === match.teamAId || e.teamId === 'A' || e.playerName?.includes('Tim A'))
+  );
+  const goalsB = events.filter(
+    (e) => e.type === 'GOAL' && (e.teamId === match.teamBId || e.teamId === 'B' || e.playerName?.includes('Tim B'))
+  );
 
   return (
     <div className="w-full h-full max-w-[177.78vh] mx-auto flex flex-col justify-between p-3 sm:p-5 lg:p-7 xl:p-8 select-none text-white overflow-hidden animate-fadeIn">
@@ -200,9 +204,9 @@ export const LiveMatchFullscreenArena: React.FC<LiveMatchFullscreenArenaProps> =
             <span>WAKTU PERTANDINGAN</span>
           </div>
 
-          {/* Huge Digital Stopwatch Display */}
+          {/* Huge Digital Stopwatch Display - Jarak border lega & proporsional */}
           <div
-            className={`w-full flex-1 flex items-center justify-center my-3 sm:my-4 rounded-2xl bg-black/85 border-2 shadow-2xl p-4 relative overflow-hidden ring-1 ${
+            className={`w-full flex-1 flex items-center justify-center my-3 sm:my-4 rounded-2xl bg-black/90 border-2 shadow-2xl px-6 sm:px-10 lg:px-12 py-4 sm:py-6 relative overflow-hidden ring-1 ${
               timerSeconds === 0
                 ? 'border-red-500 ring-red-500/50 shadow-[0_0_30px_rgba(239,68,68,0.4)]'
                 : 'border-slate-800 ring-white/10'
@@ -210,7 +214,7 @@ export const LiveMatchFullscreenArena: React.FC<LiveMatchFullscreenArenaProps> =
           >
             <div className="absolute inset-0 bg-radial from-white/5 via-transparent to-transparent pointer-events-none" />
             <div
-              className={`font-scoreboard font-black text-6xl sm:text-7xl md:text-8xl lg:text-[8.5rem] xl:text-[10.5rem] 2xl:text-[12rem] tracking-widest tabular-nums leading-none select-none ${
+              className={`font-scoreboard font-black text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-[8.5rem] 2xl:text-[9.5rem] tracking-normal tabular-nums leading-none select-none max-w-full text-center ${
                 timerSeconds === 0
                   ? 'text-red-400 drop-shadow-[0_0_35px_rgba(239,68,68,0.8)]'
                   : 'text-white drop-shadow-[0_0_35px_rgba(255,255,255,0.45)]'

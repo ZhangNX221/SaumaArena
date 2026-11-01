@@ -61,6 +61,7 @@ CREATE TABLE IF NOT EXISTS stage_groups (
 -- 6. TEAMS (Peserta Kompetisi Generik)
 CREATE TABLE IF NOT EXISTS teams (
   id TEXT PRIMARY KEY,
+  code TEXT, -- ID Khusus Tim (e.g. TM-01, TM-02)
   name TEXT NOT NULL,
   short_name TEXT NOT NULL,
   logo_url TEXT,
@@ -364,4 +365,6 @@ CREATE INDEX IF NOT EXISTS idx_supporter_team ON supporter_scores(team_id);
 CREATE INDEX IF NOT EXISTS idx_bap_match ON match_bap(match_id);
 CREATE INDEX IF NOT EXISTS idx_incidents_match ON incidents(match_id);
 CREATE INDEX IF NOT EXISTS idx_incidents_status ON incidents(status);
+CREATE INDEX IF NOT EXISTS idx_audit_created ON audit_logs(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_matches_scheduled ON matches(scheduled_at);
 `;

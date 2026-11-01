@@ -32,6 +32,10 @@ export const LiveMatchTab: React.FC<LiveMatchTabProps> = ({
     'sauma_arena_match_rules',
     DEFAULT_SPORT_RULES
   );
+  const [activeRefereeMatchId] = usePersistentState<string>(
+    'sauma_arena_active_referee_match_id',
+    'match-1'
+  );
 
   const adminDurationMinutes = matchRules[sportCode]?.durationPerPeriod || 20;
   const adminInitialSeconds = adminDurationMinutes * 60;
@@ -39,7 +43,17 @@ export const LiveMatchTab: React.FC<LiveMatchTabProps> = ({
   const availableMatches = matches.filter(
     (m) => m.stage === 'GROUP' || m.status === 'LIVE' || m.status === 'COMPLETED'
   );
-  const [selectedMatchId, setSelectedMatchId] = useState<string>('match-1');
+  const [selectedMatchId, setSelectedMatchId] = useState<string>(activeRefereeMatchId || 'match-1');
+
+  // Sinkronkan otomatis ke laga yang sedang LIVE atau yang aktif di meja juri
+  useEffect(() => {
+    const liveMatch = matches.find((m) => m.status === 'LIVE');
+    if (liveMatch) {
+      setSelectedMatchId(liveMatch.id);
+    } else if (activeRefereeMatchId && matches.some((m) => m.id === activeRefereeMatchId)) {
+      setSelectedMatchId(activeRefereeMatchId);
+    }
+  }, [matches, activeRefereeMatchId]);
 
   const selectedMatch =
     availableMatches.find((m) => m.id === selectedMatchId) ||
@@ -49,7 +63,7 @@ export const LiveMatchTab: React.FC<LiveMatchTabProps> = ({
   // Data telemetri real-time langsung terhubung dengan meja wasit
   const matchTelemetry = telemetryMap[selectedMatch.id];
   const isMatchLive = selectedMatch.status === 'LIVE';
-  const isTimerRunning = isMatchLive && (matchTelemetry?.isTimerRunning ?? false);
+  const isTimerRunning = matchTelemetry?.isTimerRunning ?? false;
   const timerSeconds = matchTelemetry?.timerSeconds !== undefined ? matchTelemetry.timerSeconds : adminInitialSeconds;
   const currentPeriod = matchTelemetry?.currentPeriod || (isMatchLive ? 'Babak 1' : 'Pemanasan / Menunggu Kick-Off');
   const foulsA = matchTelemetry?.foulsA ?? 0;
@@ -130,16 +144,24 @@ export const LiveMatchTab: React.FC<LiveMatchTabProps> = ({
   };
 
   const yellowCardsA = events.filter(
-    (e) => (e.teamId === selectedMatch.teamAId || e.teamId === 'team-sdi-kardina') && e.type === 'YELLOW_CARD'
+    (e) =>
+      (e.teamId === selectedMatch.teamAId || e.teamId === 'A' || e.playerName?.includes('Tim A')) &&
+      e.type === 'YELLOW_CARD'
   ).length;
   const redCardsA = events.filter(
-    (e) => (e.teamId === selectedMatch.teamAId || e.teamId === 'team-sdi-kardina') && e.type === 'RED_CARD'
+    (e) =>
+      (e.teamId === selectedMatch.teamAId || e.teamId === 'A' || e.playerName?.includes('Tim A')) &&
+      e.type === 'RED_CARD'
   ).length;
   const yellowCardsB = events.filter(
-    (e) => (e.teamId === selectedMatch.teamBId || e.teamId === 'team-min7-blitar') && e.type === 'YELLOW_CARD'
+    (e) =>
+      (e.teamId === selectedMatch.teamBId || e.teamId === 'B' || e.playerName?.includes('Tim B')) &&
+      e.type === 'YELLOW_CARD'
   ).length;
   const redCardsB = events.filter(
-    (e) => (e.teamId === selectedMatch.teamBId || e.teamId === 'team-min7-blitar') && e.type === 'RED_CARD'
+    (e) =>
+      (e.teamId === selectedMatch.teamBId || e.teamId === 'B' || e.playerName?.includes('Tim B')) &&
+      e.type === 'RED_CARD'
   ).length;
 
   return (

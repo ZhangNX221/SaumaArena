@@ -14,6 +14,7 @@ import {
   Megaphone,
   ShieldCheck,
   Globe,
+  GitBranch,
 } from 'lucide-react';
 import { AppUser } from '@/types';
 import { SaumaArenaLogo } from '@/components/brand/SaumaArenaLogo';
@@ -24,6 +25,7 @@ export type RefereeTabKey =
   | 'duty'
   | 'match_center'
   | 'standings'
+  | 'bracket'
   | 'supporter_scoring'
   | 'roster'
   | 'reports'
@@ -52,6 +54,7 @@ const REFEREE_ICON_MAP: Record<string, React.ComponentType<{ className?: string 
   User,
   ListOrdered,
   Megaphone,
+  GitBranch,
 };
 
 export const RefereeSidebar: React.FC<RefereeSidebarProps> = ({

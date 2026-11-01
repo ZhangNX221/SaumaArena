@@ -1,26 +1,58 @@
 'use client';
 
 import React, { useState } from 'react';
-import { RefreshCw, Trophy, CheckCircle2, RotateCcw, Save, Crown, Sparkles, Medal } from 'lucide-react';
-import { QUARTER_FINALS, SEMI_FINALS, GRAND_FINAL, BracketMatch } from '@/mocks/bracketData';
+import { CheckCircle2, RotateCcw, Save, Crown, Sparkles } from 'lucide-react';
+import {
+  QUARTER_FINALS,
+  SEMI_FINALS,
+  GRAND_FINAL,
+  ROUND_OF_16,
+  ROUND_OF_24,
+  BRONZE_MATCH,
+  BracketMatch,
+  BracketSize,
+  STORAGE_KEY_BRACKET_SIZE,
+} from '@/mocks/bracketData';
 import { initialTeams } from '@/mocks/tournamentData';
 import { usePersistentState } from '@/hooks/usePersistentState';
-import { BracketMatchCard, TeamDropdown } from './BracketMatchCard';
+import { BracketStageKey } from './BracketMatchCard';
+import { BracketPodiumCard } from './BracketPodiumCard';
+import { BracketMatchEditModal } from './BracketMatchEditModal';
+import { DrawingBracketTree } from './DrawingBracketTree';
+
+type StageFilter = 'ALL' | 'R24' | 'R16' | 'QF' | 'SF' | 'FINAL';
 
 export const DrawingBracketTab: React.FC = () => {
+  const [bracketSize] = usePersistentState<BracketSize>(STORAGE_KEY_BRACKET_SIZE, 4);
+  const [r24, setR24] = usePersistentState<BracketMatch[]>('sauma_arena_bracket_r24', ROUND_OF_24);
+  const [r16, setR16] = usePersistentState<BracketMatch[]>('sauma_arena_bracket_r16', ROUND_OF_16);
   const [qf, setQf] = usePersistentState<BracketMatch[]>('sauma_arena_bracket_qf', QUARTER_FINALS);
   const [sf, setSf] = usePersistentState<BracketMatch[]>('sauma_arena_bracket_sf', SEMI_FINALS);
   const [gf, setGf] = usePersistentState<BracketMatch>('sauma_arena_bracket_gf', GRAND_FINAL);
+  const [bronze, setBronze] = usePersistentState<BracketMatch>('sauma_arena_bracket_bronze', BRONZE_MATCH);
 
-  // Status Podium Juara (Persisted)
+  // Status Podium Juara
   const [championId, setChampionId] = usePersistentState<string>('sauma_arena_bracket_champ', '');
   const [runnerUpId, setRunnerUpId] = usePersistentState<string>('sauma_arena_bracket_runner', '');
   const [thirdPlaceId, setThirdPlaceId] = usePersistentState<string>('sauma_arena_bracket_third', '');
   const [notice, setNotice] = useState<string | null>(null);
 
+  // Stage filter & Modal state
+  const [activeStageFilter, setActiveStageFilter] = useState<StageFilter>('ALL');
+  const [editModalMatch, setEditModalMatch] = useState<{ node: BracketMatch; stage: BracketStageKey } | null>(null);
+
+  const championTeam = initialTeams.find((t) => t.id === championId);
+  const championTeamName = championTeam
+    ? `${championTeam.name} (${championTeam.schoolName || ''})`
+    : gf.teamA.isWinner
+    ? gf.teamA.name
+    : gf.teamB.isWinner
+    ? gf.teamB.name
+    : 'MENUNGGU PEMENANG LAGA FINAL (P17)';
+
   // Helper ganti tim pada slot laga
   const handleTeamChange = (
-    stage: 'QF' | 'SF' | 'GF',
+    stage: BracketStageKey,
     matchId: string,
     slot: 'teamA' | 'teamB',
     teamId: string
@@ -30,180 +62,204 @@ export const DrawingBracketTab: React.FC = () => {
       ? { id: selected.id, name: selected.name, score: 0, isWinner: false }
       : { id: `tbd-${matchId}-${slot}`, name: `Menunggu Pemenang (${slot.toUpperCase()})`, score: 0, isWinner: false };
 
-    if (stage === 'QF') {
-      setQf((prev) =>
-        prev.map((m) => (m.id === matchId ? { ...m, [slot]: newTeam, status: 'SCHEDULED' } : m))
-      );
+    if (stage === 'R24') {
+      setR24((prev) => prev.map((m) => (m.id === matchId ? { ...m, [slot]: newTeam, status: 'SCHEDULED' } : m)));
+    } else if (stage === 'R16') {
+      setR16((prev) => prev.map((m) => (m.id === matchId ? { ...m, [slot]: newTeam, status: 'SCHEDULED' } : m)));
+    } else if (stage === 'QF') {
+      setQf((prev) => prev.map((m) => (m.id === matchId ? { ...m, [slot]: newTeam, status: 'SCHEDULED' } : m)));
     } else if (stage === 'SF') {
-      setSf((prev) =>
-        prev.map((m) => (m.id === matchId ? { ...m, [slot]: newTeam, status: 'SCHEDULED' } : m))
-      );
-    } else {
+      setSf((prev) => prev.map((m) => (m.id === matchId ? { ...m, [slot]: newTeam, status: 'SCHEDULED' } : m)));
+    } else if (stage === 'GF') {
       setGf((prev) => ({ ...prev, [slot]: newTeam, status: 'SCHEDULED' }));
+    } else {
+      setBronze((prev) => ({ ...prev, [slot]: newTeam, status: 'SCHEDULED' }));
     }
   };
 
   // Helper ganti skor
   const handleScoreChange = (
-    stage: 'QF' | 'SF' | 'GF',
+    stage: BracketStageKey,
     matchId: string,
     slot: 'teamA' | 'teamB',
     score: number
   ) => {
     const safeScore = Math.max(0, score);
-    if (stage === 'QF') {
-      setQf((prev) =>
-        prev.map((m) =>
-          m.id === matchId ? { ...m, [slot]: { ...m[slot], score: safeScore } } : m
-        )
-      );
+    if (stage === 'R24') {
+      setR24((prev) => prev.map((m) => (m.id === matchId ? { ...m, [slot]: { ...m[slot], score: safeScore } } : m)));
+    } else if (stage === 'R16') {
+      setR16((prev) => prev.map((m) => (m.id === matchId ? { ...m, [slot]: { ...m[slot], score: safeScore } } : m)));
+    } else if (stage === 'QF') {
+      setQf((prev) => prev.map((m) => (m.id === matchId ? { ...m, [slot]: { ...m[slot], score: safeScore } } : m)));
     } else if (stage === 'SF') {
-      setSf((prev) =>
-        prev.map((m) =>
-          m.id === matchId ? { ...m, [slot]: { ...m[slot], score: safeScore } } : m
-        )
-      );
-    } else {
+      setSf((prev) => prev.map((m) => (m.id === matchId ? { ...m, [slot]: { ...m[slot], score: safeScore } } : m)));
+    } else if (stage === 'GF') {
       setGf((prev) => ({ ...prev, [slot]: { ...prev[slot], score: safeScore } }));
+    } else {
+      setBronze((prev) => ({ ...prev, [slot]: { ...prev[slot], score: safeScore } }));
     }
   };
 
   // Helper tandai pemenang laga & otomatis usulkan ke babak berikutnya
   const handleSetWinner = (
-    stage: 'QF' | 'SF' | 'GF',
+    stage: BracketStageKey,
     matchId: string,
     winnerSlot: 'teamA' | 'teamB'
   ) => {
-    if (stage === 'QF') {
-      const matchIndex = qf.findIndex((m) => m.id === matchId);
-      if (matchIndex === -1) return;
+    const markDone = (list: BracketMatch[], idx: number) =>
+      list.map((m, i) => (i === idx ? {
+        ...m,
+        status: 'COMPLETED' as const,
+        teamA: { ...m.teamA, isWinner: winnerSlot === 'teamA' },
+        teamB: { ...m.teamB, isWinner: winnerSlot === 'teamB' },
+      } : m));
 
-      const current = qf[matchIndex];
-      const winningTeam = winnerSlot === 'teamA' ? current.teamA : current.teamB;
-      const updatedQf = qf.map((m, idx) =>
-        idx === matchIndex
-          ? {
-              ...m,
-              status: 'COMPLETED' as const,
-              teamA: { ...m.teamA, isWinner: winnerSlot === 'teamA' },
-              teamB: { ...m.teamB, isWinner: winnerSlot === 'teamB' },
-            }
-          : m
-      );
-      setQf(updatedQf);
-
-      // Otomatis teruskan tim pemenang ke Semifinal (SF1 / SF2)
-      setSf((prev) => {
+    if (stage === 'R24') {
+      const idx = r24.findIndex((m) => m.id === matchId);
+      if (idx === -1) return;
+      const winner = winnerSlot === 'teamA' ? r24[idx].teamA : r24[idx].teamB;
+      setR24(markDone(r24, idx));
+      setR16((prev) => {
         const next = [...prev];
-        if (matchIndex === 0) next[0] = { ...next[0], teamA: { ...winningTeam, isWinner: false, score: 0 } };
-        if (matchIndex === 1) next[0] = { ...next[0], teamB: { ...winningTeam, isWinner: false, score: 0 } };
-        if (matchIndex === 2) next[1] = { ...next[1], teamA: { ...winningTeam, isWinner: false, score: 0 } };
-        if (matchIndex === 3) next[1] = { ...next[1], teamB: { ...winningTeam, isWinner: false, score: 0 } };
+        if (next[idx]) next[idx] = { ...next[idx], teamB: { ...winner, isWinner: false, score: 0 } };
         return next;
       });
-      setNotice(`Pemenang ${current.stageName} diatur ke ${winningTeam.name}. Slot Semifinal diperbarui!`);
-    } else if (stage === 'SF') {
-      const matchIndex = sf.findIndex((m) => m.id === matchId);
-      if (matchIndex === -1) return;
-
-      const current = sf[matchIndex];
-      const winningTeam = winnerSlot === 'teamA' ? current.teamA : current.teamB;
-      const losingTeam = winnerSlot === 'teamA' ? current.teamB : current.teamA;
-
-      setSf((prev) =>
-        prev.map((m, idx) =>
-          idx === matchIndex
-            ? {
-                ...m,
-                status: 'COMPLETED' as const,
-                teamA: { ...m.teamA, isWinner: winnerSlot === 'teamA' },
-                teamB: { ...m.teamB, isWinner: winnerSlot === 'teamB' },
-              }
-            : m
-        )
-      );
-
-      // Teruskan pemenang ke Grand Final (P17)
-      setGf((prev) => {
-        if (matchIndex === 0) return { ...prev, teamA: { ...winningTeam, isWinner: false, score: 0 } };
-        return { ...prev, teamB: { ...winningTeam, isWinner: false, score: 0 } };
+      setNotice(`Pemenang Playoff 24 Besar lolos ke 16 Besar: ${winner.name}!`);
+    } else if (stage === 'R16') {
+      const idx = r16.findIndex((m) => m.id === matchId);
+      if (idx === -1) return;
+      const winner = winnerSlot === 'teamA' ? r16[idx].teamA : r16[idx].teamB;
+      setR16(markDone(r16, idx));
+      const qfIdx = Math.floor(idx / 2);
+      const isA = idx % 2 === 0;
+      setQf((prev) => {
+        const next = [...prev];
+        if (next[qfIdx]) next[qfIdx] = { ...next[qfIdx], [isA ? 'teamA' : 'teamB']: { ...winner, isWinner: false, score: 0 } };
+        return next;
       });
-      if (!thirdPlaceId && losingTeam.id && !losingTeam.id.startsWith('tbd')) {
-        setThirdPlaceId(losingTeam.id);
-      }
-      setNotice(`Pemenang ${current.stageName} lolos ke Grand Final: ${winningTeam.name}!`);
-    } else {
-      // Grand Final
-      const winningTeam = winnerSlot === 'teamA' ? gf.teamA : gf.teamB;
-      const runnerUpTeam = winnerSlot === 'teamA' ? gf.teamB : gf.teamA;
-
+      setNotice(`Pemenang 16 Besar lolos ke Perempat Final: ${winner.name}!`);
+    } else if (stage === 'QF') {
+      const idx = qf.findIndex((m) => m.id === matchId);
+      if (idx === -1) return;
+      const current = qf[idx];
+      const winner = winnerSlot === 'teamA' ? current.teamA : current.teamB;
+      setQf(markDone(qf, idx));
+      setSf((prev) => {
+        const next = [...prev];
+        if (idx === 0 && next[0]) next[0] = { ...next[0], teamA: { ...winner, isWinner: false, score: 0 } };
+        if (idx === 1 && next[0]) next[0] = { ...next[0], teamB: { ...winner, isWinner: false, score: 0 } };
+        if (idx === 2 && next[1]) next[1] = { ...next[1], teamA: { ...winner, isWinner: false, score: 0 } };
+        if (idx === 3 && next[1]) next[1] = { ...next[1], teamB: { ...winner, isWinner: false, score: 0 } };
+        return next;
+      });
+      setNotice(`Pemenang ${current.stageName} lolos ke Semifinal: ${winner.name}!`);
+    } else if (stage === 'SF') {
+      const idx = sf.findIndex((m) => m.id === matchId);
+      if (idx === -1) return;
+      const current = sf[idx];
+      const winner = winnerSlot === 'teamA' ? current.teamA : current.teamB;
+      const loser = winnerSlot === 'teamA' ? current.teamB : current.teamA;
+      setSf(markDone(sf, idx));
+      setGf((prev) => ({
+        ...prev,
+        [idx === 0 ? 'teamA' : 'teamB']: { ...winner, isWinner: false, score: 0 },
+      }));
+      setBronze((prev) => ({
+        ...prev,
+        [idx === 0 ? 'teamA' : 'teamB']: { ...loser, isWinner: false, score: 0 },
+      }));
+      if (!thirdPlaceId && loser.id && !loser.id.startsWith('tbd')) setThirdPlaceId(loser.id);
+      setNotice(`Pemenang ${current.stageName} lolos ke Grand Final: ${winner.name}!`);
+    } else if (stage === 'GF') {
+      const winner = winnerSlot === 'teamA' ? gf.teamA : gf.teamB;
+      const runnerUp = winnerSlot === 'teamA' ? gf.teamB : gf.teamA;
       setGf((prev) => ({
         ...prev,
         status: 'COMPLETED' as const,
         teamA: { ...prev.teamA, isWinner: winnerSlot === 'teamA' },
         teamB: { ...prev.teamB, isWinner: winnerSlot === 'teamB' },
       }));
-
-      if (winningTeam.id && !winningTeam.id.startsWith('tbd')) {
-        setChampionId(winningTeam.id);
-      }
-      if (runnerUpTeam.id && !runnerUpTeam.id.startsWith('tbd')) {
-        setRunnerUpId(runnerUpTeam.id);
-      }
-      setNotice(`Selamat! ${winningTeam.name} resmi ditetapkan sebagai JUARA 1 MMFC I! 🏆`);
+      if (winner.id && !winner.id.startsWith('tbd')) setChampionId(winner.id);
+      if (runnerUp.id && !runnerUp.id.startsWith('tbd')) setRunnerUpId(runnerUp.id);
+      setNotice(`Selamat! ${winner.name} resmi ditetapkan sebagai JUARA 1 turnamen! 🏆`);
+    } else {
+      const winner = winnerSlot === 'teamA' ? bronze.teamA : bronze.teamB;
+      setBronze((prev) => ({
+        ...prev,
+        status: 'COMPLETED' as const,
+        teamA: { ...prev.teamA, isWinner: winnerSlot === 'teamA' },
+        teamB: { ...prev.teamB, isWinner: winnerSlot === 'teamB' },
+      }));
+      if (winner.id && !winner.id.startsWith('tbd')) setThirdPlaceId(winner.id);
+      setNotice(`${winner.name} meraih Juara 3 bersama turnamen!`);
     }
   };
 
-  // Reset ke default
   const handleReset = () => {
+    setR24(ROUND_OF_24);
+    setR16(ROUND_OF_16);
     setQf(QUARTER_FINALS);
     setSf(SEMI_FINALS);
     setGf(GRAND_FINAL);
+    setBronze(BRONZE_MATCH);
     setChampionId('');
     setRunnerUpId('');
     setThirdPlaceId('');
     setNotice('Bagan dan podium berhasil dikembalikan ke status kosong default.');
   };
 
-  // Otomatis isi perempat final dari juara dan runner-up grup turnamen
   const handleAutoFillGroups = () => {
-    const teamA1 = initialTeams.find((t) => t.id === 'team-sdi-kardina')!;
-    const teamA2 = initialTeams.find((t) => t.id === 'team-min7-blitar')!;
-    const teamC1 = initialTeams.find((t) => t.id === 'team-min2-blitar')!;
-    const teamC2 = initialTeams.find((t) => t.id === 'team-mi-wahidhasyim')!;
-    const teamB1 = initialTeams.find((t) => t.id === 'team-sdn1-srengat')!;
-    const teamB2 = initialTeams.find((t) => t.id === 'team-min14-blitar')!;
-    const teamD1 = initialTeams.find((t) => t.id === 'team-mi-ploso')!;
-    const teamD2 = initialTeams.find((t) => t.id === 'team-mi-darussalam')!;
-
-    setQf([
-      { ...QUARTER_FINALS[0], teamA: { id: teamA1.id, name: teamA1.name, score: 0 }, teamB: { id: teamA2.id, name: teamA2.name, score: 0 } },
-      { ...QUARTER_FINALS[1], teamA: { id: teamC1.id, name: teamC1.name, score: 0 }, teamB: { id: teamC2.id, name: teamC2.name, score: 0 } },
-      { ...QUARTER_FINALS[2], teamA: { id: teamB1.id, name: teamB1.name, score: 0 }, teamB: { id: teamB2.id, name: teamB2.name, score: 0 } },
-      { ...QUARTER_FINALS[3], teamA: { id: teamD1.id, name: teamD1.name, score: 0 }, teamB: { id: teamD2.id, name: teamD2.name, score: 0 } },
-    ]);
-    setNotice('Slot Perempat Final berhasil diisi otomatis berdasarkan tim unggulan fase grup!');
+    const t = (id: string) => initialTeams.find((item) => item.id === id)!;
+    if (bracketSize === 4) {
+      setSf([
+        { ...SEMI_FINALS[0], teamA: { id: t('team-sdi-kardina').id, name: t('team-sdi-kardina').name, score: 0 }, teamB: { id: t('team-min2-blitar').id, name: t('team-min2-blitar').name, score: 0 } },
+        { ...SEMI_FINALS[1], teamA: { id: t('team-sdn1-srengat').id, name: t('team-sdn1-srengat').name, score: 0 }, teamB: { id: t('team-mi-ploso').id, name: t('team-mi-ploso').name, score: 0 } },
+      ]);
+      setNotice('Slot Semifinal (4 Besar) berhasil diisi otomatis dari juara masing-masing grup (A, B, C, D)!');
+    } else {
+      setQf([
+        { ...QUARTER_FINALS[0], teamA: { id: t('team-sdi-kardina').id, name: t('team-sdi-kardina').name, score: 0 }, teamB: { id: t('team-min7-blitar').id, name: t('team-min7-blitar').name, score: 0 } },
+        { ...QUARTER_FINALS[1], teamA: { id: t('team-min2-blitar').id, name: t('team-min2-blitar').name, score: 0 }, teamB: { id: t('team-mi-wahidhasyim').id, name: t('team-mi-wahidhasyim').name, score: 0 } },
+        { ...QUARTER_FINALS[2], teamA: { id: t('team-sdn1-srengat').id, name: t('team-sdn1-srengat').name, score: 0 }, teamB: { id: t('team-min14-blitar').id, name: t('team-min14-blitar').name, score: 0 } },
+        { ...QUARTER_FINALS[3], teamA: { id: t('team-mi-ploso').id, name: t('team-mi-ploso').name, score: 0 }, teamB: { id: t('team-mi-darussalam').id, name: t('team-mi-darussalam').name, score: 0 } },
+      ]);
+      setNotice('Slot Perempat Final berhasil diisi otomatis berdasarkan tim unggulan fase grup!');
+    }
   };
 
+  const stageFilters: { id: StageFilter; label: string }[] = [
+    ...(bracketSize > 2 ? [{ id: 'ALL' as StageFilter, label: 'Semua Babak' }] : []),
+    ...(bracketSize >= 24 ? [{ id: 'R24' as StageFilter, label: 'Playoff 24' }] : []),
+    ...(bracketSize >= 16 ? [{ id: 'R16' as StageFilter, label: '16 Besar' }] : []),
+    ...(bracketSize >= 8 ? [{ id: 'QF' as StageFilter, label: '8 Besar (QF)' }] : []),
+    ...(bracketSize >= 4 ? [{ id: 'SF' as StageFilter, label: 'Semifinal (SF)' }] : []),
+    { id: 'FINAL' as StageFilter, label: 'Grand Final & Bronze' },
+  ];
+
   return (
-    <div className="p-5 sm:p-6 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] shadow-xs space-y-6">
-      {/* Action Toolbar */}
+    <div className="p-4 sm:p-6 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] shadow-xs space-y-6">
+      {/* Top Action Toolbar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[var(--border-subtle)]">
         <div>
           <span className="text-xs font-barlow font-bold uppercase tracking-wider text-[var(--color-arena-primary)] flex items-center gap-1.5">
             <Crown className="w-3.5 h-3.5 text-amber-500" />
-            <span>Pengaturan Bagan &amp; Penentuan Pemenang Manual Juri</span>
+            <span>Pengaturan Bagan &amp; Penentuan Pemenang Juri</span>
           </span>
-          <p className="text-[11px] text-[var(--text-muted)] mt-0.5">
-            Gunakan dropdown pada setiap card untuk memilih tim yang bertanding dan tombol &apos;Menang&apos; untuk meloloskan tim.
-          </p>
+          <div className="flex items-center gap-2 mt-1">
+            <span className="px-2 py-0.5 rounded-md bg-[var(--color-arena-primary)]/10 text-[var(--color-arena-primary)] text-[10px] font-mono font-bold uppercase">
+              Format: {bracketSize} Besar
+            </span>
+            <p className="text-[11px] text-[var(--text-muted)]">
+              Klik pada laga untuk membuka dialog pemilihan pemenang &amp; pengisian skor.
+            </p>
+          </div>
         </div>
 
         <div className="flex items-center gap-2 shrink-0">
           <button
             type="button"
             onClick={handleAutoFillGroups}
-            className="btn-tactile px-3 py-1.5 rounded-lg bg-[var(--bg-muted)] hover:bg-[var(--bg-surface)] text-[var(--text-main)] font-barlow font-bold uppercase tracking-wider text-[11px] border border-[var(--border-subtle)] flex items-center gap-1.5 transition-colors"
+            className="btn-tactile px-3 py-1.5 rounded-lg bg-[var(--bg-muted)] hover:bg-[var(--bg-surface)] text-[var(--text-main)] font-barlow font-bold uppercase tracking-wider text-[11px] border border-[var(--border-subtle)] flex items-center gap-1.5 transition-colors cursor-pointer"
           >
             <Sparkles className="w-3.5 h-3.5 text-amber-500" />
             <span>Isi Otomatis Grup</span>
@@ -211,17 +267,15 @@ export const DrawingBracketTab: React.FC = () => {
           <button
             type="button"
             onClick={handleReset}
-            className="btn-tactile px-3 py-1.5 rounded-lg bg-[var(--bg-muted)] hover:bg-red-500/10 text-red-600 dark:text-red-400 font-barlow font-bold uppercase tracking-wider text-[11px] border border-[var(--border-subtle)] flex items-center gap-1.5 transition-colors"
+            className="btn-tactile px-3 py-1.5 rounded-lg bg-[var(--bg-muted)] hover:bg-red-500/10 text-red-600 dark:text-red-400 font-barlow font-bold uppercase tracking-wider text-[11px] border border-[var(--border-subtle)] flex items-center gap-1.5 transition-colors cursor-pointer"
           >
             <RotateCcw className="w-3.5 h-3.5" />
             <span>Reset Bagan</span>
           </button>
           <button
             type="button"
-            onClick={() => {
-              setNotice('Konfigurasi bagan dan status pemenang berhasil disimpan ke sistem juri!');
-            }}
-            className="btn-tactile px-3.5 py-1.5 rounded-lg bg-[var(--color-arena-primary)] hover:bg-[var(--color-arena-primary-hover)] text-white font-barlow font-bold uppercase tracking-wider text-[11px] flex items-center gap-1.5 shadow-xs transition-colors"
+            onClick={() => setNotice('Konfigurasi bagan dan status pemenang berhasil disimpan ke sistem juri!')}
+            className="btn-tactile px-3.5 py-1.5 rounded-lg bg-[var(--color-arena-primary)] hover:bg-[var(--color-arena-primary-hover)] text-white font-barlow font-bold uppercase tracking-wider text-[11px] flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer"
           >
             <Save className="w-3.5 h-3.5" />
             <span>Simpan</span>
@@ -235,125 +289,80 @@ export const DrawingBracketTab: React.FC = () => {
             <CheckCircle2 className="w-4 h-4 shrink-0" />
             <span>{notice}</span>
           </div>
-          <button
-            type="button"
-            onClick={() => setNotice(null)}
-            className="text-xs hover:underline shrink-0"
-          >
+          <button type="button" onClick={() => setNotice(null)} className="text-xs hover:underline shrink-0">
             Tutup
           </button>
         </div>
       )}
 
-      {/* Bracket Tree Columns */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-        {/* Kolom 1: Perempat Final (4 Laga) */}
-        <div className="space-y-3">
-          <div className="text-xs font-barlow font-bold uppercase tracking-wider text-[var(--text-muted)] flex items-center justify-between">
-            <span>1. Perempat Final (4 Laga)</span>
-            <span className="text-[10px] font-mono text-[var(--color-arena-primary)]">Fase QF</span>
-          </div>
-          <div className="space-y-3">
-            {qf.map((node) => (
-              <BracketMatchCard
-                key={node.id}
-                node={node}
-                stage="QF"
-                accentColor="text-[var(--text-muted)]"
-                onTeamChange={handleTeamChange}
-                onScoreChange={handleScoreChange}
-                onSetWinner={handleSetWinner}
-              />
-            ))}
-          </div>
-        </div>
-
-        {/* Kolom 2: Semifinal (2 Laga) */}
-        <div className="space-y-3">
-          <div className="text-xs font-barlow font-bold uppercase tracking-wider text-[var(--text-muted)] flex items-center justify-between">
-            <span>2. Semifinal 4 Besar (2 Laga)</span>
-            <span className="text-[10px] font-mono text-[var(--color-arena-primary)]">Fase SF</span>
-          </div>
-          <div className="space-y-3">
-            {sf.map((node) => (
-              <BracketMatchCard
-                key={node.id}
-                node={node}
-                stage="SF"
-                accentColor="text-[var(--color-arena-primary)]"
-                onTeamChange={handleTeamChange}
-                onScoreChange={handleScoreChange}
-                onSetWinner={handleSetWinner}
-              />
-            ))}
-          </div>
-        </div>
-
-        {/* Kolom 3: Grand Final & Podium Juara */}
-        <div className="space-y-4">
-          <div className="text-xs font-barlow font-bold uppercase tracking-wider text-amber-500 flex items-center gap-1.5">
-            <Trophy className="w-4 h-4" />
-            <span>3. Grand Final &amp; Penentuan Juara</span>
-          </div>
-
-          {/* Laga Grand Final (P17) */}
-          <BracketMatchCard
-            node={gf}
-            stage="GF"
-            accentColor="text-amber-500 font-black"
-            onTeamChange={handleTeamChange}
-            onScoreChange={handleScoreChange}
-            onSetWinner={handleSetWinner}
-          />
-
-          {/* Podium Juara Resmi */}
-          <div className="p-4 rounded-xl border-2 border-amber-500/40 bg-amber-500/5 shadow-xs space-y-3">
-            <div className="text-xs font-barlow font-black uppercase tracking-wider text-amber-700 dark:text-amber-400 flex items-center gap-1.5">
-              <Crown className="w-4 h-4 text-amber-500" />
-              <span>Podium Pemenang Turnamen</span>
-            </div>
-
-            {/* Juara 1 */}
-            <div className="space-y-1">
-              <div className="text-[10px] font-barlow font-bold uppercase tracking-wider text-amber-800 dark:text-amber-300 flex items-center gap-1">
-                <Trophy className="w-3.5 h-3.5 text-amber-500" />
-                <span>🥇 Juara 1 (Piala Bergilir MMFC I)</span>
-              </div>
-              <TeamDropdown
-                currentId={championId}
-                currentName={championId ? initialTeams.find((t) => t.id === championId)?.name || 'Pilih Juara 1' : '-- Pilih Juara 1 --'}
-                onSelect={setChampionId}
-              />
-            </div>
-
-            {/* Juara 2 */}
-            <div className="space-y-1">
-              <div className="text-[10px] font-barlow font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 flex items-center gap-1">
-                <Medal className="w-3.5 h-3.5 text-slate-400" />
-                <span>🥈 Juara 2 (Runner-Up)</span>
-              </div>
-              <TeamDropdown
-                currentId={runnerUpId}
-                currentName={runnerUpId ? initialTeams.find((t) => t.id === runnerUpId)?.name || 'Pilih Juara 2' : '-- Pilih Juara 2 --'}
-                onSelect={setRunnerUpId}
-              />
-            </div>
-
-            {/* Juara 3 Bersama */}
-            <div className="space-y-1">
-              <div className="text-[10px] font-barlow font-bold uppercase tracking-wider text-amber-900 dark:text-amber-600 flex items-center gap-1">
-                <Medal className="w-3.5 h-3.5 text-amber-700" />
-                <span>🥉 Juara 3 Bersama</span>
-              </div>
-              <TeamDropdown
-                currentId={thirdPlaceId}
-                currentName={thirdPlaceId ? initialTeams.find((t) => t.id === thirdPlaceId)?.name || 'Pilih Juara 3' : '-- Pilih Juara 3 --'}
-                onSelect={setThirdPlaceId}
-              />
-            </div>
-          </div>
+      {/* Stage Selector Filter (Centered Pills) */}
+      <div className="flex items-center justify-center gap-2 overflow-x-auto pb-1">
+        <div className="flex items-center gap-1 p-1 rounded-xl bg-[var(--bg-muted)] border border-[var(--border-subtle)] text-xs font-semibold w-full sm:w-auto">
+          {stageFilters.map((stage) => {
+            const isActive = activeStageFilter === stage.id;
+            return (
+              <button
+                key={stage.id}
+                type="button"
+                onClick={() => setActiveStageFilter(stage.id)}
+                className={`flex-1 sm:flex-initial px-3.5 sm:px-4 py-2 rounded-lg font-barlow font-bold uppercase tracking-wider text-xs transition-all cursor-pointer min-h-[36px] whitespace-nowrap ${
+                  isActive
+                    ? stage.id === 'FINAL'
+                      ? 'bg-amber-400 text-slate-950 shadow-xs'
+                      : 'bg-[#0284c7] text-white shadow-xs'
+                    : 'text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-white/50 dark:hover:bg-slate-800'
+                }`}
+              >
+                {stage.label}
+              </button>
+            );
+          })}
         </div>
       </div>
+
+      {/* Centered Bracket Container with Dark Frame & Connecting Lines */}
+      <DrawingBracketTree
+        bracketSize={bracketSize}
+        qf={qf}
+        sf={sf}
+        gf={gf}
+        bronze={bronze}
+        championTeamName={championTeamName}
+        onSelectMatch={(node, stage) => setEditModalMatch({ node, stage })}
+      />
+
+      {/* Podium Pemenang Resmi Turnamen */}
+      <div className="pt-2">
+        <BracketPodiumCard
+          championId={championId}
+          setChampionId={setChampionId}
+          runnerUpId={runnerUpId}
+          setRunnerUpId={setRunnerUpId}
+          thirdPlaceId={thirdPlaceId}
+          setThirdPlaceId={setThirdPlaceId}
+        />
+      </div>
+
+      {/* Modal Interaktif Pengaturan Laga Juri */}
+      {editModalMatch && (
+        <BracketMatchEditModal
+          isOpen={true}
+          node={
+            editModalMatch.stage === 'SF'
+              ? sf.find((m) => m.id === editModalMatch.node.id) || editModalMatch.node
+              : editModalMatch.stage === 'GF'
+              ? gf
+              : editModalMatch.stage === 'QF'
+              ? qf.find((m) => m.id === editModalMatch.node.id) || editModalMatch.node
+              : bronze
+          }
+          stage={editModalMatch.stage}
+          onClose={() => setEditModalMatch(null)}
+          onTeamChange={handleTeamChange}
+          onScoreChange={handleScoreChange}
+          onSetWinner={handleSetWinner}
+        />
+      )}
     </div>
   );
 };

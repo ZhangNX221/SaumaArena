@@ -1,13 +1,12 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Radio, RotateCcw } from 'lucide-react';
 import { Match, MatchEvent, SportCode, EventType, MatchLiveTelemetry } from '@/types';
 import { RefereeScoringStep } from './steps/RefereeScoringStep';
 import { usePersistentState } from '@/hooks/usePersistentState';
 import { SportRuleSettings, DEFAULT_SPORT_RULES } from '@/config/sportRules';
-import { AdminPageHeaderCard } from '@/components/admin/common/AdminPageHeaderCard';
-import { ConfirmModal } from '@/components/admin/common/ConfirmModal';
+import { RefereeMatchCenterHeader } from './RefereeMatchCenterHeader';
+import { ResetMatchConfirmModal } from './dialogs/ResetMatchConfirmModal';
 import { initialMatches } from '@/mocks/tournamentData';
 import { pushMatchToBackend } from '@/lib/apiSync';
 import { playTimerStartSound, playTimerEndSound } from '@/utils/arenaSound';
@@ -216,33 +215,22 @@ export const RefereeMatchCenter: React.FC<RefereeMatchCenterProps> = ({
     }));
   };
 
-  const handleAddMinute = () => {
+  const handleAdjustMinute = (deltaSecs: number) => {
     setTelemetryMap((prev) => {
       const cur = prev[currentMatch.id] || defaultTelemetry;
       return {
         ...prev,
         [currentMatch.id]: {
           ...cur,
-          timerSeconds: cur.timerSeconds + 60,
+          timerSeconds: Math.max(0, cur.timerSeconds + deltaSecs),
           updatedAt: Date.now(),
         },
       };
     });
   };
 
-  const handleSubtractMinute = () => {
-    setTelemetryMap((prev) => {
-      const cur = prev[currentMatch.id] || defaultTelemetry;
-      return {
-        ...prev,
-        [currentMatch.id]: {
-          ...cur,
-          timerSeconds: Math.max(0, cur.timerSeconds - 60),
-          updatedAt: Date.now(),
-        },
-      };
-    });
-  };
+  const handleAddMinute = () => handleAdjustMinute(60);
+  const handleSubtractMinute = () => handleAdjustMinute(-60);
 
   const handleSetTimerSeconds = (secs: number) => {
     setTelemetryMap((prev) => ({
@@ -350,41 +338,9 @@ export const RefereeMatchCenter: React.FC<RefereeMatchCenterProps> = ({
   return (
     <div className="space-y-4 w-full pb-6 animate-fadeIn">
       {/* 1. Header Card Seragam Meja Wasit dengan Tombol Reset Laga */}
-      <AdminPageHeaderCard
-        icon={Radio}
-        category="MEJA LAPANGAN • PENCATATAN SKOR & WAKTU"
-        badge={
-          <span className="text-[11px] font-mono font-bold text-[var(--text-main)] px-2 py-0.5 rounded-md bg-[var(--bg-muted)] border border-[var(--border-subtle)]">
-            Laga #{currentMatch.matchNumber} &bull; {currentMatch.courtName || 'Lapangan Utama'} &bull; {currentMatch.stage || 'Babak Penyisihan'}
-          </span>
-        }
-        title={
-          <>
-            {currentMatch.teamAName} <span className="text-[var(--color-arena-accent)]">VS</span> {currentMatch.teamBName}
-          </>
-        }
-        description="Pusat kendali meja wasit: catat timer pertandingan, perolehan skor, dan insiden pelanggaran secara langsung."
-        action={
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={handleResetMatch}
-              className="btn-tactile px-3 py-2 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-600 dark:text-red-400 font-barlow font-bold uppercase tracking-wider text-xs border border-red-500/30 flex items-center gap-1.5 transition-colors cursor-pointer"
-              title="Reset Seluruh Skor & Waktu Laga Ini ke 0-0"
-            >
-              <RotateCcw className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Reset Laga</span>
-            </button>
-            <div className="px-4 py-2 rounded-xl bg-[var(--bg-muted)] border border-[var(--border-subtle)] text-center min-w-[110px]">
-              <span className="text-[10px] font-barlow font-bold uppercase tracking-wider text-[var(--text-muted)] block">
-                Skor Saat Ini
-              </span>
-              <span className="font-teko font-bold text-3xl text-[var(--color-arena-accent)] tabular-nums leading-none">
-                {currentMatch.scoreA} - {currentMatch.scoreB}
-              </span>
-            </div>
-          </div>
-        }
+      <RefereeMatchCenterHeader
+        currentMatch={currentMatch}
+        onResetMatch={handleResetMatch}
       />
 
       {/* 2. Dek Konsol Skor & Stopwatch Lengkap (Dengan Selector Laga, Babak, dan Tombol Reset) */}
@@ -418,53 +374,14 @@ export const RefereeMatchCenter: React.FC<RefereeMatchCenterProps> = ({
         onResetMatch={handleResetMatch}
       />
 
-      {/* Modal Dialog Konfirmasi Reset Laga yang Proper */}
-      <ConfirmModal
+      {/* Modal Dialog Konfirmasi Reset Laga */}
+      <ResetMatchConfirmModal
         isOpen={isResetConfirmOpen}
-        title="Konfirmasi Reset Laga"
-        confirmLabel="Ya, Reset Laga"
-        cancelLabel="Batal"
-        isDanger={true}
-        icon={<RotateCcw className="w-5 h-5 text-red-600 dark:text-red-400" />}
+        onClose={() => setIsResetConfirmOpen(false)}
         onConfirm={handleConfirmReset}
-        onCancel={() => setIsResetConfirmOpen(false)}
-      >
-        <div className="space-y-3 mt-2.5">
-          <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-xs">
-            <div className="font-barlow font-bold uppercase tracking-wider text-red-700 dark:text-red-400 text-[11px] flex items-center gap-1.5">
-              <span>Laga #{currentMatch.matchNumber}</span>
-              <span>&bull;</span>
-              <span>{currentMatch.courtName || 'Lapangan Futsal Seabless'}</span>
-            </div>
-            <div className="text-sm font-bebas tracking-wide uppercase text-[var(--text-main)] mt-0.5">
-              {currentMatch.teamAName} <span className="text-[var(--color-arena-accent)]">VS</span> {currentMatch.teamBName}
-            </div>
-          </div>
-
-          <p className="text-xs text-[var(--text-muted)] leading-relaxed">
-            Apakah Anda yakin ingin me-reset Laga ini? Seluruh data pertandingan babak ini akan dikembalikan ke kondisi awal:
-          </p>
-
-          <ul className="text-xs text-[var(--text-muted)] space-y-1.5 pl-0.5">
-            <li className="flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-red-500 shrink-0" />
-              <span>Skor kembali ke <strong className="text-[var(--text-main)] font-mono font-bold">0 - 0</strong></span>
-            </li>
-            <li className="flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-red-500 shrink-0" />
-              <span>Timer kembali ke <strong className="text-[var(--text-main)] font-mono font-bold">{adminDurationMinutes} Menit</strong></span>
-            </li>
-            <li className="flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-red-500 shrink-0" />
-              <span>Seluruh riwayat gol, kartu, dan pelanggaran dibersihkan</span>
-            </li>
-            <li className="flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-red-500 shrink-0" />
-              <span>Status laga dikembalikan ke <strong className="text-[var(--text-main)] font-bold">BELUM DIMULAI (UPCOMING)</strong></span>
-            </li>
-          </ul>
-        </div>
-      </ConfirmModal>
+        currentMatch={currentMatch}
+        adminDurationMinutes={adminDurationMinutes}
+      />
     </div>
   );
 };

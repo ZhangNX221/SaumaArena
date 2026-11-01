@@ -3,23 +3,21 @@
 import React, { useState } from 'react';
 import {
   Swords,
-  Timer,
-  Trophy,
   ShieldAlert,
   CheckCircle2,
   UserCog,
-  Save,
-  RotateCcw,
   Sliders,
-  Scale,
+  GitBranch,
 } from 'lucide-react';
 import { AdminPageHeaderCard } from '@/components/admin/common/AdminPageHeaderCard';
 import { MatchAssignmentsTab } from '../officials/MatchAssignmentsTab';
-import { SPORTS_CONFIG } from '@/mocks/multiSportData';
 import { usePersistentState } from '@/hooks/usePersistentState';
 import { SportRuleSettings, DEFAULT_SPORT_RULES } from '@/config/sportRules';
+import { MatchRulesTab } from './MatchRulesTab';
+import { MatchProtocolsTab } from './MatchProtocolsTab';
+import { BracketSettingsTab } from './BracketSettingsTab';
 
-type SettingSubTab = 'RULES' | 'OFFICIALS' | 'PROTOCOLS';
+type SettingSubTab = 'RULES' | 'BRACKET' | 'OFFICIALS' | 'PROTOCOLS';
 
 export const MatchSettingsView: React.FC = () => {
   const [activeTab, setActiveTab] = useState<SettingSubTab>('RULES');
@@ -28,14 +26,14 @@ export const MatchSettingsView: React.FC = () => {
     'sauma_arena_match_rules',
     DEFAULT_SPORT_RULES
   );
-  
+
   // Protocol State
   const [woScoreA, setWoScoreA] = useState<number>(3);
   const [woScoreB] = useState<number>(0);
   const [lateToleranceMinutes, setLateToleranceMinutes] = useState<number>(15);
   const [bapVerificationMode, setBapVerificationMode] = useState<'MANUAL' | 'AUTO'>('MANUAL');
   const [allowOvertimeInGroup, setAllowOvertimeInGroup] = useState<boolean>(false);
-  
+
   // Feedback toast
   const [savedSuccess, setSavedSuccess] = useState(false);
 
@@ -73,7 +71,7 @@ export const MatchSettingsView: React.FC = () => {
         icon={Swords}
         category="PENGATURAN • OPERASIONAL PERTANDINGAN"
         title="Pengaturan Pertandingan & Regulasi"
-        description="Konfigurasi teknis cabang olahraga, durasi babak, skema perhitungan poin klasemen, penugasan perangkat wasit, serta protokol sanksi laga."
+        description="Konfigurasi teknis cabang olahraga, skema jumlah bagan eliminasi, durasi babak, perhitungan poin, penugasan wasit, serta protokol sanksi laga."
       />
 
       {/* Sub-tab Navigation Bar */}
@@ -90,6 +88,20 @@ export const MatchSettingsView: React.FC = () => {
           <Sliders className="w-3.5 h-3.5" />
           <span>Aturan Cabor</span>
         </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveTab('BRACKET')}
+          className={`btn-tactile px-3.5 py-2 rounded-xl transition-all duration-150 flex items-center gap-1.5 ${
+            activeTab === 'BRACKET'
+              ? 'bg-[var(--color-arena-primary)] text-white shadow-xs'
+              : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'
+          }`}
+        >
+          <GitBranch className="w-3.5 h-3.5" />
+          <span>Pengaturan Bagan</span>
+        </button>
+
         <button
           type="button"
           onClick={() => setActiveTab('OFFICIALS')}
@@ -102,6 +114,7 @@ export const MatchSettingsView: React.FC = () => {
           <UserCog className="w-3.5 h-3.5" />
           <span>Penugasan Wasit</span>
         </button>
+
         <button
           type="button"
           onClick={() => setActiveTab('PROTOCOLS')}
@@ -128,373 +141,40 @@ export const MatchSettingsView: React.FC = () => {
 
       {/* TAB 1: RULES & DURATION */}
       {activeTab === 'RULES' && (
-        <div className="space-y-6">
-          {/* Sport Selector Pills */}
-          <div className="flex flex-wrap items-center gap-2">
-            {SPORTS_CONFIG.map((sp) => (
-              <button
-                key={sp.code}
-                type="button"
-                onClick={() => setSelectedSport(sp.code)}
-                className={`btn-tactile px-4 py-2 rounded-xl font-barlow font-bold text-xs uppercase tracking-wider border transition-all ${
-                  selectedSport === sp.code
-                    ? 'bg-[var(--color-arena-primary)] text-white border-[var(--color-arena-primary)] shadow-sm'
-                    : 'bg-[var(--bg-surface)] text-[var(--text-muted)] hover:text-[var(--text-main)] border-[var(--border-subtle)]'
-                }`}
-              >
-                {sp.name}
-              </button>
-            ))}
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Durasi & Waktu Babak */}
-            <div className="p-6 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] space-y-5">
-              <div className="flex items-center gap-2 pb-3 border-b border-[var(--border-subtle)]">
-                <Timer className="w-5 h-5 text-[var(--color-arena-primary)]" />
-                <h3 className="font-barlow font-bold uppercase tracking-wider text-base text-[var(--text-main)]">
-                  Format Durasi &amp; Waktu ({selectedSport})
-                </h3>
-              </div>
-
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <label className="text-sm font-semibold text-[var(--text-main)] block">Durasi Babak (Menit)</label>
-                    <span className="text-xs text-[var(--text-muted)]">Panjang waktu tiap periode pertandingan</span>
-                  </div>
-                  <input
-                    type="number"
-                    min="1"
-                    max="90"
-                    value={currentRules.durationPerPeriod}
-                    onChange={(e) => handleUpdateRule('durationPerPeriod', Number(e.target.value))}
-                    className="w-20 px-3 py-1.5 text-center text-sm font-bold rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-page)] text-[var(--text-main)] focus:outline-none focus:ring-2 focus:ring-[var(--color-arena-primary)]"
-                  />
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <div>
-                    <label className="text-sm font-semibold text-[var(--text-main)] block">Jumlah Babak / Set</label>
-                    <span className="text-xs text-[var(--text-muted)]">Jumlah periode waktu resmi</span>
-                  </div>
-                  <input
-                    type="number"
-                    min="1"
-                    max="6"
-                    value={currentRules.periodCount}
-                    onChange={(e) => handleUpdateRule('periodCount', Number(e.target.value))}
-                    className="w-20 px-3 py-1.5 text-center text-sm font-bold rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-page)] text-[var(--text-main)] focus:outline-none focus:ring-2 focus:ring-[var(--color-arena-primary)]"
-                  />
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <div>
-                    <label className="text-sm font-semibold text-[var(--text-main)] block">Waktu Istirahat (Menit)</label>
-                    <span className="text-xs text-[var(--text-muted)]">Jeda paruh waktu (Half-Time Interval)</span>
-                  </div>
-                  <input
-                    type="number"
-                    min="1"
-                    max="30"
-                    value={currentRules.breakDuration}
-                    onChange={(e) => handleUpdateRule('breakDuration', Number(e.target.value))}
-                    className="w-20 px-3 py-1.5 text-center text-sm font-bold rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-page)] text-[var(--text-main)] focus:outline-none focus:ring-2 focus:ring-[var(--color-arena-primary)]"
-                  />
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <div>
-                    <label className="text-sm font-semibold text-[var(--text-main)] block">Jatah Time-out per Babak</label>
-                    <span className="text-xs text-[var(--text-muted)]">Hak jeda taktis tiap tim per periode</span>
-                  </div>
-                  <input
-                    type="number"
-                    min="0"
-                    max="5"
-                    value={currentRules.timeoutPerPeriod}
-                    onChange={(e) => handleUpdateRule('timeoutPerPeriod', Number(e.target.value))}
-                    className="w-20 px-3 py-1.5 text-center text-sm font-bold rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-page)] text-[var(--text-main)] focus:outline-none focus:ring-2 focus:ring-[var(--color-arena-primary)]"
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Skema Poin & Klasemen */}
-            <div className="p-6 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] space-y-5">
-              <div className="flex items-center gap-2 pb-3 border-b border-[var(--border-subtle)]">
-                <Trophy className="w-5 h-5 text-amber-500" />
-                <h3 className="font-barlow font-bold uppercase tracking-wider text-base text-[var(--text-main)]">
-                  Perhitungan Poin Klasemen
-                </h3>
-              </div>
-
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <label className="text-sm font-semibold text-[var(--text-main)] block">Poin Menang (Win)</label>
-                    <span className="text-xs text-[var(--text-muted)]">Poin klasemen saat menang tanding</span>
-                  </div>
-                  <input
-                    type="number"
-                    min="0"
-                    max="10"
-                    value={currentRules.winPoints}
-                    onChange={(e) => handleUpdateRule('winPoints', Number(e.target.value))}
-                    className="w-20 px-3 py-1.5 text-center text-sm font-bold rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-page)] text-[var(--text-main)] focus:outline-none focus:ring-2 focus:ring-[var(--color-arena-primary)]"
-                  />
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <div>
-                    <label className="text-sm font-semibold text-[var(--text-main)] block">Poin Seri (Draw)</label>
-                    <span className="text-xs text-[var(--text-muted)]">Poin klasemen saat skor imbang</span>
-                  </div>
-                  <input
-                    type="number"
-                    min="0"
-                    max="10"
-                    value={currentRules.drawPoints}
-                    onChange={(e) => handleUpdateRule('drawPoints', Number(e.target.value))}
-                    className="w-20 px-3 py-1.5 text-center text-sm font-bold rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-page)] text-[var(--text-main)] focus:outline-none focus:ring-2 focus:ring-[var(--color-arena-primary)]"
-                  />
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <div>
-                    <label className="text-sm font-semibold text-[var(--text-main)] block">Poin Kalah (Loss)</label>
-                    <span className="text-xs text-[var(--text-muted)]">Poin klasemen saat kalah tanding</span>
-                  </div>
-                  <input
-                    type="number"
-                    min="0"
-                    max="10"
-                    value={currentRules.lossPoints}
-                    onChange={(e) => handleUpdateRule('lossPoints', Number(e.target.value))}
-                    className="w-20 px-3 py-1.5 text-center text-sm font-bold rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-page)] text-[var(--text-main)] focus:outline-none focus:ring-2 focus:ring-[var(--color-arena-primary)]"
-                  />
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <div>
-                    <label className="text-sm font-semibold text-[var(--text-main)] block">Batas Foul Akumulasi</label>
-                    <span className="text-xs text-[var(--text-muted)]">Pemicu penalti 10 meter (Futsal/Basket)</span>
-                  </div>
-                  <input
-                    type="number"
-                    min="0"
-                    max="10"
-                    value={currentRules.foulLimit}
-                    onChange={(e) => handleUpdateRule('foulLimit', Number(e.target.value))}
-                    className="w-20 px-3 py-1.5 text-center text-sm font-bold rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-page)] text-[var(--text-main)] focus:outline-none focus:ring-2 focus:ring-[var(--color-arena-primary)]"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Action Bar */}
-          <div className="flex items-center justify-between pt-2">
-            <button
-              type="button"
-              onClick={handleResetToDefault}
-              className="btn-tactile px-4 py-2.5 rounded-xl border border-[var(--border-subtle)] text-[var(--text-muted)] hover:text-[var(--text-main)] font-barlow font-bold text-xs uppercase tracking-wider flex items-center gap-2"
-            >
-              <RotateCcw className="w-4 h-4" />
-              <span>Reset Default</span>
-            </button>
-            <button
-              type="button"
-              onClick={handleSave}
-              className="btn-tactile px-6 py-2.5 rounded-xl bg-[var(--color-arena-primary)] text-white font-barlow font-bold text-xs uppercase tracking-wider flex items-center gap-2 shadow-sm"
-            >
-              <Save className="w-4 h-4" />
-              <span>Simpan Aturan Pertandingan</span>
-            </button>
-          </div>
-        </div>
+        <MatchRulesTab
+          selectedSport={selectedSport}
+          setSelectedSport={setSelectedSport}
+          currentRules={currentRules}
+          handleUpdateRule={handleUpdateRule}
+          handleResetToDefault={handleResetToDefault}
+          handleSave={handleSave}
+        />
       )}
 
-      {/* TAB 2: REFEREE & OFFICIAL ASSIGNMENTS */}
+      {/* TAB 2: BRACKET SETTINGS (24, 16, 8, 4, 2 BESAR) */}
+      {activeTab === 'BRACKET' && <BracketSettingsTab />}
+
+      {/* TAB 3: REFEREE & OFFICIAL ASSIGNMENTS */}
       {activeTab === 'OFFICIALS' && (
         <div className="space-y-4">
           <MatchAssignmentsTab hideHeader />
         </div>
       )}
 
-      {/* TAB 3: PROTOCOL & SANCTIONS */}
+      {/* TAB 4: PROTOCOL & SANCTIONS */}
       {activeTab === 'PROTOCOLS' && (
-        <div className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Walkover Settings */}
-            <div className="p-6 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] space-y-5">
-              <div className="flex items-center gap-2 pb-3 border-b border-[var(--border-subtle)]">
-                <ShieldAlert className="w-5 h-5 text-red-500" />
-                <h3 className="font-barlow font-bold uppercase tracking-wider text-base text-[var(--text-main)]">
-                  Ketentuan Walkover (WO)
-                </h3>
-              </div>
-
-              <div className="space-y-4">
-                <div>
-                  <label className="text-sm font-semibold text-[var(--text-main)] block mb-1">
-                    Skor Default Kemenangan WO
-                  </label>
-                  <p className="text-xs text-[var(--text-muted)] mb-3">
-                    Skor otomatis yang diberikan kepada tim lawan saat sebuah tim dinyatakan Walkover (WO)
-                  </p>
-                  <div className="flex items-center gap-3">
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-bold text-[var(--text-muted)]">Pemenang:</span>
-                      <input
-                        type="number"
-                        min="1"
-                        max="10"
-                        value={woScoreA}
-                        onChange={(e) => setWoScoreA(Number(e.target.value))}
-                        className="w-16 px-3 py-1.5 text-center text-sm font-bold rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-page)] text-[var(--text-main)]"
-                      />
-                    </div>
-                    <span className="text-sm font-bold text-[var(--text-muted)]">-</span>
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-bold text-[var(--text-muted)]">Kalah WO:</span>
-                      <input
-                        type="number"
-                        min="0"
-                        max="0"
-                        value={woScoreB}
-                        disabled
-                        className="w-16 px-3 py-1.5 text-center text-sm font-bold rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-page)]/50 text-[var(--text-muted)]"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="pt-3 border-t border-[var(--border-subtle)]">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <label className="text-sm font-semibold text-[var(--text-main)] block">
-                        Toleransi Waktu Keterlambatan Tim
-                      </label>
-                      <span className="text-xs text-[var(--text-muted)]">
-                        Batas toleransi hadir di lapangan sebelum dinyatakan WO
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                      <input
-                        type="number"
-                        min="5"
-                        max="60"
-                        value={lateToleranceMinutes}
-                        onChange={(e) => setLateToleranceMinutes(Number(e.target.value))}
-                        className="w-16 px-2.5 py-1.5 text-center text-sm font-bold rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-page)] text-[var(--text-main)]"
-                      />
-                      <span className="text-xs text-[var(--text-muted)] font-medium">Menit</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* BAP & Match Verification Mode */}
-            <div className="p-6 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] space-y-5">
-              <div className="flex items-center gap-2 pb-3 border-b border-[var(--border-subtle)]">
-                <Scale className="w-5 h-5 text-[var(--color-arena-primary)]" />
-                <h3 className="font-barlow font-bold uppercase tracking-wider text-base text-[var(--text-main)]">
-                  Validasi Hasil &amp; Berita Acara (BAP)
-                </h3>
-              </div>
-
-              <div className="space-y-4">
-                <div>
-                  <label className="text-sm font-semibold text-[var(--text-main)] block mb-2">
-                    Metode Verifikasi Skor ke Publik
-                  </label>
-                  <div className="space-y-2.5">
-                    <label
-                      onClick={() => setBapVerificationMode('MANUAL')}
-                      className={`flex items-start gap-3 p-3.5 rounded-xl border cursor-pointer transition-all ${
-                        bapVerificationMode === 'MANUAL'
-                          ? 'border-[var(--color-arena-primary)] bg-[var(--color-arena-primary)]/5'
-                          : 'border-[var(--border-subtle)] hover:border-[var(--border-subtle)]'
-                      }`}
-                    >
-                      <input
-                        type="radio"
-                        name="bapMode"
-                        checked={bapVerificationMode === 'MANUAL'}
-                        onChange={() => setBapVerificationMode('MANUAL')}
-                        className="mt-1"
-                      />
-                      <div>
-                        <span className="text-xs font-bold uppercase tracking-wider block text-[var(--text-main)]">
-                          Verifikasi Pengawas Manual (Disarankan)
-                        </span>
-                        <p className="text-xs text-[var(--text-muted)] mt-0.5">
-                          Hasil skor dari juri lapangan harus divalidasi dan ditandatangani Pengawas Pertandingan sebelum resmi masuk ke klasemen publik.
-                        </p>
-                      </div>
-                    </label>
-
-                    <label
-                      onClick={() => setBapVerificationMode('AUTO')}
-                      className={`flex items-start gap-3 p-3.5 rounded-xl border cursor-pointer transition-all ${
-                        bapVerificationMode === 'AUTO'
-                          ? 'border-[var(--color-arena-primary)] bg-[var(--color-arena-primary)]/5'
-                          : 'border-[var(--border-subtle)] hover:border-[var(--border-subtle)]'
-                      }`}
-                    >
-                      <input
-                        type="radio"
-                        name="bapMode"
-                        checked={bapVerificationMode === 'AUTO'}
-                        onChange={() => setBapVerificationMode('AUTO')}
-                        className="mt-1"
-                      />
-                      <div>
-                        <span className="text-xs font-bold uppercase tracking-wider block text-[var(--text-main)]">
-                          Publikasi Otomatis (Instant Publish)
-                        </span>
-                        <p className="text-xs text-[var(--text-muted)] mt-0.5">
-                          Skor langsung terverifikasi begitu juri menekan tombol &apos;Finalisasi BAP&apos; di konsol juri tanpa antrean moderasi.
-                        </p>
-                      </div>
-                    </label>
-                  </div>
-                </div>
-
-                <div className="pt-3 border-t border-[var(--border-subtle)] flex items-center justify-between">
-                  <div>
-                    <label className="text-sm font-semibold text-[var(--text-main)] block">
-                      Babak Tambahan di Fase Grup
-                    </label>
-                    <span className="text-xs text-[var(--text-muted)]">
-                      Perpanjangan waktu (Extra Time) jika skor imbang di babak grup
-                    </span>
-                  </div>
-                  <input
-                    type="checkbox"
-                    checked={allowOvertimeInGroup}
-                    onChange={(e) => setAllowOvertimeInGroup(e.target.checked)}
-                    className="w-4 h-4 rounded text-[var(--color-arena-primary)]"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Action Bar */}
-          <div className="flex items-center justify-end pt-2">
-            <button
-              type="button"
-              onClick={handleSave}
-              className="btn-tactile px-6 py-2.5 rounded-xl bg-[var(--color-arena-primary)] text-white font-barlow font-bold text-xs uppercase tracking-wider flex items-center gap-2 shadow-sm"
-            >
-              <Save className="w-4 h-4" />
-              <span>Simpan Protokol &amp; Kebijakan</span>
-            </button>
-          </div>
-        </div>
+        <MatchProtocolsTab
+          woScoreA={woScoreA}
+          setWoScoreA={setWoScoreA}
+          woScoreB={woScoreB}
+          lateToleranceMinutes={lateToleranceMinutes}
+          setLateToleranceMinutes={setLateToleranceMinutes}
+          bapVerificationMode={bapVerificationMode}
+          setBapVerificationMode={setBapVerificationMode}
+          allowOvertimeInGroup={allowOvertimeInGroup}
+          setAllowOvertimeInGroup={setAllowOvertimeInGroup}
+          handleSave={handleSave}
+        />
       )}
     </div>
   );

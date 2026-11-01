@@ -1,13 +1,48 @@
 import { NextResponse } from 'next/server';
-import { getAuthUserFromRequest, changeUserPassword, signToken } from '@/lib/auth';
+import { requireAuth, changeUserPassword, signToken } from '@/lib/auth';
 import { run } from '@/db/sqlite';
 import { randomUUID } from 'node:crypto';
 
+// Rate limiter mitigasi brute-force pergantian password (hunt-brute-force)
+const passwordAttempts = new Map<string, { count: number; resetAt: number }>();
+const MAX_PASSWORD_ATTEMPTS = 5;
+const WINDOW_MS = 60 * 1000;
+
+function checkPasswordRateLimit(ip: string): boolean {
+  const now = Date.now();
+  const record = passwordAttempts.get(ip);
+  if (!record || now > record.resetAt) {
+    passwordAttempts.set(ip, { count: 1, resetAt: now + WINDOW_MS });
+    return true;
+  }
+  if (record.count >= MAX_PASSWORD_ATTEMPTS) {
+    return false;
+  }
+  record.count += 1;
+  return true;
+}
+
 export async function POST(request: Request) {
   try {
-    const auth = getAuthUserFromRequest(request);
+    const ip = request.headers.get('x-forwarded-for')?.split(',')[0].trim() || '127.0.0.1';
+    if (!checkPasswordRateLimit(ip)) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Terlalu banyak percobaan penggantian kata sandi. Tunggu 1 menit sebelum mencoba lagi.',
+        },
+        { status: 429 }
+      );
+    }
+
+    const authResult = requireAuth(request);
+    if (authResult instanceof NextResponse) {
+      return authResult;
+    }
+
+    const { user: authUser } = authResult;
     const body = await request.json();
-    const { currentPassword, newPassword, confirmPassword, userId, username } = body || {};
+    const { currentPassword, newPassword, confirmPassword, userId } = body || {};
 
     if (!currentPassword || !newPassword) {
       return NextResponse.json(
@@ -30,31 +65,16 @@ export async function POST(request: Request) {
       );
     }
 
-    // Tentukan user target:
-    // 1. Jika terautentikasi via token/cookie: gunakan akun yang sedang login.
-    //    Jika admin, izinkan admin mengubah target user jika userId disediakan.
-    // 2. Jika sesi belum terbaca di cookie/header: gunakan identifier dari body (userId atau username),
-    //    dengan jaminan keamanan mutlak karena currentPassword tetap wajib diverifikasi oleh SQLite hash!
-    let targetIdentifier: string | null = null;
-
-    if (auth) {
-      if (userId && auth.user.role === 'ADMIN') {
-        targetIdentifier = userId;
-      } else {
-        targetIdentifier = auth.user.id;
+    // Proteksi IDOR: Hanya ADMIN yang dapat mengubah kata sandi akun lain
+    let targetIdentifier = authUser.id;
+    if (userId && userId !== authUser.id) {
+      if (authUser.role !== 'ADMIN') {
+        return NextResponse.json(
+          { success: false, error: 'Akses ditolak: Hanya administrator yang dapat mengganti sandi pengguna lain.' },
+          { status: 403 }
+        );
       }
-    } else if (userId || username) {
-      targetIdentifier = userId || username;
-    }
-
-    if (!targetIdentifier) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'Sesi masuk tidak ditemukan. Mohon masuk kembali sebelum mengganti kata sandi.',
-        },
-        { status: 401 }
-      );
+      targetIdentifier = userId;
     }
 
     const changeResult = changeUserPassword(targetIdentifier, currentPassword, newPassword);

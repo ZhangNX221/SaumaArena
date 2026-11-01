@@ -115,11 +115,11 @@ export const SupporterDetailModal: React.FC<SupporterDetailModalProps> = ({
                       <span>Catatan Sanksi Pelanggaran:</span>
                     </div>
                     <ul className="list-disc list-inside text-[11px] space-y-0.5">
-                      {item.incidentViolentChaos && <li>Kericuhan / Kekerasan Fisik (-50)</li>}
-                      {item.incidentThrowObjects && <li>Melempar Benda ke Lapangan (-25)</li>}
-                      {item.incidentRacismProvocation && <li>Tindakan Rasis / Provokasi Negatif (-15)</li>}
-                      {item.incidentSmuggleContraband && <li>Membawa Barang Terlarang (-5)</li>}
-                      {item.incidentLitteringTribun && <li>Membuang Sampah / Mengotori Tribun (-1)</li>}
+                      {item.incidentViolentChaos && <li><span className="font-bold font-barlow">[RICUH]</span> Kericuhan / Kekerasan Fisik (-50)</li>}
+                      {item.incidentThrowObjects && <li><span className="font-bold font-barlow">[LEMPAR]</span> Melempar Benda ke Lapangan (-25)</li>}
+                      {item.incidentRacismProvocation && <li><span className="font-bold font-barlow">[RASIS]</span> Tindakan Rasis / Provokasi Negatif (-15)</li>}
+                      {item.incidentSmuggleContraband && <li><span className="font-bold font-barlow">[FLARE]</span> Membawa Barang Terlarang / Flare (-5)</li>}
+                      {item.incidentLitteringTribun && <li><span className="font-bold font-barlow">[SAMPAH]</span> Membuang Sampah / Mengotori Tribun (-1)</li>}
                     </ul>
                   </div>
                 )}
@@ -127,7 +127,7 @@ export const SupporterDetailModal: React.FC<SupporterDetailModalProps> = ({
                 <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-[var(--border-subtle)] text-xs">
                   <div className="flex items-center gap-1.5 text-[var(--color-arena-primary)] font-semibold">
                     <Ticket className="w-3.5 h-3.5" />
-                    <span>5. Tiket per Pertandingan: +{item.checkedInTickets} poin</span>
+                    <span>5. Kehadiran Suporter: +{item.checkedInTickets > 0 ? 1 : 0} poin (+1 / match)</span>
                   </div>
                   <div className="text-[11px] font-medium text-[var(--text-muted)]">
                     Catatan Juri: &ldquo;{item.notes || 'Penonton kondusif dan tertib.'}&rdquo;
