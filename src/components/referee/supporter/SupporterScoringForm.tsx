@@ -46,9 +46,8 @@ export const SupporterScoringForm: React.FC<SupporterScoringFormProps> = ({
 
   const selectedTeam = teams.find((t) => t.id === selectedTeamId) || teams[0];
 
-  // Kalkulasi Skor Real-Time
+  // Kalkulasi Skor Real-Time Sesuai Ketentuan Baru (4 Positif & 4 Sanksi)
   const positiveScore =
-    (choreography ? 25 : 0) +
     (schoolMascot ? 20 : 0) +
     (supporterUniform ? 15 : 0) +
     (cheerMin3Chants ? 10 : 0) +
@@ -58,8 +57,7 @@ export const SupporterScoringForm: React.FC<SupporterScoringFormProps> = ({
     (incidentViolentChaos ? 50 : 0) +
     (incidentThrowObjects ? 25 : 0) +
     (incidentRacismProvocation ? 15 : 0) +
-    (incidentSmuggleContraband ? 5 : 0) +
-    (incidentLitteringTribun ? 1 : 0);
+    (incidentSmuggleContraband ? 5 : 0);
 
   const totalScore = positiveScore - penaltyScore;
 
@@ -286,31 +284,25 @@ export const SupporterScoringForm: React.FC<SupporterScoringFormProps> = ({
 
           <div className="space-y-2 text-xs">
             <div className="flex justify-between text-[var(--text-muted)]">
-              <span>Koreografi</span>
-              <span className="font-mono font-bold text-[var(--text-main)]">
-                {choreography ? '+25' : '0'}
-              </span>
-            </div>
-            <div className="flex justify-between text-[var(--text-muted)]">
               <span>Maskot Sekolah</span>
               <span className="font-mono font-bold text-[var(--text-main)]">
                 {schoolMascot ? '+20' : '0'}
               </span>
             </div>
             <div className="flex justify-between text-[var(--text-muted)]">
-              <span>Seragam / Atribut</span>
+              <span>Seragam Supporter</span>
               <span className="font-mono font-bold text-[var(--text-main)]">
                 {supporterUniform ? '+15' : '0'}
               </span>
             </div>
             <div className="flex justify-between text-[var(--text-muted)]">
-              <span>Yel-yel (Min. 3)</span>
+              <span>Yel-yel (Min. 2)</span>
               <span className="font-mono font-bold text-[var(--text-main)]">
                 {cheerMin3Chants ? '+10' : '0'}
               </span>
             </div>
             <div className="flex justify-between text-[var(--text-muted)]">
-              <span>Kehadiran (+1 / match)</span>
+              <span>Kehadiran (&gt; 50)</span>
               <span className="font-mono font-bold text-[var(--text-main)]">
                 +{checkedInTickets > 0 ? 1 : 0}
               </span>

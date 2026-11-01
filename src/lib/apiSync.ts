@@ -62,7 +62,6 @@ export async function fetchMatchesFromBackend(): Promise<Match[] | null> {
 export async function pushSupporterScoreToBackend(assessment: SupporterAssessment) {
   try {
     const positivePoints =
-      (assessment.choreography ? 25 : 0) +
       (assessment.schoolMascot ? 20 : 0) +
       (assessment.supporterUniform ? 15 : 0) +
       (assessment.cheerMin3Chants ? 10 : 0) +
@@ -72,8 +71,7 @@ export async function pushSupporterScoreToBackend(assessment: SupporterAssessmen
       (assessment.incidentViolentChaos ? 50 : 0) +
       (assessment.incidentThrowObjects ? 25 : 0) +
       (assessment.incidentRacismProvocation ? 15 : 0) +
-      (assessment.incidentSmuggleContraband ? 5 : 0) +
-      (assessment.incidentLitteringTribun ? 1 : 0);
+      (assessment.incidentSmuggleContraband ? 5 : 0);
 
     const payload = {
       teamId: assessment.teamId,

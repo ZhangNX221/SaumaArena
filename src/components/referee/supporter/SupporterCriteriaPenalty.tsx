@@ -48,7 +48,7 @@ export const SupporterCriteriaPenalty: React.FC<SupporterCriteriaPenaltyProps> =
             <span className="px-1.5 py-0.5 rounded bg-red-600 text-white font-black text-[10px] font-barlow uppercase">
               RICUH
             </span>
-            <span>Kericuhan / Perkelahian Fisik Anarkis</span>
+            <span>Membuat kericuhan, kekerasan dll</span>
           </span>
           <div className="flex items-center gap-3">
             <span className="text-xs font-mono font-bold text-red-600">-50</span>
@@ -66,7 +66,7 @@ export const SupporterCriteriaPenalty: React.FC<SupporterCriteriaPenaltyProps> =
             <span className="px-1.5 py-0.5 rounded bg-red-600 text-white font-black text-[10px] font-barlow uppercase">
               LEMPAR
             </span>
-            <span>Melempar Benda ke Arah Lapangan</span>
+            <span>Melempar benda ke dalam lapangan</span>
           </span>
           <div className="flex items-center gap-3">
             <span className="text-xs font-mono font-bold text-red-600">-25</span>
@@ -84,7 +84,7 @@ export const SupporterCriteriaPenalty: React.FC<SupporterCriteriaPenaltyProps> =
             <span className="px-1.5 py-0.5 rounded bg-red-600 text-white font-black text-[10px] font-barlow uppercase">
               RASIS
             </span>
-            <span>Ujaran Rasisme / Provokasi Anarkis</span>
+            <span>Melakukan rasis/provokasi</span>
           </span>
           <div className="flex items-center gap-3">
             <span className="text-xs font-mono font-bold text-red-600">-15</span>
@@ -100,9 +100,9 @@ export const SupporterCriteriaPenalty: React.FC<SupporterCriteriaPenaltyProps> =
         <label className="flex items-center justify-between p-3 rounded-xl bg-red-500/5 border border-red-500/20 hover:bg-red-500/10 cursor-pointer transition-all">
           <span className="text-xs font-barlow font-bold uppercase text-red-700 dark:text-red-300 flex items-center gap-2">
             <span className="px-1.5 py-0.5 rounded bg-red-600 text-white font-black text-[10px] font-barlow uppercase">
-              FLARE
+              BARANG
             </span>
-            <span>Penyelundupan Flare / Smoke Bomb</span>
+            <span>Membawa atau menyelundupkan barang yang dilarang</span>
           </span>
           <div className="flex items-center gap-3">
             <span className="text-xs font-mono font-bold text-red-600">-5</span>
@@ -110,24 +110,6 @@ export const SupporterCriteriaPenalty: React.FC<SupporterCriteriaPenaltyProps> =
               type="checkbox"
               checked={incidentSmuggleContraband}
               onChange={(e) => setIncidentSmuggleContraband(e.target.checked)}
-              className="w-4 h-4 rounded text-red-600 focus:ring-0 cursor-pointer"
-            />
-          </div>
-        </label>
-
-        <label className="flex items-center justify-between p-3 rounded-xl bg-red-500/5 border border-red-500/20 hover:bg-red-500/10 cursor-pointer transition-all">
-          <span className="text-xs font-barlow font-bold uppercase text-red-700 dark:text-red-300 flex items-center gap-2">
-            <span className="px-1.5 py-0.5 rounded bg-red-600 text-white font-black text-[10px] font-barlow uppercase">
-              SAMPAH
-            </span>
-            <span>Membuang Sampah Sembarangan di Tribun</span>
-          </span>
-          <div className="flex items-center gap-3">
-            <span className="text-xs font-mono font-bold text-red-600">-1</span>
-            <input
-              type="checkbox"
-              checked={incidentLitteringTribun}
-              onChange={(e) => setIncidentLitteringTribun(e.target.checked)}
               className="w-4 h-4 rounded text-red-600 focus:ring-0 cursor-pointer"
             />
           </div>

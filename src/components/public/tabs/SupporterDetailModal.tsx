@@ -89,37 +89,36 @@ export const SupporterDetailModal: React.FC<SupporterDetailModalProps> = ({
                 </div>
 
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
-                  <div className={`p-2 rounded-lg border ${item.choreography ? 'bg-[var(--color-arena-primary-light)] border-[var(--color-arena-primary)]/30 text-[var(--color-arena-primary)] dark:bg-[#102235] dark:border-blue-800 dark:text-sky-300' : 'bg-[var(--bg-muted)] border-[var(--border-subtle)] text-[var(--text-muted)]'}`}>
-                    <div className="font-semibold text-[10px]">1. Koreografi (+25)</div>
-                    <div className="font-bold">{item.choreography ? 'Terlaksana (+25)' : 'Tidak Ada (0)'}</div>
-                  </div>
                   <div className={`p-2 rounded-lg border ${item.schoolMascot ? 'bg-[var(--color-arena-primary-light)] border-[var(--color-arena-primary)]/30 text-[var(--color-arena-primary)] dark:bg-[#102235] dark:border-blue-800 dark:text-sky-300' : 'bg-[var(--bg-muted)] border-[var(--border-subtle)] text-[var(--text-muted)]'}`}>
-                    <div className="font-semibold text-[10px]">2. Maskot (+20)</div>
-                    <div className="font-bold">{item.schoolMascot ? 'Hadir (+20)' : 'Tidak Ada (0)'}</div>
+                    <div className="font-semibold text-[10px]">1. Maskot (+20)</div>
+                    <div className="font-bold">{item.schoolMascot ? 'Membawa Maskot (+20)' : 'Tidak Ada (0)'}</div>
                   </div>
                   <div className={`p-2 rounded-lg border ${item.supporterUniform ? 'bg-[var(--color-arena-primary-light)] border-[var(--color-arena-primary)]/30 text-[var(--color-arena-primary)] dark:bg-[#102235] dark:border-blue-800 dark:text-sky-300' : 'bg-[var(--bg-muted)] border-[var(--border-subtle)] text-[var(--text-muted)]'}`}>
-                    <div className="font-semibold text-[10px]">3. Seragam (+15)</div>
-                    <div className="font-bold">{item.supporterUniform ? 'Kompak (+15)' : 'Bebas (0)'}</div>
+                    <div className="font-semibold text-[10px]">2. Seragam (+15)</div>
+                    <div className="font-bold">{item.supporterUniform ? 'Seragam Suporter (+15)' : 'Bebas (0)'}</div>
                   </div>
                   <div className={`p-2 rounded-lg border ${item.cheerMin3Chants ? 'bg-[var(--color-arena-primary-light)] border-[var(--color-arena-primary)]/30 text-[var(--color-arena-primary)] dark:bg-[#102235] dark:border-blue-800 dark:text-sky-300' : 'bg-[var(--bg-muted)] border-[var(--border-subtle)] text-[var(--text-muted)]'}`}>
-                    <div className="font-semibold text-[10px]">4. Yel-Yel (+10)</div>
-                    <div className="font-bold">{item.cheerMin3Chants ? '≥ 3 Lagu (+10)' : '< 3 Lagu (0)'}</div>
+                    <div className="font-semibold text-[10px]">3. Yel-Yel (+10)</div>
+                    <div className="font-bold">{item.cheerMin3Chants ? 'Yel-Yel Min. 2 (+10)' : 'Tidak Memenuhi (0)'}</div>
+                  </div>
+                  <div className={`p-2 rounded-lg border ${item.checkedInTickets > 0 ? 'bg-emerald-50 border-emerald-500/30 text-emerald-800 dark:bg-emerald-950/40 dark:border-emerald-800 dark:text-emerald-300' : 'bg-[var(--bg-muted)] border-[var(--border-subtle)] text-[var(--text-muted)]'}`}>
+                    <div className="font-semibold text-[10px]">4. Kehadiran (+1 / match)</div>
+                    <div className="font-bold">{item.checkedInTickets > 0 ? '> 50 Orang (+1)' : '< 50 Orang (0)'}</div>
                   </div>
                 </div>
 
                 {/* Sanksi Disiplin Jika Ada */}
-                {(item.incidentViolentChaos || item.incidentThrowObjects || item.incidentRacismProvocation || item.incidentSmuggleContraband || item.incidentLitteringTribun) && (
+                {(item.incidentViolentChaos || item.incidentThrowObjects || item.incidentRacismProvocation || item.incidentSmuggleContraband) && (
                   <div className="p-2.5 rounded-lg bg-red-500/10 border border-red-500/20 text-xs text-red-600 dark:text-red-400 space-y-1">
                     <div className="font-bold flex items-center gap-1.5">
                       <ShieldAlert className="w-3.5 h-3.5" />
                       <span>Catatan Sanksi Pelanggaran:</span>
                     </div>
                     <ul className="list-disc list-inside text-[11px] space-y-0.5">
-                      {item.incidentViolentChaos && <li><span className="font-bold font-barlow">[RICUH]</span> Kericuhan / Kekerasan Fisik (-50)</li>}
-                      {item.incidentThrowObjects && <li><span className="font-bold font-barlow">[LEMPAR]</span> Melempar Benda ke Lapangan (-25)</li>}
-                      {item.incidentRacismProvocation && <li><span className="font-bold font-barlow">[RASIS]</span> Tindakan Rasis / Provokasi Negatif (-15)</li>}
-                      {item.incidentSmuggleContraband && <li><span className="font-bold font-barlow">[FLARE]</span> Membawa Barang Terlarang / Flare (-5)</li>}
-                      {item.incidentLitteringTribun && <li><span className="font-bold font-barlow">[SAMPAH]</span> Membuang Sampah / Mengotori Tribun (-1)</li>}
+                      {item.incidentViolentChaos && <li><span className="font-bold font-barlow">[RICUH]</span> Membuat kericuhan, kekerasan dll (-50)</li>}
+                      {item.incidentThrowObjects && <li><span className="font-bold font-barlow">[LEMPAR]</span> Melempar benda ke dalam lapangan (-25)</li>}
+                      {item.incidentRacismProvocation && <li><span className="font-bold font-barlow">[RASIS]</span> Melakukan rasis/provokasi (-15)</li>}
+                      {item.incidentSmuggleContraband && <li><span className="font-bold font-barlow">[BARANG]</span> Membawa atau menyelundupkan barang yang dilarang (-5)</li>}
                     </ul>
                   </div>
                 )}
@@ -127,7 +126,7 @@ export const SupporterDetailModal: React.FC<SupporterDetailModalProps> = ({
                 <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-[var(--border-subtle)] text-xs">
                   <div className="flex items-center gap-1.5 text-[var(--color-arena-primary)] font-semibold">
                     <Ticket className="w-3.5 h-3.5" />
-                    <span>5. Kehadiran Suporter: +{item.checkedInTickets > 0 ? 1 : 0} poin (+1 / match)</span>
+                    <span>Kehadiran Suporter (di atas 50): +{item.checkedInTickets > 0 ? 1 : 0} poin (+1 / match)</span>
                   </div>
                   <div className="text-[11px] font-medium text-[var(--text-muted)]">
                     Catatan Juri: &ldquo;{item.notes || 'Penonton kondusif dan tertib.'}&rdquo;

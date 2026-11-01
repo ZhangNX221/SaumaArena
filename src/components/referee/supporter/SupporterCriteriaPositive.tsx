@@ -46,30 +46,10 @@ export const SupporterCriteriaPositive: React.FC<SupporterCriteriaPositiveProps>
         <label className="flex items-center justify-between p-3 rounded-xl bg-[var(--bg-muted)]/50 border border-[var(--border-subtle)] hover:bg-[var(--bg-muted)] cursor-pointer transition-all">
           <div className="space-y-0.5">
             <span className="font-barlow font-bold text-xs uppercase text-[var(--text-main)] block">
-              Koreografi Tribun
+              1. Membawa Maskot Sekolah (+20)
             </span>
             <p className="text-[11px] text-[var(--text-muted)]">
-              Kreativitas visual, mozaik kertas/kain, formasi banner terkoordinasi rapi.
-            </p>
-          </div>
-          <div className="flex items-center gap-3">
-            <span className="text-xs font-mono font-bold text-emerald-600">+25</span>
-            <input
-              type="checkbox"
-              checked={choreography}
-              onChange={(e) => setChoreography(e.target.checked)}
-              className="w-4 h-4 rounded text-[var(--color-arena-primary)] focus:ring-0 cursor-pointer"
-            />
-          </div>
-        </label>
-
-        <label className="flex items-center justify-between p-3 rounded-xl bg-[var(--bg-muted)]/50 border border-[var(--border-subtle)] hover:bg-[var(--bg-muted)] cursor-pointer transition-all">
-          <div className="space-y-0.5">
-            <span className="font-barlow font-bold text-xs uppercase text-[var(--text-main)] block">
-              Maskot Sekolah
-            </span>
-            <p className="text-[11px] text-[var(--text-muted)]">
-              Kehadiran maskot berkostum aktif memandu dan menyemangati suporter di tribun.
+              Membawa maskot sekolah / kostum unik yang memandu dan memeriahkan tribun.
             </p>
           </div>
           <div className="flex items-center gap-3">
@@ -86,10 +66,10 @@ export const SupporterCriteriaPositive: React.FC<SupporterCriteriaPositiveProps>
         <label className="flex items-center justify-between p-3 rounded-xl bg-[var(--bg-muted)]/50 border border-[var(--border-subtle)] hover:bg-[var(--bg-muted)] cursor-pointer transition-all">
           <div className="space-y-0.5">
             <span className="font-barlow font-bold text-xs uppercase text-[var(--text-main)] block">
-              Keseragaman Seragam / Atribut
+              2. Menggunakan Seragam Supporter (+15)
             </span>
             <p className="text-[11px] text-[var(--text-muted)]">
-              Suporter mengenakan pakaian, kaos sekolah, atau atribut warna serasi.
+              Suporter kontingen hadir mengenakan seragam supporter yang kompak dan rapi.
             </p>
           </div>
           <div className="flex items-center gap-3">
@@ -106,10 +86,10 @@ export const SupporterCriteriaPositive: React.FC<SupporterCriteriaPositiveProps>
         <label className="flex items-center justify-between p-3 rounded-xl bg-[var(--bg-muted)]/50 border border-[var(--border-subtle)] hover:bg-[var(--bg-muted)] cursor-pointer transition-all">
           <div className="space-y-0.5">
             <span className="font-barlow font-bold text-xs uppercase text-[var(--text-main)] block">
-              Yel-Yel Semangat Positif (Min. 3 Lagu)
+              3. Menyanyikan Yel-Yel Minimal 2 (+10)
             </span>
             <p className="text-[11px] text-[var(--text-muted)]">
-              Bernyanyi teratur sepanjang laga tanpa kata kasar atau provokasi.
+              Menyanyikan yel-yel suporter positif minimal 2 lagu secara teratur.
             </p>
           </div>
           <div className="flex items-center gap-3">
@@ -126,10 +106,10 @@ export const SupporterCriteriaPositive: React.FC<SupporterCriteriaPositiveProps>
         <div className="flex items-center justify-between p-3 rounded-xl bg-[var(--bg-muted)]/50 border border-[var(--border-subtle)]">
           <div className="space-y-0.5">
             <span className="font-barlow font-bold text-xs uppercase text-[var(--text-main)] block">
-              Penilaian Kehadiran Suporter (+1 / match)
+              4. Jumlah Tiket Kehadiran Supporter (di atas 50) (+1 / match)
             </span>
             <p className="text-[11px] text-[var(--text-muted)]">
-              Diberikan +1 poin per pertandingan (match) yang dihadiri oleh rombongan suporter madrasah.
+              Jumlah kehadiran suporter terverifikasi di atas 50 orang per pertandingan.
             </p>
           </div>
           <div className="flex items-center gap-3">

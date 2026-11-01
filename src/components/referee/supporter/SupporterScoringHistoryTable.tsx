@@ -69,7 +69,6 @@ export const SupporterScoringHistoryTable: React.FC<SupporterScoringHistoryTable
             <tbody className="divide-y divide-[var(--border-subtle)]">
               {filteredAssessments.map((a) => {
                 const bonus =
-                  (a.choreography ? 25 : 0) +
                   (a.schoolMascot ? 20 : 0) +
                   (a.supporterUniform ? 15 : 0) +
                   (a.cheerMin3Chants ? 10 : 0) +
@@ -79,8 +78,7 @@ export const SupporterScoringHistoryTable: React.FC<SupporterScoringHistoryTable
                   (a.incidentViolentChaos ? 50 : 0) +
                   (a.incidentThrowObjects ? 25 : 0) +
                   (a.incidentRacismProvocation ? 15 : 0) +
-                  (a.incidentSmuggleContraband ? 5 : 0) +
-                  (a.incidentLitteringTribun ? 1 : 0);
+                  (a.incidentSmuggleContraband ? 5 : 0);
 
                 const total = bonus - pen;
 

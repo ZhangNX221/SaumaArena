@@ -9,16 +9,16 @@ export interface SupporterLeaderboardRow {
   schoolName: string;
   shortName: string;
   logoUrl?: string;
-  p1Points: number;
-  p2Points: number;
-  p3Points: number;
-  p4Points: number;
-  p5Points: number;
-  s1Points: number;
-  s2Points: number;
-  s3Points: number;
-  s4Points: number;
-  s5Points: number;
+  p1Points: number; // 1. Maskot (+20)
+  p2Points: number; // 2. Seragam (+15)
+  p3Points: number; // 3. Yel-yel (+10)
+  p4Points: number; // 4. Tiket (+1)
+  p5Points?: number;
+  s1Points: number; // 1. Ricuh (-50)
+  s2Points: number; // 2. Lempar (-25)
+  s3Points: number; // 3. Rasis (-15)
+  s4Points: number; // 4. Barang dilarang (-5)
+  s5Points?: number;
   penaltyPoints: number;
   totalScore: number;
   matchCount: number;
@@ -42,67 +42,55 @@ export const SupporterDesktopTable: React.FC<SupporterDesktopTableProps> = ({
             <th className="py-3 px-4 min-w-[200px] sticky left-0 bg-[var(--bg-muted)] sm:static">Sekolah Suporter</th>
             <th className="py-3 px-2 text-center">Laga</th>
 
-            {/* 5 Kriteria Positif */}
-            <th className="py-3 px-2 text-center" title="Membentang Koreografi 3D / Kertas (+25)">
+            {/* 4 Kriteria Positif */}
+            <th className="py-3 px-2 text-center" title="Membawa maskot sekolah (+20)">
               <div className="flex flex-col items-center">
                 <span className="w-5 h-5 rounded-md bg-[var(--bg-surface)] border border-slate-300 dark:border-slate-700 text-[#1D63B8] dark:text-sky-400 font-black text-[11px] flex items-center justify-center shadow-2xs font-mono">1</span>
-                <span className="text-[10px] text-[var(--text-muted)] font-bold mt-0.5 font-barlow uppercase">Koreo</span>
-              </div>
-            </th>
-            <th className="py-3 px-2 text-center" title="Membawa Maskot Sekolah / Kostum Unik (+20)">
-              <div className="flex flex-col items-center">
-                <span className="w-5 h-5 rounded-md bg-[var(--bg-surface)] border border-slate-300 dark:border-slate-700 text-[#1D63B8] dark:text-sky-400 font-black text-[11px] flex items-center justify-center shadow-2xs font-mono">2</span>
                 <span className="text-[10px] text-[var(--text-muted)] font-bold mt-0.5 font-barlow uppercase">Maskot</span>
               </div>
             </th>
-            <th className="py-3 px-2 text-center" title="Menggunakan Seragam Kompak Kontingen (+15)">
+            <th className="py-3 px-2 text-center" title="Menggunakan seragam supporter (+15)">
               <div className="flex flex-col items-center">
-                <span className="w-5 h-5 rounded-md bg-[var(--bg-surface)] border border-slate-300 dark:border-slate-700 text-[#1D63B8] dark:text-sky-400 font-black text-[11px] flex items-center justify-center shadow-2xs font-mono">3</span>
+                <span className="w-5 h-5 rounded-md bg-[var(--bg-surface)] border border-slate-300 dark:border-slate-700 text-[#1D63B8] dark:text-sky-400 font-black text-[11px] flex items-center justify-center shadow-2xs font-mono">2</span>
                 <span className="text-[10px] text-[var(--text-muted)] font-bold mt-0.5 font-barlow uppercase">Seragam</span>
               </div>
             </th>
-            <th className="py-3 px-2 text-center" title="Menyanyikan Yel-Yel Minimal 3 Lagu (+10)">
+            <th className="py-3 px-2 text-center" title="Menyanyikan yel yel minimal 2 (+10)">
               <div className="flex flex-col items-center">
-                <span className="w-5 h-5 rounded-md bg-[var(--bg-surface)] border border-slate-300 dark:border-slate-700 text-[#1D63B8] dark:text-sky-400 font-black text-[11px] flex items-center justify-center shadow-2xs font-mono">4</span>
+                <span className="w-5 h-5 rounded-md bg-[var(--bg-surface)] border border-slate-300 dark:border-slate-700 text-[#1D63B8] dark:text-sky-400 font-black text-[11px] flex items-center justify-center shadow-2xs font-mono">3</span>
                 <span className="text-[10px] text-[var(--text-muted)] font-bold mt-0.5 font-barlow uppercase">Yel-yel</span>
               </div>
             </th>
-            <th className="py-3 px-2 text-center" title="Tiket Penonton / Kehadiran Suporter (+1 / Match)">
+            <th className="py-3 px-2 text-center" title="Jumlah tiket kehadiran supporter (di atas 50) (+1 / Match)">
               <div className="flex flex-col items-center">
-                <span className="w-5 h-5 rounded-md bg-[var(--bg-surface)] border border-slate-300 dark:border-slate-700 text-[var(--color-arena-accent)] font-black text-[11px] flex items-center justify-center shadow-2xs font-mono">5</span>
+                <span className="w-5 h-5 rounded-md bg-[var(--bg-surface)] border border-slate-300 dark:border-slate-700 text-[var(--color-arena-accent)] font-black text-[11px] flex items-center justify-center shadow-2xs font-mono">4</span>
                 <span className="text-[10px] text-[var(--text-muted)] font-bold mt-0.5 font-barlow uppercase">Tiket</span>
               </div>
             </th>
 
-            {/* 5 Kriteria Sanksi (1 Kata Saja) */}
-            <th className="py-3 px-2 text-center" title="Kericuhan atau Kekerasan Fisik (-50)">
+            {/* 4 Kriteria Sanksi (Sesuai Ketentuan Baru) */}
+            <th className="py-3 px-2 text-center" title="Membuat kericuhan, kekerasan dll (-50)">
               <div className="flex flex-col items-center">
                 <span className="px-1 min-w-[20px] h-5 rounded-md bg-red-500/10 border border-red-500/30 text-red-600 dark:text-red-400 font-black text-[9px] flex items-center justify-center shadow-2xs font-mono">-50</span>
                 <span className="text-[10px] text-red-600 dark:text-red-400 font-bold mt-0.5 font-barlow uppercase">Ricuh</span>
               </div>
             </th>
-            <th className="py-3 px-2 text-center" title="Melempar Benda ke Lapangan Pertandingan (-25)">
+            <th className="py-3 px-2 text-center" title="Melempar benda ke dalam lapangan (-25)">
               <div className="flex flex-col items-center">
                 <span className="px-1 min-w-[20px] h-5 rounded-md bg-red-500/10 border border-red-500/30 text-red-600 dark:text-red-400 font-black text-[9px] flex items-center justify-center shadow-2xs font-mono">-25</span>
                 <span className="text-[10px] text-red-600 dark:text-red-400 font-bold mt-0.5 font-barlow uppercase">Lempar</span>
               </div>
             </th>
-            <th className="py-3 px-2 text-center" title="Tindakan Rasisme atau Provokasi Negatif (-15)">
+            <th className="py-3 px-2 text-center" title="Melakukan rasis/provokasi (-15)">
               <div className="flex flex-col items-center">
                 <span className="px-1 min-w-[20px] h-5 rounded-md bg-red-500/10 border border-red-500/30 text-red-600 dark:text-red-400 font-black text-[9px] flex items-center justify-center shadow-2xs font-mono">-15</span>
                 <span className="text-[10px] text-red-600 dark:text-red-400 font-bold mt-0.5 font-barlow uppercase">Rasis</span>
               </div>
             </th>
-            <th className="py-3 px-2 text-center" title="Membawa Barang Terlarang / Flare / Petasan (-5)">
+            <th className="py-3 px-2 text-center" title="Membawa atau menyelundupkan barang yang dilarang (-5)">
               <div className="flex flex-col items-center">
                 <span className="px-1 min-w-[20px] h-5 rounded-md bg-red-500/10 border border-red-500/30 text-red-600 dark:text-red-400 font-black text-[9px] flex items-center justify-center shadow-2xs font-mono">-5</span>
-                <span className="text-[10px] text-red-600 dark:text-red-400 font-bold mt-0.5 font-barlow uppercase">Flare</span>
-              </div>
-            </th>
-            <th className="py-3 px-2 text-center" title="Membuang Sampah Sembarangan / Mengotori Tribun (-1)">
-              <div className="flex flex-col items-center">
-                <span className="px-1 min-w-[20px] h-5 rounded-md bg-red-500/10 border border-red-500/30 text-red-600 dark:text-red-400 font-black text-[9px] flex items-center justify-center shadow-2xs font-mono">-1</span>
-                <span className="text-[10px] text-red-600 dark:text-red-400 font-bold mt-0.5 font-barlow uppercase">Sampah</span>
+                <span className="text-[10px] text-red-600 dark:text-red-400 font-bold mt-0.5 font-barlow uppercase">Barang</span>
               </div>
             </th>
 
@@ -164,7 +152,7 @@ export const SupporterDesktopTable: React.FC<SupporterDesktopTableProps> = ({
                   {row.matchCount}
                 </td>
 
-                {/* 5 Positif */}
+                {/* 4 Positif */}
                 <td className="py-4 px-2 text-center tabular-nums font-mono font-bold text-[var(--text-main)]">
                   +{row.p1Points}
                 </td>
@@ -174,14 +162,11 @@ export const SupporterDesktopTable: React.FC<SupporterDesktopTableProps> = ({
                 <td className="py-4 px-2 text-center tabular-nums font-mono font-bold text-[var(--text-main)]">
                   +{row.p3Points}
                 </td>
-                <td className="py-4 px-2 text-center tabular-nums font-mono font-bold text-[var(--text-main)]">
+                <td className="py-4 px-2 text-center tabular-nums font-mono font-bold text-emerald-700 dark:text-emerald-400">
                   +{row.p4Points}
                 </td>
-                <td className="py-4 px-2 text-center tabular-nums font-mono font-bold text-emerald-700 dark:text-emerald-400">
-                  +{row.p5Points}
-                </td>
 
-                {/* 5 Sanksi (1 Kata Saja) */}
+                {/* 4 Sanksi */}
                 <td className="py-4 px-2 text-center tabular-nums font-mono font-bold text-red-600 dark:text-red-400">
                   {row.s1Points > 0 ? `-${row.s1Points}` : '0'}
                 </td>
@@ -193,9 +178,6 @@ export const SupporterDesktopTable: React.FC<SupporterDesktopTableProps> = ({
                 </td>
                 <td className="py-4 px-2 text-center tabular-nums font-mono font-bold text-red-600 dark:text-red-400">
                   {row.s4Points > 0 ? `-${row.s4Points}` : '0'}
-                </td>
-                <td className="py-4 px-2 text-center tabular-nums font-mono font-bold text-red-600 dark:text-red-400">
-                  {row.s5Points > 0 ? `-${row.s5Points}` : '0'}
                 </td>
 
                 {/* Total Sanksi */}

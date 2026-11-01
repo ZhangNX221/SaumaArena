@@ -17,39 +17,35 @@ export const SupporterTab: React.FC = () => {
   const [selectedSchool, setSelectedSchool] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Agregasi skor suporter per sekolah/tim (Poin Positif 1-5 & Sanksi 1-5 dengan label 1 kata)
+  // Agregasi skor suporter per sekolah/tim (Poin Positif 1-4 & Sanksi 1-4 dengan label 1 kata)
   const leaderboard: SupporterLeaderboardRow[] = teams
     .map((team) => {
       const teamAssessments = assessments.filter((a) => a.teamId === team.id);
 
-      let p1Points = 0; // 1. Koreo (+25)
-      let p2Points = 0; // 2. Maskot (+20)
-      let p3Points = 0; // 3. Seragam (+15)
-      let p4Points = 0; // 4. Yel-yel (+10)
-      let p5Points = 0; // 5. Tiket (+1)
+      let p1Points = 0; // 1. Maskot (+20)
+      let p2Points = 0; // 2. Seragam (+15)
+      let p3Points = 0; // 3. Yel-yel (+10)
+      let p4Points = 0; // 4. Tiket (+1)
 
-      let s1Points = 0; // Ricuh (-50)
-      let s2Points = 0; // Lempar (-25)
-      let s3Points = 0; // Rasis (-15)
-      let s4Points = 0; // Flare (-5)
-      let s5Points = 0; // Sampah (-1)
+      let s1Points = 0; // 1. Ricuh (-50)
+      let s2Points = 0; // 2. Lempar (-25)
+      let s3Points = 0; // 3. Rasis (-15)
+      let s4Points = 0; // 4. Barang dilarang (-5)
 
       teamAssessments.forEach((a) => {
-        if (a.choreography) p1Points += 25;
-        if (a.schoolMascot) p2Points += 20;
-        if (a.supporterUniform) p3Points += 15;
-        if (a.cheerMin3Chants) p4Points += 10;
-        p5Points += a.checkedInTickets > 0 ? 1 : 0;
+        if (a.schoolMascot) p1Points += 20;
+        if (a.supporterUniform) p2Points += 15;
+        if (a.cheerMin3Chants) p3Points += 10;
+        p4Points += a.checkedInTickets > 0 ? 1 : 0;
 
         if (a.incidentViolentChaos) s1Points += 50;
         if (a.incidentThrowObjects) s2Points += 25;
         if (a.incidentRacismProvocation) s3Points += 15;
         if (a.incidentSmuggleContraband) s4Points += 5;
-        if (a.incidentLitteringTribun) s5Points += 1;
       });
 
-      const penaltyPoints = s1Points + s2Points + s3Points + s4Points + s5Points;
-      const totalScore = p1Points + p2Points + p3Points + p4Points + p5Points - penaltyPoints;
+      const penaltyPoints = s1Points + s2Points + s3Points + s4Points;
+      const totalScore = p1Points + p2Points + p3Points + p4Points - penaltyPoints;
 
       return {
         teamId: team.id,
@@ -60,12 +56,10 @@ export const SupporterTab: React.FC = () => {
         p2Points,
         p3Points,
         p4Points,
-        p5Points,
         s1Points,
         s2Points,
         s3Points,
         s4Points,
-        s5Points,
         penaltyPoints,
         totalScore,
         matchCount: teamAssessments.length,
@@ -170,19 +164,16 @@ export const SupporterTab: React.FC = () => {
                 {/* Score Breakdown Pills (1 Kata Saja) */}
                 <div className="py-2.5 flex flex-wrap items-center gap-1.5 text-[11px] font-mono">
                   <span className="px-2 py-0.5 rounded-sm bg-blue-50 dark:bg-sky-950/40 text-[#1D63B8] dark:text-sky-300 border border-blue-200 dark:border-sky-800 font-bold">
-                    Koreo +{row.p1Points}
+                    Maskot +{row.p1Points}
                   </span>
                   <span className="px-2 py-0.5 rounded-sm bg-blue-50 dark:bg-sky-950/40 text-[#1D63B8] dark:text-sky-300 border border-blue-200 dark:border-sky-800 font-bold">
-                    Maskot +{row.p2Points}
+                    Seragam +{row.p2Points}
                   </span>
                   <span className="px-2 py-0.5 rounded-sm bg-blue-50 dark:bg-sky-950/40 text-[#1D63B8] dark:text-sky-300 border border-blue-200 dark:border-sky-800 font-bold">
-                    Seragam +{row.p3Points}
-                  </span>
-                  <span className="px-2 py-0.5 rounded-sm bg-blue-50 dark:bg-sky-950/40 text-[#1D63B8] dark:text-sky-300 border border-blue-200 dark:border-sky-800 font-bold">
-                    Yel +{row.p4Points}
+                    Yel +{row.p3Points}
                   </span>
                   <span className="px-2 py-0.5 rounded-sm bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 font-bold">
-                    Tiket +{row.p5Points}
+                    Tiket +{row.p4Points}
                   </span>
                   {row.s1Points > 0 && (
                     <span className="px-2 py-0.5 rounded-sm bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800 font-bold">
@@ -201,12 +192,7 @@ export const SupporterTab: React.FC = () => {
                   )}
                   {row.s4Points > 0 && (
                     <span className="px-2 py-0.5 rounded-sm bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800 font-bold">
-                      Flare -{row.s4Points}
-                    </span>
-                  )}
-                  {row.s5Points > 0 && (
-                    <span className="px-2 py-0.5 rounded-sm bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800 font-bold">
-                      Sampah -{row.s5Points}
+                      Barang -{row.s4Points}
                     </span>
                   )}
                   {row.penaltyPoints > 0 && (

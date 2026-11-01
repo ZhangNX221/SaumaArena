@@ -27,19 +27,17 @@ export interface SupporterScoringWeights {
 }
 
 export const DEFAULT_POSITIVE_CRITERIA: AssessmentCriterionItem[] = [
-  { id: 'crit_pos_1', badge: 'KOREO', label: 'Membentang Koreografi 3D / Kertas', points: 25 },
-  { id: 'crit_pos_2', badge: 'MASKOT', label: 'Membawa Maskot Sekolah / Kostum Unik', points: 20 },
-  { id: 'crit_pos_3', badge: 'SERAGAM', label: 'Menggunakan Seragam Kompak Kontingen', points: 15 },
-  { id: 'crit_pos_4', badge: 'YEL-YEL', label: 'Menyanyikan Yel-Yel Minimal 3 Lagu', points: 10 },
-  { id: 'crit_pos_5', badge: 'TIKET', label: 'Kehadiran Suporter Terverifikasi', points: 1, suffix: ' / Match' },
+  { id: 'crit_pos_1', badge: 'MASKOT', label: 'Membawa maskot sekolah', points: 20 },
+  { id: 'crit_pos_2', badge: 'SERAGAM', label: 'Menggunakan seragam supporter', points: 15 },
+  { id: 'crit_pos_3', badge: 'YEL-YEL', label: 'Menyanyikan yel yel minimal 2', points: 10 },
+  { id: 'crit_pos_4', badge: 'TIKET', label: 'Jumlah tiket kehadiran supporter (di atas 50)', points: 1, suffix: ' / Match' },
 ];
 
 export const DEFAULT_PENALTY_CRITERIA: AssessmentCriterionItem[] = [
-  { id: 'crit_neg_1', badge: 'RICUH', label: 'Kericuhan atau Kekerasan Fisik', points: 50 },
-  { id: 'crit_neg_2', badge: 'LEMPAR', label: 'Melempar Benda ke Lapangan Pertandingan', points: 25 },
-  { id: 'crit_neg_3', badge: 'RASIS', label: 'Tindakan Rasisme atau Provokasi Negatif', points: 15 },
-  { id: 'crit_neg_4', badge: 'FLARE', label: 'Membawa Barang Terlarang / Flare / Petasan', points: 5 },
-  { id: 'crit_neg_5', badge: 'SAMPAH', label: 'Membuang Sampah Sembarangan / Mengotori Tribun', points: 1 },
+  { id: 'crit_neg_1', badge: 'RICUH', label: 'Membuat kericuhan, kekerasan dll', points: 50 },
+  { id: 'crit_neg_2', badge: 'LEMPAR', label: 'Melempar benda ke dalam lapangan', points: 25 },
+  { id: 'crit_neg_3', badge: 'RASIS', label: 'Melakukan rasis/provokasi', points: 15 },
+  { id: 'crit_neg_4', badge: 'BARANG', label: 'Membawa atau menyelundupkan barang yang dilarang', points: 5 },
 ];
 
 export const DEFAULT_ASSESSMENT_CONFIG: SupporterAssessmentConfig = {
@@ -49,7 +47,7 @@ export const DEFAULT_ASSESSMENT_CONFIG: SupporterAssessmentConfig = {
 };
 
 export const DEFAULT_SUPPORTER_WEIGHTS: SupporterScoringWeights = {
-  koreo: 25,
+  koreo: 0,
   maskot: 20,
   seragam: 15,
   yelYel: 10,
@@ -58,7 +56,7 @@ export const DEFAULT_SUPPORTER_WEIGHTS: SupporterScoringWeights = {
   lempar: 25,
   rasis: 15,
   flare: 5,
-  sampah: 1,
+  sampah: 0,
 };
 
 export const STORAGE_KEY_SUPPORTER_WEIGHTS = 'sauma_arena_supporter_weights';
@@ -94,22 +92,20 @@ export function normalizeAssessmentConfig(raw: any): SupporterAssessmentConfig {
   }
 
   // Jika berupa object flat bobot lama (koreo, ricuh, dll)
-  if (raw && typeof raw === 'object' && ('koreo' in raw || 'ricuh' in raw)) {
+  if (raw && typeof raw === 'object' && ('maskot' in raw || 'ricuh' in raw)) {
     return {
       title: DEFAULT_ASSESSMENT_CONFIG.title,
       positiveCriteria: [
-        { id: 'crit_pos_1', badge: 'KOREO', label: 'Membentang Koreografi 3D / Kertas', points: Number(raw.koreo) || 25 },
-        { id: 'crit_pos_2', badge: 'MASKOT', label: 'Membawa Maskot Sekolah / Kostum Unik', points: Number(raw.maskot) || 20 },
-        { id: 'crit_pos_3', badge: 'SERAGAM', label: 'Menggunakan Seragam Kompak Kontingen', points: Number(raw.seragam) || 15 },
-        { id: 'crit_pos_4', badge: 'YEL-YEL', label: 'Menyanyikan Yel-Yel Minimal 3 Lagu', points: Number(raw.yelYel) || 10 },
-        { id: 'crit_pos_5', badge: 'TIKET', label: 'Kehadiran Suporter Terverifikasi', points: Number(raw.tiket) || 1, suffix: ' / Match' },
+        { id: 'crit_pos_1', badge: 'MASKOT', label: 'Membawa maskot sekolah', points: Number(raw.maskot) || 20 },
+        { id: 'crit_pos_2', badge: 'SERAGAM', label: 'Menggunakan seragam supporter', points: Number(raw.seragam) || 15 },
+        { id: 'crit_pos_3', badge: 'YEL-YEL', label: 'Menyanyikan yel yel minimal 2', points: Number(raw.yelYel) || 10 },
+        { id: 'crit_pos_4', badge: 'TIKET', label: 'Jumlah tiket kehadiran supporter (di atas 50)', points: Number(raw.tiket) || 1, suffix: ' / Match' },
       ],
       penaltyCriteria: [
-        { id: 'crit_neg_1', badge: 'RICUH', label: 'Kericuhan atau Kekerasan Fisik', points: Number(raw.ricuh) || 50 },
-        { id: 'crit_neg_2', badge: 'LEMPAR', label: 'Melempar Benda ke Lapangan Pertandingan', points: Number(raw.lempar) || 25 },
-        { id: 'crit_neg_3', badge: 'RASIS', label: 'Tindakan Rasisme atau Provokasi Negatif', points: Number(raw.rasis) || 15 },
-        { id: 'crit_neg_4', badge: 'FLARE', label: 'Membawa Barang Terlarang / Flare / Petasan', points: Number(raw.flare) || 5 },
-        { id: 'crit_neg_5', badge: 'SAMPAH', label: 'Membuang Sampah Sembarangan / Mengotori Tribun', points: Number(raw.sampah) || 1 },
+        { id: 'crit_neg_1', badge: 'RICUH', label: 'Membuat kericuhan, kekerasan dll', points: Number(raw.ricuh) || 50 },
+        { id: 'crit_neg_2', badge: 'LEMPAR', label: 'Melempar benda ke dalam lapangan', points: Number(raw.lempar) || 25 },
+        { id: 'crit_neg_3', badge: 'RASIS', label: 'Melakukan rasis/provokasi', points: Number(raw.rasis) || 15 },
+        { id: 'crit_neg_4', badge: 'BARANG', label: 'Membawa atau menyelundupkan barang yang dilarang', points: Number(raw.flare) || 5 },
       ],
     };
   }

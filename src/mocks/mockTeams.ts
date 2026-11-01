@@ -130,7 +130,7 @@ export const initialTeams: Team[] = [
   {
     id: 'team-mi-mambaululum',
     code: 'TM-06',
-    name: 'MI MAMBAUL ULUM BUNTARAN TULUNGAGUNG',
+    name: 'MI MAMBAUL ULUM BUNTARAN (TULUNGAGUNG)',
     shortName: 'MI MAMBAUL ULUM',
     schoolName: 'Madrasah Ibtidaiyah Mambaul Ulum Buntaran Tulungagung',
     city: 'Tulungagung',
@@ -262,9 +262,9 @@ export const initialTeams: Team[] = [
   {
     id: 'team-mi-yabunaya',
     code: 'TM-13',
-    name: 'MI YAA BUNAYYA SRENGAT',
-    shortName: 'YAA BUNAYYA',
-    schoolName: 'Madrasah Ibtidaiyah Yaa Bunayya Srengat Blitar',
+    name: 'MI YA BUNAYYA SRENGAT',
+    shortName: 'YA BUNAYYA',
+    schoolName: 'Madrasah Ibtidaiyah Ya Bunayya Srengat Blitar',
     city: 'Blitar',
     logoUrl: getTeamLogoUrl('team-mi-yabunaya'),
     coachName: 'M. Ali Ridho, S.Pd',

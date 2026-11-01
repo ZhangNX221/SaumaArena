@@ -161,7 +161,7 @@ export const MatchAssessmentSettingsTab: React.FC = () => {
   const handleReset = () => {
     setFormConfig(DEFAULT_ASSESSMENT_CONFIG);
     setPersistedConfig(DEFAULT_ASSESSMENT_CONFIG);
-    setToastMessage('Bobot penilaian dikembalikan ke pengaturan standar (5 Apresiasi & 5 Sanksi).');
+    setToastMessage('Bobot penilaian dikembalikan ke pengaturan standar (4 Apresiasi & 4 Sanksi).');
     setTimeout(() => setToastMessage(null), 3000);
   };
 

@@ -26,7 +26,7 @@ export const StandingsTab: React.FC<StandingsTabProps> = ({ sportCode = 'FUTSAL'
   const [groupC, setGroupC] = usePersistentState<AppStandingRow[]>('sauma_arena_standings_c', DEFAULT_GROUP_C_STANDINGS);
   const [groupD, setGroupD] = usePersistentState<AppStandingRow[]>('sauma_arena_standings_d', DEFAULT_GROUP_D_STANDINGS);
 
-  // Self-healing: bersihkan imbuhan kode grup seperti (A1), (B1), dst dari cache/storage lama
+  // Self-healing: bersihkan imbuhan kode grup seperti (A1), (B1), dst dan sinkronkan data tim awal
   useEffect(() => {
     const sanitizeRow = (r: AppStandingRow) => ({
       ...r,
@@ -39,6 +39,18 @@ export const StandingsTab: React.FC<StandingsTabProps> = ({ sportCode = 'FUTSAL'
     if (needsSanitize(groupB)) setGroupB((l) => l.map(sanitizeRow));
     if (needsSanitize(groupC)) setGroupC((l) => l.map(sanitizeRow));
     if (needsSanitize(groupD)) setGroupD((l) => l.map(sanitizeRow));
+
+    // Sinkronkan urutan Grup D resmi jika masih urutan lama dan belum main
+    if (groupD.length === 4 && groupD.every((r) => r.played === 0) && groupD[0]?.teamId !== 'team-mi-ploso') {
+      setGroupD(DEFAULT_GROUP_D_STANDINGS);
+    }
+    // Perbarui nama tim resmi jika ada penyesuaian (misal YA BUNAYYA / MAMBAUL ULUM BUNTARAN)
+    if (groupB.some((r) => r.teamId === 'team-mi-mambaululum' && !r.teamName.includes('(TULUNGAGUNG)'))) {
+      setGroupB((l) => l.map((r) => r.teamId === 'team-mi-mambaululum' ? { ...r, teamName: 'MI MAMBAUL ULUM BUNTARAN (TULUNGAGUNG)' } : r));
+    }
+    if (groupD.some((r) => r.teamId === 'team-mi-yabunaya' && r.teamName.includes('YAA'))) {
+      setGroupD((l) => l.map((r) => r.teamId === 'team-mi-yabunaya' ? { ...r, teamName: 'MI YA BUNAYYA SRENGAT', schoolName: 'Madrasah Ibtidaiyah Ya Bunayya Srengat Blitar' } : r));
+    }
   }, []);
 
   // Sorting dan penomoran ranking dinamis sesuai aturan resmi turnamen MMFC I:
@@ -103,7 +115,7 @@ export const StandingsTab: React.FC<StandingsTabProps> = ({ sportCode = 'FUTSAL'
                 </h3>
               </div>
               <span className="text-[10px] text-[var(--text-muted)] font-mono">
-                Top 2 Lolos ke Semifinal
+                Top 1 Lolos ke Semifinal
               </span>
             </div>
 
@@ -126,7 +138,7 @@ export const StandingsTab: React.FC<StandingsTabProps> = ({ sportCode = 'FUTSAL'
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60 font-sans">
                   {group.rows.map((row, idx) => {
-                    const isQualified = idx < 2;
+                    const isQualified = idx < 1;
                     return (
                       <tr
                         key={row.teamId}
@@ -187,7 +199,7 @@ export const StandingsTab: React.FC<StandingsTabProps> = ({ sportCode = 'FUTSAL'
             <div className="px-4 py-2 bg-slate-50 dark:bg-slate-900/50 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between text-[10px] text-[var(--text-muted)] font-mono">
               <div className="flex items-center gap-1.5">
                 <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                <span>Zona Lolos Semifinal (Top 2 Grup)</span>
+                <span>Zona Lolos Semifinal (Juara Grup / Top 1)</span>
               </div>
               <span>MN: Main • M: Menang • S: Seri • K: Kalah • PS: Point Supporter</span>
             </div>

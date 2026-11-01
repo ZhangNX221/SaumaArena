@@ -35,20 +35,10 @@ export const GroupStandingsTab: React.FC = () => {
   const [deleteTarget, setDeleteTarget] = useState<{ teamId: string; teamName: string } | null>(null);
   const [syncToast, setSyncToast] = useState<string | null>(null);
 
-  const currentList =
-    selectedGroup === 'A'
-      ? groupA
-      : selectedGroup === 'B'
-      ? groupB
-      : selectedGroup === 'C'
-      ? groupC
-      : groupD;
-
+  const currentList = selectedGroup === 'A' ? groupA : selectedGroup === 'B' ? groupB : selectedGroup === 'C' ? groupC : groupD;
   const setCurrentList = (updater: React.SetStateAction<StandingRow[]>) => {
-    if (selectedGroup === 'A') setGroupA(updater);
-    else if (selectedGroup === 'B') setGroupB(updater);
-    else if (selectedGroup === 'C') setGroupC(updater);
-    else setGroupD(updater);
+    const map = { A: setGroupA, B: setGroupB, C: setGroupC, D: setGroupD };
+    map[selectedGroup](updater);
   };
 
   // Modal State
@@ -190,7 +180,7 @@ export const GroupStandingsTab: React.FC = () => {
     setTimeout(() => setSyncToast(null), 3500);
   };
 
-  // Reset otomatis jika masih terdapat poin suporter 100 atau imbuhan kode (A1, B1, dst) dari cache lama
+  // Reset otomatis jika masih terdapat poin suporter 100 atau imbuhan kode (A1, B1, dst) dari cache lama serta sinkronisasi urutan tim
   useEffect(() => {
     const sanitizeRow = (r: StandingRow) => ({
       ...r,
@@ -204,6 +194,10 @@ export const GroupStandingsTab: React.FC = () => {
     if (needsSanitize(groupB)) setGroupB((l) => l.map(sanitizeRow));
     if (needsSanitize(groupC)) setGroupC((l) => l.map(sanitizeRow));
     if (needsSanitize(groupD)) setGroupD((l) => l.map(sanitizeRow));
+
+    if (groupD.length === 4 && groupD.every((r) => r.played === 0) && groupD[0]?.teamId !== 'team-mi-ploso') {
+      setGroupD(DEFAULT_GROUP_D_STANDINGS);
+    }
   }, []);
 
   const handleResetAllSupporterPoints = () => {
@@ -317,7 +311,7 @@ export const GroupStandingsTab: React.FC = () => {
                 <td className="py-4 px-3.5 text-center font-barlow font-bold tabular-nums">
                   <span
                     className={`inline-flex items-center justify-center w-6 h-6 rounded-lg text-xs font-teko font-bold tabular-nums ${
-                      idx < 2 ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 text-sm' : 'text-[var(--text-muted)]'
+                      idx < 1 ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 text-sm' : 'text-[var(--text-muted)]'
                     }`}
                   >
                     {idx + 1}
