@@ -10,6 +10,7 @@ import {
   GitBranch,
   Database,
   Award,
+  Calendar,
 } from 'lucide-react';
 import { AdminPageHeaderCard } from '@/components/admin/common/AdminPageHeaderCard';
 import { MatchAssignmentsTab } from '../officials/MatchAssignmentsTab';
@@ -19,9 +20,10 @@ import { MatchRulesTab } from './MatchRulesTab';
 import { MatchProtocolsTab } from './MatchProtocolsTab';
 import { BracketSettingsTab } from './BracketSettingsTab';
 import { MatchAssessmentSettingsTab } from './MatchAssessmentSettingsTab';
+import { MatchScheduleSettingsTab } from './MatchScheduleSettingsTab';
 import { SettingsBackupRestoreModal } from './SettingsBackupRestoreModal';
 
-type SettingSubTab = 'RULES' | 'BRACKET' | 'OFFICIALS' | 'PROTOCOLS' | 'ASSESSMENT';
+type SettingSubTab = 'RULES' | 'SCHEDULE' | 'BRACKET' | 'OFFICIALS' | 'PROTOCOLS' | 'ASSESSMENT';
 
 export const MatchSettingsView: React.FC = () => {
   const [activeTab, setActiveTab] = useState<SettingSubTab>('RULES');
@@ -184,6 +186,19 @@ export const MatchSettingsView: React.FC = () => {
 
         <button
           type="button"
+          onClick={() => setActiveTab('SCHEDULE')}
+          className={`btn-tactile px-3.5 py-2 rounded-xl transition-all duration-150 flex items-center gap-1.5 ${
+            activeTab === 'SCHEDULE'
+              ? 'bg-[var(--color-arena-primary)] text-white shadow-xs'
+              : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'
+          }`}
+        >
+          <Calendar className="w-3.5 h-3.5" />
+          <span>Jadwal Pertandingan</span>
+        </button>
+
+        <button
+          type="button"
           onClick={() => setActiveTab('BRACKET')}
           className={`btn-tactile px-3.5 py-2 rounded-xl transition-all duration-150 flex items-center gap-1.5 ${
             activeTab === 'BRACKET'
@@ -256,6 +271,9 @@ export const MatchSettingsView: React.FC = () => {
           handleSave={handleSave}
         />
       )}
+
+      {/* TAB: JADWAL PERTANDINGAN & RUNDOWN */}
+      {activeTab === 'SCHEDULE' && <MatchScheduleSettingsTab />}
 
       {/* TAB 2: BRACKET SETTINGS (24, 16, 8, 4, 2 BESAR) */}
       {activeTab === 'BRACKET' && <BracketSettingsTab />}

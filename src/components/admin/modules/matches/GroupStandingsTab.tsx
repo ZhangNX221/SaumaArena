@@ -72,10 +72,17 @@ export const GroupStandingsTab: React.FC = () => {
       .then((res) => {
         const snap = res?.data?.groupStandingsSnapshot;
         if (snap) {
-          if (snap.A?.length) setGroupA(snap.A);
-          if (snap.B?.length) setGroupB(snap.B);
-          if (snap.C?.length) setGroupC(snap.C);
-          if (snap.D?.length) setGroupD(snap.D);
+          if (Array.isArray(snap.A) && snap.A.length > 0) setGroupA(snap.A);
+          else setGroupA(DEFAULT_GROUP_A_STANDINGS);
+
+          if (Array.isArray(snap.B) && snap.B.length > 0) setGroupB(snap.B);
+          else setGroupB(DEFAULT_GROUP_B_STANDINGS);
+
+          if (Array.isArray(snap.C) && snap.C.length > 0) setGroupC(snap.C);
+          else setGroupC(DEFAULT_GROUP_C_STANDINGS);
+
+          if (Array.isArray(snap.D) && snap.D.length > 0) setGroupD(snap.D);
+          else setGroupD(DEFAULT_GROUP_D_STANDINGS);
         } else {
           pushGroupStandingsToBackend({
             A: DEFAULT_GROUP_A_STANDINGS,

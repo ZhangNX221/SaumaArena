@@ -36,7 +36,7 @@ export async function pushMatchToBackend(
     };
 
     // 1. Push ke /api/matches/[id]
-    fetch(`/api/matches/${match.id}`, {
+    await fetch(`/api/matches/${match.id}`, {
       method: 'PATCH',
       headers,
       credentials: 'include',
@@ -44,7 +44,7 @@ export async function pushMatchToBackend(
     }).catch(() => {});
 
     // 2. Push ke /api/live untuk sinkronisasi real-time instan ke Konsol Juri & Publik
-    fetch('/api/live', {
+    await fetch('/api/live', {
       method: 'POST',
       headers,
       credentials: 'include',

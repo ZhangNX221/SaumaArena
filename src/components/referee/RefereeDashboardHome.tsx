@@ -82,7 +82,16 @@ export const RefereeDashboardHome: React.FC<RefereeDashboardHomeProps> = ({
 
     // Status hanya benar-benar LIVE jika timer sedang aktif berjalan oleh juri
     const isLive = linkedMatch?.status === 'LIVE' && Boolean(telemetry?.isTimerRunning);
-    const isCompleted = linkedMatch?.status === 'COMPLETED' || d.status === 'COMPLETED';
+    const linkedStatus = String(linkedMatch?.status || '').toUpperCase();
+    const dutyStatus = String(d.status || '').toUpperCase();
+    const isCompleted =
+      linkedStatus === 'COMPLETED' ||
+      linkedStatus === 'FINISHED' ||
+      linkedStatus === 'VERIFIED' ||
+      Boolean(linkedMatch?.bapSigned) ||
+      dutyStatus === 'COMPLETED' ||
+      dutyStatus === 'FINISHED' ||
+      dutyStatus === 'VERIFIED';
     const computedStatus: Match['status'] = isLive ? 'LIVE' : isCompleted ? 'COMPLETED' : 'UPCOMING';
 
     return {

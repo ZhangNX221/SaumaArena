@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { MapPin, Clock, Calendar } from 'lucide-react';
-import { initialMatches } from '@/mocks/tournamentData';
+import { initialMatches, TOURNAMENT_RUNDOWN } from '@/mocks/tournamentData';
 import { CABOR_INFO_DATA } from '@/mocks/caborContentData';
 import { Match, SportCode } from '@/types';
 import { usePersistentState } from '@/hooks/usePersistentState';
@@ -14,15 +14,32 @@ interface ScheduleTabProps {
 }
 
 const parseScheduleInfo = (scheduledTimeStr: string, matchNumber: number) => {
-  const parts = scheduledTimeStr.split('•').map((s) => s.trim());
-  const dateStr = parts[0] || 'Jadwal Turnamen';
+  // Ambil referensi waktu dan agenda resmi dari TABEL RUNDOWN & JADWAL PERTANDINGAN LENGKAP
+  const rundownItem = TOURNAMENT_RUNDOWN.find((r) => r.matchCode === `P${matchNumber}`);
+
+  let time = '';
+  if (rundownItem && rundownItem.time) {
+    const formattedRundownTime = rundownItem.time.replace(/\./g, ':');
+    time = `${formattedRundownTime} WIB`;
+  } else {
+    const timeMatch = (scheduledTimeStr || '').match(/(\d{1,2}[:.]\d{2}\s*-\s*\d{1,2}[:.]\d{2}(?:\s*WIB)?)/i);
+    time = timeMatch
+      ? timeMatch[1].includes('WIB')
+        ? timeMatch[1].replace(/\./g, ':')
+        : `${timeMatch[1].replace(/\./g, ':')} WIB`
+      : '07:30 - 08:00 WIB';
+  }
+
+  const parts = (scheduledTimeStr || '').split('•').map((s) => s.trim());
+  const dateStr = parts[0] || (rundownItem ? rundownItem.dayDate : 'Senin, 2 Nov 2026');
   const restStr = parts.slice(1).join(' • ');
 
-  const timeMatch = restStr.match(/(\d{2}[:.]\d{2}\s*-\s*\d{2}[:.]\d{2}(?:\s*WIB)?)/i);
-  const time = timeMatch ? (timeMatch[1].includes('WIB') ? timeMatch[1] : `${timeMatch[1]} WIB`) : '07:30 - 08:00 WIB';
-
   const codeMatch = restStr.match(/\((.*?)\)/);
-  const code = codeMatch ? codeMatch[1] : `Partai P${matchNumber}`;
+  const code = rundownItem
+    ? `Partai ${rundownItem.matchCode} (${rundownItem.agendaCode})`
+    : codeMatch
+    ? codeMatch[1]
+    : `Partai P${matchNumber}`;
 
   return { dateStr, time, code };
 };
@@ -55,22 +72,28 @@ export const ScheduleTab: React.FC<ScheduleTabProps> = ({ sportCode = 'FUTSAL' }
   const [dateFilter, setDateFilter] = useState<'ALL' | 'H1' | 'H2'>('ALL');
   const [calendarData, setCalendarData] = useState<any>(null);
 
-  // Self-healing: bersihkan logo dan sesuaikan nama tim fase gugur jika data lama tersimpan di localStorage
+  // Self-healing: bersihkan logo fase gugur dan sinkronkan waktu jadwal agar sama persis dengan TABEL RUNDOWN
   useEffect(() => {
-    const hasOutdatedKnockout = matches.some((m) => {
-      if (m.matchNumber === 15 || m.matchNumber === 16) {
-        return Boolean(m.teamALogo || m.teamBLogo || m.teamAId?.startsWith('team-') || m.teamBId?.startsWith('team-'));
+    let hasChanged = false;
+    const updated = matches.map((m) => {
+      let copy = { ...m };
+      if (KNOCKOUT_HEAL[m.matchNumber]) {
+        copy = { ...copy, ...KNOCKOUT_HEAL[m.matchNumber] };
       }
-      if (m.matchNumber === 17) {
-        return m.teamAName === 'P15' || m.teamBName === 'P16' || Boolean(m.teamALogo || m.teamBLogo);
+      const rundown = TOURNAMENT_RUNDOWN.find((r) => r.matchCode === `P${m.matchNumber}`);
+      if (rundown) {
+        const formattedTime = rundown.time.replace(/\./g, ':');
+        const correctScheduled = `${rundown.dayDate} • ${formattedTime} WIB (${rundown.matchCode} • ${rundown.agendaCode})`;
+        if (copy.scheduledTime !== correctScheduled) {
+          copy.scheduledTime = correctScheduled;
+          hasChanged = true;
+        }
       }
-      return false;
+      return copy;
     });
 
-    if (hasOutdatedKnockout) {
-      setMatches((prev) =>
-        prev.map((m) => (KNOCKOUT_HEAL[m.matchNumber] ? { ...m, ...KNOCKOUT_HEAL[m.matchNumber] } : m))
-      );
+    if (hasChanged) {
+      setMatches(updated);
     }
   }, [matches, setMatches]);
 
@@ -221,8 +244,12 @@ export const ScheduleTab: React.FC<ScheduleTabProps> = ({ sportCode = 'FUTSAL' }
                 }`}
               >
                 <div className="px-4 sm:px-6 py-2.5 bg-[var(--bg-muted)]/80 border-b border-slate-200 dark:border-slate-800 flex flex-wrap items-center justify-between gap-2.5 text-xs text-[var(--text-muted)]">
-                  <div className="flex items-center gap-2 font-bold">
+                  <div className="flex items-center gap-2 font-bold flex-wrap">
                     <span className="text-[var(--text-main)] font-mono text-xs sm:text-sm">Pertandingan #{match.matchNumber}</span>
+                    <span>&bull;</span>
+                    <span className="text-xs font-mono font-bold text-[var(--color-arena-primary)] dark:text-sky-400">
+                      {time}
+                    </span>
                     <span>&bull;</span>
                     <span className="uppercase tracking-wider text-[11px] sm:text-xs font-mono font-bold text-[#1D63B8] dark:text-sky-400">
                       {match.stage === 'GROUP'
@@ -318,7 +345,7 @@ export const ScheduleTab: React.FC<ScheduleTabProps> = ({ sportCode = 'FUTSAL' }
                             {match.scoreA} - {match.scoreB}
                           </div>
                           <span className="text-[10px] font-mono text-[var(--text-muted)]">
-                            {match.timeDisplay || 'Selesai'}
+                            {code} &bull; {match.timeDisplay || 'Selesai'}
                           </span>
                         </div>
                       )}

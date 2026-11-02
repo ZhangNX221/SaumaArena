@@ -3,9 +3,12 @@
 import React, { useState } from 'react';
 import { Calendar, Clock, Trophy, Coffee, Flag, BarChart2 } from 'lucide-react';
 import { TOURNAMENT_RUNDOWN, RundownItem, initialMatches } from '@/mocks/tournamentData';
+import { Match } from '@/types';
+import { usePersistentState } from '@/hooks/usePersistentState';
 
 export const TournamentRundownTable: React.FC = () => {
   const [selectedDay, setSelectedDay] = useState<'H1' | 'H2'>('H1');
+  const [matches] = usePersistentState<Match[]>('sauma_arena_matches', initialMatches);
 
   const items = TOURNAMENT_RUNDOWN.filter((it) => it.day === selectedDay);
 
@@ -104,13 +107,12 @@ export const TournamentRundownTable: React.FC = () => {
           const isFinal = it.agendaCode === 'FINAL';
 
           const matchNum = it.matchCode.startsWith('P') ? parseInt(it.matchCode.replace('P', ''), 10) : null;
-          const matchData = matchNum ? initialMatches.find((m) => m.matchNumber === matchNum) : null;
+          const matchData = matchNum ? matches.find((m) => m.matchNumber === matchNum) : null;
           const isLive = matchData?.status === 'LIVE';
           const isCompleted = matchData?.status === 'COMPLETED';
 
-          const vsParts = it.category === 'MATCH' && it.detail.includes(' vs ') ? it.detail.split(/\s+vs\s+/i) : null;
-          const teamA = vsParts?.[0];
-          const teamB = vsParts?.[1];
+          const teamA = matchData ? matchData.teamAName : (it.detail.includes(' vs ') ? it.detail.split(/\s+vs\s+/i)[0] : null);
+          const teamB = matchData ? matchData.teamBName : (it.detail.includes(' vs ') ? it.detail.split(/\s+vs\s+/i)[1] : null);
 
           return (
             <div
@@ -250,9 +252,12 @@ export const TournamentRundownTable: React.FC = () => {
 
                 // Hubungkan dengan data pertandingan resmi jika bertipe MATCH
                 const matchNum = it.matchCode.startsWith('P') ? parseInt(it.matchCode.replace('P', ''), 10) : null;
-                const matchData = matchNum ? initialMatches.find((m) => m.matchNumber === matchNum) : null;
+                const matchData = matchNum ? matches.find((m) => m.matchNumber === matchNum) : null;
                 const isLive = matchData?.status === 'LIVE';
                 const isCompleted = matchData?.status === 'COMPLETED';
+                const matchDetailText = matchData && it.category === 'MATCH'
+                  ? `${matchData.teamAName} vs ${matchData.teamBName}`
+                  : it.detail;
 
                 return (
                   <tr
@@ -290,7 +295,7 @@ export const TournamentRundownTable: React.FC = () => {
                     <td className="py-3 px-4 font-semibold text-[var(--text-main)]">
                       <div className="flex items-center gap-2">
                         <span className={isCeremonyOrBreak ? 'not-italic font-bold' : ''}>
-                          {it.detail}
+                          {matchDetailText}
                         </span>
                         {isLive && (
                           <span className="px-1.5 py-0.5 rounded bg-red-600 text-white font-barlow font-bold text-[9px] uppercase tracking-wider animate-pulse shrink-0">

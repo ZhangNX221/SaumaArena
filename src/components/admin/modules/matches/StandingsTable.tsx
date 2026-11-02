@@ -35,6 +35,18 @@ export const StandingsTable: React.FC<StandingsTableProps> = ({
           </tr>
         </thead>
         <tbody className="divide-y divide-[var(--border-subtle)] font-medium">
+          {sortedStandings.length === 0 && (
+            <tr>
+              <td colSpan={12} className="py-12 text-center text-xs text-[var(--text-muted)]">
+                <div className="space-y-1.5">
+                  <p className="font-bold text-[var(--text-main)] text-sm">Belum ada tim di klasemen grup ini</p>
+                  <p className="text-[11px] text-[var(--text-muted)]">
+                    Klik tombol &quot;+ Tambah Tim&quot; atau &quot;Sinkron dari Laga&quot; untuk memuat data tim.
+                  </p>
+                </div>
+              </td>
+            </tr>
+          )}
           {sortedStandings.map((row, idx) => (
             <tr key={row.teamId} className="hover:bg-[var(--bg-muted)]/30 transition-colors">
               <td className="py-4 px-3.5 text-center font-barlow font-bold tabular-nums">

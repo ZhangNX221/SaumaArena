@@ -53,9 +53,15 @@ export const RefereeSchedule: React.FC<RefereeScheduleProps> = ({
     );
   };
 
+  const isStatusFinished = (s?: string) => {
+    if (!s) return false;
+    const up = s.toUpperCase();
+    return up === 'COMPLETED' || up === 'FINISHED' || up === 'VERIFIED';
+  };
+
   const isDutyCompleted = (duty: RefereeMatchDuty): boolean => {
     const linked = getLinkedMatch(duty);
-    return linked?.status === 'COMPLETED' || Boolean(linked?.bapSigned) || duty.status === 'COMPLETED';
+    return isStatusFinished(linked?.status) || Boolean(linked?.bapSigned) || isStatusFinished(duty.status);
   };
 
   // 2. Fungsi komparasi apakah sebuah laga jatuh pada HARI INI

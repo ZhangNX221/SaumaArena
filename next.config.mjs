@@ -2,6 +2,22 @@
 const nextConfig = {
   poweredByHeader: false,
   serverExternalPackages: ['node:sqlite'],
+  webpack: (config, { dev }) => {
+    if (dev) {
+      config.watchOptions = {
+        ...config.watchOptions,
+        ignored: [
+          '**/data/**',
+          '**/*.db',
+          '**/*.db-journal',
+          '**/*.db-wal',
+          '**/*.db-shm',
+          '**/.git/**',
+        ],
+      };
+    }
+    return config;
+  },
   async headers() {
     return [
       {
