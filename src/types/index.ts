@@ -39,11 +39,12 @@ export interface SportConfig {
 
 export interface Player {
   id: string;
+  athleteCode?: string; // ID Khusus Atlet Resmi (e.g. ATL-001, ATL-002)
   name: string;
   number: number;
   position: string;
   photoUrl: string;
-  nisn: string;
+  nisn?: string;
   documentStatus: 'APPROVED' | 'PENDING' | 'REJECTED';
   isSuspended?: boolean;
   suspensionReason?: string;
@@ -52,6 +53,15 @@ export interface Player {
   goals: number;
   assists: number;
 }
+
+export interface FlattenedAthlete extends Player {
+  teamId: string;
+  teamName: string;
+  schoolName?: string;
+  group?: string;
+}
+
+export const STORAGE_KEY_MASTER_ATHLETES = 'sauma_arena_master_athletes';
 
 export interface Official {
   id: string;
@@ -446,6 +456,7 @@ export * from './partner';
 export type TeamCardLayout = 'STANDARD' | 'MINIMAL';
 export const STORAGE_KEY_TEAM_CARD_LAYOUT = 'sauma_arena_team_card_layout';
 export const STORAGE_KEY_TEAMS = 'sauma_arena_teams_v2';
+export const STORAGE_KEY_LIVE_BROADCAST_ACTIVE = 'sauma_arena_live_broadcast_active';
 
 export interface PublicStatsDisplayConfig {
   showQuickMetrics: boolean;

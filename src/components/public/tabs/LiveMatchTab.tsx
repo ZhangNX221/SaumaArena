@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { initialMatches } from '@/mocks/tournamentData';
-import { SportCode, Match, MatchLiveTelemetry } from '@/types';
+import { SportCode, Match, MatchLiveTelemetry, STORAGE_KEY_LIVE_BROADCAST_ACTIVE } from '@/types';
 import { usePersistentState } from '@/hooks/usePersistentState';
 import { SportRuleSettings, DEFAULT_SPORT_RULES } from '@/config/sportRules';
 import { fetchLiveStateFromBackend } from '@/lib/apiSync';
@@ -10,7 +10,8 @@ import { LiveMatchHeader } from './live/LiveMatchHeader';
 import { LiveMatchScoreboard } from './live/LiveMatchScoreboard';
 import { LiveMatchGoalHistory } from './live/LiveMatchGoalHistory';
 import { LiveMatchFullscreenArena } from './live/LiveMatchFullscreenArena';
-import { playTimerStartSound, playTimerEndSound } from '@/lib/soundEffects';
+import { LiveMatchInactiveView } from './live/LiveMatchInactiveView';
+import { playTimerStartSound, playTimerEndSound } from '@/utils/arenaSound';
 
 interface LiveMatchTabProps {
   sportCode?: SportCode;
@@ -19,12 +20,17 @@ interface LiveMatchTabProps {
 
 export const LiveMatchTab: React.FC<LiveMatchTabProps> = ({
   sportCode = 'FUTSAL',
+  onTabChange,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
 
-  // Akses state tersinkronisasi pertandingan, telemetri real-time, dan aturan cabor
+  // Akses state tersinkronisasi pertandingan, telemetri real-time, dan sakelar live siaran juri
   const [matches, setMatches] = usePersistentState<Match[]>('sauma_arena_matches', initialMatches);
+  const [isLiveBroadcastActive, setIsLiveBroadcastActive] = usePersistentState<boolean>(
+    STORAGE_KEY_LIVE_BROADCAST_ACTIVE,
+    true
+  );
   const [telemetryMap, setTelemetryMap] = usePersistentState<Record<string, MatchLiveTelemetry>>(
     'sauma_arena_live_telemetry',
     {}
@@ -63,6 +69,10 @@ export const LiveMatchTab: React.FC<LiveMatchTabProps> = ({
           setActiveRefereeMatchId(liveData.activeMatchId);
         }
 
+        if (typeof liveData.isLiveBroadcastActive === 'boolean') {
+          setIsLiveBroadcastActive(liveData.isLiveBroadcastActive);
+        }
+
         if (Array.isArray(liveData.matches) && liveData.matches.length > 0) {
           setMatches((prev) => {
             return prev.map((local) => {
@@ -96,7 +106,16 @@ export const LiveMatchTab: React.FC<LiveMatchTabProps> = ({
       window.removeEventListener('focus', handleFocus);
       window.removeEventListener('visibilitychange', handleFocus);
     };
-  }, [setMatches, setTelemetryMap, setActiveRefereeMatchId]);
+  }, [setMatches, setTelemetryMap, setActiveRefereeMatchId, setIsLiveBroadcastActive]);
+
+  // Pertandingan berikutnya yang berstatus UPCOMING atau belum COMPLETED
+  const nextUpcomingMatch = useMemo(() => {
+    return (
+      matches.find((m) => m.status === 'UPCOMING') ||
+      matches.find((m) => m.status !== 'COMPLETED') ||
+      null
+    );
+  }, [matches]);
 
   // Sinkronkan otomatis ke laga yang sedang LIVE atau yang aktif di meja juri
   useEffect(() => {
@@ -235,6 +254,17 @@ export const LiveMatchTab: React.FC<LiveMatchTabProps> = ({
       (e.teamId === selectedMatch.teamBId || e.teamId === 'B' || e.playerName?.includes('Tim B')) &&
       e.type === 'RED_CARD'
   ).length;
+
+  // Jika siaran live skor dimatikan oleh meja wasit juri, tampilkan pemberitahuan & jadwal laga berikutnya
+  if (!isLiveBroadcastActive) {
+    return (
+      <LiveMatchInactiveView
+        nextMatch={nextUpcomingMatch}
+        onTabChange={onTabChange}
+        isManuallyDisabled={true}
+      />
+    );
+  }
 
   return (
     <div

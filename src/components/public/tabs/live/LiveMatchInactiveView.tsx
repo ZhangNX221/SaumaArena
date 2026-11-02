@@ -19,15 +19,17 @@ import { Match } from '@/types';
 import { tournamentMeta } from '@/mocks/tournamentData';
 
 interface LiveMatchInactiveViewProps {
-  nextMatch?: Match;
+  nextMatch?: Match | null;
   onActivatePreview?: () => void;
   onTabChange?: (tab: string) => void;
+  isManuallyDisabled?: boolean;
 }
 
 export const LiveMatchInactiveView: React.FC<LiveMatchInactiveViewProps> = ({
   nextMatch,
   onActivatePreview,
   onTabChange,
+  isManuallyDisabled = false,
 }) => {
   // Hitung mundur menuju kick-off laga pembuka (Senin, 2 November 2026 07:30 WIB)
   const targetDate = new Date('2026-11-02T07:30:00+07:00').getTime();
@@ -78,16 +80,21 @@ export const LiveMatchInactiveView: React.FC<LiveMatchInactiveViewProps> = ({
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/25 text-amber-600 dark:text-amber-400 text-xs font-barlow font-bold uppercase tracking-wider">
               <span className="w-2 h-2 rounded-full bg-amber-500 animate-ping inline-block" />
               <Radio className="w-3.5 h-3.5 text-amber-500" />
-              <span>Papan Skor Standby &bull; Belum Ada Laga Berlangsung</span>
+              <span>
+                {isManuallyDisabled
+                  ? 'Siaran Langsung Skor Sedang Dinonaktifkan Meja Juri'
+                  : 'Papan Skor Standby • Belum Ada Laga Berlangsung'}
+              </span>
             </div>
 
             <h1 className="font-bebas text-3xl sm:text-4xl text-[var(--text-main)] uppercase tracking-wide leading-tight">
-              Live Score Digital Belum Aktif
+              {isManuallyDisabled ? 'Siaran Live Skor Sedang Dijeda' : 'Live Score Digital Belum Aktif'}
             </h1>
 
             <p className="text-xs sm:text-sm text-[var(--text-muted)] leading-relaxed font-sans">
-              Papan skor dan stopwatch digital terhubung langsung secara real-time dengan konsol juri meja lapangan.
-              Siaran langsung skor akan dimulai otomatis saat peluit kick-off laga pertama ditiup oleh wasit.
+              {isManuallyDisabled
+                ? 'Meja juri dan wasit pertandingan saat ini sedang menjeda atau menonaktifkan tayangan live score. Silakan pantau jadwal pertandingan berikutnya di bawah ini.'
+                : 'Papan skor dan stopwatch digital terhubung langsung secara real-time dengan konsol juri meja lapangan. Siaran langsung skor akan dimulai otomatis saat peluit kick-off laga pertama ditiup oleh wasit.'}
             </p>
           </div>
 
@@ -116,17 +123,25 @@ export const LiveMatchInactiveView: React.FC<LiveMatchInactiveViewProps> = ({
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-[var(--border-subtle)]">
           <div>
             <span className="text-[10px] font-barlow font-bold uppercase tracking-wider text-[var(--color-arena-primary)] block">
-              Laga Perdana Pembuka Turnamen &bull; Hari-1
+              {nextMatch?.stage === 'FINAL'
+                ? 'Babak Grand Final'
+                : nextMatch?.stage === 'SEMI_FINAL'
+                ? 'Babak 4 Besar (Semifinal)'
+                : nextMatch?.group
+                ? `Penyisihan Grup ${nextMatch.group}`
+                : 'Jadwal Pertandingan Berikutnya'}
             </span>
             <h3 className="font-bebas text-xl sm:text-2xl text-[var(--text-main)] uppercase tracking-wide flex items-center gap-2 mt-0.5">
               <Tv className="w-5 h-5 text-[var(--color-arena-accent)] shrink-0" />
-              <span>Pertandingan Berikutnya di Lapangan</span>
+              <span>
+                {nextMatch?.matchNumber ? `Partai P${nextMatch.matchNumber} di Lapangan` : 'Pertandingan Berikutnya di Lapangan'}
+              </span>
             </h3>
           </div>
 
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-[var(--bg-muted)] border border-[var(--border-subtle)] text-xs text-[var(--text-muted)] font-mono">
             <Clock className="w-3.5 h-3.5 text-[var(--color-arena-accent)]" />
-            <span>Senin, 2 Nov 2026 &bull; 07:30 WIB</span>
+            <span>{nextMatch?.scheduledTime || 'Senin, 2 Nov 2026 • 07:30 WIB'}</span>
           </div>
         </div>
 
@@ -146,13 +161,13 @@ export const LiveMatchInactiveView: React.FC<LiveMatchInactiveViewProps> = ({
             </div>
             <div className="space-y-1">
               <span className="px-2 py-0.5 rounded-md bg-[var(--color-arena-primary)]/10 text-[var(--color-arena-primary)] text-[10px] font-barlow font-bold uppercase tracking-wider">
-                Tim A &bull; Grup A
+                Tim A {nextMatch?.group ? `&bull; Grup ${nextMatch.group}` : ''}
               </span>
               <h4 className="font-bebas text-xl sm:text-2xl text-[var(--text-main)] uppercase tracking-wide leading-none">
                 {teamAName}
               </h4>
               <p className="text-[11px] text-[var(--text-muted)] font-sans">
-                SD Islam Kardina Massa Blitar
+                {nextMatch?.courtName || 'Lapangan Futsal Seabless'}
               </p>
             </div>
           </div>
@@ -163,7 +178,7 @@ export const LiveMatchInactiveView: React.FC<LiveMatchInactiveViewProps> = ({
               <span className="font-bebas text-lg text-[var(--color-arena-accent)] font-bold">VS</span>
             </div>
             <span className="text-[9px] font-mono font-bold text-[var(--text-muted)] uppercase tracking-wider mt-1">
-              Laga #1
+              {nextMatch?.matchNumber ? `Laga #${nextMatch.matchNumber}` : 'Laga #1'}
             </span>
           </div>
 
@@ -171,13 +186,13 @@ export const LiveMatchInactiveView: React.FC<LiveMatchInactiveViewProps> = ({
           <div className="md:col-span-5 flex items-center justify-start md:justify-end gap-3.5 md:text-right">
             <div className="space-y-1 order-2 md:order-1">
               <span className="px-2 py-0.5 rounded-md bg-amber-500/10 text-amber-600 dark:text-amber-400 text-[10px] font-barlow font-bold uppercase tracking-wider">
-                Tim B &bull; Grup A
+                Tim B {nextMatch?.group ? `&bull; Grup ${nextMatch.group}` : ''}
               </span>
               <h4 className="font-bebas text-xl sm:text-2xl text-[var(--text-main)] uppercase tracking-wide leading-none">
                 {teamBName}
               </h4>
               <p className="text-[11px] text-[var(--text-muted)] font-sans">
-                Madrasah Ibtidaiyah Negeri 7 Blitar
+                {nextMatch?.courtName || 'Lapangan Futsal Seabless'}
               </p>
             </div>
             <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] p-2 flex items-center justify-center shrink-0 shadow-xs order-1 md:order-2">

@@ -1,11 +1,19 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Users, ShieldCheck, Search, X, ChevronRight } from 'lucide-react';
 import { initialTeams } from '@/mocks/tournamentData';
 import { getTeamLogoUrl } from '@/mocks/teamLogos';
 import { usePersistentState } from '@/hooks/usePersistentState';
-import { Team, SportCode, TeamCardLayout, STORAGE_KEY_TEAM_CARD_LAYOUT, STORAGE_KEY_TEAMS } from '@/types';
+import {
+  Team,
+  FlattenedAthlete,
+  SportCode,
+  TeamCardLayout,
+  STORAGE_KEY_TEAM_CARD_LAYOUT,
+  STORAGE_KEY_TEAMS,
+  STORAGE_KEY_MASTER_ATHLETES,
+} from '@/types';
 import { ModalPortal } from '@/components/common/ModalPortal';
 import { PublicPageHeader } from '../layout/PublicPageHeader';
 
@@ -16,22 +24,66 @@ interface TeamsTabProps {
 export const TeamsTab: React.FC<TeamsTabProps> = ({ sportCode = 'FUTSAL' }) => {
   const [teams, setTeams] = usePersistentState<Team[]>(STORAGE_KEY_TEAMS, initialTeams);
   const [teamCardLayout, setTeamCardLayout] = usePersistentState<TeamCardLayout>(STORAGE_KEY_TEAM_CARD_LAYOUT, 'MINIMAL');
-  const [selectedTeam, setSelectedTeam] = useState<Team | null>(null);
+  const [masterAthletes, setMasterAthletes] = usePersistentState<FlattenedAthlete[]>(
+    STORAGE_KEY_MASTER_ATHLETES,
+    []
+  );
+  const [selectedTeamId, setSelectedTeamId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedGroup, setSelectedGroup] = useState<'ALL' | 'A' | 'B' | 'C' | 'D'>('ALL');
+
+  // Auto-fetch data atlet & statistik gol terbaru dari SQLite backend saat komponen dimuat
+  useEffect(() => {
+    fetch('/api/athletes')
+      .then((res) => res.json())
+      .then((json) => {
+        if (json.success && Array.isArray(json.data) && json.data.length > 0) {
+          setMasterAthletes((prev) => {
+            if (!prev || prev.length === 0) return json.data;
+            const prevMap = new Map(prev.map((a) => [a.id, a]));
+            return json.data.map((remote: FlattenedAthlete) => ({
+              ...remote,
+              goals: Math.max(Number(prevMap.get(remote.id)?.goals || 0), Number(remote.goals || 0)),
+              yellowCards: Math.max(Number(prevMap.get(remote.id)?.yellowCards || 0), Number(remote.yellowCards || 0)),
+              redCards: Math.max(Number(prevMap.get(remote.id)?.redCards || 0), Number(remote.redCards || 0)),
+            }));
+          });
+        }
+      })
+      .catch(() => {});
+  }, [setMasterAthletes]);
+
+  // Petakan statistik gol atlet terkini agar nama & jumlah gol selalu sinkron dengan meja juri
+  const athletesMap = useMemo(() => new Map(masterAthletes.map((a) => [a.id, a])), [masterAthletes]);
+
+  const syncedTeams = useMemo(() => {
+    return teams.map((team) => ({
+      ...team,
+      players: team.players.map((p) => {
+        const ath = athletesMap.get(p.id);
+        if (!ath) return p;
+        return {
+          ...p,
+          name: ath.name || p.name,
+          number: ath.number || p.number,
+          position: ath.position || p.position,
+          goals: ath.goals !== undefined ? ath.goals : p.goals,
+          yellowCards: ath.yellowCards !== undefined ? ath.yellowCards : p.yellowCards,
+          redCards: ath.redCards !== undefined ? ath.redCards : p.redCards,
+        };
+      }),
+    }));
+  }, [teams, athletesMap]);
+
+  const selectedTeam = useMemo(
+    () => syncedTeams.find((t) => t.id === selectedTeamId) || null,
+    [syncedTeams, selectedTeamId]
+  );
 
   useEffect(() => {
     const isOutdated =
       teams.length !== initialTeams.length ||
-      teams.some(
-        (t) =>
-          t.id === 'team-sdi-kardina-b' ||
-          t.id === 'team-min14-blitar-b' ||
-          t.name.includes('MASSA A') ||
-          t.name.includes('MASSA B') ||
-          (t.name.includes('BLITAR A') && t.id.includes('min14')) ||
-          (t.name.includes('BLITAR B') && t.id.includes('min14'))
-      );
+      teams.some((t) => t.id === 'team-sdi-kardina-b' || t.name.includes('MASSA A') || (t.name.includes('BLITAR A') && t.id.includes('min14')));
 
     if (isOutdated) {
       setTeams(initialTeams);
@@ -54,16 +106,16 @@ export const TeamsTab: React.FC<TeamsTabProps> = ({ sportCode = 'FUTSAL' }) => {
   }, [setTeamCardLayout]);
 
   useEffect(() => {
-    if (!selectedTeam) return;
+    if (!selectedTeamId) return;
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setSelectedTeam(null);
+      if (e.key === 'Escape') setSelectedTeamId(null);
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [selectedTeam]);
+  }, [selectedTeamId]);
 
   // Filtered list based on active sport
-  const filteredFutsalTeams = teams.filter((team) => {
+  const filteredFutsalTeams = syncedTeams.filter((team) => {
     const matchesSearch =
       team.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       team.schoolName.toLowerCase().includes(searchQuery.toLowerCase());
@@ -131,7 +183,7 @@ export const TeamsTab: React.FC<TeamsTabProps> = ({ sportCode = 'FUTSAL' }) => {
             return (
               <div
                 key={team.id}
-                onClick={() => setSelectedTeam(team)}
+                onClick={() => setSelectedTeamId(team.id)}
                 className="group p-4 sm:p-5 rounded-2xl bg-[var(--bg-surface)] border-2 border-slate-300 dark:border-slate-800 shadow-xs hover:border-[#1D63B8] hover:shadow-md transition-all cursor-pointer flex items-center justify-between gap-4 select-none"
               >
                 <div className="flex items-center gap-3.5 min-w-0">
@@ -221,7 +273,7 @@ export const TeamsTab: React.FC<TeamsTabProps> = ({ sportCode = 'FUTSAL' }) => {
 
               <button
                 type="button"
-                onClick={() => setSelectedTeam(team)}
+                onClick={() => setSelectedTeamId(team.id)}
                 className="btn-tactile w-full py-2.5 px-3 rounded-lg bg-[var(--bg-muted)] hover:bg-[#1D63B8] hover:text-white border border-slate-300 dark:border-slate-700 text-xs font-barlow font-bold uppercase tracking-wider text-[var(--text-main)] transition-colors min-h-[44px] cursor-pointer"
               >
                 Lihat Skuad Atlet
@@ -236,7 +288,7 @@ export const TeamsTab: React.FC<TeamsTabProps> = ({ sportCode = 'FUTSAL' }) => {
         <ModalPortal>
           <div
             className="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex items-center justify-center p-4 animate-fadeIn"
-            onClick={() => setSelectedTeam(null)}
+            onClick={() => setSelectedTeamId(null)}
           >
             <div
               className="w-full max-w-lg rounded-xl bg-[var(--bg-surface)] border-2 border-slate-300 dark:border-slate-800 p-6 space-y-5 text-[var(--text-main)] shadow-2xl animate-scaleUp max-h-[90vh] overflow-y-auto"
@@ -263,7 +315,7 @@ export const TeamsTab: React.FC<TeamsTabProps> = ({ sportCode = 'FUTSAL' }) => {
 
                 <button
                   type="button"
-                  onClick={() => setSelectedTeam(null)}
+                  onClick={() => setSelectedTeamId(null)}
                   className="p-1.5 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-muted)] cursor-pointer"
                 >
                   <X className="w-5 h-5" />

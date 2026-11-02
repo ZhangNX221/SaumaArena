@@ -18,6 +18,7 @@ import {
   Sun,
   LogOut,
   GitBranch,
+  Award,
 } from 'lucide-react';
 import { RefereeTabKey } from '../RefereeSidebar';
 import { AppUser } from '@/types';
@@ -35,22 +36,22 @@ export interface DrawerMenuItem {
 export const ALL_REFEREE_MENU_ITEMS: DrawerMenuItem[] = [
   {
     key: 'dashboard',
-    label: 'Beranda / Ringkasan',
+    label: 'Beranda',
     desc: 'Dashboard kerja & ringkasan tugas lapangan',
     icon: LayoutDashboard,
   },
   {
+    key: 'duty',
+    label: 'Daftar Laga',
+    desc: 'Alokasi meja pertandingan & jadwal tanding',
+    icon: ClipboardList,
+  },
+  {
     key: 'match_center',
-    label: 'Catat Skor & Papan Skor',
+    label: 'Papan Skor',
     desc: 'Live timer, papan skor, gol, pelanggaran & time out',
     icon: Activity,
     badge: 'LIVE',
-  },
-  {
-    key: 'duty',
-    label: 'Jadwal & Tugas Laga',
-    desc: 'Alokasi meja pertandingan & jadwal tanding',
-    icon: ClipboardList,
   },
   {
     key: 'standings',
@@ -60,13 +61,19 @@ export const ALL_REFEREE_MENU_ITEMS: DrawerMenuItem[] = [
   },
   {
     key: 'bracket',
-    label: 'Bracket',
+    label: 'Atur Bracket',
     desc: 'Pengaturan bagan fase gugur & penetapan juara',
     icon: GitBranch,
   },
   {
+    key: 'player_performance',
+    label: 'Performa Pemain',
+    desc: 'Catat gol, kartu kuning, kartu merah & kedisiplinan pemain',
+    icon: Award,
+  },
+  {
     key: 'supporter_scoring',
-    label: 'Penilaian Suporter',
+    label: 'Skor Suporter',
     desc: 'Input nilai suporter madrasah terbaik',
     icon: Megaphone,
     badge: 'HOT',
@@ -74,19 +81,19 @@ export const ALL_REFEREE_MENU_ITEMS: DrawerMenuItem[] = [
   },
   {
     key: 'reports',
-    label: 'Berita Acara (BAP)',
-    desc: 'Tanda tangan digital & pengesahan skor resmi',
+    label: 'Laporan Pertandingan',
+    desc: 'Berita Acara (BAP) & pengesahan skor resmi',
     icon: FileText,
   },
   {
     key: 'rulebook',
-    label: 'Buku Aturan Cabor',
+    label: 'Peraturan Pertandingan',
     desc: 'Regulasi resmi cabor futsal & teknis wasit',
     icon: BookOpen,
   },
   {
     key: 'profile',
-    label: 'Profil & Kesiapan Juri',
+    label: 'Pengaturan Profil',
     desc: 'Biodata wasit, lisensi resmi & keamanan kata sandi',
     icon: User,
   },

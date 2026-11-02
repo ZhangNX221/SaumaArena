@@ -42,7 +42,7 @@ export const SupporterScoringHistoryTable: React.FC<SupporterScoringHistoryTable
             value={searchFilter}
             onChange={(e) => setSearchFilter(e.target.value)}
             placeholder="Cari nama madrasah / tim..."
-            className="w-full pl-8 pr-3 py-1.5 rounded-lg bg-[var(--bg-muted)] border border-[var(--border-subtle)] text-xs text-[var(--text-main)] placeholder-[var(--text-muted)] focus:outline-none"
+            className="w-full pl-8 pr-3 py-1.5 rounded-lg bg-[var(--bg-muted)] border border-[var(--border-subtle)] text-xs text-[var(--text-main)] placeholder-[var(--text-muted)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-arena-primary)]"
           />
         </div>
       </div>

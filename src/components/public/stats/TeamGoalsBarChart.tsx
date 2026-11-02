@@ -1,7 +1,10 @@
 'use client';
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Trophy } from 'lucide-react';
+import { Match, Team } from '@/types';
+import { initialMatches, initialTeams } from '@/mocks/tournamentData';
+import { usePersistentState } from '@/hooks/usePersistentState';
 
 interface TeamGoalData {
   team: string;
@@ -11,17 +14,59 @@ interface TeamGoalData {
   isFocal?: boolean;
 }
 
-const DATA: TeamGoalData[] = [
-  { team: 'SDI KARDINA MASSA', shortName: 'SDI Kardina', goals: 0, matches: 0, isFocal: true },
-  { team: 'MIN 7 BLITAR', shortName: 'MIN 7 Blitar', goals: 0, matches: 0 },
-  { team: 'UPT SDN 1 SRENGAT', shortName: 'SDN 1 Srengat', goals: 0, matches: 0 },
-  { team: 'MIN 14 BLITAR', shortName: 'MIN 14 Blitar', goals: 0, matches: 0 },
-  { team: 'MIN 2 BLITAR', shortName: 'MIN 2 Blitar', goals: 0, matches: 0 },
-  { team: 'MI WAHID HASYIM', shortName: 'Wahid Hasyim', goals: 0, matches: 0 },
-];
+interface TeamGoalsBarChartProps {
+  matches?: Match[];
+  teams?: Team[];
+}
 
-export const TeamGoalsBarChart: React.FC = () => {
-  const maxGoals = 16;
+export const TeamGoalsBarChart: React.FC<TeamGoalsBarChartProps> = ({
+  matches: matchesProp,
+  teams: teamsProp,
+}) => {
+  const [persistedMatches] = usePersistentState<Match[]>('sauma_arena_matches', initialMatches);
+  const [persistedTeams] = usePersistentState<Team[]>('sauma_arena_teams_v2', initialTeams);
+
+  const currentMatches = matchesProp || persistedMatches;
+  const currentTeams = teamsProp || persistedTeams;
+
+  const data: TeamGoalData[] = useMemo(() => {
+    const list = (currentTeams.length > 0 ? currentTeams : initialTeams).map((t) => {
+      let goals = 0;
+      let played = 0;
+      currentMatches.forEach((m) => {
+        if (m.status === 'COMPLETED' || m.status === 'LIVE') {
+          if (m.teamAId === t.id || m.teamAName?.toLowerCase() === t.name?.toLowerCase()) {
+            goals += Number(m.scoreA || 0);
+            played += 1;
+          } else if (m.teamBId === t.id || m.teamBName?.toLowerCase() === t.name?.toLowerCase()) {
+            goals += Number(m.scoreB || 0);
+            played += 1;
+          }
+        }
+      });
+      return {
+        team: t.name,
+        shortName: t.shortName || t.name.replace(/^(MI|MIN|UPT|SDI|SD)\s+/, '').slice(0, 14),
+        goals,
+        matches: played,
+      };
+    });
+
+    const sorted = [...list].sort((a, b) => b.goals - a.goals || b.matches - a.matches).slice(0, 6);
+    return sorted.map((item, idx) => ({
+      ...item,
+      isFocal: idx === 0 && item.goals > 0,
+    }));
+  }, [currentTeams, currentMatches]);
+
+  const totalGoals = useMemo(() => data.reduce((acc, d) => acc + d.goals, 0), [data]);
+  const totalMatches = useMemo(() => data.reduce((acc, d) => acc + d.matches, 0), [data]);
+  const avgGoals = totalMatches > 0 ? (totalGoals / totalMatches).toFixed(2) : '0.00';
+
+  const highestGoal = Math.max(...data.map((d) => d.goals), 0);
+  const maxGoals = Math.max(8, Math.ceil((highestGoal + 2) / 4) * 4);
+  const yTicks = [0, maxGoals * 0.25, maxGoals * 0.5, maxGoals * 0.75, maxGoals].map((v) => Math.round(v));
+
   const viewBoxWidth = 720;
   const viewBoxHeight = 300;
   const plotLeft = 60;
@@ -31,8 +76,7 @@ export const TeamGoalsBarChart: React.FC = () => {
   const plotHeight = plotBottom - plotTop;
   const plotWidth = plotRight - plotLeft;
 
-  const yTicks = [0, 4, 8, 12, 16];
-  const barCount = DATA.length;
+  const barCount = data.length || 1;
   const colPitch = plotWidth / barCount;
   const barWidth = 54;
 
@@ -50,9 +94,9 @@ export const TeamGoalsBarChart: React.FC = () => {
         </div>
         <div className="text-left sm:text-right shrink-0">
           <span className="text-xs font-barlow font-bold uppercase tracking-wider text-[var(--color-arena-accent)]">
-            Total 0 Gol Tercipta
+            Total {totalGoals} Gol Tercipta
           </span>
-          <span className="text-[10px] text-[var(--text-muted)] block">Rata-rata 0.00 Gol/Laga</span>
+          <span className="text-[10px] text-[var(--text-muted)] block">Rata-rata {avgGoals} Gol/Laga</span>
         </div>
       </div>
 
@@ -66,7 +110,7 @@ export const TeamGoalsBarChart: React.FC = () => {
         >
           <title id="team-goals-title">Distribusi Gol Kontingen Turnamen</title>
           <desc id="team-goals-desc">
-            Grafik perbandingan total gol tim kontingen MMFC I. Seluruh laga belum dimulai (0 gol).
+            Grafik perbandingan total gol tim kontingen MMFC I ({totalGoals} gol tercipta).
           </desc>
 
           {/* Background Grid Lines & Y-Axis Labels */}
@@ -110,8 +154,8 @@ export const TeamGoalsBarChart: React.FC = () => {
           </text>
 
           {/* Bars */}
-          {DATA.map((item, idx) => {
-            const barH = (item.goals / maxGoals) * plotHeight;
+          {data.map((item, idx) => {
+            const barH = maxGoals > 0 ? (item.goals / maxGoals) * plotHeight : 0;
             const x = plotLeft + idx * colPitch + (colPitch - barWidth) / 2;
             const y = plotBottom - barH;
 
@@ -122,10 +166,10 @@ export const TeamGoalsBarChart: React.FC = () => {
                   x={x}
                   y={y}
                   width={barWidth}
-                  height={barH}
+                  height={Math.max(barH, 3)}
                   rx="4"
                   fill={item.isFocal ? 'var(--color-arena-accent)' : 'var(--color-arena-primary)'}
-                  opacity={item.isFocal ? '0.95' : '0.45'}
+                  opacity={item.isFocal ? '0.95' : item.goals > 0 ? '0.65' : '0.25'}
                   stroke={item.isFocal ? 'var(--color-arena-accent)' : 'var(--color-arena-primary)'}
                   strokeWidth="1.5"
                   className="transition-all duration-200 group-hover:opacity-100"
@@ -161,7 +205,7 @@ export const TeamGoalsBarChart: React.FC = () => {
                   fill="currentColor"
                   className="text-[var(--text-muted)] text-[10px] font-barlow"
                 >
-                  {(item.goals / item.matches).toFixed(1)} gol/laga
+                  {item.matches > 0 ? (item.goals / item.matches).toFixed(1) : '0.0'} gol/laga
                 </text>
               </g>
             );
@@ -178,13 +222,11 @@ export const TeamGoalsBarChart: React.FC = () => {
             strokeWidth="1"
           />
           <g transform="translate(60, 288)">
-            {/* Focal Legend Item */}
             <rect x="0" y="-8" width="12" height="10" rx="2" fill="var(--color-arena-accent)" />
             <text x="18" y="0" fill="currentColor" className="text-[var(--text-main)] text-[10px] font-bold">
               Tim Tersubur (Top Goalscorer Leader)
             </text>
 
-            {/* Standard Item */}
             <rect
               x="260"
               y="-8"

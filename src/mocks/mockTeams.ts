@@ -12,6 +12,10 @@ import {
   WAHID_HASYIM_PLAYERS,
   PLOSO_PLAYERS,
   MIN5_TA_PLAYERS,
+  MIN13_A_PLAYERS,
+  MIN13_B_PLAYERS,
+  DARUSSALAM_PLAYERS,
+  YABUNAYYA_PLAYERS,
 } from './teamRosters';
 
 export const TEAM_CODE_MAP: Record<string, string> = {
@@ -162,12 +166,15 @@ export const initialTeams: Team[] = [
     schoolName: 'Madrasah Ibtidaiyah Negeri 13 Blitar',
     city: 'Blitar',
     logoUrl: getTeamLogoUrl('team-min13-b'),
-    coachName: 'Coach MIN 13 BLITAR A',
+    coachName: 'Ihwon Efendi',
     group: 'B',
     rosterLocked: true,
     registrationStatus: 'VERIFIED',
-    players: createDefaultPlayers('m13b', 7),
-    officials: [{ id: 'off-m13b-1', name: 'Coach MIN 13 BLITAR A', role: 'Pelatih Kepala', phone: '081234567807' }],
+    players: MIN13_A_PLAYERS,
+    officials: [
+      { id: 'off-m13b-1', name: 'Ihwon Efendi', role: 'Pelatih Kepala', phone: '081234567807' },
+      { id: 'off-m13b-2', name: 'Dedi Setiawan F.S', role: 'Asisten Pelatih', phone: '081234567808' },
+    ],
   },
 
   // Group C
@@ -215,12 +222,15 @@ export const initialTeams: Team[] = [
     schoolName: 'Madrasah Ibtidaiyah Negeri 13 Blitar',
     city: 'Blitar',
     logoUrl: getTeamLogoUrl('team-min13-c'),
-    coachName: 'Coach MIN 13 BLITAR B',
+    coachName: 'Ihwon Efendi',
     group: 'C',
     rosterLocked: true,
     registrationStatus: 'VERIFIED',
-    players: createDefaultPlayers('m13c', 10),
-    officials: [{ id: 'off-m13c-1', name: 'Coach MIN 13 BLITAR B', role: 'Pelatih Kepala', phone: '081234567810' }],
+    players: MIN13_B_PLAYERS,
+    officials: [
+      { id: 'off-m13c-1', name: 'Ihwon Efendi', role: 'Pelatih Kepala', phone: '081234567810' },
+      { id: 'off-m13c-2', name: 'Dedi Setiawan', role: 'Asisten Pelatih', phone: '081234567811' },
+    ],
   },
 
   // Group D
@@ -251,7 +261,7 @@ export const initialTeams: Team[] = [
     group: 'D',
     rosterLocked: true,
     registrationStatus: 'VERIFIED',
-    players: createDefaultPlayers('ds', 12),
+    players: DARUSSALAM_PLAYERS,
     officials: [{ id: 'off-ds-1', name: 'Coach MI UNGGULAN DARUSSALAM', role: 'Pelatih Kepala', phone: '081234567812' }],
   },
   {
@@ -266,7 +276,7 @@ export const initialTeams: Team[] = [
     group: 'D',
     rosterLocked: true,
     registrationStatus: 'VERIFIED',
-    players: createDefaultPlayers('yb', 13),
+    players: YABUNAYYA_PLAYERS,
     officials: [{ id: 'off-yb-1', name: 'Coach MI YA BUNAYYA SRENGAT', role: 'Pelatih Kepala', phone: '081234567813' }],
   },
   {

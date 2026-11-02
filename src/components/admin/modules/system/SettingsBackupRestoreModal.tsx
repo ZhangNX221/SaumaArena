@@ -280,7 +280,7 @@ export const SettingsBackupRestoreModal: React.FC<SettingsBackupRestoreModalProp
               <div className="p-3.5 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-page)] hover:border-[var(--color-arena-primary)]/50 transition-all flex flex-col justify-between space-y-2">
                 <div>
                   <div className="flex items-center justify-between mb-1">
-                    <span className="text-xs font-bold text-[var(--text-main)]">🏆 Turnamen Resmi MMFC I</span>
+                    <span className="text-xs font-bold text-[var(--text-main)]">Turnamen Resmi MMFC I</span>
                     <span className="text-[10px] font-mono font-bold text-emerald-600 bg-emerald-500/10 px-1.5 py-0.5 rounded">Resmi</span>
                   </div>
                   <p className="text-[11px] text-[var(--text-muted)] leading-relaxed">
@@ -302,7 +302,7 @@ export const SettingsBackupRestoreModal: React.FC<SettingsBackupRestoreModalProp
               <div className="p-3.5 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-page)] hover:border-[var(--color-arena-primary)]/50 transition-all flex flex-col justify-between space-y-2">
                 <div>
                   <div className="flex items-center justify-between mb-1">
-                    <span className="text-xs font-bold text-[var(--text-main)]">⚡ Futsal Kilat (Fast-Track)</span>
+                    <span className="text-xs font-bold text-[var(--text-main)]">Futsal Kilat (Fast-Track)</span>
                     <span className="text-[10px] font-mono text-amber-600 bg-amber-500/10 px-1.5 py-0.5 rounded">Cepat</span>
                   </div>
                   <p className="text-[11px] text-[var(--text-muted)] leading-relaxed">

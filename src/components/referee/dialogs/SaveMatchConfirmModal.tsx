@@ -58,8 +58,8 @@ export const SaveMatchConfirmModal: React.FC<SaveMatchConfirmModalProps> = ({
               {currentMatch.scoreA} - {currentMatch.scoreB}
             </div>
             <div className="flex items-center justify-center gap-4 text-[11px] text-[var(--text-muted)] pt-1 font-mono">
-              <span>⚽ {totalGoals} Gol</span>
-              <span>🟨🟥 {totalCards} Kartu</span>
+              <span>{totalGoals} Gol</span>
+              <span>{totalCards} Kartu Pelanggaran</span>
               <span>Peristiwa: {currentMatch.events?.length || 0}</span>
             </div>
           </div>

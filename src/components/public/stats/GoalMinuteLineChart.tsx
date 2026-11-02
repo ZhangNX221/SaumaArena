@@ -1,7 +1,10 @@
 'use client';
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Activity } from 'lucide-react';
+import { Match } from '@/types';
+import { initialMatches } from '@/mocks/tournamentData';
+import { usePersistentState } from '@/hooks/usePersistentState';
 
 interface IntervalPoint {
   interval: string;
@@ -9,14 +12,48 @@ interface IntervalPoint {
   goals: number;
 }
 
-const INTERVALS: IntervalPoint[] = [
-  { interval: "01' - 10'", phase: 'Babak 1 (Awal)', goals: 0 },
-  { interval: "11' - 20'", phase: 'Babak 1 (Akhir)', goals: 0 },
-  { interval: "21' - 30'", phase: 'Babak 2 (Awal)', goals: 0 },
-  { interval: "31' - 40'", phase: 'Babak 2 (Crunch Time)', goals: 0 },
-];
+interface GoalMinuteLineChartProps {
+  matches?: Match[];
+}
 
-export const GoalMinuteLineChart: React.FC = () => {
+export const GoalMinuteLineChart: React.FC<GoalMinuteLineChartProps> = ({ matches: matchesProp }) => {
+  const [persistedMatches] = usePersistentState<Match[]>('sauma_arena_matches', initialMatches);
+  const currentMatches = matchesProp || persistedMatches;
+
+  const intervals: IntervalPoint[] = useMemo(() => {
+    const goalEvents = currentMatches
+      .flatMap((m) => m.events || [])
+      .filter((e) => e.type === 'GOAL');
+
+    let g1 = 0; // 01' - 05'
+    let g2 = 0; // 06' - 10'
+    let g3 = 0; // 11' - 15'
+    let g4 = 0; // 16' - 20' / Crunch Time
+
+    goalEvents.forEach((ev) => {
+      const min = ev.minute || 1;
+      if (min <= 5) g1 += 1;
+      else if (min <= 10) g2 += 1;
+      else if (min <= 15) g3 += 1;
+      else g4 += 1;
+    });
+
+    return [
+      { interval: "01' - 05'", phase: 'Babak 1 (Awal)', goals: g1 },
+      { interval: "06' - 10'", phase: 'Babak 1 (Akhir)', goals: g2 },
+      { interval: "11' - 15'", phase: 'Babak 2 (Awal)', goals: g3 },
+      { interval: "16' - 20'", phase: 'Babak 2 (Crunch Time)', goals: g4 },
+    ];
+  }, [currentMatches]);
+
+  const totalGoals = useMemo(() => intervals.reduce((acc, d) => acc + d.goals, 0), [intervals]);
+  const highestInterval = useMemo(() => {
+    return intervals.reduce((prev, cur) => (cur.goals > prev.goals ? cur : prev), intervals[0]);
+  }, [intervals]);
+
+  const maxGoals = Math.max(8, Math.ceil((highestInterval.goals + 2) / 4) * 4);
+  const yTicks = [0, maxGoals * 0.25, maxGoals * 0.5, maxGoals * 0.75, maxGoals].map((v) => Math.round(v));
+
   const viewBoxWidth = 720;
   const viewBoxHeight = 280;
   const plotLeft = 60;
@@ -25,12 +62,9 @@ export const GoalMinuteLineChart: React.FC = () => {
   const plotBottom = 210;
   const plotHeight = plotBottom - plotTop;
   const plotWidth = plotRight - plotLeft;
-  const maxGoals = 25;
 
-  const yTicks = [0, 5, 10, 15, 20, 25];
-
-  const points = INTERVALS.map((item, idx) => {
-    const x = plotLeft + (idx / (INTERVALS.length - 1)) * plotWidth;
+  const points = intervals.map((item, idx) => {
+    const x = plotLeft + (idx / (intervals.length - 1)) * plotWidth;
     const y = plotBottom - (item.goals / maxGoals) * plotHeight;
     return { x, y, ...item };
   });
@@ -52,9 +86,11 @@ export const GoalMinuteLineChart: React.FC = () => {
         </div>
         <div className="text-left sm:text-right shrink-0">
           <span className="text-xs font-barlow font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
-            Puncak: 0 Gol (Menunggu Kickoff)
+            {totalGoals > 0 ? `Puncak: ${highestInterval.goals} Gol (${highestInterval.interval})` : 'Puncak: 0 Gol'}
           </span>
-          <span className="text-[10px] text-[var(--text-muted)] block">Belum ada gol tercipta</span>
+          <span className="text-[10px] text-[var(--text-muted)] block">
+            {totalGoals > 0 ? `${totalGoals} Gol Terdistribusi` : 'Menunggu peristiwa gol tercatat'}
+          </span>
         </div>
       </div>
 
@@ -67,7 +103,7 @@ export const GoalMinuteLineChart: React.FC = () => {
         >
           <title id="goal-timing-title">Distribusi Waktu Terjadinya Gol</title>
           <desc id="goal-timing-desc">
-            Grafik garis tren menit gol futsal MMFC I, memperlihatkan intensitas gol melonjak di menit 31 hingga 40.
+            Grafik garis tren menit gol futsal MMFC I ({totalGoals} gol tercatat).
           </desc>
 
           {/* Horizontal Gridlines */}
@@ -82,7 +118,7 @@ export const GoalMinuteLineChart: React.FC = () => {
                   y2={y}
                   stroke="currentColor"
                   className="text-[var(--border-subtle)] opacity-40"
-                  strokeWidth="1"
+                  strokeWidth={tick === 0 ? '1.5' : '1'}
                   strokeDasharray={tick === 0 ? undefined : '3,3'}
                 />
                 <text
@@ -99,11 +135,7 @@ export const GoalMinuteLineChart: React.FC = () => {
           })}
 
           {/* Subtle Area Fill under curve */}
-          <polygon
-            points={areaPolygonPoints}
-            fill="var(--color-arena-accent)"
-            opacity="0.12"
-          />
+          <polygon points={areaPolygonPoints} fill="var(--color-arena-accent)" opacity="0.12" />
 
           {/* Polyline Path */}
           <polyline
@@ -116,9 +148,8 @@ export const GoalMinuteLineChart: React.FC = () => {
           />
 
           {/* Dots and Labels at each interval */}
-          {points.map((p, idx) => (
+          {points.map((p) => (
             <g key={p.interval} className="cursor-pointer">
-              {/* Vertical Guide to X-axis */}
               <line
                 x1={p.x}
                 y1={p.y}
@@ -128,8 +159,6 @@ export const GoalMinuteLineChart: React.FC = () => {
                 className="text-[var(--border-subtle)] opacity-40"
                 strokeDasharray="2,2"
               />
-
-              {/* Point Dot */}
               <circle
                 cx={p.x}
                 cy={p.y}
@@ -138,8 +167,6 @@ export const GoalMinuteLineChart: React.FC = () => {
                 stroke="var(--bg-surface)"
                 strokeWidth="2"
               />
-
-              {/* Value Badge on top */}
               <rect
                 x={p.x - 18}
                 y={p.y - 24}
@@ -154,54 +181,31 @@ export const GoalMinuteLineChart: React.FC = () => {
                 x={p.x}
                 y={p.y - 12}
                 textAnchor="middle"
-                fill="var(--color-arena-accent)"
-                className="text-sm font-teko font-bold tracking-wide"
+                fill="currentColor"
+                className="text-[10px] font-mono font-bold text-[var(--color-arena-accent)]"
               >
                 {p.goals}
               </text>
-
-              {/* X-Axis Interval Label */}
               <text
                 x={p.x}
-                y={plotBottom + 18}
+                y={plotBottom + 16}
                 textAnchor="middle"
                 fill="currentColor"
-                className="text-[var(--text-main)] text-xs font-barlow font-bold tracking-wide"
+                className="text-xs font-barlow font-bold text-[var(--text-main)]"
               >
                 {p.interval}
               </text>
-
-              {/* Phase name */}
               <text
                 x={p.x}
-                y={plotBottom + 32}
+                y={plotBottom + 28}
                 textAnchor="middle"
                 fill="currentColor"
-                className="text-[var(--text-muted)] text-[10px] font-barlow"
+                className="text-[10px] font-sans text-[var(--text-muted)]"
               >
                 {p.phase}
               </text>
             </g>
           ))}
-
-          {/* Bottom Annotation */}
-          <line
-            x1={plotLeft}
-            y1={255}
-            x2={plotRight}
-            y2={255}
-            stroke="currentColor"
-            className="text-[var(--border-subtle)] opacity-40"
-            strokeWidth="1"
-          />
-          <text
-            x={plotLeft}
-            y={272}
-            fill="currentColor"
-            className="text-[var(--text-muted)] text-[10px] italic"
-          >
-            * Analisis Taktis: Tekanan fisik dan pergantian strategi 'flying goalkeeper' memicu lonjakan gol di kuarter akhir.
-          </text>
         </svg>
       </div>
     </div>

@@ -33,6 +33,7 @@ import { RefereeReportsView } from './RefereeReportsView';
 import { RefereeStandingsView } from './RefereeStandingsView';
 import { RefereeBracketView } from './RefereeBracketView';
 import { RefereeSupporterScoringView } from './RefereeSupporterScoringView';
+import { RefereePlayerPerformanceView } from './performance/RefereePlayerPerformanceView';
 
 interface RefereeDashboardProps {
   user: AppUser;
@@ -152,15 +153,17 @@ export const RefereeDashboard: React.FC<RefereeDashboardProps> = ({
   };
 
   const handleFinalizeBAP = (bapData: { winner: string; notes: string }) => {
+    const targetId = selectedMatchId || liveMatch.id;
     setMatches((prev) =>
       prev.map((m) => {
-        if (m.id !== liveMatch.id) return m;
+        if (m.id !== targetId) return m;
         const updated = {
           ...m,
           status: 'COMPLETED' as const,
           bapSigned: true,
-          bapSigner: currentUser.name,
+          bapSigner: currentUser?.name || 'Ust. Ahmad Syarif, S.Pd',
           winnerTeamId: bapData.winner,
+          bapNotes: bapData.notes,
         };
         pushMatchToBackend(updated);
         return updated;
@@ -332,6 +335,7 @@ export const RefereeDashboard: React.FC<RefereeDashboardProps> = ({
             <RefereeMatchCenter
               currentMatch={liveMatch}
               selectedSport="FUTSAL"
+              user={currentUser}
               onUpdateScore={handleUpdateScore}
               onAddIncident={handleAddIncident}
               onFinalizeBAP={handleFinalizeBAP}
@@ -342,6 +346,9 @@ export const RefereeDashboard: React.FC<RefereeDashboardProps> = ({
 
           {activeTab === 'standings' && <RefereeStandingsView />}
           {activeTab === 'bracket' && <RefereeBracketView />}
+          {activeTab === 'player_performance' && (
+            <RefereePlayerPerformanceView user={currentUser} />
+          )}
           {(activeTab === 'supporter_scoring' || activeTab === 'roster') && (
             <RefereeSupporterScoringView user={currentUser} currentMatch={liveMatch} />
           )}

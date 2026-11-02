@@ -1,90 +1,111 @@
 'use client';
 
 import React, { useState, useMemo, useEffect } from 'react';
-import { Search, UserCheck, Edit2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { UserCheck, ChevronLeft, ChevronRight, CheckCircle2 } from 'lucide-react';
 import { initialTeams } from '@/mocks/tournamentData';
 import { AdminPageHeaderCard } from '@/components/admin/common/AdminPageHeaderCard';
 import { usePersistentState } from '@/hooks/usePersistentState';
-import { AthleteEditModal, FlattenedAthlete } from './AthleteEditModal';
+import { AthleteEditModal } from './AthleteEditModal';
+import { AthleteMasterTableRow } from './AthleteMasterTableRow';
+import { AthleteFilterToolbar } from './AthleteFilterToolbar';
+import { ConfirmModal } from '@/components/admin/common/ConfirmModal';
+import { fetchAthletesFromBackend, pushAthleteToBackend, deleteAthleteFromBackend } from '@/lib/athleteSync';
+import { Team, FlattenedAthlete, STORAGE_KEY_TEAMS, STORAGE_KEY_MASTER_ATHLETES } from '@/types';
 
 export const AthletesPlayersTab: React.FC = () => {
-  const allAthletes: FlattenedAthlete[] = useMemo(
-    () =>
-      initialTeams.flatMap((t) =>
-        t.players.map((p) => ({
-          ...p,
-          teamId: t.id,
-          teamName: t.name,
-          schoolName: t.schoolName,
-          group: t.group,
-        }))
-      ),
-    []
-  );
+  const allAthletesFallback: FlattenedAthlete[] = useMemo(() => {
+    let counter = 1;
+    return initialTeams.flatMap((t) =>
+      t.players.map((p) => ({
+        ...p,
+        athleteCode: p.athleteCode || `ATL-${String(counter++).padStart(3, '0')}`,
+        teamId: t.id,
+        teamName: t.name,
+        schoolName: t.schoolName,
+        group: t.group,
+      }))
+    );
+  }, []);
 
   const [athletesList, setAthletesList] = usePersistentState<FlattenedAthlete[]>(
-    'sauma_arena_master_athletes',
-    allAthletes
+    STORAGE_KEY_MASTER_ATHLETES,
+    allAthletesFallback
   );
+  const [, setTeams] = usePersistentState<Team[]>(STORAGE_KEY_TEAMS, initialTeams);
 
-  // Self-healing: bersihkan duplikasi tim dan pastikan data tim terbaru
+  const [toastMsg, setToastMsg] = useState<string | null>(null);
+  const [editingAthlete, setEditingAthlete] = useState<FlattenedAthlete | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<FlattenedAthlete | null>(null);
+
+  // 1. Sinkronisasi Data Atlet dari SQLite Database Backend saat pertama kali dimuat
   useEffect(() => {
-    const hasStale =
-      athletesList.length === 0 ||
-      athletesList.some(
-        (a) =>
-          a.name.startsWith('Pemain ') ||
-          a.teamId === 'team-sdi-kardina-b' ||
-          a.teamId === 'team-min14-blitar-b' ||
-          a.teamName.includes('MASSA A') ||
-          a.teamName.includes('MASSA B') ||
-          a.teamName.includes('BLITAR A') && a.teamId.includes('min14') ||
-          a.teamName.includes('BLITAR B') && a.teamId.includes('min14')
-      );
-
-    if (hasStale || athletesList.length > allAthletes.length) {
-      setAthletesList(allAthletes);
-    } else {
-      let changed = false;
-      const sanitized = athletesList.map((a) => {
-        const team = initialTeams.find((t) => t.id === a.teamId);
-        if (team && a.teamName !== team.name) {
-          changed = true;
-          return {
-            ...a,
-            teamName: team.name,
-            schoolName: team.schoolName,
-            group: team.group,
-          };
-        }
-        return a;
-      });
-      if (changed) {
-        setAthletesList(sanitized);
+    let isMounted = true;
+    fetchAthletesFromBackend().then((backendAthletes) => {
+      if (!isMounted) return;
+      if (backendAthletes && Array.isArray(backendAthletes) && backendAthletes.length > 0) {
+        setAthletesList((prev) => {
+          const prevMap = new Map(prev.map((a) => [a.id, a]));
+          return backendAthletes.map((remote) => {
+            const local = prevMap.get(remote.id);
+            return {
+              ...remote,
+              // Pertahankan statistik kartu & gol dari juri / remote
+              goals: Math.max(Number(local?.goals || 0), Number(remote.goals || 0)),
+              yellowCards: Math.max(Number(local?.yellowCards || 0), Number(remote.yellowCards || 0)),
+              redCards: Math.max(Number(local?.redCards || 0), Number(remote.redCards || 0)),
+              assists: Math.max(Number(local?.assists || 0), Number(remote.assists || 0)),
+            };
+          });
+        });
       }
+    });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [setAthletesList]);
+
+  // 2. Isi ID Khusus (athleteCode) hanya bagi atlet yang belum memiliki kode
+  useEffect(() => {
+    let hasMissingCode = false;
+    let codeIndex = 1;
+
+    const sanitized = athletesList.map((a) => {
+      if (!a.athleteCode || a.athleteCode.trim() === '') {
+        hasMissingCode = true;
+        return {
+          ...a,
+          athleteCode: `ATL-${String(codeIndex++).padStart(3, '0')}`,
+        };
+      }
+      codeIndex++;
+      return a;
+    });
+
+    if (hasMissingCode) {
+      setAthletesList(sanitized);
     }
-  }, [allAthletes, athletesList, setAthletesList]);
+  }, [athletesList, setAthletesList]);
 
   const [search, setSearch] = useState('');
   const [selectedTeamFilter, setSelectedTeamFilter] = useState('ALL');
   const [selectedDocFilter, setSelectedDocFilter] = useState('ALL');
   const [pageSize, setPageSize] = useState<number>(25);
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const [editingAthlete, setEditingAthlete] = useState<FlattenedAthlete | null>(null);
 
   const filteredAthletes = useMemo(() => {
     return athletesList.filter((ath) => {
       const matchSearch =
+        (ath.athleteCode && ath.athleteCode.toLowerCase().includes(search.toLowerCase())) ||
         ath.name.toLowerCase().includes(search.toLowerCase()) ||
-        (ath.nisn && ath.nisn.includes(search)) ||
-        ath.teamName.toLowerCase().includes(search.toLowerCase());
+        ath.teamName.toLowerCase().includes(search.toLowerCase()) ||
+        (ath.schoolName && ath.schoolName.toLowerCase().includes(search.toLowerCase()));
       const matchTeam = selectedTeamFilter === 'ALL' || ath.teamId === selectedTeamFilter;
       const matchDoc = selectedDocFilter === 'ALL' || ath.documentStatus === selectedDocFilter;
       return matchSearch && matchTeam && matchDoc;
     });
   }, [athletesList, search, selectedTeamFilter, selectedDocFilter]);
 
-  // Reset ke halaman 1 jika filter berubah
   useEffect(() => {
     setCurrentPage(1);
   }, [search, selectedTeamFilter, selectedDocFilter, pageSize]);
@@ -95,20 +116,24 @@ export const AthletesPlayersTab: React.FC = () => {
     return filteredAthletes.slice(start, start + pageSize);
   }, [filteredAthletes, currentPage, pageSize]);
 
-  const handleSaveEdit = (updated: {
+  // 3. Simpan perubahan ke State Lokal & Simpan Permanen ke SQLite Database
+  const handleSaveEdit = async (updated: {
     id: string;
     teamId: string;
     name: string;
     targetTeamId: string;
     number: number;
     position: string;
+    athleteCode: string;
   }) => {
     const targetTeam = initialTeams.find((t) => t.id === updated.targetTeamId);
+
     setAthletesList((prev) =>
       prev.map((a) =>
-        a.id === updated.id && a.teamId === updated.teamId
+        a.id === updated.id
           ? {
               ...a,
+              athleteCode: updated.athleteCode,
               name: updated.name,
               teamId: updated.targetTeamId,
               teamName: targetTeam ? targetTeam.name : a.teamName,
@@ -120,25 +145,96 @@ export const AthletesPlayersTab: React.FC = () => {
           : a
       )
     );
+
+    setTeams((prev) =>
+      prev.map((t) => {
+        if (t.id === updated.teamId || t.id === updated.targetTeamId) {
+          const newPlayers = t.players.map((p) => {
+            if (p.id === updated.id) {
+              return {
+                ...p,
+                name: updated.name,
+                number: updated.number,
+                position: updated.position,
+                athleteCode: updated.athleteCode,
+              };
+            }
+            return p;
+          });
+          return { ...t, players: newPlayers };
+        }
+        return t;
+      })
+    );
+
+    await pushAthleteToBackend({
+      id: updated.id,
+      name: updated.name,
+      teamId: updated.targetTeamId,
+      number: updated.number,
+      position: updated.position,
+      athleteCode: updated.athleteCode,
+    });
+
+    setToastMsg(`✓ Data atlet ${updated.name} (${updated.athleteCode}) berhasil tersimpan di database.`);
+    setTimeout(() => setToastMsg(null), 3500);
     setEditingAthlete(null);
+  };
+
+  // 4. Hapus Atlet dari Master Data & SQLite Database
+  const handleConfirmDelete = async () => {
+    if (!deleteTarget) return;
+    const target = deleteTarget;
+
+    setAthletesList((prev) =>
+      prev.filter((a) => a.id !== target.id)
+    );
+
+    setTeams((prev) =>
+      prev.map((t) => {
+        if (t.id === target.teamId) {
+          return { ...t, players: t.players.filter((p) => p.id !== target.id) };
+        }
+        return t;
+      })
+    );
+
+    await deleteAthleteFromBackend(target.id);
+
+    setToastMsg(`✓ Atlet ${target.name} (${target.athleteCode}) berhasil dihapus dari database.`);
+    setTimeout(() => setToastMsg(null), 3500);
+    setDeleteTarget(null);
   };
 
   return (
     <div className="space-y-6 animate-fadeIn pb-12">
+      {toastMsg && (
+        <div className="p-3.5 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-800 dark:text-emerald-300 font-bold text-xs flex items-center gap-2 animate-fadeIn shadow-xs">
+          <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-500" />
+          <span>{toastMsg}</span>
+        </div>
+      )}
+
       {/* Header */}
       <AdminPageHeaderCard
         icon={UserCheck}
         category="DATABASE PESERTA • KONTINGEN RESMI"
-        title="Database Pemain &amp; Atlet"
-        description="Pusat data induk seluruh atlet terdaftar, nomor punggung, posisi bermain, verifikasi dokumen NISN, dan catatan disiplin kartu."
+        title="Database Pemain & Atlet"
+        description="Pusat data induk seluruh atlet terdaftar, ID khusus atlet, nomor punggung, posisi bermain, dan riwayat disiplin kartu."
         action={
           <div className="flex items-center gap-3">
             <div className="px-4 py-2 rounded-xl bg-[var(--bg-muted)] border border-[var(--border-subtle)] text-right">
-              <span className="text-[10px] font-barlow font-bold uppercase tracking-wider text-[var(--text-muted)] block">Total Atlet</span>
-              <span className="text-xl font-teko font-bold text-[var(--text-main)] leading-none">{athletesList.length} Atlet</span>
+              <span className="text-[10px] font-barlow font-bold uppercase tracking-wider text-[var(--text-muted)] block">
+                Total Atlet
+              </span>
+              <span className="text-xl font-teko font-bold text-[var(--text-main)] leading-none">
+                {athletesList.length} Atlet
+              </span>
             </div>
             <div className="px-4 py-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-right">
-              <span className="text-[10px] font-barlow font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-300 block">Dokumen Sah</span>
+              <span className="text-[10px] font-barlow font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-300 block">
+                Dokumen Sah
+              </span>
               <span className="text-xl font-teko font-bold text-emerald-600 leading-none">
                 {athletesList.filter((a) => a.documentStatus === 'APPROVED').length} Atlet
               </span>
@@ -147,74 +243,28 @@ export const AthletesPlayersTab: React.FC = () => {
         }
       />
 
-      {/* Filter Toolbar */}
-      <div className="p-4 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] shadow-xs flex flex-col md:flex-row items-stretch md:items-center gap-3">
-        {/* Search */}
-        <div className="relative flex-1 w-full">
-          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-faint)]" />
-          <input
-            type="text"
-            placeholder="Cari nama pemain, NISN, atau sekolah..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-9 pr-3 py-2 text-xs rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)] focus:outline-none focus:border-[var(--color-arena-primary)]"
-          />
-        </div>
-
-        {/* Filter Tim */}
-        <select
-          value={selectedTeamFilter}
-          onChange={(e) => setSelectedTeamFilter(e.target.value)}
-          className="w-full md:w-52 px-3 py-2 text-xs rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)] font-barlow font-bold uppercase tracking-wider"
-        >
-          <option value="ALL">Semua Tim ({initialTeams.length})</option>
-          {initialTeams.map((t) => (
-            <option key={t.id} value={t.id}>
-              {t.name}
-            </option>
-          ))}
-        </select>
-
-        {/* Filter Status Berkas */}
-        <select
-          value={selectedDocFilter}
-          onChange={(e) => setSelectedDocFilter(e.target.value)}
-          className="w-full md:w-44 px-3 py-2 text-xs rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)] font-barlow font-bold uppercase tracking-wider"
-        >
-          <option value="ALL">Semua Status Berkas</option>
-          <option value="APPROVED">Berkas Sah (Approved)</option>
-          <option value="PENDING">Menunggu Verifikasi</option>
-          <option value="REJECTED">Ditolak</option>
-        </select>
-
-        {/* Filter Jumlah Data Yang Ditampilkan (10, 25, 50, 100) */}
-        <div className="flex items-center gap-2">
-          <span className="text-[11px] font-barlow font-bold uppercase tracking-wider text-[var(--text-muted)] whitespace-nowrap">
-            Tampil:
-          </span>
-          <select
-            value={pageSize}
-            onChange={(e) => setPageSize(Number(e.target.value))}
-            className="px-3 py-2 text-xs rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--text-main)] font-barlow font-bold uppercase tracking-wider cursor-pointer"
-          >
-            <option value={10}>10 Data</option>
-            <option value={25}>25 Data</option>
-            <option value={50}>50 Data</option>
-            <option value={100}>100 Data</option>
-          </select>
-        </div>
-      </div>
+      {/* Filter Toolbar Subcomponent */}
+      <AthleteFilterToolbar
+        search={search}
+        onSearchChange={setSearch}
+        selectedTeamFilter={selectedTeamFilter}
+        onTeamFilterChange={setSelectedTeamFilter}
+        selectedDocFilter={selectedDocFilter}
+        onDocFilterChange={setSelectedDocFilter}
+        pageSize={pageSize}
+        onPageSizeChange={setPageSize}
+      />
 
       {/* Athletes Master Table */}
       <div className="overflow-x-auto rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] shadow-xs">
         <table className="w-full text-xs text-left">
           <thead className="bg-[var(--bg-muted)] text-[11px] font-barlow font-bold uppercase tracking-wider text-[var(--text-muted)] border-b border-[var(--border-subtle)]">
             <tr>
-              <th className="py-3 px-4">No. Punggung</th>
+              <th className="py-3 px-4 font-mono">ID Atlet</th>
+              <th className="py-3 px-4 text-center">No. Jersey</th>
               <th className="py-3 px-4">Nama Lengkap Atlet</th>
               <th className="py-3 px-4">Tim &amp; Sekolah</th>
               <th className="py-3 px-4 text-center">Posisi</th>
-              <th className="py-3 px-4 text-center">NISN</th>
               <th className="py-3 px-4 text-center">Gol / Kartu</th>
               <th className="py-3 px-4 text-center">Status Berkas</th>
               <th className="py-3 px-4 text-right">Aksi</th>
@@ -228,59 +278,16 @@ export const AthletesPlayersTab: React.FC = () => {
                 </td>
               </tr>
             ) : (
-              paginatedAthletes.map((ath) => (
-                <tr key={`${ath.teamId}-${ath.id}`} className="hover:bg-[var(--bg-muted)]/40 transition-colors">
-                  <td className="py-3 px-4 font-mono font-bold text-sm text-[var(--text-main)]">
-                    <span className="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-[var(--bg-muted)] border border-[var(--border-subtle)]">
-                      #{ath.number}
-                    </span>
-                  </td>
-                  <td className="py-3 px-4">
-                    <div className="font-bold text-[var(--text-main)] text-sm">{ath.name}</div>
-                  </td>
-                  <td className="py-3 px-4">
-                    <div className="font-semibold text-[var(--color-arena-primary)]">{ath.teamName}</div>
-                    <div className="text-[10px] text-[var(--text-muted)] truncate max-w-xs">{ath.schoolName}</div>
-                  </td>
-                  <td className="py-3 px-4 text-center">
-                    <span className="px-2 py-0.5 rounded-md text-[10px] font-barlow font-bold uppercase tracking-wider bg-[var(--bg-muted)] text-[var(--text-main)] border border-[var(--border-subtle)]">
-                      {ath.position}
-                    </span>
-                  </td>
-                  <td className="py-3 px-4 text-center font-mono text-[11px] text-[var(--text-muted)]">
-                    {ath.nisn || '-'}
-                  </td>
-                  <td className="py-3 px-4 text-center">
-                    <div className="flex items-center justify-center gap-1.5 font-mono text-[11px]">
-                      <span className="text-emerald-600 font-bold" title="Gol">{ath.goals || 0}G</span>
-                      <span className="text-[var(--text-muted)]">&bull;</span>
-                      <span className="text-amber-600 font-bold" title="Kartu Kuning">{ath.yellowCards || 0}K</span>
-                      <span className="text-[var(--text-muted)]">&bull;</span>
-                      <span className="text-red-600 font-bold" title="Kartu Merah">{ath.redCards || 0}M</span>
-                    </div>
-                  </td>
-                  <td className="py-3 px-4 text-center">
-                    <span
-                      className={`px-2 py-0.5 rounded-md text-[10px] font-barlow font-bold uppercase tracking-wider ${
-                        ath.documentStatus === 'APPROVED'
-                          ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20'
-                          : 'bg-amber-500/10 text-amber-800 dark:text-amber-300 border border-amber-500/20'
-                      }`}
-                    >
-                      {ath.documentStatus === 'APPROVED' ? '✓ Sah' : 'Menunggu'}
-                    </span>
-                  </td>
-                  <td className="py-3 px-4 text-right">
-                    <button
-                      type="button"
-                      onClick={() => setEditingAthlete(ath)}
-                      className="p-1.5 rounded-lg border border-[var(--border-subtle)] text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-muted)] transition-colors"
-                      title="Edit Nama, Tim, No. Punggung &amp; Posisi"
-                    >
-                      <Edit2 className="w-3.5 h-3.5" />
-                    </button>
-                  </td>
-                </tr>
+              paginatedAthletes.map((ath, idx) => (
+                <AthleteMasterTableRow
+                  key={`${ath.teamId}-${ath.id}`}
+                  ath={ath}
+                  idx={idx}
+                  currentPage={currentPage}
+                  pageSize={pageSize}
+                  onEdit={setEditingAthlete}
+                  onDelete={setDeleteTarget}
+                />
               ))
             )}
           </tbody>
@@ -307,7 +314,7 @@ export const AthletesPlayersTab: React.FC = () => {
                 type="button"
                 disabled={currentPage === 1}
                 onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                className="p-1.5 px-3 rounded-xl border border-[var(--border-subtle)] text-xs font-barlow font-bold uppercase tracking-wider disabled:opacity-40 disabled:cursor-not-allowed hover:bg-[var(--bg-muted)] flex items-center gap-1 transition-colors"
+                className="p-1.5 px-3 rounded-xl border border-[var(--border-subtle)] text-xs font-barlow font-bold uppercase tracking-wider disabled:opacity-40 disabled:cursor-not-allowed hover:bg-[var(--bg-muted)] flex items-center gap-1 transition-colors cursor-pointer"
               >
                 <ChevronLeft className="w-3.5 h-3.5" />
                 <span>Sebelumnya</span>
@@ -319,7 +326,7 @@ export const AthletesPlayersTab: React.FC = () => {
                 type="button"
                 disabled={currentPage === totalPages}
                 onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                className="p-1.5 px-3 rounded-xl border border-[var(--border-subtle)] text-xs font-barlow font-bold uppercase tracking-wider disabled:opacity-40 disabled:cursor-not-allowed hover:bg-[var(--bg-muted)] flex items-center gap-1 transition-colors"
+                className="p-1.5 px-3 rounded-xl border border-[var(--border-subtle)] text-xs font-barlow font-bold uppercase tracking-wider disabled:opacity-40 disabled:cursor-not-allowed hover:bg-[var(--bg-muted)] flex items-center gap-1 transition-colors cursor-pointer"
               >
                 <span>Selanjutnya</span>
                 <ChevronRight className="w-3.5 h-3.5" />
@@ -337,6 +344,18 @@ export const AthletesPlayersTab: React.FC = () => {
           onSave={handleSaveEdit}
         />
       )}
+
+      {/* Delete Confirmation Modal */}
+      <ConfirmModal
+        isOpen={!!deleteTarget}
+        title="Hapus Data Atlet"
+        message={`Apakah Anda yakin ingin menghapus atlet "${deleteTarget?.name}" (${deleteTarget?.athleteCode || ''}) dari kontingen ${deleteTarget?.teamName || ''}? Data yang dihapus akan terhapus dari daftar pemain dan database.`}
+        confirmLabel="Ya, Hapus Atlet"
+        cancelLabel="Batal"
+        isDanger={true}
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setDeleteTarget(null)}
+      />
     </div>
   );
 };

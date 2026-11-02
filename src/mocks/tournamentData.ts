@@ -108,7 +108,7 @@ const createMatch = (
 });
 
 export const initialMatches: Match[] = [
-  // --- HARI PERTAMA (H1): Senin, 2 November 2026 ---
+  // Hari pertama: Senin, 2 November 2026
   createMatch('match-1', 1, 'GROUP', 'A', 'team-sdi-kardina', 'SDI KARDINA MASSA', 'team-min7-blitar', 'MIN 7 BLITAR', 'Senin, 2 Nov 2026 • 07:30 - 08:00 WIB (P1 • A1 vs A2)', { scoreA: 0, scoreB: 2, status: 'COMPLETED', bapSigned: true }),
   createMatch('match-2', 2, 'GROUP', 'B', 'team-sdn1-srengat', 'UPT SDN 1 SRENGAT', 'team-min14-blitar', 'MIN 14 BLITAR', 'Senin, 2 Nov 2026 • 08:00 - 08:30 WIB (P2 • B1 vs B2)', { scoreA: 4, scoreB: 0, status: 'COMPLETED', bapSigned: true }),
   createMatch('match-3', 3, 'GROUP', 'C', 'team-min2-blitar', 'MIN 2 BLITAR', 'team-mi-wahidhasyim', 'MI WAHID HASYIM BAKUNG', 'Senin, 2 Nov 2026 • 08:30 - 09:00 WIB (P3 • C1 vs C2)', { scoreA: 3, scoreB: 5, status: 'COMPLETED', bapSigned: true }),
@@ -120,13 +120,13 @@ export const initialMatches: Match[] = [
   createMatch('match-9', 9, 'GROUP', 'D', 'team-mi-ploso', 'MI PLOSO KEDIRI', 'team-mi-darussalam', 'MI UNGGULAN DARUSSALAM', 'Senin, 2 Nov 2026 • 13:00 - 13:30 WIB (P9 • D1 vs D2)', { scoreA: 1, scoreB: 7, status: 'COMPLETED', bapSigned: true }),
   createMatch('match-10', 10, 'GROUP', 'B', 'team-mi-mambaululum', 'MI MAMBAUL ULUM BUNTARAN', 'team-min13-b', 'MIN 13 BLITAR A', 'Senin, 2 Nov 2026 • 13:30 - 14:00 WIB (P10 • B3 vs B4)', { scoreA: 1, scoreB: 0, status: 'COMPLETED', bapSigned: true }),
 
-  // --- HARI KEDUA (H2): Selasa, 3 November 2026 ---
+  // Hari kedua: Selasa, 3 November 2026
   createMatch('match-11', 11, 'GROUP', 'A', 'team-min7-blitar', 'MIN 7 BLITAR', 'team-min8-blitar', 'MIN 8 BLITAR', 'Selasa, 3 Nov 2026 • 07:30 - 08:00 WIB (P11 • A2 vs A3)'),
   createMatch('match-12', 12, 'GROUP', 'C', 'team-min13-c', 'MIN 13 BLITAR B', 'team-min2-blitar', 'MIN 2 BLITAR', 'Selasa, 3 Nov 2026 • 08:00 - 08:30 WIB (P12 • C3 vs C1)'),
   createMatch('match-13', 13, 'GROUP', 'D', 'team-mi-darussalam', 'MI UNGGULAN DARUSSALAM', 'team-mi-yabunaya', 'MI YA BUNAYYA SRENGAT', 'Selasa, 3 Nov 2026 • 08:30 - 09:00 WIB (P13 • D2 vs D3)'),
   createMatch('match-14', 14, 'GROUP', 'B', 'team-min13-b', 'MIN 13 BLITAR A', 'team-sdn1-srengat', 'UPT SDN 1 SRENGAT', 'Selasa, 3 Nov 2026 • 09:00 - 09:30 WIB (P14 • B4 vs B1)'),
 
-  // --- BABAK 4 BESAR (SEMIFINAL) & FINAL ---
+  // Babak semifinal dan final
   createMatch('match-15', 15, 'SEMI_FINAL', undefined, 'placeholder-ga', 'JUARA GRUP A', 'placeholder-gc', 'JUARA GRUP C', 'Selasa, 3 Nov 2026 • 10:00 - 10:30 WIB (P15 • 4 Besar 1)', { teamALogo: '', teamBLogo: '' }),
   createMatch('match-16', 16, 'SEMI_FINAL', undefined, 'placeholder-gb', 'JUARA GRUP B', 'placeholder-gd', 'JUARA GRUP D', 'Selasa, 3 Nov 2026 • 10:30 - 11:00 WIB (P16 • 4 Besar 2)', { teamALogo: '', teamBLogo: '' }),
   createMatch('match-17', 17, 'FINAL', undefined, 'placeholder-sf1', 'JUARA SEMIFINAL 1', 'placeholder-sf2', 'JUARA SEMIFINAL 2', 'Selasa, 3 Nov 2026 • 11:30 - 12:00 WIB (P17 • Grand Final)', { teamALogo: '', teamBLogo: '' }),

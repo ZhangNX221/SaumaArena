@@ -66,6 +66,7 @@ export interface LiveStateResponse {
   activeMatchId: string;
   telemetryMap: Record<string, MatchLiveTelemetry>;
   matches: Match[];
+  isLiveBroadcastActive?: boolean;
   serverTime: number;
 }
 
@@ -92,7 +93,7 @@ export async function fetchLiveStateFromBackend(): Promise<LiveStateResponse | n
 export async function pushLiveTelemetryToBackend(
   matchId: string,
   telemetry: MatchLiveTelemetry,
-  extra?: { activeMatchId?: string; status?: string; scoreA?: number; scoreB?: number }
+  extra?: { activeMatchId?: string; status?: string; scoreA?: number; scoreB?: number; isLiveBroadcastActive?: boolean }
 ) {
   try {
     const token = typeof window !== 'undefined' ? localStorage.getItem('sauma_auth_token') : null;
@@ -113,6 +114,30 @@ export async function pushLiveTelemetryToBackend(
     });
   } catch (error) {
     console.warn(`[apiSync] Gagal push live telemetry:`, error);
+  }
+}
+
+/**
+ * Matikan atau aktifkan status siaran live skor ke layar publik
+ */
+export async function pushLiveBroadcastStatusToBackend(isLiveBroadcastActive: boolean) {
+  try {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('sauma_auth_token') : null;
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    };
+
+    await fetch('/api/live', {
+      method: 'POST',
+      headers,
+      credentials: 'include',
+      body: JSON.stringify({
+        isLiveBroadcastActive,
+      }),
+    });
+  } catch (error) {
+    console.warn(`[apiSync] Gagal push status broadcast:`, error);
   }
 }
 

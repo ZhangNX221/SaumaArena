@@ -55,8 +55,16 @@ export function seedDatabase(db: DatabaseSync): void {
 
   // 5. Seed Players
   const insertPlayer = db.prepare(`
-    INSERT OR REPLACE INTO players (id, team_id, full_name, birth_date, gender, jersey_number, position)
-    VALUES (?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO players (id, team_id, full_name, birth_date, gender, jersey_number, position, goals, yellow_cards, red_cards)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ON CONFLICT(id) DO UPDATE SET
+      team_id = excluded.team_id,
+      full_name = excluded.full_name,
+      jersey_number = excluded.jersey_number,
+      position = excluded.position,
+      goals = CASE WHEN excluded.goals > 0 THEN excluded.goals ELSE players.goals END,
+      yellow_cards = CASE WHEN excluded.yellow_cards > 0 THEN excluded.yellow_cards ELSE players.yellow_cards END,
+      red_cards = CASE WHEN excluded.red_cards > 0 THEN excluded.red_cards ELSE players.red_cards END
   `);
 
   const teamCount = (db.prepare('SELECT COUNT(*) as count FROM teams').get() as { count: number })?.count || 0;
@@ -81,7 +89,10 @@ export function seedDatabase(db: DatabaseSync): void {
             '2012-05-10',
             'M',
             p.number || 0,
-            p.position || 'Pemain'
+            p.position || 'Pemain',
+            p.goals || 0,
+            p.yellowCards || 0,
+            p.redCards || 0
           );
         }
       }

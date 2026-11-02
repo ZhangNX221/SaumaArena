@@ -45,6 +45,33 @@ export function getDatabase(): DatabaseSync {
     // Index already exists
   }
 
+  // Auto-migration: Ensure players table has athlete_code column & index
+  try {
+    db.exec('ALTER TABLE players ADD COLUMN athlete_code TEXT;');
+  } catch {
+    // Column already exists
+  }
+  try {
+    db.exec('ALTER TABLE players ADD COLUMN yellow_cards INTEGER DEFAULT 0;');
+  } catch {
+    // Column already exists
+  }
+  try {
+    db.exec('ALTER TABLE players ADD COLUMN red_cards INTEGER DEFAULT 0;');
+  } catch {
+    // Column already exists
+  }
+  try {
+    db.exec('ALTER TABLE players ADD COLUMN goals INTEGER DEFAULT 0;');
+  } catch {
+    // Column already exists
+  }
+  try {
+    db.exec('CREATE INDEX IF NOT EXISTS idx_players_athlete_code ON players(athlete_code);');
+  } catch {
+    // Index already exists
+  }
+
   // Normalize match IDs if existing database has legacy m_ prefix
   try {
     db.exec(`
@@ -128,7 +155,7 @@ export function getDatabase(): DatabaseSync {
       }
     }
 
-    // Auto-migration: Update nama tim resmi & master pemain sesuai DSP resmi di tabel SQLite
+    // Auto-migration: Pastikan tabel tim & pemain terisi tanpa menimpa data yang sudah diedit user
     const upsertTeamStmt = db.prepare(`
       INSERT INTO teams (id, code, name, short_name, school_name, logo_url, kind)
       VALUES (?, ?, ?, ?, ?, ?, 'team')
@@ -139,19 +166,66 @@ export function getDatabase(): DatabaseSync {
         logo_url = excluded.logo_url
     `);
 
-    const insertPlayerStmt = db.prepare(`
-      INSERT OR REPLACE INTO players (id, team_id, full_name, birth_date, gender, jersey_number, position, is_active)
-      VALUES (?, ?, ?, ?, ?, ?, ?, 1)
-    `);
-
     // Bersihkan pemain dummy usang jika ada
     db.prepare("DELETE FROM players WHERE full_name LIKE 'Pemain %'").run();
 
-    for (const t of initialTeams) {
-      upsertTeamStmt.run(t.id, t.code || t.id, t.name, t.shortName, t.schoolName, t.logoUrl);
-      if (t.players && t.players.length > 0) {
-        for (const p of t.players) {
-          insertPlayerStmt.run(p.id, t.id, p.name, '2012-05-10', 'M', p.number, p.position);
+    const existingPlayersCount = (db.prepare('SELECT COUNT(*) as count FROM players').get() as { count: number })?.count || 0;
+
+    if (existingPlayersCount === 0) {
+      // Inisialisasi awal pemain hanya jika tabel players benar-benar kosong
+      const insertPlayerStmt = db.prepare(`
+        INSERT INTO players (id, team_id, full_name, birth_date, gender, jersey_number, position, athlete_code, is_active)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1)
+        ON CONFLICT(id) DO NOTHING
+      `);
+
+      let athleteCounter = 1;
+      for (const t of initialTeams) {
+        upsertTeamStmt.run(t.id, t.code || t.id, t.name, t.shortName, t.schoolName, t.logoUrl);
+        if (t.players && t.players.length > 0) {
+          for (const p of t.players) {
+            const athleteCode = p.athleteCode || `ATL-${String(athleteCounter++).padStart(3, '0')}`;
+            insertPlayerStmt.run(p.id, t.id, p.name, '2012-05-10', 'M', p.number, p.position, athleteCode);
+          }
+        }
+      }
+    } else {
+      // Jika tabel sudah ada data, pastikan tim terdaftar & pemain resmi masuk tanpa menimpa editan pengguna
+      for (const t of initialTeams) {
+        upsertTeamStmt.run(t.id, t.code || t.id, t.name, t.shortName, t.schoolName, t.logoUrl);
+      }
+
+      const insertMissingPlayerStmt = db.prepare(`
+        INSERT INTO players (id, team_id, full_name, birth_date, gender, jersey_number, position, athlete_code, is_active)
+        VALUES (?, ?, ?, '2012-05-10', 'M', ?, ?, ?, 1)
+        ON CONFLICT(id) DO UPDATE SET
+          full_name = CASE WHEN players.full_name LIKE 'Pemain %' OR players.full_name = '' THEN excluded.full_name ELSE players.full_name END,
+          jersey_number = CASE WHEN players.full_name LIKE 'Pemain %' OR players.full_name = '' THEN excluded.jersey_number ELSE players.jersey_number END,
+          position = CASE WHEN players.full_name LIKE 'Pemain %' OR players.full_name = '' THEN excluded.position ELSE players.position END,
+          athlete_code = COALESCE(players.athlete_code, excluded.athlete_code)
+      `);
+
+      for (const t of initialTeams) {
+        if (t.players && t.players.length > 0) {
+          for (const p of t.players) {
+            insertMissingPlayerStmt.run(p.id, t.id, p.name, p.number, p.position, p.athleteCode || null);
+          }
+        }
+      }
+
+      // Isi kode atlet yang masih kosong tanpa mengubah editan pengguna
+      const unassignedAthletes = db.prepare('SELECT id FROM players WHERE athlete_code IS NULL OR athlete_code = "" ORDER BY rowid ASC').all() as any[];
+      if (unassignedAthletes.length > 0) {
+        const maxCodeRow = db.prepare("SELECT athlete_code FROM players WHERE athlete_code LIKE 'ATL-%' ORDER BY athlete_code DESC LIMIT 1").get() as { athlete_code?: string } | undefined;
+        let lastIdx = 0;
+        if (maxCodeRow?.athlete_code) {
+          const matched = maxCodeRow.athlete_code.match(/\d+/);
+          if (matched) lastIdx = parseInt(matched[0], 10);
+        }
+
+        const updateCodeStmt = db.prepare('UPDATE players SET athlete_code = ? WHERE id = ?');
+        for (const row of unassignedAthletes) {
+          updateCodeStmt.run(`ATL-${String(++lastIdx).padStart(3, '0')}`, row.id);
         }
       }
     }

@@ -17,7 +17,7 @@ import { TicketModal } from '@/components/public/TicketModal';
 import { AdminDashboard } from '@/components/admin/AdminDashboard';
 import { AdminLogin } from '@/components/admin/AdminLogin';
 import { RefereeDashboard } from '@/components/referee/RefereeDashboard';
-import { AppUser, PublicHeaderConfig, STORAGE_KEY_TEAMS } from '@/types';
+import { AppUser, PublicHeaderConfig, STORAGE_KEY_TEAMS, STORAGE_KEY_MASTER_ATHLETES } from '@/types';
 import { initialTeams } from '@/mocks/tournamentData';
 import { PRESET_USERS } from '@/mocks/multiSportData';
 import { DEFAULT_HEADER_CONFIG, DEFAULT_CABOR_BANNERS } from '@/mocks/headerConfig';
@@ -47,21 +47,36 @@ export default function Home() {
         const parsed = JSON.parse(savedBanners);
         if (Array.isArray(parsed) && parsed.length > 0) setBanners(parsed);
       }
-      // Clean legacy storage key
+      // Clean legacy storage key & sinkronkan tim terbaru
       localStorage.removeItem('sauma_arena_teams');
       const savedTeams = localStorage.getItem(STORAGE_KEY_TEAMS);
       if (!savedTeams) {
         localStorage.setItem(STORAGE_KEY_TEAMS, JSON.stringify(initialTeams));
       } else {
         const parsed = JSON.parse(savedTeams);
-        const isOutdated = !Array.isArray(parsed) || parsed.length !== initialTeams.length || parsed.some(
-          (t: any) => t.id === 'team-sdi-kardina-b' || t.id === 'team-min14-blitar-b' ||
-            (typeof t.name === 'string' && (t.name.includes('MASSA A') || t.name.includes('MASSA B'))) ||
-            (typeof t.name === 'string' && typeof t.id === 'string' && (t.name.includes('BLITAR A') || t.name.includes('BLITAR B')) && t.id.includes('min14'))
+        const isOutdated = !Array.isArray(parsed) || parsed.length !== initialTeams.length || parsed.some((t: any) =>
+          t.id === 'team-sdi-kardina-b' || t.id === 'team-min14-blitar-b' ||
+          (typeof t.name === 'string' && t.name.includes('MASSA A')) ||
+          ((t.id === 'team-min13-b' || t.id === 'team-min13-c' || t.id === 'team-mi-darussalam' || t.id === 'team-mi-yabunaya') && (!t.players || t.players.length < 11 || t.players.some((p: any) => p.name?.startsWith('Pemain'))))
         );
         if (isOutdated) {
-          localStorage.setItem(STORAGE_KEY_TEAMS, JSON.stringify(initialTeams));
-          window.dispatchEvent(new CustomEvent('sauma_state_sync', { detail: { key: STORAGE_KEY_TEAMS, value: initialTeams } }));
+          const prevStats = new Map<string, { goals: number; yellowCards: number; redCards: number }>();
+          if (Array.isArray(parsed)) {
+            parsed.forEach((t: any) => {
+              (t.players || []).forEach((p: any) => {
+                if (p?.id) prevStats.set(p.id, { goals: Number(p.goals || 0), yellowCards: Number(p.yellowCards || 0), redCards: Number(p.redCards || 0) });
+              });
+            });
+          }
+          const mergedTeams = initialTeams.map((t) => ({
+            ...t,
+            players: (t.players || []).map((p) => {
+              const st = prevStats.get(p.id);
+              return { ...p, goals: Math.max(Number(p.goals || 0), st?.goals || 0), yellowCards: Math.max(Number(p.yellowCards || 0), st?.yellowCards || 0), redCards: Math.max(Number(p.redCards || 0), st?.redCards || 0) };
+            }),
+          }));
+          localStorage.setItem(STORAGE_KEY_TEAMS, JSON.stringify(mergedTeams));
+          window.dispatchEvent(new CustomEvent('sauma_state_sync', { detail: { key: STORAGE_KEY_TEAMS, value: mergedTeams } }));
         }
       }
     } catch {}
@@ -91,14 +106,9 @@ export default function Home() {
           if (supporterWeights) syncItem('sauma_supporter_rules_config', supporterWeights);
           if (sportRules) syncItem('sauma_arena_sport_rules', sportRules);
           if (protocols) syncItem('sauma_arena_protocols', protocols);
-          if (dbBanners?.length) {
-            setBanners(dbBanners);
-            syncItem('sauma_arena_cabor_banners', dbBanners);
-          }
+          if (dbBanners?.length) { setBanners(dbBanners); syncItem('sauma_arena_cabor_banners', dbBanners); }
           if (standingsSnapshot) {
-            ['A', 'B', 'C', 'D'].forEach((g) => {
-              if (standingsSnapshot[g]) syncItem(`sauma_arena_standings_${g.toLowerCase()}`, standingsSnapshot[g]);
-            });
+            ['A', 'B', 'C', 'D'].forEach((g) => standingsSnapshot[g] && syncItem(`sauma_arena_standings_${g.toLowerCase()}`, standingsSnapshot[g]));
           }
           if (json.data.partners) {
             syncItem('sauma_arena_tournament_partners_v3', json.data.partners);
@@ -115,12 +125,7 @@ export default function Home() {
 
   const handleSaveBanners = (newBanners: PublicHeaderConfig[]) => {
     setBanners(newBanners);
-    try {
-      localStorage.setItem('sauma_arena_cabor_banners', JSON.stringify(newBanners));
-    } catch {
-      // ignore
-    }
-
+    try { localStorage.setItem('sauma_arena_cabor_banners', JSON.stringify(newBanners)); } catch {}
     const token = typeof window !== 'undefined' ? localStorage.getItem('sauma_auth_token') : null;
     if (token) {
       fetch('/api/settings', {
@@ -283,11 +288,7 @@ export default function Home() {
         banners={banners}
         onSaveBanners={handleSaveBanners}
         headerConfig={banners[activeBannerIndex] || DEFAULT_HEADER_CONFIG}
-        onSaveHeaderConfig={(updated) => {
-          const next = [...banners];
-          next[activeBannerIndex] = updated;
-          handleSaveBanners(next);
-        }}
+        onSaveHeaderConfig={(updated) => { const next = [...banners]; next[activeBannerIndex] = updated; handleSaveBanners(next); }}
       />
     );
   }
@@ -377,12 +378,10 @@ export default function Home() {
       <TicketModal
         isOpen={FEATURES.ticketing && isTicketModalOpen}
         onClose={() => setIsTicketModalOpen(false)}
-        onTicketGenerated={(c, s) => console.log(`Tiket: ${c} - ${s}`)}
       />
       <TeamRegistrationModal
         isOpen={isRegModalOpen}
         onClose={() => setIsRegModalOpen(false)}
-        onSuccess={(d) => console.log('Pendaftaran:', d)}
       />
 
       <PublicFooter

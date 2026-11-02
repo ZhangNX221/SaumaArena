@@ -274,20 +274,20 @@ export const getAdminMenuConfig = (counts?: {
 export const getRefereeMenuConfig = (activeDutyCount: number = 1): MenuItemConfig[] => [
   {
     id: 'dashboard',
-    label: 'Dashboard',
+    label: 'Beranda',
     icon: 'LayoutDashboard',
     status: 'active',
   },
   {
     id: 'duty',
-    label: 'Laga',
+    label: 'Daftar Laga',
     icon: 'ClipboardList',
     badge: { type: 'count', text: `${activeDutyCount} AKTIF`, count: activeDutyCount },
     status: 'active',
   },
   {
     id: 'match_center',
-    label: 'Skor',
+    label: 'Papan Skor',
     icon: 'Activity',
     badge: { type: 'live', text: 'LIVE' },
     status: 'active',
@@ -300,8 +300,14 @@ export const getRefereeMenuConfig = (activeDutyCount: number = 1): MenuItemConfi
   },
   {
     id: 'bracket',
-    label: 'Bracket',
+    label: 'Atur Bracket',
     icon: 'GitBranch',
+    status: 'active',
+  },
+  {
+    id: 'player_performance',
+    label: 'Performa Pemain',
+    icon: 'Award',
     status: 'active',
   },
   {
@@ -312,19 +318,19 @@ export const getRefereeMenuConfig = (activeDutyCount: number = 1): MenuItemConfi
   },
   {
     id: 'reports',
-    label: 'Laporan',
+    label: 'Laporan Pertandingan',
     icon: 'FileText',
     status: 'active',
   },
   {
     id: 'rulebook',
-    label: 'Aturan',
+    label: 'Peraturan Pertandingan',
     icon: 'BookOpen',
     status: 'active',
   },
   {
     id: 'profile',
-    label: 'Profil',
+    label: 'Pengaturan Profil',
     icon: 'User',
     status: 'active',
   },

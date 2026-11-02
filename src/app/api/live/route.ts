@@ -24,6 +24,7 @@ export async function GET() {
     const telemetryMap: Record<string, MatchLiveTelemetry> = overrides.live_telemetry || {};
     const liveEventsMap: Record<string, MatchEvent[]> = overrides.live_events || {};
     const activeMatchId: string = overrides.active_referee_match_id || 'match-1';
+    const isLiveBroadcastActive: boolean = overrides.is_live_broadcast_active !== false;
 
     const matchRows = query<any>(
       `SELECT 
@@ -104,6 +105,7 @@ export async function GET() {
         activeMatchId,
         telemetryMap,
         matches,
+        isLiveBroadcastActive,
         serverTime: Date.now(),
       },
     });
@@ -127,6 +129,7 @@ export async function POST(request: Request) {
       status,
       telemetry,
       events,
+      isLiveBroadcastActive,
     } = body;
 
     // 1. Perbarui data match di tabel matches jika matchId dan score/status disertakan
@@ -192,6 +195,10 @@ export async function POST(request: Request) {
       const currentEventsMap = overrides.live_events || {};
       currentEventsMap[matchId] = events;
       overrides.live_events = currentEventsMap;
+    }
+
+    if (isLiveBroadcastActive !== undefined) {
+      overrides.is_live_broadcast_active = Boolean(isLiveBroadcastActive);
     }
 
     run(

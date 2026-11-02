@@ -1,21 +1,28 @@
 'use client';
 
-import React, { useEffect } from 'react';
-import {
-  Trophy,
-  BarChart3,
-  Flame,
-  Zap,
-  ShieldCheck,
-  PieChart,
-  SlidersHorizontal,
-} from 'lucide-react';
-import { initialTeams } from '@/mocks/tournamentData';
+import React, { useEffect, useMemo } from 'react';
+import { BarChart3, PieChart, SlidersHorizontal } from 'lucide-react';
+import { initialMatches, initialTeams } from '@/mocks/tournamentData';
 import { TeamGoalsBarChart } from '../stats/TeamGoalsBarChart';
 import { DisciplineFairPlayChart } from '../stats/DisciplineFairPlayChart';
-import { SportCode, PublicStatsDisplayConfig, STORAGE_KEY_STATS_CONFIG, DEFAULT_PUBLIC_STATS_CONFIG } from '@/types';
+import { StatsQuickMetricsCards } from '../stats/StatsQuickMetricsCards';
+import { StatsTopScorersCard, TopScorerItem } from '../stats/StatsTopScorersCard';
+import { StatsCleanSheetCard, CleanSheetTeamItem } from '../stats/StatsCleanSheetCard';
+import {
+  SportCode,
+  PublicStatsDisplayConfig,
+  STORAGE_KEY_STATS_CONFIG,
+  DEFAULT_PUBLIC_STATS_CONFIG,
+  Match,
+  Team,
+  FlattenedAthlete,
+  STORAGE_KEY_MASTER_ATHLETES,
+  STORAGE_KEY_TEAMS,
+} from '@/types';
 import { PublicPageHeader } from '../layout/PublicPageHeader';
 import { usePersistentState } from '@/hooks/usePersistentState';
+import { fetchLiveStateFromBackend } from '@/lib/apiSync';
+import { fetchAthletesFromBackend } from '@/lib/athleteSync';
 
 interface StatsTabProps {
   sportCode?: SportCode;
@@ -27,6 +34,11 @@ export const StatsTab: React.FC<StatsTabProps> = ({ sportCode = 'FUTSAL' }) => {
     DEFAULT_PUBLIC_STATS_CONFIG
   );
 
+  const [matches, setMatches] = usePersistentState<Match[]>('sauma_arena_matches', initialMatches);
+  const [teams] = usePersistentState<Team[]>(STORAGE_KEY_TEAMS, initialTeams);
+  const [athletes, setAthletes] = usePersistentState<FlattenedAthlete[]>(STORAGE_KEY_MASTER_ATHLETES, []);
+
+  // Sinkronisasi data pengaturan, jadwal laga, dan master atlet dari backend
   useEffect(() => {
     fetch('/api/settings?sport=futsal')
       .then((res) => res.json())
@@ -36,19 +48,214 @@ export const StatsTab: React.FC<StatsTabProps> = ({ sportCode = 'FUTSAL' }) => {
         }
       })
       .catch(() => {});
-  }, [setStatsConfig]);
 
-  // Ambil seluruh pemain Futsal
-  const allPlayers = initialTeams.flatMap((t) =>
-    t.players.map((p) => ({
-      ...p,
-      teamName: t.name,
-      schoolName: t.schoolName,
-      logoUrl: t.logoUrl,
-    }))
-  );
+    fetchLiveStateFromBackend().then((state) => {
+      if (state && Array.isArray(state.matches) && state.matches.length > 0) {
+        setMatches(state.matches);
+      }
+    });
 
-  const topScorers = [...allPlayers].sort((a, b) => b.goals - a.goals).slice(0, 5);
+    fetchAthletesFromBackend().then((remoteData) => {
+      if (remoteData && Array.isArray(remoteData) && remoteData.length > 0) {
+        setAthletes((prev) => {
+          let currentList = prev;
+          if (!currentList || currentList.length === 0) {
+            try {
+              const saved = typeof window !== 'undefined' ? localStorage.getItem(STORAGE_KEY_MASTER_ATHLETES) : null;
+              if (saved) currentList = JSON.parse(saved);
+            } catch {}
+          }
+          if (!currentList || currentList.length === 0) return remoteData;
+          const prevMap = new Map(currentList.map((a) => [a.id, a]));
+          return remoteData.map((remote) => {
+            const local = prevMap.get(remote.id);
+            return {
+              ...remote,
+              goals: Math.max(Number(local?.goals || 0), Number(remote.goals || 0)),
+              yellowCards: Math.max(Number(local?.yellowCards || 0), Number(remote.yellowCards || 0)),
+              redCards: Math.max(Number(local?.redCards || 0), Number(remote.redCards || 0)),
+            };
+          });
+        });
+      }
+    });
+  }, [setStatsConfig, setMatches, setAthletes]);
+
+  // Ringkasan metrik gol turnamen
+  const totalGoals = useMemo(() => {
+    return matches.reduce((acc, m) => {
+      if (m.status === 'COMPLETED' || m.status === 'LIVE') {
+        return acc + Number(m.scoreA || 0) + Number(m.scoreB || 0);
+      }
+      return acc;
+    }, 0);
+  }, [matches]);
+
+  const completedMatches = useMemo(() => {
+    return matches.filter((m) => m.status === 'COMPLETED').length;
+  }, [matches]);
+
+  const totalMatches = matches.length || 17;
+  const avgGoals = completedMatches > 0 ? (totalGoals / completedMatches).toFixed(2) : '0.00';
+
+  // Akumulasi total kartu kuning dan merah turnamen
+  const { totalYellowCards, totalRedCards } = useMemo(() => {
+    const baseTeams = teams.length > 0 ? teams : initialTeams;
+    let sumYellow = 0;
+    let sumRed = 0;
+
+    baseTeams.forEach((t) => {
+      const athleteY = athletes
+        .filter((a) => a.teamId === t.id || (a.teamName && a.teamName.toLowerCase() === t.name.toLowerCase()))
+        .reduce((s, a) => s + Number(a.yellowCards || 0), 0);
+
+      const playerY = (t.players || []).reduce((s, p) => s + Number(p.yellowCards || 0), 0);
+
+      const matchY = matches.reduce((s, m) => {
+        return (
+          s +
+          (m.events || []).filter((e) => {
+            if (e.type !== 'YELLOW_CARD') return false;
+            return (
+              e.teamId === t.id ||
+              (m.teamAId === t.id && (e.teamId === 'A' || e.playerName?.includes('Tim A'))) ||
+              (m.teamBId === t.id && (e.teamId === 'B' || e.playerName?.includes('Tim B'))) ||
+              (e.playerName && e.playerName.toLowerCase().includes(t.name.toLowerCase()))
+            );
+          }).length
+        );
+      }, 0);
+
+      sumYellow += Math.max(athleteY, playerY, matchY);
+
+      const athleteR = athletes
+        .filter((a) => a.teamId === t.id || (a.teamName && a.teamName.toLowerCase() === t.name.toLowerCase()))
+        .reduce((s, a) => s + Number(a.redCards || 0), 0);
+
+      const playerR = (t.players || []).reduce((s, p) => s + Number(p.redCards || 0), 0);
+
+      const matchR = matches.reduce((s, m) => {
+        return (
+          s +
+          (m.events || []).filter((e) => {
+            if (e.type !== 'RED_CARD') return false;
+            return (
+              e.teamId === t.id ||
+              (m.teamAId === t.id && (e.teamId === 'A' || e.playerName?.includes('Tim A'))) ||
+              (m.teamBId === t.id && (e.teamId === 'B' || e.playerName?.includes('Tim B'))) ||
+              (e.playerName && e.playerName.toLowerCase().includes(t.name.toLowerCase()))
+            );
+          }).length
+        );
+      }, 0);
+
+      sumRed += Math.max(athleteR, playerR, matchR);
+    });
+
+    return { totalYellowCards: sumYellow, totalRedCards: sumRed };
+  }, [athletes, teams, matches]);
+
+  const avgCards =
+    completedMatches > 0
+      ? ((totalYellowCards + totalRedCards) / completedMatches).toFixed(2)
+      : '0.00';
+
+  // Peringkat pencetak gol terbanyak
+  const topScorers: TopScorerItem[] = useMemo(() => {
+    const playerMap: Record<string, TopScorerItem> = {};
+
+    const baseAthletes =
+      athletes.length > 0
+        ? athletes
+        : teams.flatMap((t) =>
+            t.players.map((p) => ({ ...p, teamId: t.id, teamName: t.name, schoolName: t.schoolName }))
+          );
+
+    baseAthletes.forEach((p) => {
+      playerMap[p.id] = {
+        id: p.id,
+        name: p.name,
+        teamName: p.teamName || 'Tim Futsal',
+        schoolName: p.schoolName || '',
+        goals: Number(p.goals || 0),
+      };
+    });
+
+    matches.forEach((m) => {
+      (m.events || []).forEach((e) => {
+        if (e.type === 'GOAL' && e.playerId && playerMap[e.playerId]) {
+          const directGoal = baseAthletes.find((a) => a.id === e.playerId)?.goals || 0;
+          if (directGoal === 0) {
+            playerMap[e.playerId].goals += 1;
+          }
+        }
+      });
+    });
+
+    return Object.values(playerMap)
+      .sort((a, b) => b.goals - a.goals || a.name.localeCompare(b.name))
+      .slice(0, 5);
+  }, [athletes, teams, matches]);
+
+  // Rekap pertahanan dan clean sheet tim
+  const cleanSheetTeams: CleanSheetTeamItem[] = useMemo(() => {
+    const list = (teams.length > 0 ? teams : initialTeams).map((team) => {
+      let cleanSheets = 0;
+      let goalsConceded = 0;
+      let matchesPlayed = 0;
+
+      matches.forEach((m) => {
+        if (m.status === 'COMPLETED') {
+          if (m.teamAId === team.id || m.teamAName?.toLowerCase() === team.name?.toLowerCase()) {
+            matchesPlayed += 1;
+            const conceded = Number(m.scoreB || 0);
+            goalsConceded += conceded;
+            if (conceded === 0) cleanSheets += 1;
+          } else if (m.teamBId === team.id || m.teamBName?.toLowerCase() === team.name?.toLowerCase()) {
+            matchesPlayed += 1;
+            const conceded = Number(m.scoreA || 0);
+            goalsConceded += conceded;
+            if (conceded === 0) cleanSheets += 1;
+          }
+        }
+      });
+
+      return {
+        id: team.id,
+        name: team.name,
+        logoUrl: team.logoUrl,
+        group: team.group,
+        cleanSheets,
+        goalsConceded,
+        matchesPlayed,
+        csPercentage: matchesPlayed > 0 ? Math.round((cleanSheets / matchesPlayed) * 100) : 100,
+      };
+    });
+
+    return list
+      .sort((a, b) => b.cleanSheets - a.cleanSheets || a.goalsConceded - b.goalsConceded)
+      .slice(0, 4);
+  }, [teams, matches]);
+
+  // Distribusi fase waktu terjadinya gol
+  const goalTimingStats = useMemo(() => {
+    const goalEvents = matches.flatMap((m) => m.events || []).filter((e) => e.type === 'GOAL');
+    const totalGoalEvents = goalEvents.length;
+    if (totalGoalEvents === 0) {
+      return {
+        h1Count: 0,
+        h2Count: 0,
+        h1Percent: totalGoals > 0 ? 50 : 0,
+        h2Percent: totalGoals > 0 ? 50 : 0,
+        totalGoalEvents: totalGoals,
+      };
+    }
+    const h1Count = goalEvents.filter((g) => (g.minute || 1) <= 10).length;
+    const h2Count = totalGoalEvents - h1Count;
+    const h1Percent = Math.round((h1Count / totalGoalEvents) * 100);
+    const h2Percent = 100 - h1Percent;
+    return { h1Count, h2Count, h1Percent, h2Percent, totalGoalEvents };
+  }, [matches, totalGoals]);
 
   const hasAnyActiveCard =
     statsConfig.showQuickMetrics ||
@@ -84,43 +291,15 @@ export const StatsTab: React.FC<StatsTabProps> = ({ sportCode = 'FUTSAL' }) => {
 
       {/* 1. Quick Stat Metric Cards */}
       {statsConfig.showQuickMetrics && (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
-          <div className="p-4 rounded-xl bg-[var(--bg-surface)] border-2 border-slate-300 dark:border-slate-800 shadow-sm">
-            <div className="flex items-center justify-between text-[var(--text-muted)]">
-              <span className="text-[11px] font-barlow font-bold uppercase tracking-wider">Total Gol Tercipta</span>
-              <Flame className="w-4 h-4 text-amber-500" />
-            </div>
-            <div className="text-3xl sm:text-4xl font-teko font-bold text-[#1D63B8] dark:text-sky-400 mt-1 leading-none tracking-wide">0</div>
-            <span className="text-[10px] text-[var(--text-muted)] font-mono">0.00 Gol per Laga</span>
-          </div>
-
-          <div className="p-4 rounded-xl bg-[var(--bg-surface)] border-2 border-slate-300 dark:border-slate-800 shadow-sm">
-            <div className="flex items-center justify-between text-[var(--text-muted)]">
-              <span className="text-[11px] font-barlow font-bold uppercase tracking-wider">Laga Selesai</span>
-              <Zap className="w-4 h-4 text-[#1D63B8] dark:text-sky-400" />
-            </div>
-            <div className="text-3xl sm:text-4xl font-teko font-bold text-[var(--text-main)] mt-1 leading-none tracking-wide">0 / 17</div>
-            <span className="text-[10px] text-[var(--text-muted)] font-mono">Menunggu Kickoff Hari-1</span>
-          </div>
-
-          <div className="p-4 rounded-xl bg-[var(--bg-surface)] border-2 border-slate-300 dark:border-slate-800 shadow-sm">
-            <div className="flex items-center justify-between text-[var(--text-muted)]">
-              <span className="text-[11px] font-barlow font-bold uppercase tracking-wider">Kartu Kuning</span>
-              <div className="w-3.5 h-4 bg-amber-400 rounded-2xs" />
-            </div>
-            <div className="text-3xl sm:text-4xl font-teko font-bold text-amber-600 mt-1 leading-none tracking-wide">0</div>
-            <span className="text-[10px] text-[var(--text-muted)] font-mono">0.00 Kartu per Laga</span>
-          </div>
-
-          <div className="p-4 rounded-xl bg-[var(--bg-surface)] border-2 border-slate-300 dark:border-slate-800 shadow-sm">
-            <div className="flex items-center justify-between text-[var(--text-muted)]">
-              <span className="text-[11px] font-barlow font-bold uppercase tracking-wider">Kartu Merah</span>
-              <div className="w-3.5 h-4 bg-red-500 rounded-2xs" />
-            </div>
-            <div className="text-3xl sm:text-4xl font-teko font-bold text-red-600 mt-1 leading-none tracking-wide">0</div>
-            <span className="text-[10px] text-[var(--text-muted)] font-mono">Fair Play Terkendali</span>
-          </div>
-        </div>
+        <StatsQuickMetricsCards
+          totalGoals={totalGoals}
+          avgGoals={avgGoals}
+          completedMatches={completedMatches}
+          totalMatches={totalMatches}
+          totalYellowCards={totalYellowCards}
+          totalRedCards={totalRedCards}
+          avgCards={avgCards}
+        />
       )}
 
       {/* 2. Charts (Side-by-Side or Full width) */}
@@ -128,115 +307,22 @@ export const StatsTab: React.FC<StatsTabProps> = ({ sportCode = 'FUTSAL' }) => {
         <div className={`grid grid-cols-1 ${statsConfig.showTeamGoalsChart && statsConfig.showDisciplineChart ? 'lg:grid-cols-2' : ''} gap-6 items-stretch`}>
           {statsConfig.showTeamGoalsChart && (
             <div className="h-full rounded-xl border-2 border-slate-300 dark:border-slate-800 bg-[var(--bg-surface)] overflow-hidden shadow-sm p-4 sm:p-5">
-              <TeamGoalsBarChart />
+              <TeamGoalsBarChart matches={matches} teams={teams} />
             </div>
           )}
           {statsConfig.showDisciplineChart && (
             <div className="h-full rounded-xl border-2 border-slate-300 dark:border-slate-800 bg-[var(--bg-surface)] overflow-hidden shadow-sm p-4 sm:p-5">
-              <DisciplineFairPlayChart />
+              <DisciplineFairPlayChart matches={matches} teams={teams} athletes={athletes} />
             </div>
           )}
         </div>
       )}
 
       {/* 3. Top Scorers (Piala Sepatu Emas) */}
-      {statsConfig.showTopScorers && (
-        <div className="p-5 sm:p-6 rounded-xl bg-[var(--bg-surface)] border-2 border-slate-300 dark:border-slate-800 space-y-4 shadow-sm">
-          <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800">
-            <div className="flex items-center gap-2">
-              <Trophy className="w-4 h-4 text-amber-500" />
-              <h4 className="font-bebas text-lg sm:text-xl text-[var(--text-main)] uppercase tracking-wide">
-                Peringkat Top Scorer Turnamen &bull; Sepatu Emas
-              </h4>
-            </div>
-            <span className="text-xs font-mono text-[var(--text-muted)]">Top 5 Pencetak Gol</span>
-          </div>
-
-          <div className="divide-y divide-slate-200 dark:divide-slate-800">
-            {topScorers.map((player, idx) => (
-              <div key={player.id} className="py-3 flex items-center justify-between gap-4">
-                <div className="flex items-center gap-3 min-w-0">
-                  <span
-                    className={`w-7 h-7 rounded-lg font-mono font-black text-xs flex items-center justify-center shrink-0 ${
-                      idx === 0
-                        ? 'bg-[var(--color-arena-accent)] text-slate-950 shadow-xs'
-                        : idx === 1
-                        ? 'bg-slate-200 dark:bg-slate-700 text-[var(--text-main)]'
-                        : idx === 2
-                        ? 'bg-amber-700/20 text-amber-800 dark:text-amber-300'
-                        : 'bg-[var(--bg-muted)] text-[var(--text-muted)]'
-                    }`}
-                  >
-                    {idx + 1}
-                  </span>
-
-                  <div className="min-w-0">
-                    <span className="font-barlow font-bold text-sm text-[var(--text-main)] block truncate">
-                      {player.name}
-                    </span>
-                    <span className="text-[11px] text-[var(--text-muted)] block truncate font-sans">
-                      {player.teamName} &bull; {player.schoolName}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="text-right shrink-0">
-                  <span className="font-teko font-bold text-2xl text-[#1D63B8] dark:text-sky-400 tabular-nums leading-none block">
-                    {player.goals}
-                  </span>
-                  <span className="text-[10px] font-barlow font-bold uppercase tracking-wider text-[var(--text-muted)]">
-                    Gol
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+      {statsConfig.showTopScorers && <StatsTopScorersCard topScorers={topScorers} />}
 
       {/* 4. Rekap Pertahanan Terbaik & Clean Sheet */}
-      {statsConfig.showCleanSheet && (
-        <div className="p-5 sm:p-6 rounded-xl bg-[var(--bg-surface)] border-2 border-slate-300 dark:border-slate-800 space-y-4 shadow-sm">
-          <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800">
-            <div className="flex items-center gap-2">
-              <ShieldCheck className="w-4 h-4 text-emerald-500" />
-              <h4 className="font-bebas text-lg sm:text-xl text-[var(--text-main)] uppercase tracking-wide">
-                Rekap Pertahanan Terbaik &bull; Clean Sheet Tim
-              </h4>
-            </div>
-            <span className="text-xs font-mono text-[var(--text-muted)]">Nirbobol Sempurna</span>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-            {initialTeams.slice(0, 4).map((team) => (
-              <div
-                key={team.id}
-                className="p-3.5 rounded-xl bg-[var(--bg-muted)]/70 border border-[var(--border-subtle)] flex items-center justify-between gap-3"
-              >
-                <div className="flex items-center gap-2.5 min-w-0">
-                  <div className="w-8 h-8 rounded-lg bg-[var(--bg-surface)] border border-[var(--border-subtle)] flex items-center justify-center p-1 shrink-0 overflow-hidden">
-                    <img src={team.logoUrl} alt={team.name} className="w-full h-full object-contain" />
-                  </div>
-                  <div className="min-w-0">
-                    <span className="font-barlow font-bold text-xs text-[var(--text-main)] block truncate">
-                      {team.name}
-                    </span>
-                    <span className="text-[10px] text-[var(--text-muted)] truncate block">
-                      Grup {team.group}
-                    </span>
-                  </div>
-                </div>
-                <div className="text-right shrink-0">
-                  <span className="font-mono text-xs font-bold text-emerald-600 dark:text-emerald-400 block">
-                    0 Kebobolan
-                  </span>
-                  <span className="text-[9px] font-mono text-[var(--text-muted)]">100% CS</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+      {statsConfig.showCleanSheet && <StatsCleanSheetCard cleanSheetTeams={cleanSheetTeams} />}
 
       {/* 5. Grafik Distribusi Waktu Gol */}
       {statsConfig.showGoalDistribution && (
@@ -254,19 +340,29 @@ export const StatsTab: React.FC<StatsTabProps> = ({ sportCode = 'FUTSAL' }) => {
             <div className="p-4 rounded-xl bg-[var(--bg-muted)] border border-[var(--border-subtle)] space-y-2">
               <div className="flex justify-between font-barlow font-bold">
                 <span>Babak Pertama (Menit 1 - 10)</span>
-                <span className="font-mono text-sky-500">50%</span>
+                <span className="font-mono text-sky-500">
+                  {goalTimingStats.h1Percent}% ({goalTimingStats.h1Count} Gol)
+                </span>
               </div>
               <div className="w-full h-3 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden">
-                <div className="h-full bg-sky-500 rounded-full w-1/2" />
+                <div
+                  className="h-full bg-sky-500 rounded-full transition-all duration-300"
+                  style={{ width: `${goalTimingStats.h1Percent}%` }}
+                />
               </div>
             </div>
             <div className="p-4 rounded-xl bg-[var(--bg-muted)] border border-[var(--border-subtle)] space-y-2">
               <div className="flex justify-between font-barlow font-bold">
                 <span>Babak Kedua (Menit 11 - 20)</span>
-                <span className="font-mono text-amber-500">50%</span>
+                <span className="font-mono text-amber-500">
+                  {goalTimingStats.h2Percent}% ({goalTimingStats.h2Count} Gol)
+                </span>
               </div>
               <div className="w-full h-3 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden">
-                <div className="h-full bg-amber-500 rounded-full w-1/2" />
+                <div
+                  className="h-full bg-amber-500 rounded-full transition-all duration-300"
+                  style={{ width: `${goalTimingStats.h2Percent}%` }}
+                />
               </div>
             </div>
           </div>

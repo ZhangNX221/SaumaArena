@@ -81,7 +81,7 @@ export const RefereeBottomNav: React.FC<RefereeBottomNavProps> = ({
               <Activity className={`w-5 h-5 mb-0.5 ${activeTab === 'match_center' && !isDrawerOpen ? 'stroke-[2.5]' : ''}`} />
               <span className="absolute -top-0.5 -right-1 w-2 h-2 rounded-full bg-red-500 animate-pulse" />
             </div>
-            <span className="text-[10px] leading-tight font-medium">Skor</span>
+            <span className="text-[10px] leading-tight font-medium truncate max-w-full">Papan Skor</span>
             {activeTab === 'match_center' && !isDrawerOpen && (
               <span className="w-1.5 h-1.5 rounded-full bg-red-500 mt-0.5" />
             )}
@@ -110,7 +110,7 @@ export const RefereeBottomNav: React.FC<RefereeBottomNavProps> = ({
             <span className="text-[10px] leading-tight font-bold mt-0.5">Menu</span>
           </button>
 
-          {/* 4. Laga */}
+          {/* 4. Daftar Laga */}
           <button
             type="button"
             onClick={() => handleSelectTab('duty')}
@@ -121,7 +121,7 @@ export const RefereeBottomNav: React.FC<RefereeBottomNavProps> = ({
             }`}
           >
             <ClipboardList className={`w-5 h-5 mb-0.5 ${isLagaActive && !isDrawerOpen ? 'stroke-[2.5]' : ''}`} />
-            <span className="text-[10px] leading-tight font-medium">Laga</span>
+            <span className="text-[10px] leading-tight font-medium truncate max-w-full">Daftar Laga</span>
             {isLagaActive && !isDrawerOpen && (
               <span className="w-1.5 h-1.5 rounded-full bg-[#1D63B8] dark:bg-sky-400 mt-0.5" />
             )}

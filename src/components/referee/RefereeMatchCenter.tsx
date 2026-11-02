@@ -1,22 +1,24 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { CheckCircle2 } from 'lucide-react';
-import { Match, MatchEvent, SportCode, EventType, MatchLiveTelemetry, RefereeMatchDuty } from '@/types';
+import { CheckCircle2, Radio } from 'lucide-react';
+import { Match, MatchEvent, SportCode, EventType, MatchLiveTelemetry, RefereeMatchDuty, STORAGE_KEY_LIVE_BROADCAST_ACTIVE, AppUser } from '@/types';
 import { RefereeScoringStep } from './steps/RefereeScoringStep';
 import { usePersistentState } from '@/hooks/usePersistentState';
 import { SportRuleSettings, DEFAULT_SPORT_RULES } from '@/config/sportRules';
 import { RefereeMatchCenterHeader } from './RefereeMatchCenterHeader';
+import { LiveBroadcastDisabledBanner } from './LiveBroadcastDisabledBanner';
 import { ResetMatchConfirmModal } from './dialogs/ResetMatchConfirmModal';
 import { SaveMatchConfirmModal } from './dialogs/SaveMatchConfirmModal';
 import { initialMatches } from '@/mocks/tournamentData';
 import { REFEREE_DUTIES } from '@/mocks/multiSportData';
-import { pushMatchToBackend, pushLiveTelemetryToBackend } from '@/lib/apiSync';
+import { pushMatchToBackend, pushLiveTelemetryToBackend, pushLiveBroadcastStatusToBackend } from '@/lib/apiSync';
 import { playTimerStartSound, playTimerEndSound } from '@/utils/arenaSound';
 
 interface RefereeMatchCenterProps {
   currentMatch: Match;
   selectedSport?: SportCode;
+  user?: AppUser;
   onUpdateScore: (team: 'A' | 'B', delta: number) => void;
   onAddIncident: (event: Omit<MatchEvent, 'id'>) => void;
   onFinalizeBAP?: (bapData: { winner: string; notes: string }) => void;
@@ -28,21 +30,46 @@ interface RefereeMatchCenterProps {
 export const RefereeMatchCenter: React.FC<RefereeMatchCenterProps> = ({
   currentMatch: initialMatchProp,
   selectedSport = 'FUTSAL',
+  user,
   onUpdateScore,
   onAddIncident,
+  onFinalizeBAP,
   onSelectMatch: onSelectMatchProp,
   onResetMatch: onResetMatchProp,
 }) => {
   const [matches, setMatches] = usePersistentState<Match[]>('sauma_arena_matches', initialMatches);
   const [, setDuties] = usePersistentState<RefereeMatchDuty[]>('sauma_arena_duties', REFEREE_DUTIES);
   const [telemetryMap, setTelemetryMap] = usePersistentState<Record<string, MatchLiveTelemetry>>('sauma_arena_live_telemetry', {});
-  const [matchRules] = usePersistentState<Record<string, SportRuleSettings>>('sauma_arena_match_rules', DEFAULT_SPORT_RULES);
+  const [matchRules, setMatchRules] = usePersistentState<Record<string, SportRuleSettings>>('sauma_arena_match_rules', DEFAULT_SPORT_RULES);
+  const [isLiveBroadcastActive, setIsLiveBroadcastActive] = usePersistentState<boolean>(
+    STORAGE_KEY_LIVE_BROADCAST_ACTIVE,
+    true
+  );
+
+  useEffect(() => {
+    fetch(`/api/settings?sport=${selectedSport}`)
+      .then((res) => res.json())
+      .then((json) => {
+        if (json.success && json.data?.sportRules) {
+          setMatchRules((prev) => ({ ...prev, ...json.data.sportRules }));
+        }
+      })
+      .catch(() => {});
+  }, [selectedSport, setMatchRules]);
 
   const [selectedMatchId, setSelectedMatchId] = useState<string>(initialMatchProp.id);
   const [isResetConfirmOpen, setIsResetConfirmOpen] = useState<boolean>(false);
   const [isSaveConfirmOpen, setIsSaveConfirmOpen] = useState<boolean>(false);
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [saveToast, setSaveToast] = useState<string | null>(null);
+
+  const handleToggleLiveBroadcast = (active: boolean) => {
+    setIsLiveBroadcastActive(active);
+    pushLiveBroadcastStatusToBackend(active);
+    window.dispatchEvent(new CustomEvent('sauma_state_sync', { detail: { key: STORAGE_KEY_LIVE_BROADCAST_ACTIVE, value: active } }));
+    setSaveToast(active ? '✓ Siaran live skor publik BERHASIL DIAKTIFKAN.' : '✓ Siaran live skor publik BERHASIL DIMATIKAN (Penonton melihat jadwal berikutnya).');
+    setTimeout(() => setSaveToast(null), 4000);
+  };
 
   useEffect(() => {
     setSelectedMatchId(initialMatchProp.id);
@@ -65,13 +92,15 @@ export const RefereeMatchCenter: React.FC<RefereeMatchCenterProps> = ({
   };
 
   const currentTelemetry = telemetryMap[currentMatch.id] || defaultTelemetry;
-  const timerSeconds = currentTelemetry.timerSeconds ?? adminInitialSeconds;
-  const isTimerRunning = currentTelemetry.isTimerRunning ?? false;
-  const currentPeriod = currentTelemetry.currentPeriod ?? 'Babak 1';
-  const foulsA = currentTelemetry.foulsA ?? 0;
-  const foulsB = currentTelemetry.foulsB ?? 0;
-  const timeoutsA = currentTelemetry.timeoutsA ?? 1;
-  const timeoutsB = currentTelemetry.timeoutsB ?? 1;
+  const {
+    timerSeconds = adminInitialSeconds,
+    isTimerRunning = false,
+    currentPeriod = 'Babak 1',
+    foulsA = 0,
+    foulsB = 0,
+    timeoutsA = 1,
+    timeoutsB = 1,
+  } = currentTelemetry;
 
   useEffect(() => {
     let interval: ReturnType<typeof setInterval>;
@@ -106,15 +135,12 @@ export const RefereeMatchCenter: React.FC<RefereeMatchCenterProps> = ({
     prevRefereeSecondsRef.current = timerSeconds;
   }, [timerSeconds]);
 
-  const formatTime = (secs: number) => {
-    const m = Math.floor(secs / 60);
-    const s = secs % 60;
-    return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
-  };
+  const formatTime = (secs: number) =>
+    `${Math.floor(secs / 60).toString().padStart(2, '0')}:${(secs % 60).toString().padStart(2, '0')}`;
 
   const handleSelectMatch = (matchId: string) => {
     setSelectedMatchId(matchId);
-    pushLiveTelemetryToBackend(matchId, telemetryMap[matchId] || defaultTelemetry, { activeMatchId: matchId });
+    pushLiveTelemetryToBackend(matchId, currentTelemetry, { activeMatchId: matchId });
     if (onSelectMatchProp) onSelectMatchProp(matchId);
   };
 
@@ -151,7 +177,7 @@ export const RefereeMatchCenter: React.FC<RefereeMatchCenterProps> = ({
       ...currentMatch,
       status: 'COMPLETED',
       bapSigned: true,
-      bapSigner: 'Ust. Ahmad Syarif, S.Pd',
+      bapSigner: user?.name || currentMatch.bapSigner || 'Ust. Ahmad Syarif, S.Pd',
     };
 
     setMatches((prev) => prev.map((m) => (m.id === currentMatch.id ? completedMatch : m)));
@@ -168,6 +194,14 @@ export const RefereeMatchCenter: React.FC<RefereeMatchCenterProps> = ({
       scoreA: currentMatch.scoreA,
       scoreB: currentMatch.scoreB,
     });
+
+    if (onFinalizeBAP) {
+      const winner = currentMatch.scoreA > currentMatch.scoreB ? currentMatch.teamAId : currentMatch.scoreB > currentMatch.scoreA ? currentMatch.teamBId : 'DRAW';
+      onFinalizeBAP({
+        winner,
+        notes: `Disahkan oleh ${user?.name || 'Wasit Utama'} dengan skor ${currentMatch.scoreA} - ${currentMatch.scoreB}`,
+      });
+    }
 
     setIsSaving(false);
     setSaveToast(`Laga #${currentMatch.matchNumber} (${currentMatch.teamAName} vs ${currentMatch.teamBName}) berhasil disimpan sebagai SELESAI dan BAP resmi telah disahkan!`);
@@ -197,52 +231,21 @@ export const RefereeMatchCenter: React.FC<RefereeMatchCenterProps> = ({
     });
   };
 
-  const handleResetTimer = () => {
-    const nextTelem: MatchLiveTelemetry = {
-      ...(telemetryMap[currentMatch.id] || defaultTelemetry),
-      isTimerRunning: false,
-      timerSeconds: adminInitialSeconds,
-      updatedAt: Date.now(),
-    };
-    setTelemetryMap((prev) => ({ ...prev, [currentMatch.id]: nextTelem }));
-    pushLiveTelemetryToBackend(currentMatch.id, nextTelem);
-  };
-
-  const handleAdjustMinute = (deltaSecs: number) => {
+  const updateTelemetry = (updater: (cur: MatchLiveTelemetry) => Partial<MatchLiveTelemetry>) => {
     const cur = telemetryMap[currentMatch.id] || defaultTelemetry;
-    const nextSecs = Math.max(0, cur.timerSeconds + deltaSecs);
-    const nextTelem: MatchLiveTelemetry = { ...cur, timerSeconds: nextSecs, updatedAt: Date.now() };
+    const nextTelem: MatchLiveTelemetry = { ...cur, ...updater(cur), updatedAt: Date.now() };
     setTelemetryMap((prev) => ({ ...prev, [currentMatch.id]: nextTelem }));
     pushLiveTelemetryToBackend(currentMatch.id, nextTelem);
   };
 
-  const handleChangePeriod = (period: string) => {
-    const nextTelem: MatchLiveTelemetry = { ...(telemetryMap[currentMatch.id] || defaultTelemetry), currentPeriod: period, updatedAt: Date.now() };
-    setTelemetryMap((prev) => ({ ...prev, [currentMatch.id]: nextTelem }));
-    pushLiveTelemetryToBackend(currentMatch.id, nextTelem);
-  };
-
-  const handleUpdateFouls = (team: 'A' | 'B', delta: number) => {
-    const cur = telemetryMap[currentMatch.id] || defaultTelemetry;
-    const count = team === 'A' ? cur.foulsA : cur.foulsB;
-    const nextTelem: MatchLiveTelemetry = { ...cur, [team === 'A' ? 'foulsA' : 'foulsB']: Math.max(0, count + delta), updatedAt: Date.now() };
-    setTelemetryMap((prev) => ({ ...prev, [currentMatch.id]: nextTelem }));
-    pushLiveTelemetryToBackend(currentMatch.id, nextTelem);
-  };
-
-  const handleUpdateTimeouts = (team: 'A' | 'B', delta: number) => {
-    const cur = telemetryMap[currentMatch.id] || defaultTelemetry;
-    const count = team === 'A' ? cur.timeoutsA : cur.timeoutsB;
-    const nextTelem: MatchLiveTelemetry = { ...cur, [team === 'A' ? 'timeoutsA' : 'timeoutsB']: Math.max(0, count + delta), updatedAt: Date.now() };
-    setTelemetryMap((prev) => ({ ...prev, [currentMatch.id]: nextTelem }));
-    pushLiveTelemetryToBackend(currentMatch.id, nextTelem);
-  };
-
-  const handleSetTimerSeconds = (secs: number) => {
-    const nextTelem: MatchLiveTelemetry = { ...(telemetryMap[currentMatch.id] || defaultTelemetry), isTimerRunning: false, timerSeconds: Math.max(0, secs), updatedAt: Date.now() };
-    setTelemetryMap((prev) => ({ ...prev, [currentMatch.id]: nextTelem }));
-    pushLiveTelemetryToBackend(currentMatch.id, nextTelem);
-  };
+  const handleResetTimer = () => updateTelemetry(() => ({ isTimerRunning: false, timerSeconds: adminInitialSeconds }));
+  const handleAdjustMinute = (deltaSecs: number) => updateTelemetry((cur) => ({ timerSeconds: Math.max(0, cur.timerSeconds + deltaSecs) }));
+  const handleChangePeriod = (period: string) => updateTelemetry(() => ({ currentPeriod: period }));
+  const handleUpdateFouls = (team: 'A' | 'B', delta: number) =>
+    updateTelemetry((cur) => ({ [team === 'A' ? 'foulsA' : 'foulsB']: Math.max(0, (team === 'A' ? cur.foulsA : cur.foulsB) + delta) }));
+  const handleUpdateTimeouts = (team: 'A' | 'B', delta: number) =>
+    updateTelemetry((cur) => ({ [team === 'A' ? 'timeoutsA' : 'timeoutsB']: Math.max(0, (team === 'A' ? cur.timeoutsA : cur.timeoutsB) + delta) }));
+  const handleSetTimerSeconds = (secs: number) => updateTelemetry(() => ({ isTimerRunning: false, timerSeconds: Math.max(0, secs) }));
 
   const handleAddIncidentItem = (type: EventType, team: 'A' | 'B', label: string) => {
     const teamId = team === 'A' ? currentMatch.teamAId : currentMatch.teamBId;
@@ -260,17 +263,7 @@ export const RefereeMatchCenter: React.FC<RefereeMatchCenterProps> = ({
     });
   };
 
-  const handleUndoLastEvent = () => {
-    if (!currentMatch.events || currentMatch.events.length === 0) return;
-    const lastEvent = currentMatch.events[0];
-    const isGoal = lastEvent.type === 'GOAL';
-    const isGoalA = isGoal && (lastEvent.teamId === currentMatch.teamAId || (lastEvent.playerName || '').toLowerCase().includes('tim a'));
-    const isGoalB = isGoal && !isGoalA;
-
-    const newScoreA = isGoalA ? Math.max(0, currentMatch.scoreA - 1) : currentMatch.scoreA;
-    const newScoreB = isGoalB ? Math.max(0, currentMatch.scoreB - 1) : currentMatch.scoreB;
-    const newEvents = currentMatch.events.slice(1);
-
+  const applyMatchScoreAndEvents = (newScoreA: number, newScoreB: number, newEvents: MatchEvent[]) => {
     const updatedMatch: Match = {
       ...currentMatch,
       scoreA: newScoreA,
@@ -278,7 +271,6 @@ export const RefereeMatchCenter: React.FC<RefereeMatchCenterProps> = ({
       events: newEvents,
       status: 'LIVE',
     };
-
     setMatches((prev) => prev.map((m) => (m.id === currentMatch.id ? updatedMatch : m)));
     pushMatchToBackend(updatedMatch, telemetryMap[currentMatch.id]);
     pushLiveTelemetryToBackend(currentMatch.id, telemetryMap[currentMatch.id] || defaultTelemetry, {
@@ -286,6 +278,20 @@ export const RefereeMatchCenter: React.FC<RefereeMatchCenterProps> = ({
       scoreB: newScoreB,
       status: 'LIVE',
     });
+  };
+
+  const handleUndoLastEvent = () => {
+    if (!currentMatch.events || currentMatch.events.length === 0) return;
+    const lastEvent = currentMatch.events[0];
+    const isGoal = lastEvent.type === 'GOAL';
+    const isGoalA = isGoal && (lastEvent.teamId === currentMatch.teamAId || (lastEvent.playerName || '').toLowerCase().includes('tim a'));
+    const isGoalB = isGoal && !isGoalA;
+
+    applyMatchScoreAndEvents(
+      isGoalA ? Math.max(0, currentMatch.scoreA - 1) : currentMatch.scoreA,
+      isGoalB ? Math.max(0, currentMatch.scoreB - 1) : currentMatch.scoreB,
+      currentMatch.events.slice(1)
+    );
   };
 
   const handleUndoTeamGoal = (team: 'A' | 'B', eventId?: string) => {
@@ -306,25 +312,11 @@ export const RefereeMatchCenter: React.FC<RefereeMatchCenterProps> = ({
       return false;
     });
 
-    const newEvents = idx !== -1 ? events.filter((_, i) => i !== idx) : events;
-    const newScoreA = team === 'A' ? Math.max(0, currentMatch.scoreA - 1) : currentMatch.scoreA;
-    const newScoreB = team === 'B' ? Math.max(0, currentMatch.scoreB - 1) : currentMatch.scoreB;
-
-    const updatedMatch: Match = {
-      ...currentMatch,
-      scoreA: newScoreA,
-      scoreB: newScoreB,
-      events: newEvents,
-      status: 'LIVE',
-    };
-
-    setMatches((prev) => prev.map((m) => (m.id === currentMatch.id ? updatedMatch : m)));
-    pushMatchToBackend(updatedMatch, telemetryMap[currentMatch.id]);
-    pushLiveTelemetryToBackend(currentMatch.id, telemetryMap[currentMatch.id] || defaultTelemetry, {
-      scoreA: newScoreA,
-      scoreB: newScoreB,
-      status: 'LIVE',
-    });
+    applyMatchScoreAndEvents(
+      team === 'A' ? Math.max(0, currentMatch.scoreA - 1) : currentMatch.scoreA,
+      team === 'B' ? Math.max(0, currentMatch.scoreB - 1) : currentMatch.scoreB,
+      idx !== -1 ? events.filter((_, i) => i !== idx) : events
+    );
   };
 
   return (
@@ -336,13 +328,20 @@ export const RefereeMatchCenter: React.FC<RefereeMatchCenterProps> = ({
         </div>
       )}
 
-      {/* 1. Header Card Seragam Meja Wasit dengan Tombol Simpan & Reset Laga */}
+      {/* 1. Header Card Seragam Meja Wasit dengan Tombol Simpan, Reset Laga & Sakelar Live Skor */}
       <RefereeMatchCenterHeader
         currentMatch={currentMatch}
         onResetMatch={() => setIsResetConfirmOpen(true)}
         onSaveMatch={() => setIsSaveConfirmOpen(true)}
         isSaving={isSaving}
+        isLiveBroadcastActive={isLiveBroadcastActive}
+        onToggleLiveBroadcast={handleToggleLiveBroadcast}
       />
+
+      {/* Banner Pemberitahuan saat Siaran Live Skor Dinonaktifkan */}
+      {!isLiveBroadcastActive && (
+        <LiveBroadcastDisabledBanner onEnable={() => handleToggleLiveBroadcast(true)} />
+      )}
 
       {/* 2. Dek Konsol Skor & Stopwatch Lengkap */}
       <RefereeScoringStep

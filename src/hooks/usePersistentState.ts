@@ -11,7 +11,19 @@ export function usePersistentState<T>(
   key: string,
   defaultValue: T
 ): [T, React.Dispatch<React.SetStateAction<T>>] {
-  const [state, setState] = useState<T>(defaultValue);
+  const [state, setState] = useState<T>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem(key);
+        if (saved !== null) {
+          return JSON.parse(saved);
+        }
+      } catch (err) {
+        console.warn(`[usePersistentState] Gagal memuat data "${key}":`, err);
+      }
+    }
+    return defaultValue;
+  });
   const hookInstanceId = useRef<string>(Math.random().toString(36).substring(2, 9));
 
   useEffect(() => {

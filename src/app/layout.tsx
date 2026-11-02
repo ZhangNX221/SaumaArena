@@ -30,7 +30,7 @@ const barlowCondensed = Barlow_Condensed({
 });
 
 export const metadata: Metadata = {
-  title: 'Sauma Arena — MMFC I 2026 MTsN 3 Blitar',
+  title: 'Sauma Arena | MMFC I 2026 MTsN 3 Blitar',
   description:
     'Sistem manajemen turnamen terpadu dan match center resmi Milad Matsanega Futsal Competition I (MMFC I). Papan klasemen, live score real-time, juknis turnamen, dan penilaian best supporter madrasah.',
   keywords: [

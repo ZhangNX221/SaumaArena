@@ -133,7 +133,7 @@ export const SupporterScoringForm: React.FC<SupporterScoringFormProps> = ({
                 const code = getTeamCode(t, idx);
                 return (
                   <option key={t.id} value={t.id}>
-                    [{code}] {t.name} — {t.schoolName} ({t.city})
+                    [{code}] {t.name} ({t.schoolName}, {t.city})
                   </option>
                 );
               })}
@@ -253,7 +253,7 @@ export const SupporterScoringForm: React.FC<SupporterScoringFormProps> = ({
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             placeholder="Catatan tambahan mengenai perilaku suporter, koreografi, atau kejadian di tribun..."
-            className="w-full px-3.5 py-2.5 rounded-xl bg-[var(--bg-muted)] border border-[var(--border-subtle)] text-xs text-[var(--text-main)] placeholder-[var(--text-muted)] focus:outline-none resize-none"
+            className="w-full px-3.5 py-2.5 rounded-xl bg-[var(--bg-muted)] border border-[var(--border-subtle)] text-xs text-[var(--text-main)] placeholder-[var(--text-muted)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-arena-primary)] resize-none"
           />
         </div>
       </div>

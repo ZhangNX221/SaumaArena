@@ -4,14 +4,8 @@ import React, { useState } from 'react';
 import { X } from 'lucide-react';
 import { ModalPortal } from '@/components/common/ModalPortal';
 import { initialTeams } from '@/mocks/tournamentData';
-import { Player } from '@/types';
-
-export interface FlattenedAthlete extends Player {
-  teamId: string;
-  teamName: string;
-  schoolName?: string;
-  group?: string;
-}
+import { FlattenedAthlete } from '@/types';
+export type { FlattenedAthlete };
 
 interface AthleteEditModalProps {
   athlete: FlattenedAthlete;
@@ -23,10 +17,12 @@ interface AthleteEditModalProps {
     targetTeamId: string;
     number: number;
     position: string;
+    athleteCode: string;
   }) => void;
 }
 
 export const AthleteEditModal: React.FC<AthleteEditModalProps> = ({ athlete, onClose, onSave }) => {
+  const [editAthleteCode, setEditAthleteCode] = useState(athlete.athleteCode || 'ATL-001');
   const [editName, setEditName] = useState(athlete.name);
   const [editTeamId, setEditTeamId] = useState(athlete.teamId);
   const [editNumber, setEditNumber] = useState(athlete.number);
@@ -41,6 +37,7 @@ export const AthleteEditModal: React.FC<AthleteEditModalProps> = ({ athlete, onC
       targetTeamId: editTeamId,
       number: editNumber,
       position: editPosition.trim() || athlete.position,
+      athleteCode: editAthleteCode.trim() || athlete.athleteCode || 'ATL-001',
     });
   };
 
@@ -60,20 +57,38 @@ export const AthleteEditModal: React.FC<AthleteEditModalProps> = ({ athlete, onC
                 Edit Data Pemain
               </h3>
               <p className="text-xs text-[var(--text-muted)]">
-                Perbarui nama lengkap, tim kontingen, nomor punggung, dan posisi bermain.
+                Perbarui ID khusus atlet, nama lengkap, tim, nomor punggung, dan posisi.
               </p>
             </div>
             <button
               type="button"
               onClick={onClose}
-              className="p-1 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-main)]"
+              className="p-1 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-main)] cursor-pointer"
             >
               <X className="w-4 h-4" />
             </button>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-3.5 text-xs">
-            {/* 1. Form Edit Nama Pemain */}
+            {/* 1. Form Edit ID Khusus Atlet */}
+            <div>
+              <label className="font-barlow font-bold uppercase tracking-wider text-[11px] text-[var(--text-main)] block mb-1">
+                ID Khusus Pemain Atlet
+              </label>
+              <input
+                type="text"
+                required
+                value={editAthleteCode}
+                onChange={(e) => setEditAthleteCode(e.target.value.toUpperCase())}
+                placeholder="Contoh: ATL-001"
+                className="w-full px-3 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-muted)] text-[var(--color-arena-primary)] font-mono font-bold focus:outline-none focus:border-[var(--color-arena-primary)]"
+              />
+              <span className="text-[10px] text-[var(--text-muted)] font-sans mt-0.5 block">
+                Identitas unik resmi atlet untuk turnamen dan pencatatan statistik juri.
+              </span>
+            </div>
+
+            {/* 2. Form Edit Nama Pemain */}
             <div>
               <label className="font-barlow font-bold uppercase tracking-wider text-[11px] text-[var(--text-main)] block mb-1">
                 Nama Lengkap Atlet / Pemain
@@ -88,7 +103,7 @@ export const AthleteEditModal: React.FC<AthleteEditModalProps> = ({ athlete, onC
               />
             </div>
 
-            {/* 2. Form Edit Tim & Sekolah */}
+            {/* 3. Form Edit Tim & Sekolah */}
             <div>
               <label className="font-barlow font-bold uppercase tracking-wider text-[11px] text-[var(--text-main)] block mb-1">
                 Kontingen Tim &amp; Sekolah
@@ -107,7 +122,7 @@ export const AthleteEditModal: React.FC<AthleteEditModalProps> = ({ athlete, onC
             </div>
 
             <div className="grid grid-cols-2 gap-3">
-              {/* 3. Nomor Punggung */}
+              {/* 4. Nomor Punggung */}
               <div>
                 <label className="font-barlow font-bold uppercase tracking-wider text-[11px] text-[var(--text-main)] block mb-1">
                   Nomor Punggung (Jersey)
@@ -123,7 +138,7 @@ export const AthleteEditModal: React.FC<AthleteEditModalProps> = ({ athlete, onC
                 />
               </div>
 
-              {/* 4. Posisi Bermain */}
+              {/* 5. Posisi Bermain */}
               <div>
                 <label className="font-barlow font-bold uppercase tracking-wider text-[11px] text-[var(--text-main)] block mb-1">
                   Posisi Bermain
@@ -143,13 +158,13 @@ export const AthleteEditModal: React.FC<AthleteEditModalProps> = ({ athlete, onC
               <button
                 type="button"
                 onClick={onClose}
-                className="btn-tactile px-4 py-2 rounded-xl border border-[var(--border-subtle)] font-barlow font-bold uppercase tracking-wider text-xs"
+                className="btn-tactile px-4 py-2 rounded-xl border border-[var(--border-subtle)] font-barlow font-bold uppercase tracking-wider text-xs cursor-pointer"
               >
                 Batal
               </button>
               <button
                 type="submit"
-                className="btn-tactile px-4 py-2 rounded-xl bg-[var(--color-arena-primary)] text-white font-barlow font-bold uppercase tracking-wider text-xs"
+                className="btn-tactile px-4 py-2 rounded-xl bg-[var(--color-arena-primary)] text-white font-barlow font-bold uppercase tracking-wider text-xs cursor-pointer shadow-xs"
               >
                 Simpan Perubahan
               </button>
@@ -160,4 +175,3 @@ export const AthleteEditModal: React.FC<AthleteEditModalProps> = ({ athlete, onC
     </ModalPortal>
   );
 };
-

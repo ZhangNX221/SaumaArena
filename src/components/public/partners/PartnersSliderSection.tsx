@@ -53,7 +53,7 @@ export const PartnersSliderSection: React.FC<PartnersSliderSectionProps> = ({ pa
     setCurrentIndex((prev) => (prev > 0 ? prev - 1 : totalItems - 1));
   }, [shouldSlide, totalItems]);
 
-  // Seamless infinite loop on transition end
+  // Reset index to start after slide animation ends
   const handleTransitionEnd = () => {
     if (currentIndex >= totalItems) {
       setIsTransitioning(false);

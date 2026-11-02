@@ -52,7 +52,7 @@ export const DrawingBracketTab: React.FC = () => {
     ? gf.teamB.name
     : 'MENUNGGU PEMENANG LAGA FINAL (P17)';
 
-  // Helper ganti tim pada slot laga
+  // Perbarui tim pada slot bagan laga
   const handleTeamChange = (
     stage: BracketStageKey,
     matchId: string,
@@ -79,7 +79,7 @@ export const DrawingBracketTab: React.FC = () => {
     }
   };
 
-  // Helper ganti skor
+  // Perbarui skor pertandingan
   const handleScoreChange = (
     stage: BracketStageKey,
     matchId: string,
@@ -102,7 +102,7 @@ export const DrawingBracketTab: React.FC = () => {
     }
   };
 
-  // Helper tandai pemenang laga & otomatis usulkan ke babak berikutnya
+  // Tetapkan pemenang laga dan jadwalkan ke babak berikutnya
   const handleSetWinner = (
     stage: BracketStageKey,
     matchId: string,
