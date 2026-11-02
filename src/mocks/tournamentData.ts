@@ -109,16 +109,16 @@ const createMatch = (
 
 export const initialMatches: Match[] = [
   // --- HARI PERTAMA (H1): Senin, 2 November 2026 ---
-  createMatch('match-1', 1, 'GROUP', 'A', 'team-sdi-kardina', 'SDI KARDINA MASSA', 'team-min7-blitar', 'MIN 7 BLITAR', 'Senin, 2 Nov 2026 • 07:30 - 08:00 WIB (P1 • A1 vs A2)'),
-  createMatch('match-2', 2, 'GROUP', 'B', 'team-sdn1-srengat', 'UPT SDN 1 SRENGAT', 'team-min14-blitar', 'MIN 14 BLITAR', 'Senin, 2 Nov 2026 • 08:00 - 08:30 WIB (P2 • B1 vs B2)'),
-  createMatch('match-3', 3, 'GROUP', 'C', 'team-min2-blitar', 'MIN 2 BLITAR', 'team-mi-wahidhasyim', 'MI WAHID HASYIM BAKUNG', 'Senin, 2 Nov 2026 • 08:30 - 09:00 WIB (P3 • C1 vs C2)'),
-  createMatch('match-4', 4, 'GROUP', 'D', 'team-min5-tulungagung', 'MIN 5 TULUNGAGUNG', 'team-mi-ploso', 'MI PLOSO KEDIRI', 'Senin, 2 Nov 2026 • 09:00 - 09:30 WIB (P4 • D4 vs D1)'),
-  createMatch('match-5', 5, 'GROUP', 'A', 'team-min8-blitar', 'MIN 8 BLITAR', 'team-sdi-kardina', 'SDI KARDINA MASSA', 'Senin, 2 Nov 2026 • 09:30 - 10:00 WIB (P5 • A3 vs A1)'),
-  createMatch('match-6', 6, 'GROUP', 'B', 'team-min14-blitar', 'MIN 14 BLITAR', 'team-mi-mambaululum', 'MI MAMBAUL ULUM BUNTARAN TULUNGAGUNG', 'Senin, 2 Nov 2026 • 10:00 - 10:30 WIB (P6 • B2 vs B3)'),
-  createMatch('match-7', 7, 'GROUP', 'C', 'team-mi-wahidhasyim', 'MI WAHID HASYIM BAKUNG', 'team-min13-c', 'MIN 13 BLITAR B', 'Senin, 2 Nov 2026 • 12:00 - 12:30 WIB (P7 • C2 vs C3)'),
-  createMatch('match-8', 8, 'GROUP', 'D', 'team-mi-yabunaya', 'MI YAA BUNAYYA SRENGAT', 'team-min5-tulungagung', 'MIN 5 TULUNGAGUNG', 'Senin, 2 Nov 2026 • 12:30 - 13:00 WIB (P8 • D3 vs D4)'),
-  createMatch('match-9', 9, 'GROUP', 'D', 'team-mi-ploso', 'MI PLOSO KEDIRI', 'team-mi-darussalam', 'MI UNGGULAN DARUSSALAM', 'Senin, 2 Nov 2026 • 13:00 - 13:30 WIB (P9 • D1 vs D2)'),
-  createMatch('match-10', 10, 'GROUP', 'B', 'team-mi-mambaululum', 'MI MAMBAUL ULUM BUNTARAN TULUNGAGUNG', 'team-min13-b', 'MIN 13 BLITAR A', 'Senin, 2 Nov 2026 • 13:30 - 14:00 WIB (P10 • B3 vs B4)'),
+  createMatch('match-1', 1, 'GROUP', 'A', 'team-sdi-kardina', 'SDI KARDINA MASSA', 'team-min7-blitar', 'MIN 7 BLITAR', 'Senin, 2 Nov 2026 • 07:30 - 08:00 WIB (P1 • A1 vs A2)', { scoreA: 0, scoreB: 2, status: 'COMPLETED', bapSigned: true }),
+  createMatch('match-2', 2, 'GROUP', 'B', 'team-sdn1-srengat', 'UPT SDN 1 SRENGAT', 'team-min14-blitar', 'MIN 14 BLITAR', 'Senin, 2 Nov 2026 • 08:00 - 08:30 WIB (P2 • B1 vs B2)', { scoreA: 4, scoreB: 0, status: 'COMPLETED', bapSigned: true }),
+  createMatch('match-3', 3, 'GROUP', 'C', 'team-min2-blitar', 'MIN 2 BLITAR', 'team-mi-wahidhasyim', 'MI WAHID HASYIM BAKUNG', 'Senin, 2 Nov 2026 • 08:30 - 09:00 WIB (P3 • C1 vs C2)', { scoreA: 3, scoreB: 5, status: 'COMPLETED', bapSigned: true }),
+  createMatch('match-4', 4, 'GROUP', 'D', 'team-min5-tulungagung', 'MIN 5 TULUNGAGUNG', 'team-mi-ploso', 'MI PLOSO KEDIRI', 'Senin, 2 Nov 2026 • 09:00 - 09:30 WIB (P4 • D4 vs D1)', { scoreA: 4, scoreB: 0, status: 'COMPLETED', bapSigned: true }),
+  createMatch('match-5', 5, 'GROUP', 'A', 'team-min8-blitar', 'MIN 8 BLITAR', 'team-sdi-kardina', 'SDI KARDINA MASSA', 'Senin, 2 Nov 2026 • 09:30 - 10:00 WIB (P5 • A3 vs A1)', { scoreA: 2, scoreB: 0, status: 'COMPLETED', bapSigned: true }),
+  createMatch('match-6', 6, 'GROUP', 'B', 'team-min14-blitar', 'MIN 14 BLITAR', 'team-mi-mambaululum', 'MI MAMBAUL ULUM BUNTARAN TULUNGAGUNG', 'Senin, 2 Nov 2026 • 10:00 - 10:30 WIB (P6 • B2 vs B3)', { scoreA: 0, scoreB: 5, status: 'COMPLETED', bapSigned: true }),
+  createMatch('match-7', 7, 'GROUP', 'C', 'team-mi-wahidhasyim', 'MI WAHID HASYIM BAKUNG', 'team-min13-c', 'MIN 13 BLITAR B', 'Senin, 2 Nov 2026 • 12:00 - 12:30 WIB (P7 • C2 vs C3)', { scoreA: 0, scoreB: 1, status: 'COMPLETED', bapSigned: true }),
+  createMatch('match-8', 8, 'GROUP', 'D', 'team-mi-yabunaya', 'MI YAA BUNAYYA SRENGAT', 'team-min5-tulungagung', 'MIN 5 TULUNGAGUNG', 'Senin, 2 Nov 2026 • 12:30 - 13:00 WIB (P8 • D3 vs D4)', { scoreA: 1, scoreB: 1, status: 'COMPLETED', bapSigned: true }),
+  createMatch('match-9', 9, 'GROUP', 'D', 'team-mi-ploso', 'MI PLOSO KEDIRI', 'team-mi-darussalam', 'MI UNGGULAN DARUSSALAM', 'Senin, 2 Nov 2026 • 13:00 - 13:30 WIB (P9 • D1 vs D2)', { scoreA: 1, scoreB: 7, status: 'COMPLETED', bapSigned: true }),
+  createMatch('match-10', 10, 'GROUP', 'B', 'team-mi-mambaululum', 'MI MAMBAUL ULUM BUNTARAN TULUNGAGUNG', 'team-min13-b', 'MIN 13 BLITAR A', 'Senin, 2 Nov 2026 • 13:30 - 14:00 WIB (P10 • B3 vs B4)', { scoreA: 0, scoreB: 0, status: 'LIVE' }),
 
   // --- HARI KEDUA (H2): Selasa, 3 November 2026 ---
   createMatch('match-11', 11, 'GROUP', 'A', 'team-min7-blitar', 'MIN 7 BLITAR', 'team-min8-blitar', 'MIN 8 BLITAR', 'Selasa, 3 Nov 2026 • 07:30 - 08:00 WIB (P11 • A2 vs A3)'),

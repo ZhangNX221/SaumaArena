@@ -64,7 +64,7 @@ export async function GET(request: Request) {
     let matchSql = `
       SELECT id, home_team_id, away_team_id, result
       FROM matches
-      WHERE competition_id = ? AND status = 'verified'
+      WHERE competition_id = ? AND status IN ('verified', 'finished')
     `;
     const matchParams: unknown[] = [competitionId];
 
@@ -100,15 +100,19 @@ export async function GET(request: Request) {
       const res = JSON.parse(m.result || '{}');
       const homeCards = cardMap.get(`${m.id}_${m.home_team_id}`);
       const awayCards = cardMap.get(`${m.id}_${m.away_team_id}`);
+      const scoreHome = Number(res.scoreHome ?? 0);
+      const scoreAway = Number(res.scoreAway ?? 0);
+      const pointsHome = Number(res.pointsHome ?? (scoreHome > scoreAway ? 3 : scoreHome === scoreAway ? 1 : 0));
+      const pointsAway = Number(res.pointsAway ?? (scoreAway > scoreHome ? 3 : scoreAway === scoreHome ? 1 : 0));
 
       return {
         id: m.id,
         homeTeamId: m.home_team_id,
         awayTeamId: m.away_team_id,
-        scoreHome: Number(res.scoreHome ?? 0),
-        scoreAway: Number(res.scoreAway ?? 0),
-        pointsHome: Number(res.pointsHome ?? 0),
-        pointsAway: Number(res.pointsAway ?? 0),
+        scoreHome,
+        scoreAway,
+        pointsHome,
+        pointsAway,
         homeYellowCards: homeCards?.yellows || 0,
         homeRedCards: homeCards?.reds || 0,
         awayYellowCards: awayCards?.yellows || 0,
