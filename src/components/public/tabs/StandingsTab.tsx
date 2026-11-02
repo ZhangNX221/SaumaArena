@@ -158,14 +158,14 @@ export const StandingsTab: React.FC<StandingsTabProps> = ({ sportCode = 'FUTSAL'
                   <tr className="border-b border-slate-200 dark:border-slate-800 text-[10px] font-mono text-[var(--text-muted)] bg-[var(--bg-muted)]/50">
                     <th className="py-2 px-3 w-8 text-center" title="Peringkat">#</th>
                     <th className="py-2 px-3">Tim / Madrasah</th>
-                    <th className="py-2 px-2 text-center w-8" title="Main / Pertandingan Dimainkan">MN</th>
-                    <th className="py-2 px-2 text-center w-8 text-emerald-600 dark:text-emerald-400" title="Menang (+3 Poin)">M</th>
-                    <th className="py-2 px-2 text-center w-8 text-amber-600 dark:text-amber-400" title="Seri (+1 Poin)">S</th>
-                    <th className="py-2 px-2 text-center w-8 text-red-600 dark:text-red-400" title="Kalah (0 Poin)">K</th>
-                    <th className="py-2 px-2 text-center w-10" title="Gol Dicetak - Gol Kebobolan">GM-GK</th>
+                    <th className="py-2 px-2 text-center w-8" title="Berapa kali Main">MN</th>
+                    <th className="py-2 px-2 text-center w-8 text-emerald-600 dark:text-emerald-400" title="Poin Menang (+3)">M</th>
+                    <th className="py-2 px-2 text-center w-8 text-amber-600 dark:text-amber-400" title="Seri">S</th>
+                    <th className="py-2 px-2 text-center w-8 text-red-600 dark:text-red-400" title="Kalah">K</th>
+                    <th className="py-2 px-2 text-center w-10" title="Gol Memasukkan - Gol Kemasukan">GM-GK</th>
                     <th className="py-2 px-2 text-center w-8" title="Selisih Gol (GM - GK)">SG</th>
-                    <th className="py-2 px-2 text-center w-8 text-amber-600 dark:text-amber-400 font-bold" title="Point Supporter">PS</th>
-                    <th className="py-2 px-3 text-center w-10 font-bold text-[#1D63B8] dark:text-sky-400" title="Total Poin Klasemen">PTS</th>
+                    <th className="py-2 px-2 text-center w-8 text-amber-600 dark:text-amber-400 font-bold" title="Point Supporter (+1)">PS</th>
+                    <th className="py-2 px-3 text-center w-10 font-bold text-[#1D63B8] dark:text-sky-400" title="Total Poin (Menang + PS)">PTS</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60 font-sans">
@@ -228,12 +228,15 @@ export const StandingsTab: React.FC<StandingsTabProps> = ({ sportCode = 'FUTSAL'
             </div>
 
             {/* Table Footer */}
-            <div className="px-4 py-2 bg-slate-50 dark:bg-slate-900/50 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between text-[10px] text-[var(--text-muted)] font-mono">
+            <div className="px-4 py-2 bg-slate-50 dark:bg-slate-900/50 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between flex-wrap gap-2 text-[10px] text-[var(--text-muted)] font-mono">
               <div className="flex items-center gap-1.5">
                 <span className="w-2 h-2 rounded-full bg-emerald-500" />
                 <span>Zona Lolos Semifinal (Juara Grup / Top 1)</span>
               </div>
-              <span>MN: Main • M: Menang • S: Seri • K: Kalah • PS: Point Supporter</span>
+              <div className="flex items-center gap-2 flex-wrap">
+                <span>MN: Berapa kali Main • M: Poin Menang (+3) • S: Seri • K: Kalah • PS: Point Supporter (+1)</span>
+                <span className="font-bold text-[#1D63B8] dark:text-sky-400">PTS = Menang + PS</span>
+              </div>
             </div>
           </div>
         ))}

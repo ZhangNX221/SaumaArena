@@ -102,8 +102,8 @@ export async function GET(request: Request) {
       const awayCards = cardMap.get(`${m.id}_${m.away_team_id}`);
       const scoreHome = Number(res.scoreHome ?? 0);
       const scoreAway = Number(res.scoreAway ?? 0);
-      const pointsHome = Number(res.pointsHome ?? (scoreHome > scoreAway ? 3 : scoreHome === scoreAway ? 1 : 0));
-      const pointsAway = Number(res.pointsAway ?? (scoreAway > scoreHome ? 3 : scoreAway === scoreHome ? 1 : 0));
+      const pointsHome = Number(res.pointsHome ?? (scoreHome > scoreAway ? 3 : 0));
+      const pointsAway = Number(res.pointsAway ?? (scoreAway > scoreHome ? 3 : 0));
 
       return {
         id: m.id,

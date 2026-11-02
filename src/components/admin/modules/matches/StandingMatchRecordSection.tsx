@@ -106,7 +106,7 @@ export const StandingMatchRecordSection: React.FC<StandingMatchRecordSectionProp
                 <Plus className="w-3.5 h-3.5" />
               </button>
             </div>
-            <span className="text-[9px] text-amber-600/80 font-mono">+1 Poin</span>
+            <span className="text-[9px] text-[var(--text-muted)] font-mono">0 Poin</span>
           </div>
 
           {/* Kalah */}

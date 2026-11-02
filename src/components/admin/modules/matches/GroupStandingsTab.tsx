@@ -147,7 +147,7 @@ export const GroupStandingsTab: React.FC = () => {
       : formData.won + formData.drawn + formData.lost;
     const pts = Number.isFinite(formData.points)
       ? Number(formData.points)
-      : formData.won * 3 + formData.drawn;
+      : formData.won * 3 + (Number(formData.supporterPoints) || 0);
 
     let updatedList: StandingRow[] = [];
 

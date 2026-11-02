@@ -134,9 +134,10 @@ export function calculateStandings(
     away.fairPlayScore -= (m.awayYellowCards || 0) * 1 + (m.awayRedCards || 0) * 3;
   }
 
-  // Calculate goal differences
+  // Calculate goal differences & total points (Hanya Poin Menang +3 dan Point Supporter +1 yang dijumlahkan)
   for (const row of map.values()) {
     row.goalDifference = row.goalsFor - row.goalsAgainst;
+    row.points = row.won * 3 + (row.supporterPoints || 0);
   }
 
   const rows = Array.from(map.values());

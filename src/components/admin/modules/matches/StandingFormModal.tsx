@@ -63,7 +63,7 @@ export const StandingFormModal: React.FC<StandingFormModalProps> = ({
   const autoPlayed = Math.max(0, won + drawn + lost);
   const finalPlayed = isManualPlayed ? manualPlayed : autoPlayed;
 
-  const autoPoints = Math.max(0, won * 3 + drawn * 1);
+  const autoPoints = Math.max(0, won * 3 + supporterPoints * 1);
   const finalPoints = isManualPoints ? manualPoints : autoPoints;
 
   const goalDifference = goalsFor - goalsAgainst;
@@ -80,8 +80,8 @@ export const StandingFormModal: React.FC<StandingFormModalProps> = ({
       setSupporterPoints(editingRow.supporterPoints ?? 0);
       setFairPlayScore(editingRow.fairPlayScore ?? 10);
 
-      // Cek apakah poin atau main sebelumnya tidak cocok dengan rumus standar
-      const expectedPts = (editingRow.won || 0) * 3 + (editingRow.drawn || 0);
+      // Cek apakah poin atau main sebelumnya tidak cocok dengan rumus standar (Menang * 3 + PS * 1)
+      const expectedPts = (editingRow.won || 0) * 3 + (editingRow.supporterPoints || 0) * 1;
       if (editingRow.points !== undefined && editingRow.points !== expectedPts) {
         setIsManualPoints(true);
         setManualPoints(editingRow.points);
@@ -106,7 +106,7 @@ export const StandingFormModal: React.FC<StandingFormModalProps> = ({
       setLost(0);
       setGoalsFor(0);
       setGoalsAgainst(0);
-      setSupporterPoints(100);
+      setSupporterPoints(0);
       setFairPlayScore(10);
       setIsManualPoints(false);
       setManualPoints(0);
@@ -286,7 +286,7 @@ export const StandingFormModal: React.FC<StandingFormModalProps> = ({
                   <span className="text-[10px] text-[var(--text-muted)] font-mono">
                     {isManualPoints
                       ? 'Nilai ditentukan manual (koreksi komite)'
-                      : `(${won} Menang × 3) + (${drawn} Seri × 1) = ${finalPoints} Poin`}
+                      : `(${won} Menang × 3) + (${supporterPoints} PS × 1) = ${finalPoints} Poin`}
                   </span>
                 </div>
                 <div className="text-right">

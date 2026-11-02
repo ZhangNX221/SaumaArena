@@ -258,23 +258,28 @@ export function recalculateGroupStandingsFromMatches(
 
       if (match.scoreA > match.scoreB) {
         rowA.won += 1;
-        rowA.points += 3;
         rowB.lost += 1;
       } else if (match.scoreA < match.scoreB) {
         rowB.won += 1;
-        rowB.points += 3;
         rowA.lost += 1;
       } else {
         rowA.drawn += 1;
         rowB.drawn += 1;
-        rowA.points += 1;
-        rowB.points += 1;
       }
 
       rowA.goalDifference = rowA.goalsFor - rowA.goalsAgainst;
       rowB.goalDifference = rowB.goalsFor - rowB.goalsAgainst;
     }
   }
+
+  // Hitung poin akhir: Hanya Poin Menang (+3) dan Point Supporter (+1) yang dijumlahkan
+  const applyFinalPoints = (r: StandingRow) => {
+    r.points = r.won * 3 + (r.supporterPoints || 0);
+  };
+  result.A.forEach(applyFinalPoints);
+  result.B.forEach(applyFinalPoints);
+  result.C.forEach(applyFinalPoints);
+  result.D.forEach(applyFinalPoints);
 
   // Sort each group: Points -> Goal Difference -> Goals For -> Supporter Points
   const sortFn = (a: StandingRow, b: StandingRow) => {
