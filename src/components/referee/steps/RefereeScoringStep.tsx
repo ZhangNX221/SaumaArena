@@ -34,6 +34,7 @@ interface RefereeScoringStepProps {
   matches?: Match[];
   onSelectMatch?: (matchId: string) => void;
   onResetMatch?: () => void;
+  onSaveMatch?: () => void;
 }
 
 export const RefereeScoringStep: React.FC<RefereeScoringStepProps> = ({
@@ -64,6 +65,7 @@ export const RefereeScoringStep: React.FC<RefereeScoringStepProps> = ({
   matches,
   onSelectMatch,
   onResetMatch,
+  onSaveMatch,
 }) => {
   // Model skor ditentukan otomatis berdasarkan cabor penugasan juri
   const sport = selectedSport || 'FUTSAL';
@@ -109,6 +111,7 @@ export const RefereeScoringStep: React.FC<RefereeScoringStepProps> = ({
           matches={matches}
           onSelectMatch={onSelectMatch}
           onResetMatch={onResetMatch}
+          onSaveMatch={onSaveMatch}
         />
       )}
     </div>

@@ -14,6 +14,32 @@ interface MatchGoalsTableProps {
   onUndoTeamGoal?: (team: 'A' | 'B', eventId?: string) => void;
 }
 
+const isGoalForTeam = (
+  e: MatchEvent,
+  targetTeamId: string,
+  oppTeamId: string,
+  targetKey: 'A' | 'B',
+  targetTeamName: string
+) => {
+  if (e.type !== 'GOAL') return false;
+  if (e.teamId && e.teamId === targetTeamId) return true;
+  if (e.teamId && e.teamId === oppTeamId) return false;
+
+  const nameLower = (e.playerName || '').toLowerCase();
+  const myKey = targetKey === 'A' ? 'tim a' : 'tim b';
+  const oppKey = targetKey === 'A' ? 'tim b' : 'tim a';
+
+  if (nameLower.includes(myKey)) return true;
+  if (nameLower.includes(oppKey)) return false;
+
+  const firstWord = targetTeamName.split(' ')[0].toLowerCase().trim();
+  if (firstWord && firstWord.length >= 2) {
+    const regex = new RegExp(`\\b${firstWord}\\b`, 'i');
+    if (regex.test(nameLower)) return true;
+  }
+  return false;
+};
+
 export const MatchGoalsTable: React.FC<MatchGoalsTableProps> = ({
   teamAName,
   teamBName,
@@ -25,31 +51,19 @@ export const MatchGoalsTable: React.FC<MatchGoalsTableProps> = ({
 }) => {
   // Goals for Team A (chronological order)
   const goalsA = useMemo(() => {
-    const firstWordA = teamAName.split(' ')[0].toLowerCase();
     return events
-      .filter((e) => {
-        if (e.type !== 'GOAL') return false;
-        if (e.teamId === teamAId) return true;
-        const nameLower = (e.playerName || '').toLowerCase();
-        return nameLower.includes('tim a') || nameLower.includes(firstWordA);
-      })
+      .filter((e) => isGoalForTeam(e, teamAId, teamBId, 'A', teamAName))
       .slice()
       .reverse();
-  }, [events, teamAId, teamAName]);
+  }, [events, teamAId, teamBId, teamAName]);
 
   // Goals for Team B (chronological order)
   const goalsB = useMemo(() => {
-    const firstWordB = teamBName.split(' ')[0].toLowerCase();
     return events
-      .filter((e) => {
-        if (e.type !== 'GOAL') return false;
-        if (e.teamId === teamBId) return true;
-        const nameLower = (e.playerName || '').toLowerCase();
-        return nameLower.includes('tim b') || nameLower.includes(firstWordB);
-      })
+      .filter((e) => isGoalForTeam(e, teamBId, teamAId, 'B', teamBName))
       .slice()
       .reverse();
-  }, [events, teamBId, teamBName]);
+  }, [events, teamBId, teamAId, teamBName]);
 
   const handleCancelGoal = (teamKey: 'A' | 'B', eventId?: string) => {
     if (onUndoTeamGoal) {
@@ -86,7 +100,7 @@ export const MatchGoalsTable: React.FC<MatchGoalsTableProps> = ({
           {goals.length > 0 && (
             <button
               type="button"
-              onClick={() => handleCancelGoal(teamKey)}
+              onClick={() => handleCancelGoal(teamKey, goals[0]?.id)}
               className="btn-tactile flex items-center gap-1 px-2 py-0.5 rounded-md bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100 active:scale-95 text-rose-700 dark:text-rose-300 text-[10px] font-barlow font-bold uppercase tracking-wider border border-rose-300 dark:border-rose-800 transition-all shrink-0 cursor-pointer"
               title={`Batalkan gol terakhir ${teamName}`}
             >

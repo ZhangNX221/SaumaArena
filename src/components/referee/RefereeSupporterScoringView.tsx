@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { Megaphone, CheckCircle2 } from 'lucide-react';
-import { Match, AppUser, SupporterAssessment, Team } from '@/types';
+import { Match, AppUser, SupporterAssessment, Team, STORAGE_KEY_TEAMS } from '@/types';
 import { initialTeams, initialSupporterAssessments } from '@/mocks/tournamentData';
 import { usePersistentState } from '@/hooks/usePersistentState';
 import { AdminPageHeaderCard } from '@/components/admin/common/AdminPageHeaderCard';
@@ -22,7 +22,7 @@ export const RefereeSupporterScoringView: React.FC<RefereeSupporterScoringViewPr
     'sauma_arena_supporter_scores',
     initialSupporterAssessments
   );
-  const [teams] = usePersistentState<Team[]>('sauma_arena_teams', initialTeams);
+  const [teams] = usePersistentState<Team[]>(STORAGE_KEY_TEAMS, initialTeams);
   const [selectedTeamId, setSelectedTeamId] = useState<string>(teams[0]?.id || 'team-sdi-kardina');
   const [notice, setNotice] = useState<string | null>(null);
 

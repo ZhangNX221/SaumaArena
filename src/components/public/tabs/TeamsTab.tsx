@@ -5,7 +5,7 @@ import { Users, ShieldCheck, Search, X, ChevronRight } from 'lucide-react';
 import { initialTeams } from '@/mocks/tournamentData';
 import { getTeamLogoUrl } from '@/mocks/teamLogos';
 import { usePersistentState } from '@/hooks/usePersistentState';
-import { Team, SportCode, TeamCardLayout, STORAGE_KEY_TEAM_CARD_LAYOUT } from '@/types';
+import { Team, SportCode, TeamCardLayout, STORAGE_KEY_TEAM_CARD_LAYOUT, STORAGE_KEY_TEAMS } from '@/types';
 import { ModalPortal } from '@/components/common/ModalPortal';
 import { PublicPageHeader } from '../layout/PublicPageHeader';
 
@@ -14,7 +14,7 @@ interface TeamsTabProps {
 }
 
 export const TeamsTab: React.FC<TeamsTabProps> = ({ sportCode = 'FUTSAL' }) => {
-  const [teams, setTeams] = usePersistentState<Team[]>('sauma_arena_teams', initialTeams);
+  const [teams, setTeams] = usePersistentState<Team[]>(STORAGE_KEY_TEAMS, initialTeams);
   const [teamCardLayout, setTeamCardLayout] = usePersistentState<TeamCardLayout>(STORAGE_KEY_TEAM_CARD_LAYOUT, 'MINIMAL');
   const [selectedTeam, setSelectedTeam] = useState<Team | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -34,7 +34,8 @@ export const TeamsTab: React.FC<TeamsTabProps> = ({ sportCode = 'FUTSAL' }) => {
     if (isOutdated) {
       setTeams(initialTeams);
       try {
-        localStorage.setItem('sauma_arena_teams', JSON.stringify(initialTeams));
+        localStorage.removeItem('sauma_arena_teams');
+        localStorage.setItem(STORAGE_KEY_TEAMS, JSON.stringify(initialTeams));
       } catch {}
     }
   }, [teams, setTeams]);

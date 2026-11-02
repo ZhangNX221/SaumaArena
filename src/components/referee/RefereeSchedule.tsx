@@ -10,8 +10,9 @@ import {
   ArrowRight,
   CheckCircle2,
 } from 'lucide-react';
-import { AppUser, RefereeMatchDuty } from '@/types';
+import { AppUser, Match, RefereeMatchDuty } from '@/types';
 import { REFEREE_DUTIES } from '@/mocks/multiSportData';
+import { initialMatches } from '@/mocks/tournamentData';
 import { usePersistentState } from '@/hooks/usePersistentState';
 import { AdminPageHeaderCard } from '@/components/admin/common/AdminPageHeaderCard';
 import { formatIndonesianFullDate } from '@/lib/calendar';
@@ -28,6 +29,7 @@ export const RefereeSchedule: React.FC<RefereeScheduleProps> = ({
   onSelectDutyMatch,
 }) => {
   const [duties] = usePersistentState<RefereeMatchDuty[]>('sauma_arena_duties', REFEREE_DUTIES);
+  const [matches] = usePersistentState<Match[]>('sauma_arena_matches', initialMatches);
 
   // 1. Identifikasi tanggal dan hari saat ini secara dinamis
   const now = new Date();
@@ -45,9 +47,21 @@ export const RefereeSchedule: React.FC<RefereeScheduleProps> = ({
   const currentYear = now.getFullYear(); // Contoh: 2026
   const todayFormattedStr = formatIndonesianFullDate(now);
 
+  const getLinkedMatch = (duty: RefereeMatchDuty) => {
+    return matches.find(
+      (m) => m.id === duty.matchId || String(m.matchNumber) === String(duty.matchNumber)
+    );
+  };
+
+  const isDutyCompleted = (duty: RefereeMatchDuty): boolean => {
+    const linked = getLinkedMatch(duty);
+    return linked?.status === 'COMPLETED' || Boolean(linked?.bapSigned) || duty.status === 'COMPLETED';
+  };
+
   // 2. Fungsi komparasi apakah sebuah laga jatuh pada HARI INI
   const isDutyToday = (duty: RefereeMatchDuty): boolean => {
-    if ((duty.status as string) === 'LIVE') return true;
+    const linked = getLinkedMatch(duty);
+    if ((linked?.status === 'LIVE' || (duty.status as string) === 'LIVE') && !isDutyCompleted(duty)) return true;
     if (!duty.time) return false;
     if (duty.time.toLowerCase().includes('hari ini')) return true;
 
@@ -60,9 +74,9 @@ export const RefereeSchedule: React.FC<RefereeScheduleProps> = ({
   };
 
   // 3. Filter data ke tempat yang benar sesuai tanggal dan status
-  const historyDuties = duties.filter((d) => d.status === 'COMPLETED');
-  const todayDuties = duties.filter((d) => isDutyToday(d) && d.status !== 'COMPLETED');
-  const upcomingDuties = duties.filter((d) => !isDutyToday(d) && d.status !== 'COMPLETED');
+  const historyDuties = duties.filter((d) => isDutyCompleted(d));
+  const todayDuties = duties.filter((d) => isDutyToday(d) && !isDutyCompleted(d));
+  const upcomingDuties = duties.filter((d) => !isDutyToday(d) && !isDutyCompleted(d));
 
   // 4. Tentukan segmen tab aktif: jika hari ini tidak ada laga, arahkan langsung ke tab MENDATANG
   const [activeSegment, setActiveSegment] = useState<'TODAY' | 'UPCOMING' | 'HISTORY'>(() => {
@@ -200,69 +214,101 @@ export const RefereeSchedule: React.FC<RefereeScheduleProps> = ({
             </div>
           )
         ) : (
-          displayedDuties.map((duty) => (
-            <div
-              key={duty.id}
-              className="p-5 sm:p-6 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] hover:border-[var(--color-arena-primary)]/40 hover:-translate-y-0.5 transition-all duration-200 space-y-3.5"
-            >
-              {/* Meta Row */}
-              <div className="flex flex-wrap items-center justify-between gap-2.5 text-xs">
-                <div className="flex flex-wrap items-center gap-2">
-                  <span
-                    className={`px-2.5 py-0.5 rounded-md text-[10px] font-barlow font-bold uppercase tracking-wider ${
-                      (duty.status as string) === 'LIVE'
-                        ? 'bg-red-500/15 text-red-600 dark:text-red-400 font-bold'
-                        : duty.status === 'COMPLETED'
-                        ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 font-bold'
-                        : 'bg-[var(--color-arena-primary-light)] text-[var(--color-arena-primary)]'
-                    }`}
-                  >
-                    {(duty.status as string) === 'LIVE' ? 'Sedang Berjalan' : duty.status === 'COMPLETED' ? 'Selesai & BAP Sah' : 'Terjadwal'}
-                  </span>
-                  <span className="font-mono font-bold text-xs text-[var(--color-arena-primary)]">
-                    Laga #{duty.matchNumber}
-                  </span>
-                  <span className="text-[var(--text-faint)]">&bull;</span>
-                  <span className="text-[var(--text-muted)] uppercase font-barlow font-bold text-xs tracking-wider">
-                    {duty.sport}
-                  </span>
+          displayedDuties.map((duty) => {
+            const linked = getLinkedMatch(duty);
+            const isCompleted = isDutyCompleted(duty);
+            const isLive = (linked?.status === 'LIVE' || (duty.status as string) === 'LIVE') && !isCompleted;
+
+            return (
+              <div
+                key={duty.id}
+                className="p-5 sm:p-6 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] hover:border-[var(--color-arena-primary)]/40 hover:-translate-y-0.5 transition-all duration-200 space-y-3.5"
+              >
+                {/* Meta Row */}
+                <div className="flex flex-wrap items-center justify-between gap-2.5 text-xs">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span
+                      className={`px-2.5 py-0.5 rounded-md text-[10px] font-barlow font-bold uppercase tracking-wider ${
+                        isLive
+                          ? 'bg-red-500/15 text-red-600 dark:text-red-400 font-bold'
+                          : isCompleted
+                          ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 font-bold'
+                          : 'bg-[var(--color-arena-primary-light)] text-[var(--color-arena-primary)]'
+                      }`}
+                    >
+                      {isLive ? 'Sedang Berjalan' : isCompleted ? 'Selesai & BAP Sah' : 'Terjadwal'}
+                    </span>
+                    <span className="font-mono font-bold text-xs text-[var(--color-arena-primary)]">
+                      Laga #{duty.matchNumber}
+                    </span>
+                    <span className="text-[var(--text-faint)]">&bull;</span>
+                    <span className="text-[var(--text-muted)] uppercase font-barlow font-bold text-xs tracking-wider">
+                      {duty.sport}
+                    </span>
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-4 text-xs text-[var(--text-muted)] font-sans">
+                    <div className="flex items-center gap-1.5">
+                      <Clock className="w-3.5 h-3.5 text-[var(--color-arena-primary)]" />
+                      <span className="font-mono text-xs">{duty.time}</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <MapPin className="w-3.5 h-3.5 text-[var(--color-arena-accent)]" />
+                      <span>{duty.courtName}</span>
+                    </div>
+                  </div>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-4 text-xs text-[var(--text-muted)] font-sans">
-                  <div className="flex items-center gap-1.5">
-                    <Clock className="w-3.5 h-3.5 text-[var(--color-arena-primary)]" />
-                    <span className="font-mono text-xs">{duty.time}</span>
+                {/* Matchup & CTA */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1 border-t border-[var(--border-subtle)]/60">
+                  <div className="space-y-0.5">
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-bebas text-2xl text-[var(--text-main)] uppercase tracking-wide">
+                        {duty.teamA}
+                      </h3>
+                      {isCompleted && linked ? (
+                        <span className="font-scoreboard text-base text-[var(--color-arena-accent)] px-2 py-0.5 rounded-md bg-[var(--bg-muted)] border border-slate-300 dark:border-slate-700 leading-none">
+                          {linked.scoreA} - {linked.scoreB}
+                        </span>
+                      ) : (
+                        <span className="text-[var(--color-arena-accent)] text-lg font-bebas">VS</span>
+                      )}
+                      <h3 className="font-bebas text-2xl text-[var(--text-main)] uppercase tracking-wide">
+                        {duty.teamB}
+                      </h3>
+                    </div>
+                    <div className="text-xs text-[var(--text-muted)] font-sans">
+                      Peran Laga: <strong className="text-[var(--text-main)]">{duty.roleInMatch || 'Wasit Utama'}</strong>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-1.5">
-                    <MapPin className="w-3.5 h-3.5 text-[var(--color-arena-accent)]" />
-                    <span>{duty.courtName}</span>
-                  </div>
+
+                  {isCompleted ? (
+                    <button
+                      type="button"
+                      onClick={() => onSelectDutyMatch(duty)}
+                      className="btn-tactile px-4 py-2.5 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/30 text-emerald-800 dark:text-emerald-300 text-xs font-barlow font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-all duration-150 shrink-0 min-h-[42px] cursor-pointer"
+                      title={`Laga #${duty.matchNumber} telah selesai - Klik untuk tinjau BAP & Skor`}
+                    >
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                      <span>Selesai</span>
+                      <ChevronRight className="w-3.5 h-3.5 opacity-60" />
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => onSelectDutyMatch(duty)}
+                      className="btn-tactile px-4 py-2.5 rounded-xl bg-[var(--color-arena-primary)] hover:bg-[var(--color-arena-primary-hover)] active:scale-[0.98] text-white text-xs font-barlow font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-all duration-150 shrink-0 min-h-[42px] cursor-pointer shadow-xs"
+                      title={`Mulai Laga #${duty.matchNumber}`}
+                    >
+                      <Play className="w-3.5 h-3.5 fill-current" />
+                      <span>Mulai Laga</span>
+                      <ChevronRight className="w-3.5 h-3.5" />
+                    </button>
+                  )}
                 </div>
               </div>
-
-              {/* Matchup & CTA */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1 border-t border-[var(--border-subtle)]/60">
-                <div className="space-y-0.5">
-                  <h3 className="font-bebas text-2xl text-[var(--text-main)] uppercase tracking-wide">
-                    {duty.teamA} <span className="text-[var(--color-arena-accent)] text-lg">VS</span> {duty.teamB}
-                  </h3>
-                  <div className="text-xs text-[var(--text-muted)] font-sans">
-                    Peran Laga: <strong className="text-[var(--text-main)]">{duty.roleInMatch || 'Wasit Utama'}</strong>
-                  </div>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => onSelectDutyMatch(duty)}
-                  className="btn-tactile px-4 py-2.5 rounded-xl bg-[var(--color-arena-primary)] hover:bg-[var(--color-arena-primary-hover)] active:scale-[0.98] text-white text-xs font-barlow font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-all duration-150 shrink-0 min-h-[42px] cursor-pointer"
-                >
-                  <Play className="w-3.5 h-3.5 fill-current" />
-                  <span>Buka Meja Laga</span>
-                  <ChevronRight className="w-3.5 h-3.5" />
-                </button>
-              </div>
-            </div>
-          ))
+            );
+          })
         )}
       </div>
     </div>

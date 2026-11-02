@@ -99,14 +99,46 @@ export const BAPPreviewModal: React.FC<BAPPreviewModalProps> = ({ bap, onClose }
           </div>
         </div>
 
-        {/* Discipline Summary */}
+        {/* Discipline Summary & Status */}
         <div className="p-3 rounded-xl bg-[var(--bg-muted)] border border-[var(--border-subtle)] flex items-center justify-between text-xs font-sans">
-          <span className="text-[var(--text-muted)]">Catatan Disiplin Lapangan:</span>
+          <span className="text-[var(--text-muted)]">Catatan Disiplin &amp; Pelanggaran:</span>
           <div className="flex items-center gap-3 font-bold">
-            <span className="text-amber-400">{bap.yellowCards} Kuning</span>
-            <span className="text-red-400">{bap.redCards} Merah</span>
+            <span className="text-amber-500 dark:text-amber-400">{bap.yellowCards} Kuning</span>
+            <span className="text-red-500 dark:text-red-400">{bap.redCards} Merah</span>
+            {typeof bap.foulsCount === 'number' && (
+              <span className="text-sky-500 dark:text-sky-400">{bap.foulsCount} Foul</span>
+            )}
           </div>
         </div>
+
+        {/* Chronological Match Events (Goals & Cards) */}
+        {bap.events && bap.events.length > 0 && (
+          <div className="space-y-2">
+            <span className="text-[10px] font-barlow font-bold uppercase tracking-wider text-[var(--text-muted)] block">
+              Kronologi Pertandingan ({bap.events.length} Peristiwa)
+            </span>
+            <div className="max-h-36 overflow-y-auto space-y-1.5 p-2 rounded-xl bg-[var(--bg-muted)]/50 border border-[var(--border-subtle)] text-xs">
+              {bap.events.map((ev, idx) => (
+                <div key={ev.id || idx} className="flex items-center justify-between text-[11px] py-1 border-b border-[var(--border-subtle)]/40 last:border-0">
+                  <div className="flex items-center gap-2">
+                    <span className="font-mono font-bold text-[var(--color-arena-primary)] px-1.5 py-0.5 rounded bg-[var(--color-arena-primary-light)]">
+                      {ev.minute}'
+                    </span>
+                    <span className="font-semibold text-[var(--text-main)]">
+                      {ev.type === 'GOAL' ? '⚽ Gol' : ev.type === 'YELLOW_CARD' ? '🟨 Kartu Kuning' : ev.type === 'RED_CARD' ? '🟥 Kartu Merah' : ev.type === 'FOUL' ? 'Pelanggaran' : ev.type}
+                    </span>
+                    {ev.playerName && (
+                      <span className="text-[var(--text-muted)] font-medium truncate max-w-[150px]">
+                        &bull; {ev.playerName}
+                      </span>
+                    )}
+                  </div>
+                  {ev.detail && <span className="text-[10px] text-[var(--text-muted)]">{ev.detail}</span>}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Actions */}
         <div className="flex items-center justify-end gap-2.5 pt-2">

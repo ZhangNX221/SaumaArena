@@ -3,13 +3,13 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Search, Edit2, Trash2 } from 'lucide-react';
 import { initialTeams, getTeamCode } from '@/mocks/tournamentData';
-import { Team } from '@/types';
+import { Team, STORAGE_KEY_TEAMS } from '@/types';
 import { ConfirmModal } from '@/components/admin/common/ConfirmModal';
 import { TeamEditModal, TeamFormData } from './TeamEditModal';
 import { usePersistentState } from '@/hooks/usePersistentState';
 
 export const TeamsManagementTab: React.FC = () => {
-  const [teams, setTeams] = usePersistentState<Team[]>('sauma_arena_teams', initialTeams);
+  const [teams, setTeams] = usePersistentState<Team[]>(STORAGE_KEY_TEAMS, initialTeams);
   const [search, setSearch] = useState('');
   const [groupFilter, setGroupFilter] = useState('ALL');
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);

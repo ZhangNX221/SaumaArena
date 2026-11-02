@@ -445,6 +445,7 @@ export * from './partner';
 
 export type TeamCardLayout = 'STANDARD' | 'MINIMAL';
 export const STORAGE_KEY_TEAM_CARD_LAYOUT = 'sauma_arena_team_card_layout';
+export const STORAGE_KEY_TEAMS = 'sauma_arena_teams_v2';
 
 export interface PublicStatsDisplayConfig {
   showQuickMetrics: boolean;

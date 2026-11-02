@@ -5,6 +5,7 @@ import { initialMatches } from '@/mocks/tournamentData';
 import { SportCode, Match, MatchLiveTelemetry } from '@/types';
 import { usePersistentState } from '@/hooks/usePersistentState';
 import { SportRuleSettings, DEFAULT_SPORT_RULES } from '@/config/sportRules';
+import { fetchLiveStateFromBackend } from '@/lib/apiSync';
 import { LiveMatchHeader } from './live/LiveMatchHeader';
 import { LiveMatchScoreboard } from './live/LiveMatchScoreboard';
 import { LiveMatchGoalHistory } from './live/LiveMatchGoalHistory';
@@ -23,8 +24,8 @@ export const LiveMatchTab: React.FC<LiveMatchTabProps> = ({
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
 
   // Akses state tersinkronisasi pertandingan, telemetri real-time, dan aturan cabor
-  const [matches] = usePersistentState<Match[]>('sauma_arena_matches', initialMatches);
-  const [telemetryMap] = usePersistentState<Record<string, MatchLiveTelemetry>>(
+  const [matches, setMatches] = usePersistentState<Match[]>('sauma_arena_matches', initialMatches);
+  const [telemetryMap, setTelemetryMap] = usePersistentState<Record<string, MatchLiveTelemetry>>(
     'sauma_arena_live_telemetry',
     {}
   );
@@ -32,7 +33,7 @@ export const LiveMatchTab: React.FC<LiveMatchTabProps> = ({
     'sauma_arena_match_rules',
     DEFAULT_SPORT_RULES
   );
-  const [activeRefereeMatchId] = usePersistentState<string>(
+  const [activeRefereeMatchId, setActiveRefereeMatchId] = usePersistentState<string>(
     'sauma_arena_active_referee_match_id',
     'match-1'
   );
@@ -44,6 +45,58 @@ export const LiveMatchTab: React.FC<LiveMatchTabProps> = ({
     (m) => m.stage === 'GROUP' || m.status === 'LIVE' || m.status === 'COMPLETED'
   );
   const [selectedMatchId, setSelectedMatchId] = useState<string>(activeRefereeMatchId || 'match-1');
+
+  // Sinkronisasi Live Skor & Telemetri dari Backend (Real-Time Polling lintas perangkat)
+  useEffect(() => {
+    let isMounted = true;
+
+    const pullLiveState = async () => {
+      try {
+        const liveData = await fetchLiveStateFromBackend();
+        if (!liveData || !isMounted) return;
+
+        if (liveData.telemetryMap && Object.keys(liveData.telemetryMap).length > 0) {
+          setTelemetryMap((prev) => ({ ...prev, ...liveData.telemetryMap }));
+        }
+
+        if (liveData.activeMatchId) {
+          setActiveRefereeMatchId(liveData.activeMatchId);
+        }
+
+        if (Array.isArray(liveData.matches) && liveData.matches.length > 0) {
+          setMatches((prev) => {
+            return prev.map((local) => {
+              const remote = liveData.matches.find((m) => m.id === local.id);
+              if (!remote) return local;
+              return {
+                ...local,
+                scoreA: remote.scoreA,
+                scoreB: remote.scoreB,
+                status: remote.status,
+                events: remote.events && remote.events.length > 0 ? remote.events : local.events,
+              };
+            });
+          });
+        }
+      } catch {
+        // Fallback hening jika jaringan terputus
+      }
+    };
+
+    pullLiveState();
+    const interval = setInterval(pullLiveState, 2000);
+
+    const handleFocus = () => pullLiveState();
+    window.addEventListener('focus', handleFocus);
+    window.addEventListener('visibilitychange', handleFocus);
+
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+      window.removeEventListener('focus', handleFocus);
+      window.removeEventListener('visibilitychange', handleFocus);
+    };
+  }, [setMatches, setTelemetryMap, setActiveRefereeMatchId]);
 
   // Sinkronkan otomatis ke laga yang sedang LIVE atau yang aktif di meja juri
   useEffect(() => {
@@ -70,6 +123,25 @@ export const LiveMatchTab: React.FC<LiveMatchTabProps> = ({
   const foulsB = matchTelemetry?.foulsB ?? 0;
   const timeoutsA = matchTelemetry?.timeoutsA ?? 0;
   const timeoutsB = matchTelemetry?.timeoutsB ?? 0;
+
+  // Stopwatch lokal di sisi penonton agar detik menghitung mundur mulus setiap 1 detik
+  useEffect(() => {
+    if (!isTimerRunning || timerSeconds <= 0) return;
+    const tick = setInterval(() => {
+      setTelemetryMap((prev) => {
+        const cur = prev[selectedMatch.id];
+        if (!cur || !cur.isTimerRunning || cur.timerSeconds <= 0) return prev;
+        return {
+          ...prev,
+          [selectedMatch.id]: {
+            ...cur,
+            timerSeconds: Math.max(0, cur.timerSeconds - 1),
+          },
+        };
+      });
+    }, 1000);
+    return () => clearInterval(tick);
+  }, [isTimerRunning, timerSeconds, selectedMatch.id, setTelemetryMap]);
 
   // Skor dan peristiwa gol langsung dari state laga juri
   const scoreA = selectedMatch.scoreA ?? 0;

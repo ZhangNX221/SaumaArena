@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { Award, Search } from 'lucide-react';
 import { initialSupporterAssessments, initialTeams } from '@/mocks/tournamentData';
-import { SupporterAssessment, Team } from '@/types';
+import { SupporterAssessment, Team, STORAGE_KEY_TEAMS } from '@/types';
 import { usePersistentState } from '@/hooks/usePersistentState';
 import { SupporterRulesInfo } from './SupporterRulesInfo';
 import { SupporterDesktopTable, SupporterLeaderboardRow } from './SupporterDesktopTable';
@@ -11,7 +11,7 @@ import { PublicPageHeader } from '../layout/PublicPageHeader';
 
 export const SupporterTab: React.FC = () => {
   const [assessments] = usePersistentState<SupporterAssessment[]>('sauma_arena_supporter_scores', initialSupporterAssessments);
-  const [teams, setTeams] = usePersistentState<Team[]>('sauma_arena_teams', initialTeams);
+  const [teams, setTeams] = usePersistentState<Team[]>(STORAGE_KEY_TEAMS, initialTeams);
   const [searchQuery, setSearchQuery] = useState('');
 
   // Sinkronkan daftar tim jika data lokal belum memuat 14 kontingen lengkap

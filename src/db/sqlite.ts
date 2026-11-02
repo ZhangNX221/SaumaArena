@@ -95,7 +95,13 @@ export function getDatabase(): DatabaseSync {
         updated = true;
       }
 
-      if (!overrides.standings_override) {
+      if (
+        !overrides.standings_override ||
+        !Array.isArray(overrides.standings_override.A) || overrides.standings_override.A.length === 0 ||
+        !Array.isArray(overrides.standings_override.B) || overrides.standings_override.B.length === 0 ||
+        !Array.isArray(overrides.standings_override.C) || overrides.standings_override.C.length === 0 ||
+        !Array.isArray(overrides.standings_override.D) || overrides.standings_override.D.length === 0
+      ) {
         overrides.standings_override = {
           A: DEFAULT_GROUP_A_STANDINGS,
           B: DEFAULT_GROUP_B_STANDINGS,
@@ -122,19 +128,27 @@ export function getDatabase(): DatabaseSync {
       }
     }
 
-    // Auto-migration: Update nama tim resmi & master pemain default (5 pemain per tim) di tabel SQLite
-    db.prepare("UPDATE teams SET name = 'MI MAMBAUL ULUM BUNTARAN (TULUNGAGUNG)' WHERE id = 'team-mi-mambaululum'").run();
-    db.prepare("UPDATE teams SET name = 'MIN 13 BLITAR A', short_name = 'MIN 13 A', school_name = 'Madrasah Ibtidaiyah Negeri 13 Blitar' WHERE id = 'team-min13-b'").run();
-    db.prepare("UPDATE teams SET name = 'MIN 13 BLITAR B', short_name = 'MIN 13 B', school_name = 'Madrasah Ibtidaiyah Negeri 13 Blitar' WHERE id = 'team-min13-c'").run();
-    db.prepare("UPDATE teams SET name = 'MI YA BUNAYYA SRENGAT', short_name = 'YA BUNAYYA', school_name = 'Madrasah Ibtidaiyah Ya Bunayya Srengat Blitar' WHERE id = 'team-mi-yabunaya'").run();
+    // Auto-migration: Update nama tim resmi & master pemain sesuai DSP resmi di tabel SQLite
+    const upsertTeamStmt = db.prepare(`
+      INSERT INTO teams (id, code, name, short_name, school_name, logo_url, kind)
+      VALUES (?, ?, ?, ?, ?, ?, 'team')
+      ON CONFLICT(id) DO UPDATE SET
+        name = excluded.name,
+        short_name = excluded.short_name,
+        school_name = excluded.school_name,
+        logo_url = excluded.logo_url
+    `);
 
-    // Hapus data pemain lama/acak dan ganti dengan rata 5 pemain default per tim (Pemain 1 - Pemain 5)
-    db.prepare("DELETE FROM players WHERE full_name NOT LIKE 'Pemain %' OR team_id IS NULL").run();
     const insertPlayerStmt = db.prepare(`
       INSERT OR REPLACE INTO players (id, team_id, full_name, birth_date, gender, jersey_number, position, is_active)
       VALUES (?, ?, ?, ?, ?, ?, ?, 1)
     `);
+
+    // Bersihkan pemain dummy usang jika ada
+    db.prepare("DELETE FROM players WHERE full_name LIKE 'Pemain %'").run();
+
     for (const t of initialTeams) {
+      upsertTeamStmt.run(t.id, t.code || t.id, t.name, t.shortName, t.schoolName, t.logoUrl);
       if (t.players && t.players.length > 0) {
         for (const p of t.players) {
           insertPlayerStmt.run(p.id, t.id, p.name, '2012-05-10', 'M', p.number, p.position);

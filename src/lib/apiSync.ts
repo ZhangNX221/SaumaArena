@@ -1,4 +1,4 @@
-import { Match, SupporterAssessment, StandingRow } from '@/types';
+import { Match, SupporterAssessment, StandingRow, MatchLiveTelemetry } from '@/types';
 import { TicketOrderData } from '@/types/ticket';
 import { initialTeams } from '@/mocks/tournamentData';
 
@@ -10,32 +10,109 @@ import { initialTeams } from '@/mocks/tournamentData';
 /**
  * 1. Kirim pembaruan status / skor pertandingan ke SQLite database.
  */
-export async function pushMatchToBackend(match: Partial<Match> & { id: string }) {
+export async function pushMatchToBackend(
+  match: Partial<Match> & { id: string },
+  telemetry?: MatchLiveTelemetry
+) {
   try {
-    const payload = {
-      scoreA: match.scoreA ?? 0,
-      scoreB: match.scoreB ?? 0,
-      scoreHome: match.scoreA ?? 0,
-      scoreAway: match.scoreB ?? 0,
-      status: match.status,
-      courtName: match.courtName,
-      scheduledAt: match.scheduledTime,
-      winnerTeamId: match.winnerTeamId,
+    const payload: Record<string, any> = {};
+    if (match.scoreA !== undefined) {
+      payload.scoreA = match.scoreA;
+      payload.scoreHome = match.scoreA;
+    }
+    if (match.scoreB !== undefined) {
+      payload.scoreB = match.scoreB;
+      payload.scoreAway = match.scoreB;
+    }
+    if (match.status !== undefined) payload.status = match.status;
+    if (match.courtName !== undefined) payload.courtName = match.courtName;
+    if (match.scheduledTime !== undefined) payload.scheduledAt = match.scheduledTime;
+    if (match.winnerTeamId !== undefined) payload.winnerTeamId = match.winnerTeamId;
+
+    const token = typeof window !== 'undefined' ? localStorage.getItem('sauma_auth_token') : null;
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
     };
 
-    const res = await fetch(`/api/matches/${match.id}`, {
+    // 1. Push ke /api/matches/[id]
+    fetch(`/api/matches/${match.id}`, {
       method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers,
+      credentials: 'include',
       body: JSON.stringify(payload),
-    });
+    }).catch(() => {});
 
-    if (!res.ok) {
-      console.warn(`[apiSync] Gagal push match ${match.id} ke backend:`, res.statusText);
-    }
+    // 2. Push ke /api/live untuk sinkronisasi real-time instan ke Konsol Juri & Publik
+    fetch('/api/live', {
+      method: 'POST',
+      headers,
+      credentials: 'include',
+      body: JSON.stringify({
+        matchId: match.id,
+        scoreA: match.scoreA,
+        scoreB: match.scoreB,
+        status: match.status,
+        telemetry,
+        events: match.events,
+      }),
+    }).catch(() => {});
   } catch (error) {
     console.warn(`[apiSync] Error jaringan push match ${match.id}:`, error);
+  }
+}
+
+export interface LiveStateResponse {
+  activeMatchId: string;
+  telemetryMap: Record<string, MatchLiveTelemetry>;
+  matches: Match[];
+  serverTime: number;
+}
+
+/**
+ * Ambil status real-time live match, live scores, dan telemetri dari backend.
+ */
+export async function fetchLiveStateFromBackend(): Promise<LiveStateResponse | null> {
+  try {
+    const res = await fetch('/api/live');
+    if (!res.ok) return null;
+    const json = await res.json();
+    if (json.success && json.data) {
+      return json.data;
+    }
+  } catch (error) {
+    console.warn('[apiSync] Error fetchLiveStateFromBackend:', error);
+  }
+  return null;
+}
+
+/**
+ * Kirim update telemetri real-time (stopwatch, foul, babak, timeout) dari Konsol Juri ke server.
+ */
+export async function pushLiveTelemetryToBackend(
+  matchId: string,
+  telemetry: MatchLiveTelemetry,
+  extra?: { activeMatchId?: string; status?: string; scoreA?: number; scoreB?: number }
+) {
+  try {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('sauma_auth_token') : null;
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    };
+
+    await fetch('/api/live', {
+      method: 'POST',
+      headers,
+      credentials: 'include',
+      body: JSON.stringify({
+        matchId,
+        telemetry,
+        ...extra,
+      }),
+    });
+  } catch (error) {
+    console.warn(`[apiSync] Gagal push live telemetry:`, error);
   }
 }
 
@@ -223,18 +300,38 @@ export async function pushGroupStandingsToBackend(groups: {
   B?: StandingRow[];
   C?: StandingRow[];
   D?: StandingRow[];
-}) {
+}): Promise<boolean> {
   try {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('sauma_auth_token') : null;
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
     const res = await fetch('/api/standings', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers,
+      credentials: 'include',
       body: JSON.stringify({ groups }),
     });
+
+    if (token) {
+      fetch('/api/settings', {
+        method: 'PUT',
+        headers,
+        credentials: 'include',
+        body: JSON.stringify({ standingsSnapshot: groups }),
+      }).catch(() => {});
+    }
+
     if (!res.ok) {
       console.warn('[apiSync] Gagal push group standings:', res.statusText);
+      return false;
     }
+    return true;
   } catch (error) {
     console.warn('[apiSync] Error jaringan push group standings:', error);
+    return false;
   }
 }
 

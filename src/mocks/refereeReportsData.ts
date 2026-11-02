@@ -11,6 +11,22 @@ export interface BAPRecord {
   redCards: number;
   isFullySigned: boolean;
   sport: string;
+  matchId?: string;
+  status?: string;
+  group?: string;
+  scoreA?: number;
+  scoreB?: number;
+  teamAName?: string;
+  teamBName?: string;
+  foulsCount?: number;
+  events?: Array<{
+    id: string;
+    minute: number;
+    type: string;
+    teamId: string;
+    playerName?: string;
+    detail?: string;
+  }>;
 }
 
 export interface IncidentReport {

@@ -90,10 +90,10 @@ export const StandingsTab: React.FC<StandingsTabProps> = ({ sportCode = 'FUTSAL'
   };
 
   const allFutsalGroups = useMemo(() => [
-    { groupName: 'Grup A', rows: sortAndRankGroup(groupA) },
-    { groupName: 'Grup B', rows: sortAndRankGroup(groupB) },
-    { groupName: 'Grup C', rows: sortAndRankGroup(groupC) },
-    { groupName: 'Grup D', rows: sortAndRankGroup(groupD) },
+    { groupName: 'Grup A', rows: sortAndRankGroup(groupA?.length ? groupA : DEFAULT_GROUP_A_STANDINGS) },
+    { groupName: 'Grup B', rows: sortAndRankGroup(groupB?.length ? groupB : DEFAULT_GROUP_B_STANDINGS) },
+    { groupName: 'Grup C', rows: sortAndRankGroup(groupC?.length ? groupC : DEFAULT_GROUP_C_STANDINGS) },
+    { groupName: 'Grup D', rows: sortAndRankGroup(groupD?.length ? groupD : DEFAULT_GROUP_D_STANDINGS) },
   ], [groupA, groupB, groupC, groupD]);
 
   return (

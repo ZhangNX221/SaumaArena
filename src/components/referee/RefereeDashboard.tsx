@@ -97,16 +97,35 @@ export const RefereeDashboard: React.FC<RefereeDashboardProps> = ({
     };
   }, []);
 
-  const handleUpdateScore = (team: 'A' | 'B', delta: number) => {
+  const handleUpdateScore = (team: 'A' | 'B', delta: number, matchId?: string) => {
+    const targetId = matchId || selectedMatchId || liveMatch.id;
     setMatches((prev) =>
       prev.map((m) => {
-        if (m.id !== liveMatch.id) return m;
+        if (m.id !== targetId) return m;
         const newScoreA = team === 'A' ? Math.max(0, m.scoreA + delta) : m.scoreA;
         const newScoreB = team === 'B' ? Math.max(0, m.scoreB + delta) : m.scoreB;
+        let newEvents = m.events || [];
+        if (delta < 0) {
+          const targetTeamId = team === 'A' ? m.teamAId : m.teamBId;
+          const oppTeamId = team === 'A' ? m.teamBId : m.teamAId;
+          const firstWord = (team === 'A' ? m.teamAName : m.teamBName).split(' ')[0].toLowerCase().trim();
+          const gIdx = newEvents.findIndex((e) => {
+            if (e.type !== 'GOAL') return false;
+            if (e.teamId === targetTeamId) return true;
+            if (e.teamId === oppTeamId) return false;
+            const name = (e.playerName || '').toLowerCase();
+            if (name.includes(team === 'A' ? 'tim a' : 'tim b')) return true;
+            if (name.includes(team === 'A' ? 'tim b' : 'tim a')) return false;
+            if (firstWord && firstWord.length >= 2 && new RegExp(`\\b${firstWord}\\b`, 'i').test(name)) return true;
+            return false;
+          });
+          if (gIdx !== -1) newEvents = newEvents.filter((_, i) => i !== gIdx);
+        }
         const updated = {
           ...m,
           scoreA: newScoreA,
           scoreB: newScoreB,
+          events: newEvents,
           status: 'LIVE' as const,
         };
         pushMatchToBackend(updated);
@@ -115,15 +134,19 @@ export const RefereeDashboard: React.FC<RefereeDashboardProps> = ({
     );
   };
 
-  const handleAddIncident = (event: Omit<MatchEvent, 'id'>) => {
+  const handleAddIncident = (event: Omit<MatchEvent, 'id'>, matchId?: string) => {
+    const targetId = matchId || selectedMatchId || liveMatch.id;
     const newEv: MatchEvent = { ...event, id: `EV-${Date.now()}` };
     setMatches((prev) =>
       prev.map((m) => {
-        if (m.id !== liveMatch.id) return m;
-        return {
+        if (m.id !== targetId) return m;
+        const updatedEvents = [newEv, ...(m.events || [])];
+        const updated = {
           ...m,
-          events: [newEv, ...(m.events || [])],
+          events: updatedEvents,
         };
+        pushMatchToBackend(updated);
+        return updated;
       })
     );
   };
@@ -292,23 +315,11 @@ export const RefereeDashboard: React.FC<RefereeDashboardProps> = ({
             />
           )}
 
-          {/* TAB 1: TUGAS SAYA (DASHBOARD JURI - 3 TABS: HARI INI | MENDATANG | RIWAYAT) */}
-          {activeTab === 'duty' && (
+          {/* TAB 1: TUGAS SAYA & TAB 2: JADWAL SAYA */}
+          {(activeTab === 'duty' || activeTab === 'schedule') && (
             <RefereeSchedule
               user={currentUser}
-              initialTab="TODAY"
-              onSelectDutyMatch={(duty) => {
-                setSelectedMatchId(duty.matchId);
-                setActiveTab('match_center');
-              }}
-            />
-          )}
-
-          {/* TAB 2: JADWAL SAYA (MENDATANG) */}
-          {activeTab === 'schedule' && (
-            <RefereeSchedule
-              user={currentUser}
-              initialTab="UPCOMING"
+              initialTab={activeTab === 'duty' ? 'TODAY' : 'UPCOMING'}
               onSelectDutyMatch={(duty) => {
                 setSelectedMatchId(duty.matchId);
                 setActiveTab('match_center');
@@ -329,33 +340,13 @@ export const RefereeDashboard: React.FC<RefereeDashboardProps> = ({
             />
           )}
 
-          {/* TAB: KLASEMEN GRUB */}
-          {activeTab === 'standings' && (
-            <RefereeStandingsView />
-          )}
-
-          {/* TAB: BRACKET */}
-          {activeTab === 'bracket' && (
-            <RefereeBracketView />
-          )}
-
-          {/* TAB: PENILAIAN SKOR SUPORTER */}
+          {activeTab === 'standings' && <RefereeStandingsView />}
+          {activeTab === 'bracket' && <RefereeBracketView />}
           {(activeTab === 'supporter_scoring' || activeTab === 'roster') && (
-            <RefereeSupporterScoringView
-              user={currentUser}
-              currentMatch={liveMatch}
-            />
+            <RefereeSupporterScoringView user={currentUser} currentMatch={liveMatch} />
           )}
-
-          {/* TAB 4: LAPORAN & CATATAN WASIT */}
-          {activeTab === 'reports' && (
-            <RefereeReportsView user={currentUser} />
-          )}
-
-          {/* TAB 5: BUKU ATURAN (DULU BUKU REGULASI) */}
+          {activeTab === 'reports' && <RefereeReportsView user={currentUser} />}
           {activeTab === 'rulebook' && <RefereeRulebook user={currentUser} />}
-
-          {/* TAB 6: PROFIL & KESIAPAN */}
           {activeTab === 'profile' && (
             <RefereeProfile
               user={currentUser}

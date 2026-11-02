@@ -17,7 +17,7 @@ import { TicketModal } from '@/components/public/TicketModal';
 import { AdminDashboard } from '@/components/admin/AdminDashboard';
 import { AdminLogin } from '@/components/admin/AdminLogin';
 import { RefereeDashboard } from '@/components/referee/RefereeDashboard';
-import { AppUser, PublicHeaderConfig } from '@/types';
+import { AppUser, PublicHeaderConfig, STORAGE_KEY_TEAMS } from '@/types';
 import { initialTeams } from '@/mocks/tournamentData';
 import { PRESET_USERS } from '@/mocks/multiSportData';
 import { DEFAULT_HEADER_CONFIG, DEFAULT_CABOR_BANNERS } from '@/mocks/headerConfig';
@@ -47,8 +47,12 @@ export default function Home() {
         const parsed = JSON.parse(savedBanners);
         if (Array.isArray(parsed) && parsed.length > 0) setBanners(parsed);
       }
-      const savedTeams = localStorage.getItem('sauma_arena_teams');
-      if (savedTeams) {
+      // Clean legacy storage key
+      localStorage.removeItem('sauma_arena_teams');
+      const savedTeams = localStorage.getItem(STORAGE_KEY_TEAMS);
+      if (!savedTeams) {
+        localStorage.setItem(STORAGE_KEY_TEAMS, JSON.stringify(initialTeams));
+      } else {
         const parsed = JSON.parse(savedTeams);
         const isOutdated =
           !Array.isArray(parsed) ||
@@ -61,8 +65,8 @@ export default function Home() {
               t.coachName !== initialTeams[i]?.coachName
           );
         if (isOutdated) {
-          localStorage.setItem('sauma_arena_teams', JSON.stringify(initialTeams));
-          window.dispatchEvent(new CustomEvent('sauma_state_sync', { detail: { key: 'sauma_arena_teams', value: initialTeams } }));
+          localStorage.setItem(STORAGE_KEY_TEAMS, JSON.stringify(initialTeams));
+          window.dispatchEvent(new CustomEvent('sauma_state_sync', { detail: { key: STORAGE_KEY_TEAMS, value: initialTeams } }));
         }
       }
     } catch {}

@@ -136,7 +136,7 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    const auth = requireAuth(request, ['ADMIN']);
+    const auth = requireAuth(request, ['ADMIN', 'REFEREE']);
     if (auth instanceof NextResponse) return auth;
 
     const body = await request.json();

@@ -6,6 +6,7 @@ import {
   ArrowRight,
   Shield,
   UserCheck,
+  CheckCircle2,
 } from 'lucide-react';
 import { AppUser, Match, RefereeMatchDuty, MatchLiveTelemetry } from '@/types';
 import { REFEREE_DUTIES } from '@/mocks/multiSportData';
@@ -238,11 +239,19 @@ export const RefereeDashboardHome: React.FC<RefereeDashboardHomeProps> = ({
                   <button
                     type="button"
                     onClick={() => onGoToMatchCenter(m.id)}
-                    className="btn-tactile px-4 py-2 rounded-xl bg-[var(--color-arena-primary)] hover:bg-[var(--color-arena-primary-hover)] active:scale-[0.98] text-white text-xs font-barlow font-bold uppercase tracking-wider transition-all duration-150 flex items-center gap-1.5 cursor-pointer shadow-xs"
-                    title={`Buka Meja Lapangan Laga #${m.matchNumber}`}
+                    className={`btn-tactile px-4 py-2 rounded-xl text-xs font-barlow font-bold uppercase tracking-wider transition-all duration-150 flex items-center gap-1.5 cursor-pointer shadow-xs ${
+                      m.status === 'COMPLETED'
+                        ? 'bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/30 text-emerald-800 dark:text-emerald-300'
+                        : 'bg-[var(--color-arena-primary)] hover:bg-[var(--color-arena-primary-hover)] text-white'
+                    }`}
+                    title={m.status === 'COMPLETED' ? `Laga #${m.matchNumber} telah selesai` : `Mulai Laga #${m.matchNumber}`}
                   >
-                    <Play className="w-3.5 h-3.5 fill-current" />
-                    <span>Buka Meja Laga</span>
+                    {m.status === 'COMPLETED' ? (
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                    ) : (
+                      <Play className="w-3.5 h-3.5 fill-current" />
+                    )}
+                    <span>{m.status === 'COMPLETED' ? 'Selesai' : 'Mulai Laga'}</span>
                   </button>
                 </div>
               </div>

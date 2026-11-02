@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Play, Pause, RotateCcw, BellRing, Sliders } from 'lucide-react';
+import { Play, Pause, RotateCcw, BellRing, Sliders, Save, CheckCircle2 } from 'lucide-react';
 import { Match, MatchEvent, EventType } from '@/types';
 import { MatchGoalsTable } from './MatchGoalsTable';
 import { TeamScoreFoulCard } from './TeamScoreFoulCard';
@@ -36,6 +36,7 @@ interface ScoringTimedGoalsProps {
   matches?: Match[];
   onSelectMatch?: (matchId: string) => void;
   onResetMatch?: () => void;
+  onSaveMatch?: () => void;
 }
 
 export const ScoringTimedGoals: React.FC<ScoringTimedGoalsProps> = ({
@@ -65,6 +66,7 @@ export const ScoringTimedGoals: React.FC<ScoringTimedGoalsProps> = ({
   matches,
   onSelectMatch,
   onResetMatch,
+  onSaveMatch,
 }) => {
   const [localFoulsA, setLocalFoulsA] = useState(0);
   const [localFoulsB, setLocalFoulsB] = useState(0);
@@ -80,18 +82,12 @@ export const ScoringTimedGoals: React.FC<ScoringTimedGoalsProps> = ({
   const [showTimeModal, setShowTimeModal] = useState(false);
 
   // Hitung jumlah kartu Tim A dan Tim B dari events laga
-  const yellowCardsA = (events || []).filter(
-    (e) => (e.teamId === currentMatch.teamAId || e.teamId === 'team-sdi-kardina' || e.playerName?.includes('Tim A')) && e.type === 'YELLOW_CARD'
-  ).length;
-  const redCardsA = (events || []).filter(
-    (e) => (e.teamId === currentMatch.teamAId || e.teamId === 'team-sdi-kardina' || e.playerName?.includes('Tim A')) && e.type === 'RED_CARD'
-  ).length;
-  const yellowCardsB = (events || []).filter(
-    (e) => (e.teamId === currentMatch.teamBId || e.teamId === 'team-min7-blitar' || e.playerName?.includes('Tim B')) && e.type === 'YELLOW_CARD'
-  ).length;
-  const redCardsB = (events || []).filter(
-    (e) => (e.teamId === currentMatch.teamBId || e.teamId === 'team-min7-blitar' || e.playerName?.includes('Tim B')) && e.type === 'RED_CARD'
-  ).length;
+  const isCardA = (e: MatchEvent, type: string) => e.type === type && (e.teamId === currentMatch.teamAId || e.playerName?.includes('Tim A'));
+  const isCardB = (e: MatchEvent, type: string) => e.type === type && (e.teamId === currentMatch.teamBId || e.playerName?.includes('Tim B'));
+  const yellowCardsA = (events || []).filter((e) => isCardA(e, 'YELLOW_CARD')).length;
+  const redCardsA = (events || []).filter((e) => isCardA(e, 'RED_CARD')).length;
+  const yellowCardsB = (events || []).filter((e) => isCardB(e, 'YELLOW_CARD')).length;
+  const redCardsB = (events || []).filter((e) => isCardB(e, 'RED_CARD')).length;
 
   const handleRingBell = () => {
     setIsBellRinging(true);
@@ -100,41 +96,29 @@ export const ScoringTimedGoals: React.FC<ScoringTimedGoalsProps> = ({
   };
 
   const handleFoulChange = (team: 'A' | 'B', delta: number) => {
-    if (onUpdateFouls) {
-      onUpdateFouls(team, delta);
-    } else {
-      if (team === 'A') setLocalFoulsA((prev) => Math.max(0, prev + delta));
-      else setLocalFoulsB((prev) => Math.max(0, prev + delta));
-    }
+    if (onUpdateFouls) onUpdateFouls(team, delta);
+    else if (team === 'A') setLocalFoulsA((prev) => Math.max(0, prev + delta));
+    else setLocalFoulsB((prev) => Math.max(0, prev + delta));
     const current = team === 'A' ? foulsA : foulsB;
     const next = Math.max(0, current + delta);
     if (delta > 0 && onQuickIncident) onQuickIncident('FOUL', team, `Foul ke-${next}`);
   };
 
   const handleTimeout = (team: 'A' | 'B') => {
-    if (team === 'A' && timeoutsA > 0) {
-      if (onUpdateTimeouts) onUpdateTimeouts('A', -1);
-      else setLocalTimeoutsA((prev) => prev - 1);
-      onQuickIncident?.('TIMEOUT', 'A', 'Time Out Babak Ini');
-    } else if (team === 'B' && timeoutsB > 0) {
-      if (onUpdateTimeouts) onUpdateTimeouts('B', -1);
-      else setLocalTimeoutsB((prev) => prev - 1);
-      onQuickIncident?.('TIMEOUT', 'B', 'Time Out Babak Ini');
-    }
+    const isA = team === 'A';
+    const count = isA ? timeoutsA : timeoutsB;
+    if (count <= 0) return;
+    if (onUpdateTimeouts) onUpdateTimeouts(team, -1);
+    else if (isA) setLocalTimeoutsA((p) => p - 1);
+    else setLocalTimeoutsB((p) => p - 1);
+    onQuickIncident?.('TIMEOUT', team, 'Time Out Babak Ini');
   };
 
-  const handleOpenTimeModal = () => {
-    setShowTimeModal(true);
-  };
+  const handleOpenTimeModal = () => setShowTimeModal(true);
 
   const handleCyclePeriod = () => {
     if (!onChangePeriod) return;
-    const next =
-      currentPeriod === 'Babak 1'
-        ? 'Babak 2'
-        : currentPeriod === 'Babak 2'
-        ? 'Perpanjangan'
-        : 'Babak 1';
+    const next = currentPeriod === 'Babak 1' ? 'Babak 2' : currentPeriod === 'Babak 2' ? 'Perpanjangan' : 'Babak 1';
     onChangePeriod(next);
   };
 
@@ -176,6 +160,23 @@ export const ScoringTimedGoals: React.FC<ScoringTimedGoalsProps> = ({
             >
               {currentPeriod}
             </button>
+
+            {/* Tombol Simpan Laga (Selesai) */}
+            {onSaveMatch && (
+              <button
+                type="button"
+                onClick={onSaveMatch}
+                className={`btn-tactile px-3 py-2 rounded-xl text-white font-barlow font-bold uppercase tracking-wider text-xs flex items-center gap-1.5 transition-all shadow-xs cursor-pointer min-h-[38px] ${
+                  currentMatch.status === 'COMPLETED' || currentMatch.bapSigned
+                    ? 'bg-emerald-700 hover:bg-emerald-600 border border-emerald-500/40'
+                    : 'bg-emerald-600 hover:bg-emerald-500'
+                }`}
+                title="Simpan riwayat pertandingan dan selesaikan laga"
+              >
+                <Save className="w-3.5 h-3.5" />
+                <span>{currentMatch.status === 'COMPLETED' || currentMatch.bapSigned ? 'Selesai' : 'Simpan Laga'}</span>
+              </button>
+            )}
 
             {/* Tombol Reset Pertandingan Laga Ini */}
             {onResetMatch && (
@@ -228,8 +229,11 @@ export const ScoringTimedGoals: React.FC<ScoringTimedGoalsProps> = ({
           yellowCards={yellowCardsA}
           redCards={redCardsA}
           onUpdateScore={(delta) => {
-            onUpdateScore('A', delta);
-            if (delta > 0 && onQuickIncident) onQuickIncident('GOAL', 'A', 'Gol Tim A');
+            if (delta < 0 && onUndoTeamGoal) onUndoTeamGoal('A');
+            else {
+              onUpdateScore('A', delta);
+              if (delta > 0 && onQuickIncident) onQuickIncident('GOAL', 'A', 'Gol Tim A');
+            }
           }}
           onFoulChange={(delta) => handleFoulChange('A', delta)}
           onTimeout={() => handleTimeout('A')}
@@ -343,8 +347,11 @@ export const ScoringTimedGoals: React.FC<ScoringTimedGoalsProps> = ({
           yellowCards={yellowCardsB}
           redCards={redCardsB}
           onUpdateScore={(delta) => {
-            onUpdateScore('B', delta);
-            if (delta > 0 && onQuickIncident) onQuickIncident('GOAL', 'B', 'Gol Tim B');
+            if (delta < 0 && onUndoTeamGoal) onUndoTeamGoal('B');
+            else {
+              onUpdateScore('B', delta);
+              if (delta > 0 && onQuickIncident) onQuickIncident('GOAL', 'B', 'Gol Tim B');
+            }
           }}
           onFoulChange={(delta) => handleFoulChange('B', delta)}
           onTimeout={() => handleTimeout('B')}

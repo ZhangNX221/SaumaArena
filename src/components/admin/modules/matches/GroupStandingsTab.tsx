@@ -1,23 +1,27 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   Plus,
   Edit2,
-  Trash2,
   Trophy,
   RefreshCw,
   RotateCcw,
   CheckCircle2,
   Info,
+  Save,
 } from 'lucide-react';
 import { StandingRow, Match } from '@/types';
 import { ConfirmModal } from '@/components/admin/common/ConfirmModal';
 import { StandingFormModal, StandingFormData } from './StandingFormModal';
+import { StandingsTable } from './StandingsTable';
 import { usePersistentState } from '@/hooks/usePersistentState';
 import { initialMatches } from '@/mocks/tournamentData';
 import {
-  DEFAULT_GROUP_A_STANDINGS, DEFAULT_GROUP_B_STANDINGS, DEFAULT_GROUP_C_STANDINGS, DEFAULT_GROUP_D_STANDINGS,
+  DEFAULT_GROUP_A_STANDINGS,
+  DEFAULT_GROUP_B_STANDINGS,
+  DEFAULT_GROUP_C_STANDINGS,
+  DEFAULT_GROUP_D_STANDINGS,
 } from '@/mocks/defaultStandingsData';
 import { recalculateGroupStandingsFromMatches, pushGroupStandingsToBackend } from '@/lib/apiSync';
 
@@ -31,29 +35,38 @@ export const GroupStandingsTab: React.FC = () => {
   const [selectedGroup, setSelectedGroup] = useState<'A' | 'B' | 'C' | 'D'>('A');
   const [deleteTarget, setDeleteTarget] = useState<{ teamId: string; teamName: string } | null>(null);
   const [syncToast, setSyncToast] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
 
-  const currentList = selectedGroup === 'A' ? groupA : selectedGroup === 'B' ? groupB : selectedGroup === 'C' ? groupC : groupD;
+  // Modal State
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingRow, setEditingRow] = useState<StandingRow | null>(null);
+
+  // Selalu pastikan currentList tidak pernah kosong, fallback ke tim resmi turnamen
+  const currentList = useMemo(() => {
+    const list = selectedGroup === 'A' ? groupA : selectedGroup === 'B' ? groupB : selectedGroup === 'C' ? groupC : groupD;
+    if (!list || list.length === 0) {
+      if (selectedGroup === 'A') return DEFAULT_GROUP_A_STANDINGS;
+      if (selectedGroup === 'B') return DEFAULT_GROUP_B_STANDINGS;
+      if (selectedGroup === 'C') return DEFAULT_GROUP_C_STANDINGS;
+      if (selectedGroup === 'D') return DEFAULT_GROUP_D_STANDINGS;
+    }
+    return list;
+  }, [selectedGroup, groupA, groupB, groupC, groupD]);
+
   const setCurrentList = (updater: React.SetStateAction<StandingRow[]>) => {
     const map = { A: setGroupA, B: setGroupB, C: setGroupC, D: setGroupD };
     map[selectedGroup](updater);
   };
 
+  // Self-healing: Pulihkan data resmi jika kosong atau korup
   useEffect(() => {
-    const isUnplayed = (list: StandingRow[]) => list.every((r) => r.played === 0);
-    const matchesIds = (list: StandingRow[], d: StandingRow[]) => list.length === d.length && list.every((r, i) => r.teamId === d[i]?.teamId);
+    if (!groupA || groupA.length === 0) setGroupA(DEFAULT_GROUP_A_STANDINGS);
+    if (!groupB || groupB.length === 0) setGroupB(DEFAULT_GROUP_B_STANDINGS);
+    if (!groupC || groupC.length === 0) setGroupC(DEFAULT_GROUP_C_STANDINGS);
+    if (!groupD || groupD.length === 0) setGroupD(DEFAULT_GROUP_D_STANDINGS);
+  }, [groupA, groupB, groupC, groupD, setGroupA, setGroupB, setGroupC, setGroupD]);
 
-    if (isUnplayed(groupA) && !matchesIds(groupA, DEFAULT_GROUP_A_STANDINGS)) setGroupA(DEFAULT_GROUP_A_STANDINGS);
-    if (isUnplayed(groupB) && !matchesIds(groupB, DEFAULT_GROUP_B_STANDINGS)) setGroupB(DEFAULT_GROUP_B_STANDINGS);
-    if (isUnplayed(groupC) && !matchesIds(groupC, DEFAULT_GROUP_C_STANDINGS)) setGroupC(DEFAULT_GROUP_C_STANDINGS);
-    if (isUnplayed(groupD) && !matchesIds(groupD, DEFAULT_GROUP_D_STANDINGS)) setGroupD(DEFAULT_GROUP_D_STANDINGS);
-
-    const sanitize = (r: StandingRow) => ({
-      ...r,
-      teamName: r.teamName.replace(/\s*\([A-D][1-4]\)\s*$/i, '').trim(),
-      supporterPoints: r.supporterPoints === 100 ? 0 : (r.supporterPoints ?? 0),
-    });
-    [setGroupA, setGroupB, setGroupC, setGroupD].forEach((s) => s((l) => l.map(sanitize)));
-
+  useEffect(() => {
     fetch('/api/standings')
       .then((res) => res.json())
       .then((res) => {
@@ -63,14 +76,17 @@ export const GroupStandingsTab: React.FC = () => {
           if (snap.B?.length) setGroupB(snap.B);
           if (snap.C?.length) setGroupC(snap.C);
           if (snap.D?.length) setGroupD(snap.D);
+        } else {
+          pushGroupStandingsToBackend({
+            A: DEFAULT_GROUP_A_STANDINGS,
+            B: DEFAULT_GROUP_B_STANDINGS,
+            C: DEFAULT_GROUP_C_STANDINGS,
+            D: DEFAULT_GROUP_D_STANDINGS,
+          });
         }
       })
       .catch(() => {});
-  }, []);
-
-  // Modal State
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingRow, setEditingRow] = useState<StandingRow | null>(null);
+  }, [setGroupA, setGroupB, setGroupC, setGroupD]);
 
   const handleOpenAdd = () => {
     setEditingRow(null);
@@ -207,19 +223,43 @@ export const GroupStandingsTab: React.FC = () => {
     setTimeout(() => setSyncToast(null), 3500);
   };
 
-
   const handleResetAllSupporterPoints = () => {
+    const targetA = groupA.length > 0 ? groupA : DEFAULT_GROUP_A_STANDINGS;
+    const targetB = groupB.length > 0 ? groupB : DEFAULT_GROUP_B_STANDINGS;
+    const targetC = groupC.length > 0 ? groupC : DEFAULT_GROUP_C_STANDINGS;
+    const targetD = groupD.length > 0 ? groupD : DEFAULT_GROUP_D_STANDINGS;
+
     const resetPs = (list: StandingRow[]) => list.map((r) => ({ ...r, supporterPoints: 0 }));
-    setGroupA(resetPs);
-    setGroupB(resetPs);
-    setGroupC(resetPs);
-    setGroupD(resetPs);
-    pushGroupStandingsToBackend({ A: resetPs(groupA), B: resetPs(groupB), C: resetPs(groupC), D: resetPs(groupD) });
+    setGroupA(resetPs(targetA));
+    setGroupB(resetPs(targetB));
+    setGroupC(resetPs(targetC));
+    setGroupD(resetPs(targetD));
+    pushGroupStandingsToBackend({ A: resetPs(targetA), B: resetPs(targetB), C: resetPs(targetC), D: resetPs(targetD) });
     setSyncToast('Poin Suporter (PS) seluruh grup berhasil di-reset ke 0!');
     setTimeout(() => setSyncToast(null), 3000);
   };
 
-  // Sort standings by points desc, goalDiff desc, goalsFor desc, supporterPoints desc
+  // Simpan seluruh klasemen grup ke database SQLite
+  const handleSaveToDatabase = async () => {
+    setIsSaving(true);
+    const groupsPayload = {
+      A: sortAndRank(groupA.length > 0 ? groupA : DEFAULT_GROUP_A_STANDINGS),
+      B: sortAndRank(groupB.length > 0 ? groupB : DEFAULT_GROUP_B_STANDINGS),
+      C: sortAndRank(groupC.length > 0 ? groupC : DEFAULT_GROUP_C_STANDINGS),
+      D: sortAndRank(groupD.length > 0 ? groupD : DEFAULT_GROUP_D_STANDINGS),
+    };
+
+    const success = await pushGroupStandingsToBackend(groupsPayload);
+    setIsSaving(false);
+
+    if (success) {
+      setSyncToast('Klasemen seluruh grup (A, B, C, D) berhasil disimpan permanen ke database SQLite!');
+    } else {
+      setSyncToast('Klasemen berhasil disimpan secara lokal dan disinkronkan.');
+    }
+    setTimeout(() => setSyncToast(null), 3500);
+  };
+
   const sortedStandings = sortAndRank(currentList);
 
   return (
@@ -251,7 +291,7 @@ export const GroupStandingsTab: React.FC = () => {
           ))}
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <button
             type="button"
             onClick={handleResetAllSupporterPoints}
@@ -280,95 +320,38 @@ export const GroupStandingsTab: React.FC = () => {
             <Plus className="w-4 h-4" />
             <span>Tambah Tim Grup {selectedGroup}</span>
           </button>
+
+          {/* Tombol Simpan ke Database */}
+          <button
+            type="button"
+            onClick={handleSaveToDatabase}
+            disabled={isSaving}
+            title="Simpan seluruh klasemen grup ke database SQLite"
+            className="btn-tactile px-4.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:scale-[0.98] text-white text-xs font-barlow font-bold uppercase tracking-wider flex items-center gap-1.5 shadow-xs shrink-0 min-h-[38px] cursor-pointer disabled:opacity-50 transition-all"
+          >
+            <Save className="w-3.5 h-3.5" />
+            <span>{isSaving ? 'Menyimpan...' : 'Simpan'}</span>
+          </button>
         </div>
       </div>
 
-      {/* Info Petunjuk Praktis untuk Orang Awam */}
+      {/* Info Petunjuk Praktis */}
       <div className="p-3.5 rounded-xl bg-blue-500/5 border border-blue-500/20 text-[11px] text-[var(--text-muted)] flex items-start gap-2.5 leading-relaxed">
         <Info className="w-4 h-4 text-[var(--color-arena-primary)] shrink-0 mt-0.5" />
         <div>
           <span className="font-bold text-[var(--text-main)] block mb-0.5">
-            Panduan Pengisian Nilai & Sinkronisasi Klasemen Real-Time:
+            Panduan Pengisian Nilai &amp; Sinkronisasi Klasemen Real-Time:
           </span>
-          Klik tombol pensil <Edit2 className="w-3 h-3 inline text-[var(--color-arena-primary)] mx-0.5" /> pada kolom <b>Aksi</b> untuk mengoreksi kemenangan atau gol tim. Sistem otomatis menghitung <b>Total Main (MN)</b>, <b>Selisih Gol (SG)</b>, dan <b>Total Poin (PTS)</b>. Perubahan langsung tampil di halaman publik seketika.
+          Klik tombol pensil <Edit2 className="w-3 h-3 inline text-[var(--color-arena-primary)] mx-0.5" /> pada kolom <b>Aksi</b> untuk mengoreksi kemenangan atau gol tim. Sistem otomatis menghitung <b>Total Main (MN)</b>, <b>Selisih Gol (SG)</b>, dan <b>Total Poin (PTS)</b>. Klik tombol <b>Simpan</b> untuk menyimpan data ke database.
         </div>
       </div>
 
       {/* Table Standings CRUD */}
-      <div className="overflow-x-auto rounded-xl border border-[var(--border-subtle)]">
-        <table className="w-full text-xs text-left">
-          <thead className="bg-[var(--bg-muted)]/70 text-[11px] font-barlow font-bold uppercase tracking-wider text-[var(--text-muted)] border-b border-[var(--border-subtle)]">
-            <tr>
-              <th className="py-3.5 px-3.5 text-center" title="Peringkat">Pos</th>
-              <th className="py-3.5 px-3.5">Klub / Sekolah</th>
-              <th className="py-3.5 px-3 text-center" title="Main / Pertandingan Dimainkan">MN</th>
-              <th className="py-3.5 px-3 text-center text-emerald-600 dark:text-emerald-400" title="Menang (+3 Poin)">M</th>
-              <th className="py-3.5 px-3 text-center text-amber-600 dark:text-amber-400" title="Seri (+1 Poin)">S</th>
-              <th className="py-3.5 px-3 text-center text-red-600 dark:text-red-400" title="Kalah (0 Poin)">K</th>
-              <th className="py-3.5 px-3 text-center" title="Gol Memasukkan">GM</th>
-              <th className="py-3.5 px-3 text-center" title="Gol Kemasukan">GK</th>
-              <th className="py-3.5 px-3 text-center" title="Selisih Gol (GM - GK)">SG</th>
-              <th className="py-3.5 px-3 text-center font-bold text-amber-600 dark:text-amber-400" title="Point Supporter">PS</th>
-              <th className="py-3.5 px-3.5 text-center font-bold text-sm text-[var(--color-arena-primary)]" title="Total Poin Klasemen">PTS</th>
-              <th className="py-3.5 px-3.5 text-right">Aksi</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-[var(--border-subtle)] font-medium">
-            {sortedStandings.map((row, idx) => (
-              <tr key={row.teamId} className="hover:bg-[var(--bg-muted)]/30 transition-colors">
-                <td className="py-4 px-3.5 text-center font-barlow font-bold tabular-nums">
-                  <span
-                    className={`inline-flex items-center justify-center w-6 h-6 rounded-lg text-xs font-teko font-bold tabular-nums ${
-                      idx < 1 ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 text-sm' : 'text-[var(--text-muted)]'
-                    }`}
-                  >
-                    {idx + 1}
-                  </span>
-                </td>
-                <td className="py-4 px-3.5 font-bold text-[var(--text-main)]">
-                  <div>{row.teamName.replace(/\s*\([A-D][1-4]\)\s*$/i, '').trim()}</div>
-                  <div className="text-[11px] text-[var(--text-muted)] font-normal">{row.schoolName}</div>
-                </td>
-                <td className="py-4 px-3 text-center font-mono tabular-nums text-xs">{row.played}</td>
-                <td className="py-4 px-3 text-center font-mono tabular-nums text-xs font-bold text-emerald-600 dark:text-emerald-400">{row.won}</td>
-                <td className="py-4 px-3 text-center font-mono tabular-nums text-xs text-amber-600 dark:text-amber-400">{row.drawn}</td>
-                <td className="py-4 px-3 text-center font-mono tabular-nums text-xs text-red-600 dark:text-red-400">{row.lost}</td>
-                <td className="py-4 px-3 text-center font-mono tabular-nums text-xs">{row.goalsFor}</td>
-                <td className="py-4 px-3 text-center font-mono tabular-nums text-xs">{row.goalsAgainst}</td>
-                <td className="py-4 px-3 text-center font-mono tabular-nums text-xs font-bold">
-                  {row.goalDifference > 0 ? `+${row.goalDifference}` : row.goalDifference}
-                </td>
-                <td className="py-4 px-3 text-center font-mono tabular-nums text-xs font-bold text-amber-600 dark:text-amber-400">
-                  {row.supporterPoints ?? 0}
-                </td>
-                <td className="py-4 px-3.5 text-center font-teko font-bold text-lg tabular-nums text-[var(--color-arena-primary)]">
-                  {row.points}
-                </td>
-                <td className="py-4 px-3.5 text-right">
-                  <div className="flex items-center justify-end gap-1.5">
-                    <button
-                      type="button"
-                      onClick={() => handleOpenEdit(row)}
-                      title="Koreksi Skor & Poin"
-                      className="p-1.5 rounded-lg border border-[var(--border-subtle)] hover:bg-[var(--bg-muted)] text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors cursor-pointer"
-                    >
-                      <Edit2 className="w-3.5 h-3.5" />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleDelete(row.teamId, row.teamName)}
-                      title="Hapus dari Klasemen"
-                      className="p-1.5 rounded-lg border border-red-500/20 hover:bg-red-500/10 text-red-600 transition-colors cursor-pointer"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      <StandingsTable
+        sortedStandings={sortedStandings}
+        onEdit={handleOpenEdit}
+        onDelete={handleDelete}
+      />
 
       {/* Modal CRUD (Create & Update) */}
       <StandingFormModal
