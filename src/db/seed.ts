@@ -291,24 +291,14 @@ function seedNewEntities(db: DatabaseSync): void {
     `);
 
     const sampleScores: Record<string, { tkt: number; crt: number; pen: number; notes: string }> = {
-      'team-sdi-kardina': { tkt: 32, crt: 60, pen: 0, notes: 'Yel-yel bergemuruh, membawa maskot singa, tribun tertib dan bersih.' },
-      'team-sdn1-srengat': { tkt: 28, crt: 55, pen: 0, notes: 'Atribut bendera lengkap, drum perkusi konsisten.' },
-      'team-min2-blitar': { tkt: 24, crt: 50, pen: 0, notes: 'Koreografi gerak kompak sepanjang 30 menit laga.' },
-      'team-mi-ploso': { tkt: 20, crt: 45, pen: 0, notes: 'Kreativitas yel-yel madrasah santun dan positif.' },
-      'team-min7-blitar': { tkt: 18, crt: 45, pen: 0, notes: 'Atribut seragam sekolah rapi.' },
-      'team-min8-blitar': { tkt: 16, crt: 40, pen: 0, notes: 'Dukungan vokal tanpa henti.' },
-      'team-min14-blitar': { tkt: 15, crt: 40, pen: 0, notes: 'Tribun bersih pasca pertandingan usai.' },
-      'team-mi-mambaululum': { tkt: 14, crt: 35, pen: 0, notes: 'Kekompakan yel-yel baik.' },
-      'team-mi-wahidhasyim': { tkt: 14, crt: 35, pen: 0, notes: 'Spanduk sportivitas terpasang rapi.' },
-      'team-min13-c': { tkt: 12, crt: 35, pen: 0, notes: 'Semangat tinggi mendampingi tim.' },
-      'team-mi-darussalam': { tkt: 12, crt: 30, pen: 0, notes: 'Koreografi sederhana namun rapi.' },
-      'team-mi-yabunaya': { tkt: 10, crt: 30, pen: 0, notes: 'Tribun tertib.' },
-      'team-min5-tulungagung': { tkt: 10, crt: 30, pen: 0, notes: 'Rombongan suporter luar kota yang sportif.' },
-      'team-min13-b': { tkt: 8, crt: 25, pen: 0, notes: 'Dukungan suporter madrasah.' },
+      'team-min14-blitar': { tkt: 0, crt: 45, pen: 0, notes: 'Maskot (+20), seragam (+15), yel-yel min 2 (+10).' },
+      'team-min7-blitar': { tkt: 1, crt: 25, pen: 0, notes: 'Seragam (+15), yel-yel min 2 (+10), tiket min. 50 (+1).' },
+      'team-sdn1-srengat': { tkt: 1, crt: 25, pen: 0, notes: 'Seragam (+15), yel-yel min 2 (+10), tiket min. 50 (+1).' },
+      'team-mi-yabunaya': { tkt: 0, crt: 25, pen: 0, notes: 'Seragam (+15), yel-yel min 2 (+10).' },
     };
 
     for (const team of initialTeams) {
-      const score = sampleScores[team.id] || { tkt: 10, crt: 30, pen: 0, notes: 'Partisipasi suporter madrasah.' };
+      const score = sampleScores[team.id] || { tkt: 0, crt: 0, pen: 0, notes: 'Belum ada penilaian suporter.' };
       const total = score.tkt + score.crt - score.pen;
       insertSupporter.run(
         `sup_${team.id}`,

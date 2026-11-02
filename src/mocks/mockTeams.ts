@@ -139,7 +139,7 @@ export const initialTeams: Team[] = [
   {
     id: 'team-mi-mambaululum',
     code: 'TM-06',
-    name: 'MI MAMBAUL ULUM BUNTARAN (TULUNGAGUNG)',
+    name: 'MI MAMBAUL ULUM BUNTARAN',
     shortName: 'MI MAMBAUL ULUM',
     schoolName: 'Madrasah Ibtidaiyah Mambaul Ulum Buntaran Tulungagung',
     city: 'Tulungagung',

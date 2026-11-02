@@ -24,13 +24,13 @@ export const StandingsTable: React.FC<StandingsTableProps> = ({
             <th className="py-3.5 px-3.5">Klub / Sekolah</th>
             <th className="py-3.5 px-3 text-center" title="Berapa kali Main">MN</th>
             <th className="py-3.5 px-3 text-center text-emerald-600 dark:text-emerald-400" title="Poin Menang (+3)">M</th>
-            <th className="py-3.5 px-3 text-center text-amber-600 dark:text-amber-400" title="Seri">S</th>
-            <th className="py-3.5 px-3 text-center text-red-600 dark:text-red-400" title="Kalah">K</th>
+            <th className="py-3.5 px-3 text-center text-amber-600 dark:text-amber-400" title="Poin Seri (+1)">S</th>
+            <th className="py-3.5 px-3 text-center text-red-600 dark:text-red-400" title="Kalah (0 Poin)">K</th>
             <th className="py-3.5 px-3 text-center" title="Gol Memasukkan">GM</th>
             <th className="py-3.5 px-3 text-center" title="Gol Kemasukan">GK</th>
             <th className="py-3.5 px-3 text-center" title="Selisih Gol (GM - GK)">SG</th>
             <th className="py-3.5 px-3 text-center font-bold text-amber-600 dark:text-amber-400" title="Point Supporter (+1)">PS</th>
-            <th className="py-3.5 px-3.5 text-center font-bold text-sm text-[var(--color-arena-primary)]" title="Total Poin (Menang + PS)">PTS</th>
+            <th className="py-3.5 px-3.5 text-center font-bold text-sm text-[var(--color-arena-primary)]" title="Total Poin: (M × 3) + (S × 1) + (PS × 1)">PTS</th>
             <th className="py-3.5 px-3.5 text-right">Aksi</th>
           </tr>
         </thead>
@@ -101,9 +101,9 @@ export const StandingsTable: React.FC<StandingsTableProps> = ({
           ))}
         </tbody>
       </table>
-      <div className="px-4 py-2 bg-[var(--bg-muted)]/50 border-t border-[var(--border-subtle)] text-[10px] font-mono text-[var(--text-muted)] flex items-center justify-between flex-wrap gap-2">
-        <span>MN: Berapa kali Main • M: Poin Menang (+3) • S: Seri • K: Kalah • PS: Point Supporter (+1)</span>
-        <span className="font-bold text-[var(--color-arena-primary)]">PTS = Menang + PS</span>
+      <div className="px-4 py-2.5 bg-[var(--bg-muted)]/60 border-t border-[var(--border-subtle)] text-[11px] font-mono text-[var(--text-muted)] flex items-center justify-between flex-wrap gap-2">
+        <span>MN: Berapa kali Main • M: Poin Menang (+3) • S: Seri (+1) • K: Kalah (0) • PS: Point Supporter (+1)</span>
+        <span className="font-bold text-[var(--color-arena-primary)] bg-[var(--color-arena-primary)]/10 px-2 py-0.5 rounded border border-[var(--color-arena-primary)]/20">PTS = (M × 3) + (S × 1) + (PS × 1)</span>
       </div>
     </div>
   );

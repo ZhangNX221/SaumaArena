@@ -26,6 +26,13 @@ export const RefereeSupporterScoringView: React.FC<RefereeSupporterScoringViewPr
   const [selectedTeamId, setSelectedTeamId] = useState<string>(teams[0]?.id || 'team-sdi-kardina');
   const [notice, setNotice] = useState<string | null>(null);
 
+  // Sinkronkan data skor suporter dengan rekapitulasi data kriteria resmi turnamen MMFC I
+  React.useEffect(() => {
+    if (!assessments || assessments.length === 0 || !assessments.some((a) => a.teamId === 'team-min14-blitar')) {
+      setAssessments(initialSupporterAssessments);
+    }
+  }, [assessments, setAssessments]);
+
   const handleSaveAssessment = (data: Omit<SupporterAssessment, 'id' | 'createdAt'>) => {
     const newAssessment: SupporterAssessment = {
       ...data,

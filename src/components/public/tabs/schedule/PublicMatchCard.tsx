@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { MapPin, Clock } from 'lucide-react';
+import { MapPin, Clock, Trophy } from 'lucide-react';
 import { Match } from '@/types';
 
 interface PublicMatchCardProps {
@@ -29,9 +29,26 @@ const isPlaceholderTeam = (name: string, stage?: string) => {
 
 const cleanTeamName = (name?: string | null) => {
   if (!name) return '';
-  if (name.includes('KARDINA MASSA')) return 'SDI KARDINA MASSA';
-  if (name.includes('MIN 14 BLITAR')) return 'MIN 14 BLITAR';
-  return name;
+  let cleaned = name.replace(/\s*\([A-D][1-4]\)\s*$/i, '').trim();
+  if (cleaned.includes('KARDINA MASSA')) return 'SDI KARDINA MASSA';
+  if (cleaned.includes('MIN 14 BLITAR')) return 'MIN 14 BLITAR';
+  if (cleaned.includes('MAMBAUL ULUM')) return 'MI MAMBAUL ULUM BUNTARAN';
+  if (cleaned.includes('BUNAYYA')) return 'MI YA BUNAYYA SRENGAT';
+  return cleaned;
+};
+
+const getTeamBadgeLabel = (teamName: string, fallbackGroup?: string, stage?: string) => {
+  const upper = teamName.toUpperCase();
+  if (upper.includes('GRUP A')) return 'Pemenang Grup A';
+  if (upper.includes('GRUP B')) return 'Pemenang Grup B';
+  if (upper.includes('GRUP C')) return 'Pemenang Grup C';
+  if (upper.includes('GRUP D')) return 'Pemenang Grup D';
+  if (upper.includes('SEMIFINAL 1')) return 'Pemenang Semifinal 1';
+  if (upper.includes('SEMIFINAL 2')) return 'Pemenang Semifinal 2';
+  if (fallbackGroup) return `Fase Grup ${fallbackGroup}`;
+  if (stage === 'FINAL') return 'Babak Grand Final';
+  if (stage === 'SEMI_FINAL') return 'Babak 4 Besar';
+  return 'Babak Gugur';
 };
 
 export const PublicMatchCard: React.FC<PublicMatchCardProps> = ({
@@ -141,7 +158,7 @@ export const PublicMatchCard: React.FC<PublicMatchCardProps> = ({
               </h4>
               <div className="mt-1 flex items-center md:justify-end">
                 <span className="inline-flex items-center px-2 py-0.5 rounded-sm text-[11px] font-barlow font-bold uppercase tracking-wider bg-blue-50 dark:bg-sky-950/40 text-[#1D63B8] dark:text-sky-300 border border-blue-200 dark:border-sky-800">
-                  {match.group ? `Fase Grup ${match.group}` : match.stage === 'FINAL' ? 'Grand Final' : 'Babak 4 Besar'}
+                  {getTeamBadgeLabel(teamAName, match.group, match.stage)}
                 </span>
               </div>
             </div>
@@ -149,13 +166,22 @@ export const PublicMatchCard: React.FC<PublicMatchCardProps> = ({
               <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-lg bg-[var(--bg-muted)] border border-slate-300 dark:border-slate-700 flex items-center justify-center p-1.5 shrink-0 shadow-2xs overflow-hidden">
                 <img src={match.teamALogo} alt={teamAName} className="w-full h-full object-contain" />
               </div>
-            ) : !isTeamAPlaceholder ? (
-              <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-lg bg-[var(--bg-muted)] border border-slate-300 dark:border-slate-700 flex items-center justify-center p-1.5 shrink-0 shadow-2xs overflow-hidden">
-                <span className="font-barlow font-bold text-base text-[#1D63B8]">
-                  {teamAName.split(' ')[0]}
-                </span>
+            ) : (
+              <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-lg bg-[var(--bg-muted)] border border-slate-300 dark:border-slate-700 flex flex-col items-center justify-center p-1 shrink-0 shadow-2xs overflow-hidden">
+                {isTeamAPlaceholder ? (
+                  <>
+                    <Trophy className={`w-5 h-5 ${isFinalMatch ? 'text-amber-500' : 'text-[#1D63B8] dark:text-sky-400'}`} />
+                    <span className="font-barlow font-bold text-[9px] text-[var(--text-muted)] uppercase tracking-tight mt-0.5 text-center">
+                      {teamAName.includes('GRUP A') ? 'GRUP A' : teamAName.includes('GRUP B') ? 'GRUP B' : teamAName.includes('GRUP C') ? 'GRUP C' : teamAName.includes('GRUP D') ? 'GRUP D' : 'SF 1'}
+                    </span>
+                  </>
+                ) : (
+                  <span className="font-barlow font-bold text-base text-[#1D63B8]">
+                    {teamAName.split(' ')[0]}
+                  </span>
+                )}
               </div>
-            ) : null}
+            )}
           </div>
 
           {/* AREA TENGAH: WAKTU & VS / SKOR */}
@@ -192,20 +218,29 @@ export const PublicMatchCard: React.FC<PublicMatchCardProps> = ({
               <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-lg bg-[var(--bg-muted)] border border-slate-300 dark:border-slate-700 flex items-center justify-center p-1.5 shrink-0 shadow-2xs overflow-hidden order-2 md:order-1">
                 <img src={match.teamBLogo} alt={teamBName} className="w-full h-full object-contain" />
               </div>
-            ) : !isTeamBPlaceholder ? (
-              <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-lg bg-[var(--bg-muted)] border border-slate-300 dark:border-slate-700 flex items-center justify-center p-1.5 shrink-0 shadow-2xs overflow-hidden order-2 md:order-1">
-                <span className="font-barlow font-bold text-base text-[var(--color-arena-accent)]">
-                  {teamBName.split(' ')[0]}
-                </span>
+            ) : (
+              <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-lg bg-[var(--bg-muted)] border border-slate-300 dark:border-slate-700 flex flex-col items-center justify-center p-1 shrink-0 shadow-2xs overflow-hidden order-2 md:order-1">
+                {isTeamBPlaceholder ? (
+                  <>
+                    <Trophy className={`w-5 h-5 ${isFinalMatch ? 'text-amber-500' : 'text-amber-600 dark:text-amber-400'}`} />
+                    <span className="font-barlow font-bold text-[9px] text-[var(--text-muted)] uppercase tracking-tight mt-0.5 text-center">
+                      {teamBName.includes('GRUP A') ? 'GRUP A' : teamBName.includes('GRUP B') ? 'GRUP B' : teamBName.includes('GRUP C') ? 'GRUP C' : teamBName.includes('GRUP D') ? 'GRUP D' : 'SF 2'}
+                    </span>
+                  </>
+                ) : (
+                  <span className="font-barlow font-bold text-base text-[var(--color-arena-accent)]">
+                    {teamBName.split(' ')[0]}
+                  </span>
+                )}
               </div>
-            ) : null}
+            )}
             <div className="min-w-0 flex-1 md:flex-initial order-1 md:order-2">
               <h4 className="font-barlow font-bold text-lg sm:text-xl text-[var(--text-main)] leading-tight tracking-wide">
                 {teamBName}
               </h4>
               <div className="mt-1 flex items-center md:justify-start">
                 <span className="inline-flex items-center px-2 py-0.5 rounded-sm text-[11px] font-barlow font-bold uppercase tracking-wider bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
-                  {match.group ? `Fase Grup ${match.group}` : match.stage === 'FINAL' ? 'Grand Final' : 'Babak 4 Besar'}
+                  {getTeamBadgeLabel(teamBName, match.group, match.stage)}
                 </span>
               </div>
             </div>

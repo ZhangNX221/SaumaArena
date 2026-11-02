@@ -16,6 +16,16 @@ interface ScheduleTabProps {
   sportCode?: SportCode;
 }
 
+const cleanTeamName = (name?: string | null) => {
+  if (!name) return '';
+  let cleaned = name.replace(/\s*\([A-D][1-4]\)\s*$/i, '').trim();
+  if (cleaned.includes('KARDINA MASSA')) return 'SDI KARDINA MASSA';
+  if (cleaned.includes('MIN 14 BLITAR')) return 'MIN 14 BLITAR';
+  if (cleaned.includes('MAMBAUL ULUM')) return 'MI MAMBAUL ULUM BUNTARAN';
+  if (cleaned.includes('BUNAYYA')) return 'MI YA BUNAYYA SRENGAT';
+  return cleaned;
+};
+
 const parseScheduleInfo = (scheduledTimeStr: string, matchNumber: number) => {
   const rundownItem = TOURNAMENT_RUNDOWN.find((r) => r.matchCode === `P${matchNumber}`);
 
@@ -37,8 +47,17 @@ const parseScheduleInfo = (scheduledTimeStr: string, matchNumber: number) => {
   const restStr = parts.slice(1).join(' • ');
 
   const codeMatch = restStr.match(/\((.*?)\)/);
+  const stageDesc =
+    matchNumber === 15
+      ? 'Semifinal 1'
+      : matchNumber === 16
+      ? 'Semifinal 2'
+      : matchNumber === 17
+      ? 'Grand Final'
+      : rundownItem?.agendaCode;
+
   const code = rundownItem
-    ? `Partai ${rundownItem.matchCode} (${rundownItem.agendaCode})`
+    ? `Partai ${rundownItem.matchCode} (${stageDesc})`
     : codeMatch
     ? codeMatch[1]
     : `Partai P${matchNumber}`;
@@ -104,12 +123,16 @@ export const ScheduleTab: React.FC<ScheduleTabProps> = ({ sportCode = 'FUTSAL' }
       }
       const initial = initialMatches.find((im) => im.id === m.id || im.matchNumber === m.matchNumber);
       if (initial && m.stage === 'GROUP') {
-        if (copy.teamAName !== initial.teamAName) {
-          copy.teamAName = initial.teamAName;
+        const cleanInitialA = cleanTeamName(initial.teamAName);
+        const cleanInitialB = cleanTeamName(initial.teamBName);
+        const cleanCurrentA = cleanTeamName(copy.teamAName);
+        const cleanCurrentB = cleanTeamName(copy.teamBName);
+        if (cleanCurrentA !== cleanInitialA) {
+          copy.teamAName = cleanInitialA;
           hasChanged = true;
         }
-        if (copy.teamBName !== initial.teamBName) {
-          copy.teamBName = initial.teamBName;
+        if (cleanCurrentB !== cleanInitialB) {
+          copy.teamBName = cleanInitialB;
           hasChanged = true;
         }
         if (copy.teamAId !== initial.teamAId) {
@@ -167,16 +190,24 @@ export const ScheduleTab: React.FC<ScheduleTabProps> = ({ sportCode = 'FUTSAL' }
             const newStatus = isRemoteCompleted ? 'COMPLETED' : isRemoteLive ? 'LIVE' : local.status;
             const isScoreDiff = remote.scoreA !== local.scoreA || remote.scoreB !== local.scoreB;
             const isStatusDiff = newStatus !== local.status;
+            const cleanRemoteA = cleanTeamName(remote.teamAName);
+            const cleanRemoteB = cleanTeamName(remote.teamBName);
+            const cleanLocalA = cleanTeamName(local.teamAName);
+            const cleanLocalB = cleanTeamName(local.teamBName);
+
+            const isRemotePlaceholder = (name: string) =>
+              !name || name.toLowerCase().includes('tim a') || name.toLowerCase().includes('tim b');
+
             const isNameDiff =
-              (Boolean(remote.teamAName) && remote.teamAName !== local.teamAName) ||
-              (Boolean(remote.teamBName) && remote.teamBName !== local.teamBName);
+              (Boolean(cleanRemoteA) && !isRemotePlaceholder(cleanRemoteA) && cleanRemoteA !== cleanLocalA) ||
+              (Boolean(cleanRemoteB) && !isRemotePlaceholder(cleanRemoteB) && cleanRemoteB !== cleanLocalB);
 
             if (isScoreDiff || isStatusDiff || isNameDiff) {
               hasDiff = true;
               return {
                 ...local,
-                teamAName: remote.teamAName || local.teamAName,
-                teamBName: remote.teamBName || local.teamBName,
+                teamAName: isRemotePlaceholder(cleanRemoteA) ? local.teamAName : (cleanRemoteA || local.teamAName),
+                teamBName: isRemotePlaceholder(cleanRemoteB) ? local.teamBName : (cleanRemoteB || local.teamBName),
                 scoreA: remote.scoreA,
                 scoreB: remote.scoreB,
                 status: newStatus,

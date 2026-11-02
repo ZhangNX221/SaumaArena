@@ -41,15 +41,15 @@ export async function GET(request: Request) {
 
     const rawTeams = query<TeamInfo>(teamSql, teamParams);
 
-    // Ambil poin suporter per tim dari tabel supporter_scores
+    // Ambil poin suporter per tim dari tabel supporter_scores (Tiket Min. 50 = +1 Poin Klasemen MMFC I)
     const supporterMap = new Map<string, number>();
     try {
       const supRows = query<any>(
-        'SELECT team_id, total_score FROM supporter_scores WHERE competition_id = ?',
+        'SELECT team_id, ticket_points FROM supporter_scores WHERE competition_id = ?',
         [competitionId]
       );
       for (const s of supRows) {
-        supporterMap.set(s.team_id, s.total_score || 0);
+        supporterMap.set(s.team_id, s.ticket_points || 0);
       }
     } catch (e) {
       console.warn('Could not load supporter_scores for standings:', e);
@@ -102,8 +102,8 @@ export async function GET(request: Request) {
       const awayCards = cardMap.get(`${m.id}_${m.away_team_id}`);
       const scoreHome = Number(res.scoreHome ?? 0);
       const scoreAway = Number(res.scoreAway ?? 0);
-      const pointsHome = Number(res.pointsHome ?? (scoreHome > scoreAway ? 3 : 0));
-      const pointsAway = Number(res.pointsAway ?? (scoreAway > scoreHome ? 3 : 0));
+      const pointsHome = Number(res.pointsHome ?? (scoreHome > scoreAway ? 3 : scoreHome === scoreAway ? 1 : 0));
+      const pointsAway = Number(res.pointsAway ?? (scoreAway > scoreHome ? 3 : scoreAway === scoreHome ? 1 : 0));
 
       return {
         id: m.id,

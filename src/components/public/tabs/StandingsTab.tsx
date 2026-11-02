@@ -32,6 +32,8 @@ export const StandingsTab: React.FC<StandingsTabProps> = ({ sportCode = 'FUTSAL'
       let cleaned = r.teamName.replace(/\s*\([A-D][1-4]\)\s*$/i, '').trim();
       if (cleaned.includes('KARDINA MASSA')) cleaned = 'SDI KARDINA MASSA';
       if (cleaned.includes('MIN 14 BLITAR')) cleaned = 'MIN 14 BLITAR';
+      if (cleaned.includes('MAMBAUL ULUM')) cleaned = 'MI MAMBAUL ULUM BUNTARAN';
+      if (cleaned.includes('BUNAYYA')) cleaned = 'MI YA BUNAYYA SRENGAT';
       return {
         ...r,
         teamName: cleaned,
@@ -86,12 +88,17 @@ export const StandingsTab: React.FC<StandingsTabProps> = ({ sportCode = 'FUTSAL'
   }, []);
 
   // Sorting dan penomoran ranking dinamis sesuai aturan resmi turnamen MMFC I:
+  // Rumus PTS = (Menang × 3) + (Seri × 1) + (Point Supporter × 1)
   // 1. Poin tertinggi (PTS)
   // 2. Selisih Gol tertinggi (SG)
   // 3. Gol Dicetak terbanyak (GM)
   // 4. Point Supporter tertinggi (PS)
   const sortAndRankGroup = (rows: AppStandingRow[]) => {
     return [...(rows || [])]
+      .map((r) => ({
+        ...r,
+        points: (r.won || 0) * 3 + (r.drawn || 0) * 1 + (Number(r.supporterPoints) || 0) * 1,
+      }))
       .sort((a, b) => {
         if (b.points !== a.points) return b.points - a.points;
         if (b.goalDifference !== a.goalDifference) return b.goalDifference - a.goalDifference;
@@ -118,16 +125,66 @@ export const StandingsTab: React.FC<StandingsTabProps> = ({ sportCode = 'FUTSAL'
         description="Perolehan poin, selisih gol, rekor kemenangan, dan penentuan juara grup yang melaju ke babak semifinal."
       />
 
-      {/* Two-Stage Verification Notice */}
-      <div className="p-4 rounded-xl bg-blue-50 dark:bg-sky-950/40 border-2 border-blue-200 dark:border-sky-800 text-[var(--text-main)] text-xs flex items-start gap-3 shadow-xs">
-        <ShieldCheck className="w-4 h-4 text-[#1D63B8] dark:text-sky-400 shrink-0 mt-0.5" />
-        <div className="space-y-0.5">
-          <span className="font-bold text-[#1D63B8] dark:text-sky-300 block text-xs">
-            Klasemen Tersinkronisasi Real-Time dengan Meja Wasit Lapangan
+      {/* Panduan Sistem Poin & Keterangan Klasemen Resmi */}
+      <div className="rounded-2xl bg-[var(--bg-surface)] border-2 border-blue-200 dark:border-sky-800 p-4 sm:p-5 shadow-xs space-y-3.5">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-2.5 border-b border-slate-200 dark:border-slate-800">
+          <div className="flex items-center gap-2 text-xs font-bold text-[#1D63B8] dark:text-sky-300">
+            <ShieldCheck className="w-4 h-4 text-[#1D63B8] dark:text-sky-400 shrink-0" />
+            <span className="uppercase tracking-wider font-barlow text-sm">
+              Sistem Poin Resmi &amp; Keterangan Klasemen Turnamen MMFC I
+            </span>
+          </div>
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-[11px] font-mono font-bold bg-blue-50 dark:bg-sky-950/60 text-[#1D63B8] dark:text-sky-300 border border-blue-300 dark:border-sky-800 w-fit">
+            Rumus PTS = (M × 3) + (S × 1) + (PS × 1)
           </span>
-          <p className="text-[11px] text-[var(--text-muted)] leading-relaxed">
-            Perolehan menang, seri, kalah, selisih gol, dan poin klasemen dihitung secara otomatis setiap kali skor pertandingan diperbarui oleh wasit atau admin turnamen MMFC I.
-          </p>
+        </div>
+
+        {/* Kotak Rincian Penambahan Poin */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-xs">
+          <div className="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-between">
+            <div>
+              <span className="font-bold text-emerald-700 dark:text-emerald-400 block text-xs">Menang (M)</span>
+              <span className="text-[10px] text-[var(--text-muted)]">1x Menang</span>
+            </div>
+            <span className="font-teko font-bold text-2xl text-emerald-600 dark:text-emerald-400">+3</span>
+          </div>
+
+          <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-between">
+            <div>
+              <span className="font-bold text-amber-700 dark:text-amber-400 block text-xs">Seri (S)</span>
+              <span className="text-[10px] text-[var(--text-muted)]">1x Hasil Seri</span>
+            </div>
+            <span className="font-teko font-bold text-2xl text-amber-600 dark:text-amber-400">+1</span>
+          </div>
+
+          <div className="p-2.5 rounded-xl bg-sky-500/10 border border-sky-500/30 flex items-center justify-between">
+            <div>
+              <span className="font-bold text-sky-700 dark:text-sky-400 block text-xs">Point Supporter (PS)</span>
+              <span className="text-[10px] text-[var(--text-muted)]">Ada Supporter</span>
+            </div>
+            <span className="font-teko font-bold text-2xl text-sky-600 dark:text-sky-400">+1</span>
+          </div>
+
+          <div className="p-2.5 rounded-xl bg-red-500/10 border border-red-500/30 flex items-center justify-between">
+            <div>
+              <span className="font-bold text-red-700 dark:text-red-400 block text-xs">Kalah (K)</span>
+              <span className="text-[10px] text-[var(--text-muted)]">Hasil Kalah</span>
+            </div>
+            <span className="font-teko font-bold text-2xl text-red-600 dark:text-red-400">0</span>
+          </div>
+        </div>
+
+        {/* Legend Singkatan Kolom Lengkap */}
+        <div className="pt-2 border-t border-slate-200 dark:border-slate-800 text-[11px] text-[var(--text-muted)] font-mono leading-relaxed">
+          <span className="font-bold text-[var(--text-main)]">Keterangan Kolom:</span>{' '}
+          <strong className="text-[var(--text-main)]">MN</strong>: Berapa kali Main &bull;{' '}
+          <strong className="text-emerald-600 dark:text-emerald-400">M</strong>: Poin Menang (+3) &bull;{' '}
+          <strong className="text-amber-600 dark:text-amber-400">S</strong>: Seri (+1) &bull;{' '}
+          <strong className="text-red-600 dark:text-red-400">K</strong>: Kalah (0) &bull;{' '}
+          <strong>GM-GK</strong>: Gol Masuk - Kebobolan &bull;{' '}
+          <strong>SG</strong>: Selisih Gol &bull;{' '}
+          <strong className="text-sky-600 dark:text-sky-400">PS</strong>: Point Supporter (+1) &bull;{' '}
+          <strong className="text-[#1D63B8] dark:text-sky-400">PTS</strong>: Total Poin Klasemen
         </div>
       </div>
 
@@ -160,12 +217,12 @@ export const StandingsTab: React.FC<StandingsTabProps> = ({ sportCode = 'FUTSAL'
                     <th className="py-2 px-3">Tim / Madrasah</th>
                     <th className="py-2 px-2 text-center w-8" title="Berapa kali Main">MN</th>
                     <th className="py-2 px-2 text-center w-8 text-emerald-600 dark:text-emerald-400" title="Poin Menang (+3)">M</th>
-                    <th className="py-2 px-2 text-center w-8 text-amber-600 dark:text-amber-400" title="Seri">S</th>
-                    <th className="py-2 px-2 text-center w-8 text-red-600 dark:text-red-400" title="Kalah">K</th>
+                    <th className="py-2 px-2 text-center w-8 text-amber-600 dark:text-amber-400" title="Poin Seri (+1)">S</th>
+                    <th className="py-2 px-2 text-center w-8 text-red-600 dark:text-red-400" title="Kalah (0 Poin)">K</th>
                     <th className="py-2 px-2 text-center w-10" title="Gol Memasukkan - Gol Kemasukan">GM-GK</th>
                     <th className="py-2 px-2 text-center w-8" title="Selisih Gol (GM - GK)">SG</th>
                     <th className="py-2 px-2 text-center w-8 text-amber-600 dark:text-amber-400 font-bold" title="Point Supporter (+1)">PS</th>
-                    <th className="py-2 px-3 text-center w-10 font-bold text-[#1D63B8] dark:text-sky-400" title="Total Poin (Menang + PS)">PTS</th>
+                    <th className="py-2 px-3 text-center w-10 font-bold text-[#1D63B8] dark:text-sky-400" title="Total Poin: (M × 3) + (S × 1) + (PS × 1)">PTS</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60 font-sans">
@@ -225,18 +282,6 @@ export const StandingsTab: React.FC<StandingsTabProps> = ({ sportCode = 'FUTSAL'
                   })}
                 </tbody>
               </table>
-            </div>
-
-            {/* Table Footer */}
-            <div className="px-4 py-2 bg-slate-50 dark:bg-slate-900/50 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between flex-wrap gap-2 text-[10px] text-[var(--text-muted)] font-mono">
-              <div className="flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                <span>Zona Lolos Semifinal (Juara Grup / Top 1)</span>
-              </div>
-              <div className="flex items-center gap-2 flex-wrap">
-                <span>MN: Berapa kali Main • M: Poin Menang (+3) • S: Seri • K: Kalah • PS: Point Supporter (+1)</span>
-                <span className="font-bold text-[#1D63B8] dark:text-sky-400">PTS = Menang + PS</span>
-              </div>
             </div>
           </div>
         ))}

@@ -272,9 +272,9 @@ export function recalculateGroupStandingsFromMatches(
     }
   }
 
-  // Hitung poin akhir: Hanya Poin Menang (+3) dan Point Supporter (+1) yang dijumlahkan
+  // Hitung poin akhir: Menang (+3), Seri (+1), dan Point Supporter (+1) dijumlahkan
   const applyFinalPoints = (r: StandingRow) => {
-    r.points = r.won * 3 + (r.supporterPoints || 0);
+    r.points = r.won * 3 + r.drawn * 1 + (r.supporterPoints || 0);
   };
   result.A.forEach(applyFinalPoints);
   result.B.forEach(applyFinalPoints);

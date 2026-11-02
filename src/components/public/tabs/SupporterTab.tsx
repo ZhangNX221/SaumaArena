@@ -10,7 +10,7 @@ import { SupporterDesktopTable, SupporterLeaderboardRow } from './SupporterDeskt
 import { PublicPageHeader } from '../layout/PublicPageHeader';
 
 export const SupporterTab: React.FC = () => {
-  const [assessments] = usePersistentState<SupporterAssessment[]>('sauma_arena_supporter_scores', initialSupporterAssessments);
+  const [assessments, setAssessments] = usePersistentState<SupporterAssessment[]>('sauma_arena_supporter_scores', initialSupporterAssessments);
   const [teams, setTeams] = usePersistentState<Team[]>(STORAGE_KEY_TEAMS, initialTeams);
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -20,6 +20,13 @@ export const SupporterTab: React.FC = () => {
       setTeams(initialTeams);
     }
   }, [teams, setTeams]);
+
+  // Sinkronkan data skor suporter dengan rekapitulasi data kriteria resmi turnamen MMFC I
+  React.useEffect(() => {
+    if (!assessments || assessments.length === 0 || !assessments.some((a) => a.teamId === 'team-min14-blitar')) {
+      setAssessments(initialSupporterAssessments);
+    }
+  }, [assessments, setAssessments]);
 
   // Agregasi skor suporter per sekolah/tim (Poin Positif 1-4 & Sanksi 1-4 dengan label 1 kata)
   const leaderboard: SupporterLeaderboardRow[] = teams

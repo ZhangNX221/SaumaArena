@@ -8,9 +8,12 @@ import { usePersistentState } from '@/hooks/usePersistentState';
 
 const cleanTeamName = (name?: string | null) => {
   if (!name) return '';
-  if (name.includes('KARDINA MASSA')) return 'SDI KARDINA MASSA';
-  if (name.includes('MIN 14 BLITAR')) return 'MIN 14 BLITAR';
-  return name;
+  let cleaned = name.replace(/\s*\([A-D][1-4]\)\s*$/i, '').trim();
+  if (cleaned.includes('KARDINA MASSA')) return 'SDI KARDINA MASSA';
+  if (cleaned.includes('MIN 14 BLITAR')) return 'MIN 14 BLITAR';
+  if (cleaned.includes('MAMBAUL ULUM')) return 'MI MAMBAUL ULUM BUNTARAN';
+  if (cleaned.includes('BUNAYYA')) return 'MI YA BUNAYYA SRENGAT';
+  return cleaned;
 };
 
 export const TournamentRundownTable: React.FC = () => {
