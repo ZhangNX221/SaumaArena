@@ -26,17 +26,22 @@ export const createDefaultPlayers = (prefix: string, teamIndex: number): Player[
   { id: `p-${prefix}-5`, name: 'Pemain 5', number: 5, position: 'Pivot', photoUrl: '', nisn: `013${String(teamIndex).padStart(2, '0')}0105`, documentStatus: 'APPROVED', yellowCards: 0, redCards: 0, goals: 0, assists: 0 },
 ];
 
-export const KARDINA_A_PLAYERS = makePlayers('km', [
-  ['Exel', 15, 'Kiper'], ['Farris', 11, 'Anchor'], ['Reza', 13, 'Flank'],
-  ['Rido', 10, 'Flank'], ['Fiofal', 12, 'Pivot'], ['Alfin', 8, 'Pemain'],
-  ['Afnan', 6, 'Pemain'], ['Loor', 4, 'Pemain'], ['Atha', 2, 'Pemain'], ['Marun', 14, 'Pemain'],
+export const KARDINA_PLAYERS = makePlayers('km', [
+  ['Exel', 15, 'Kiper'],
+  ['Dude', 10, 'Anchor'],
+  ['Faris', 11, 'Flank'],
+  ['Noval', 12, 'Flank'],
+  ['Fahreza', 13, 'Pivot'],
+  ['Marvel', 14, 'Pemain'],
+  ['Igor Kenzi', 4, 'Pemain'],
+  ['Athalla', 2, 'Pemain'],
+  ['Afnan', 6, 'Pemain'],
+  ['Alfin', 8, 'Pemain'],
+  ['Rido', 10, 'Pemain'],
+  ['Fiofal', 12, 'Pemain'],
 ]);
-
-export const KARDINA_B_PLAYERS = makePlayers('kmb', [
-  ['Exele', 15, 'Kiper'], ['Dude', 10, 'Anchor'], ['Marvel', 14, 'Flank'],
-  ['Noval', 12, 'Flank'], ['Fahreza', 13, 'Pivot'], ['Igor Kenzi', 4, 'Pemain'],
-  ['Athalla', 2, 'Pemain'], ['Afnan', 6, 'Pemain'], ['Alfin', 8, 'Pemain'], ['Faris', 11, 'Pemain'],
-]);
+export const KARDINA_A_PLAYERS = KARDINA_PLAYERS;
+export const KARDINA_B_PLAYERS = KARDINA_PLAYERS;
 
 export const MIN7_PLAYERS = makePlayers('m7', [
   ['Vika', 8, 'Flank'], ['Arka', 4, 'Anchor'], ['Danil', 6, 'Flank'],
@@ -58,19 +63,22 @@ export const SDN1_SRENGAT_PLAYERS = makePlayers('s1', [
   ['Arsya', 14, 'Pemain'], ['Abinaya', 19, 'Pemain'], ['Zidane', 17, 'Pemain'], ['Adit', 21, 'Kiper'],
 ]);
 
-export const MIN14_A_PLAYERS = makePlayers('m14', [
-  ['Atha', 10, 'Pivot'], ['Fahri', 12, 'Kiper'], ['Wafi', 8, 'Anchor'],
-  ['Farel', 11, 'Flank'], ['Rafi', 5, 'Flank'], ['Krisna', 6, 'Pemain'],
-  ['Fahri', 7, 'Pemain'], ['Arya', 3, 'Pemain'], ['Andika', 9, 'Pemain'],
-  ['Syailendra', 2, 'Pemain'], ['Fahmi', 13, 'Pemain'], ['Hilmi', 14, 'Pemain'],
+export const MIN14_PLAYERS = makePlayers('m14', [
+  ['Fahri', 12, 'Kiper'],
+  ['Atha', 10, 'Pivot'],
+  ['Wafi', 8, 'Anchor'],
+  ['Farel', 11, 'Flank'],
+  ['Rafi', 5, 'Flank'],
+  ['Krisna', 6, 'Pemain'],
+  ['Fahri', 7, 'Pemain'],
+  ['Arya', 3, 'Pemain'],
+  ['Andika', 9, 'Pemain'],
+  ['Syailendra', 2, 'Pemain'],
+  ['Fahmi', 13, 'Pemain'],
+  ['Hilmi', 14, 'Pemain'],
 ]);
-
-export const MIN14_B_PLAYERS = makePlayers('m14b', [
-  ['Fahri', 12, 'Kiper'], ['Krisna', 6, 'Anchor'], ['Atha', 10, 'Pivot'],
-  ['Farel', 11, 'Flank'], ['Fahri', 7, 'Flank'], ['Wafi', 8, 'Pemain'],
-  ['Andika', 9, 'Pemain'], ['Rafi', 5, 'Pemain'], ['Fahmi', 13, 'Pemain'],
-  ['Hilmi', 14, 'Pemain'], ['Rendra', 2, 'Pemain'], ['Ruko Arya', 13, 'Pemain'],
-]);
+export const MIN14_A_PLAYERS = MIN14_PLAYERS;
+export const MIN14_B_PLAYERS = MIN14_PLAYERS;
 
 export const MAMBAUL_ULUM_PLAYERS = makePlayers('mu', [
   ['Fahmi', 14, 'Kiper'], ['Vino', 9, 'Anchor'], ['Rafa', 11, 'Flank'],

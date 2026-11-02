@@ -27,10 +27,41 @@ export const AthletesPlayersTab: React.FC = () => {
     allAthletes
   );
 
-  // Self-healing: jika dalam localStorage masih ada data dummy lama ("Pemain 1"), reset ke allAthletes
+  // Self-healing: bersihkan duplikasi tim dan pastikan data tim terbaru
   useEffect(() => {
-    if (athletesList.length === 0 || athletesList.some((a) => a.name.startsWith('Pemain '))) {
+    const hasStale =
+      athletesList.length === 0 ||
+      athletesList.some(
+        (a) =>
+          a.name.startsWith('Pemain ') ||
+          a.teamId === 'team-sdi-kardina-b' ||
+          a.teamId === 'team-min14-blitar-b' ||
+          a.teamName.includes('MASSA A') ||
+          a.teamName.includes('MASSA B') ||
+          a.teamName.includes('BLITAR A') && a.teamId.includes('min14') ||
+          a.teamName.includes('BLITAR B') && a.teamId.includes('min14')
+      );
+
+    if (hasStale || athletesList.length > allAthletes.length) {
       setAthletesList(allAthletes);
+    } else {
+      let changed = false;
+      const sanitized = athletesList.map((a) => {
+        const team = initialTeams.find((t) => t.id === a.teamId);
+        if (team && a.teamName !== team.name) {
+          changed = true;
+          return {
+            ...a,
+            teamName: team.name,
+            schoolName: team.schoolName,
+            group: team.group,
+          };
+        }
+        return a;
+      });
+      if (changed) {
+        setAthletesList(sanitized);
+      }
     }
   }, [allAthletes, athletesList, setAthletesList]);
 

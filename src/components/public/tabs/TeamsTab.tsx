@@ -24,11 +24,13 @@ export const TeamsTab: React.FC<TeamsTabProps> = ({ sportCode = 'FUTSAL' }) => {
     const isOutdated =
       teams.length !== initialTeams.length ||
       teams.some(
-        (t, i) =>
-          !t.players ||
-          t.players.length !== 5 ||
-          t.players[0]?.name !== 'Pemain 1' ||
-          t.coachName !== initialTeams[i]?.coachName
+        (t) =>
+          t.id === 'team-sdi-kardina-b' ||
+          t.id === 'team-min14-blitar-b' ||
+          t.name.includes('MASSA A') ||
+          t.name.includes('MASSA B') ||
+          (t.name.includes('BLITAR A') && t.id.includes('min14')) ||
+          (t.name.includes('BLITAR B') && t.id.includes('min14'))
       );
 
     if (isOutdated) {

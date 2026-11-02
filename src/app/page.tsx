@@ -54,16 +54,11 @@ export default function Home() {
         localStorage.setItem(STORAGE_KEY_TEAMS, JSON.stringify(initialTeams));
       } else {
         const parsed = JSON.parse(savedTeams);
-        const isOutdated =
-          !Array.isArray(parsed) ||
-          parsed.length !== initialTeams.length ||
-          parsed.some(
-            (t: any, i: number) =>
-              !t.players ||
-              t.players.length !== 5 ||
-              t.players[0]?.name !== 'Pemain 1' ||
-              t.coachName !== initialTeams[i]?.coachName
-          );
+        const isOutdated = !Array.isArray(parsed) || parsed.length !== initialTeams.length || parsed.some(
+          (t: any) => t.id === 'team-sdi-kardina-b' || t.id === 'team-min14-blitar-b' ||
+            (typeof t.name === 'string' && (t.name.includes('MASSA A') || t.name.includes('MASSA B'))) ||
+            (typeof t.name === 'string' && typeof t.id === 'string' && (t.name.includes('BLITAR A') || t.name.includes('BLITAR B')) && t.id.includes('min14'))
+        );
         if (isOutdated) {
           localStorage.setItem(STORAGE_KEY_TEAMS, JSON.stringify(initialTeams));
           window.dispatchEvent(new CustomEvent('sauma_state_sync', { detail: { key: STORAGE_KEY_TEAMS, value: initialTeams } }));

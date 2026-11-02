@@ -28,12 +28,24 @@ export const StandingsTab: React.FC<StandingsTabProps> = ({ sportCode = 'FUTSAL'
 
   // Self-healing: bersihkan imbuhan kode grup seperti (A1), (B1), dst dan sinkronkan data tim resmi
   useEffect(() => {
-    const sanitizeRow = (r: AppStandingRow) => ({
-      ...r,
-      teamName: r.teamName.replace(/\s*\([A-D][1-4]\)\s*$/i, '').trim(),
-    });
+    const sanitizeRow = (r: AppStandingRow) => {
+      let cleaned = r.teamName.replace(/\s*\([A-D][1-4]\)\s*$/i, '').trim();
+      if (cleaned.includes('KARDINA MASSA')) cleaned = 'SDI KARDINA MASSA';
+      if (cleaned.includes('MIN 14 BLITAR')) cleaned = 'MIN 14 BLITAR';
+      return {
+        ...r,
+        teamName: cleaned,
+      };
+    };
     const needsSanitize = (list: AppStandingRow[]) =>
-      list.some((r) => /\s*\([A-D][1-4]\)\s*$/i.test(r.teamName));
+      list.some(
+        (r) =>
+          /\s*\([A-D][1-4]\)\s*$/i.test(r.teamName) ||
+          r.teamName.includes('MASSA A') ||
+          r.teamName.includes('MASSA B') ||
+          (r.teamName.includes('BLITAR A') && r.teamId.includes('min14')) ||
+          (r.teamName.includes('BLITAR B') && r.teamId.includes('min14'))
+      );
 
     if (needsSanitize(groupA)) setGroupA((l) => l.map(sanitizeRow));
     if (needsSanitize(groupB)) setGroupB((l) => l.map(sanitizeRow));

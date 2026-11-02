@@ -6,6 +6,13 @@ import { TOURNAMENT_RUNDOWN, RundownItem, initialMatches } from '@/mocks/tournam
 import { Match } from '@/types';
 import { usePersistentState } from '@/hooks/usePersistentState';
 
+const cleanTeamName = (name?: string | null) => {
+  if (!name) return '';
+  if (name.includes('KARDINA MASSA')) return 'SDI KARDINA MASSA';
+  if (name.includes('MIN 14 BLITAR')) return 'MIN 14 BLITAR';
+  return name;
+};
+
 export const TournamentRundownTable: React.FC = () => {
   const [selectedDay, setSelectedDay] = useState<'H1' | 'H2'>('H1');
   const [matches] = usePersistentState<Match[]>('sauma_arena_matches', initialMatches);
@@ -108,11 +115,18 @@ export const TournamentRundownTable: React.FC = () => {
 
           const matchNum = it.matchCode.startsWith('P') ? parseInt(it.matchCode.replace('P', ''), 10) : null;
           const matchData = matchNum ? matches.find((m) => m.matchNumber === matchNum) : null;
-          const isLive = matchData?.status === 'LIVE';
-          const isCompleted = matchData?.status === 'COMPLETED';
+          const isLive = matchData?.status === 'LIVE' || (matchData?.status as string)?.toLowerCase() === 'live';
+          const isCompleted =
+            matchData?.status === 'COMPLETED' ||
+            (matchData?.status as string)?.toLowerCase() === 'finished' ||
+            (matchData?.status as string)?.toLowerCase() === 'verified' ||
+            (matchData?.status as string)?.toLowerCase() === 'bap_signed' ||
+            Boolean(matchData?.bapSigned);
 
-          const teamA = matchData ? matchData.teamAName : (it.detail.includes(' vs ') ? it.detail.split(/\s+vs\s+/i)[0] : null);
-          const teamB = matchData ? matchData.teamBName : (it.detail.includes(' vs ') ? it.detail.split(/\s+vs\s+/i)[1] : null);
+          const rawTeamA = matchData ? matchData.teamAName : (it.detail.includes(' vs ') ? it.detail.split(/\s+vs\s+/i)[0] : null);
+          const rawTeamB = matchData ? matchData.teamBName : (it.detail.includes(' vs ') ? it.detail.split(/\s+vs\s+/i)[1] : null);
+          const teamA = cleanTeamName(rawTeamA);
+          const teamB = cleanTeamName(rawTeamB);
 
           return (
             <div
@@ -253,10 +267,15 @@ export const TournamentRundownTable: React.FC = () => {
                 // Hubungkan dengan data pertandingan resmi jika bertipe MATCH
                 const matchNum = it.matchCode.startsWith('P') ? parseInt(it.matchCode.replace('P', ''), 10) : null;
                 const matchData = matchNum ? matches.find((m) => m.matchNumber === matchNum) : null;
-                const isLive = matchData?.status === 'LIVE';
-                const isCompleted = matchData?.status === 'COMPLETED';
+                const isLive = matchData?.status === 'LIVE' || (matchData?.status as string)?.toLowerCase() === 'live';
+                const isCompleted =
+                  matchData?.status === 'COMPLETED' ||
+                  (matchData?.status as string)?.toLowerCase() === 'finished' ||
+                  (matchData?.status as string)?.toLowerCase() === 'verified' ||
+                  (matchData?.status as string)?.toLowerCase() === 'bap_signed' ||
+                  Boolean(matchData?.bapSigned);
                 const matchDetailText = matchData && it.category === 'MATCH'
-                  ? `${matchData.teamAName} vs ${matchData.teamBName}`
+                  ? `${cleanTeamName(matchData.teamAName)} vs ${cleanTeamName(matchData.teamBName)}`
                   : it.detail;
 
                 return (

@@ -1,20 +1,22 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { MapPin, Clock, Calendar } from 'lucide-react';
+import { Clock, Calendar } from 'lucide-react';
 import { initialMatches, TOURNAMENT_RUNDOWN } from '@/mocks/tournamentData';
+import { REFEREE_DUTIES } from '@/mocks/multiSportData';
 import { CABOR_INFO_DATA } from '@/mocks/caborContentData';
-import { Match, SportCode } from '@/types';
+import { Match, RefereeMatchDuty, SportCode } from '@/types';
 import { usePersistentState } from '@/hooks/usePersistentState';
+import { fetchLiveStateFromBackend } from '@/lib/apiSync';
 import { PublicPageHeader } from '../layout/PublicPageHeader';
 import { TournamentRundownTable } from './schedule/TournamentRundownTable';
+import { PublicMatchCard } from './schedule/PublicMatchCard';
 
 interface ScheduleTabProps {
   sportCode?: SportCode;
 }
 
 const parseScheduleInfo = (scheduledTimeStr: string, matchNumber: number) => {
-  // Ambil referensi waktu dan agenda resmi dari TABEL RUNDOWN & JADWAL PERTANDINGAN LENGKAP
   const rundownItem = TOURNAMENT_RUNDOWN.find((r) => r.matchCode === `P${matchNumber}`);
 
   let time = '';
@@ -44,35 +46,46 @@ const parseScheduleInfo = (scheduledTimeStr: string, matchNumber: number) => {
   return { dateStr, time, code };
 };
 
-const isPlaceholderTeam = (name: string, stage?: string) => {
-  if (!name) return true;
-  const upper = name.trim().toUpperCase();
-  return (
-    upper.startsWith('JUARA') ||
-    upper.startsWith('PEMENANG') ||
-    upper.startsWith('P15') ||
-    upper.startsWith('P16') ||
-    upper.startsWith('P17') ||
-    upper.startsWith('TBD') ||
-    upper.startsWith('MENUNGGU') ||
-    (stage !== 'GROUP' && (upper.includes('GRUP') || upper.includes('SEMIFINAL')))
-  );
-};
-
 const KNOCKOUT_HEAL: Record<number, Partial<Match>> = {
   15: { teamAId: 'placeholder-ga', teamAName: 'JUARA GRUP A', teamBId: 'placeholder-gc', teamBName: 'JUARA GRUP C', teamALogo: '', teamBLogo: '' },
   16: { teamAId: 'placeholder-gb', teamAName: 'JUARA GRUP B', teamBId: 'placeholder-gd', teamBName: 'JUARA GRUP D', teamALogo: '', teamBLogo: '' },
   17: { teamAId: 'placeholder-sf1', teamAName: 'JUARA SEMIFINAL 1', teamBId: 'placeholder-sf2', teamBName: 'JUARA SEMIFINAL 2', teamALogo: '', teamBLogo: '' },
 };
 
+const isMatchCompleted = (m: Match, dutyList?: RefereeMatchDuty[]): boolean => {
+  const s = (m.status || '').toUpperCase();
+  if (s === 'COMPLETED' || s === 'FINISHED' || s === 'VERIFIED' || s === 'BAP_SIGNED') return true;
+  if (m.bapSigned) return true;
+  if (dutyList) {
+    const d = dutyList.find((duty) => duty.matchId === m.id || String(duty.matchNumber) === String(m.matchNumber));
+    if (d) {
+      const ds = (d.status || '').toUpperCase();
+      if (ds === 'COMPLETED' || ds === 'FINISHED' || ds === 'VERIFIED') return true;
+    }
+  }
+  return false;
+};
+
+const isMatchLive = (m: Match, dutyList?: RefereeMatchDuty[]): boolean => {
+  if (isMatchCompleted(m, dutyList)) return false;
+  const s = (m.status || '').toUpperCase();
+  if (s === 'LIVE') return true;
+  if (dutyList) {
+    const d = dutyList.find((duty) => duty.matchId === m.id || String(duty.matchNumber) === String(m.matchNumber));
+    if (d && (d.status || '').toUpperCase() === 'LIVE') return true;
+  }
+  return false;
+};
+
 export const ScheduleTab: React.FC<ScheduleTabProps> = ({ sportCode = 'FUTSAL' }) => {
   const caborMeta = CABOR_INFO_DATA[sportCode] || CABOR_INFO_DATA.FUTSAL;
 
   const [matches, setMatches] = usePersistentState<Match[]>('sauma_arena_matches', initialMatches);
+  const [duties] = usePersistentState<RefereeMatchDuty[]>('sauma_arena_duties', REFEREE_DUTIES);
   const [dateFilter, setDateFilter] = useState<'ALL' | 'H1' | 'H2'>('ALL');
   const [calendarData, setCalendarData] = useState<any>(null);
 
-  // Self-healing: bersihkan logo fase gugur dan sinkronkan waktu jadwal agar sama persis dengan TABEL RUNDOWN
+  // 1. Self-healing: bersihkan placeholder knockout dan sinkronkan alokasi waktu resmi
   useEffect(() => {
     let hasChanged = false;
     const updated = matches.map((m) => {
@@ -89,6 +102,25 @@ export const ScheduleTab: React.FC<ScheduleTabProps> = ({ sportCode = 'FUTSAL' }
           hasChanged = true;
         }
       }
+      const initial = initialMatches.find((im) => im.id === m.id || im.matchNumber === m.matchNumber);
+      if (initial && m.stage === 'GROUP') {
+        if (copy.teamAName !== initial.teamAName) {
+          copy.teamAName = initial.teamAName;
+          hasChanged = true;
+        }
+        if (copy.teamBName !== initial.teamBName) {
+          copy.teamBName = initial.teamBName;
+          hasChanged = true;
+        }
+        if (copy.teamAId !== initial.teamAId) {
+          copy.teamAId = initial.teamAId;
+          hasChanged = true;
+        }
+        if (copy.teamBId !== initial.teamBId) {
+          copy.teamBId = initial.teamBId;
+          hasChanged = true;
+        }
+      }
       return copy;
     });
 
@@ -97,6 +129,7 @@ export const ScheduleTab: React.FC<ScheduleTabProps> = ({ sportCode = 'FUTSAL' }
     }
   }, [matches, setMatches]);
 
+  // 2. Sinkronisasi kalender turnamen
   useEffect(() => {
     fetch('/api/calendar')
       .then((res) => res.json())
@@ -107,6 +140,71 @@ export const ScheduleTab: React.FC<ScheduleTabProps> = ({ sportCode = 'FUTSAL' }
       })
       .catch((err) => console.error('Failed to load calendar data:', err));
   }, []);
+
+  // 3. Sinkronisasi Real-Time Otomatis dari SQLite Backend (/api/live) saat laga selesai atau live
+  useEffect(() => {
+    let isMounted = true;
+
+    const pullLiveState = async () => {
+      try {
+        const liveData = await fetchLiveStateFromBackend();
+        if (!liveData || !isMounted || !Array.isArray(liveData.matches) || liveData.matches.length === 0) return;
+
+        setMatches((prev) => {
+          let hasDiff = false;
+          const merged = prev.map((local) => {
+            const remote = liveData.matches.find(
+              (m) => m.id === local.id || String(m.matchNumber) === String(local.matchNumber)
+            );
+            if (!remote) return local;
+
+            const isRemoteCompleted =
+              remote.status === 'COMPLETED' ||
+              (remote.status as string)?.toLowerCase() === 'finished' ||
+              (remote.status as string)?.toLowerCase() === 'verified';
+            const isRemoteLive = remote.status === 'LIVE' || (remote.status as string)?.toLowerCase() === 'live';
+
+            const newStatus = isRemoteCompleted ? 'COMPLETED' : isRemoteLive ? 'LIVE' : local.status;
+            const isScoreDiff = remote.scoreA !== local.scoreA || remote.scoreB !== local.scoreB;
+            const isStatusDiff = newStatus !== local.status;
+            const isNameDiff =
+              (Boolean(remote.teamAName) && remote.teamAName !== local.teamAName) ||
+              (Boolean(remote.teamBName) && remote.teamBName !== local.teamBName);
+
+            if (isScoreDiff || isStatusDiff || isNameDiff) {
+              hasDiff = true;
+              return {
+                ...local,
+                teamAName: remote.teamAName || local.teamAName,
+                teamBName: remote.teamBName || local.teamBName,
+                scoreA: remote.scoreA,
+                scoreB: remote.scoreB,
+                status: newStatus,
+                isVerified: (remote.status as string)?.toLowerCase() === 'verified' || local.isVerified,
+              };
+            }
+            return local;
+          });
+
+          return hasDiff ? merged : prev;
+        });
+      } catch {
+        // Fallback hening jika jaringan terputus
+      }
+    };
+
+    pullLiveState();
+    const interval = setInterval(pullLiveState, 2500);
+
+    const handleFocus = () => pullLiveState();
+    window.addEventListener('focus', handleFocus);
+
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+      window.removeEventListener('focus', handleFocus);
+    };
+  }, [setMatches]);
 
   const filteredMatches = matches.filter((m) => {
     if (dateFilter === 'H1') return m.scheduledTime.includes('Senin, 2 Nov') || m.matchNumber <= 10;
@@ -199,7 +297,7 @@ export const ScheduleTab: React.FC<ScheduleTabProps> = ({ sportCode = 'FUTSAL' }
         </div>
       </div>
 
-      {/* Tab Semua Tanggal: Munculkan Tabel Rundown saja. Tab Tanggal: Tampilkan per Pertandingan */}
+      {/* Tab Semua Tanggal: Munculkan Tabel Rundown. Tab Tanggal: Tampilkan per Pertandingan */}
       {dateFilter === 'ALL' ? (
         <TournamentRundownTable />
       ) : filteredMatches.length === 0 ? (
@@ -214,170 +312,19 @@ export const ScheduleTab: React.FC<ScheduleTabProps> = ({ sportCode = 'FUTSAL' }
       ) : (
         <div className="space-y-4">
           {filteredMatches.map((match) => {
-            const isLive = match.status === 'LIVE';
-            const isCompleted = match.status === 'COMPLETED';
+            const isCompleted = isMatchCompleted(match, duties);
+            const isLive = isMatchLive(match, duties);
             const { time, code } = parseScheduleInfo(match.scheduledTime, match.matchNumber);
 
-            // Pada Babak Grand Final (Pertandingan #17), tulis tim pemain dengan JUARA SEMIFINAL 1 & 2
-            const isFinalMatch = match.stage === 'FINAL' || match.matchNumber === 17;
-            const teamAName = isFinalMatch && (match.teamAName === 'P15' || match.teamAName.includes('15') || !match.teamAName)
-              ? 'JUARA SEMIFINAL 1'
-              : match.teamAName;
-            const teamBName = isFinalMatch && (match.teamBName === 'P16' || match.teamBName.includes('16') || !match.teamBName)
-              ? 'JUARA SEMIFINAL 2'
-              : match.teamBName;
-
-            const isTeamAPlaceholder = isPlaceholderTeam(teamAName, match.stage);
-            const isTeamBPlaceholder = isPlaceholderTeam(teamBName, match.stage);
-
-            // Hilangkan semua logo jika belum ada pihak yang menang (placeholder/semifinal/final)
-            const showLogoA = !isTeamAPlaceholder && Boolean(match.teamALogo);
-            const showLogoB = !isTeamBPlaceholder && Boolean(match.teamBLogo);
-
             return (
-              <div
+              <PublicMatchCard
                 key={match.id}
-                className={`rounded-xl bg-[var(--bg-surface)] border-2 transition-all overflow-hidden shadow-sm ${
-                  isLive
-                    ? 'border-red-500/80 ring-2 ring-red-500/15'
-                    : 'border-slate-300 dark:border-slate-800 hover:border-[#1D63B8]/60'
-                }`}
-              >
-                <div className="px-4 sm:px-6 py-2.5 bg-[var(--bg-muted)]/80 border-b border-slate-200 dark:border-slate-800 flex flex-wrap items-center justify-between gap-2.5 text-xs text-[var(--text-muted)]">
-                  <div className="flex items-center gap-2 font-bold flex-wrap">
-                    <span className="text-[var(--text-main)] font-mono text-xs sm:text-sm">Pertandingan #{match.matchNumber}</span>
-                    <span>&bull;</span>
-                    <span className="text-xs font-mono font-bold text-[var(--color-arena-primary)] dark:text-sky-400">
-                      {time}
-                    </span>
-                    <span>&bull;</span>
-                    <span className="uppercase tracking-wider text-[11px] sm:text-xs font-mono font-bold text-[#1D63B8] dark:text-sky-400">
-                      {match.stage === 'GROUP'
-                        ? `FASE GRUP ${match.group}`
-                        : match.stage === 'QUARTER_FINAL'
-                        ? 'BABAK 8 BESAR'
-                        : match.stage === 'SEMI_FINAL'
-                        ? 'BABAK 4 BESAR (SEMIFINAL)'
-                        : match.stage === 'FINAL'
-                        ? 'BABAK GRAND FINAL'
-                        : 'BABAK GUGUR'}
-                    </span>
-                  </div>
-
-                  <div className="flex items-center gap-2.5">
-                    <a
-                      href="https://maps.app.goo.gl/71UwUT3czxJj5Mip7"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="btn-tactile inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[var(--bg-surface)] hover:bg-[var(--bg-muted)] text-[#1D63B8] dark:text-sky-400 border border-slate-300 dark:border-slate-700 text-[11px] font-bold shadow-2xs transition-colors"
-                    >
-                      <MapPin className="w-3.5 h-3.5 text-[var(--color-arena-accent)]" />
-                      <span>{match.courtName}</span>
-                      <span className="text-[9px] px-1 py-0.2 rounded bg-blue-50 dark:bg-sky-950/40 font-mono font-bold">
-                        Maps ↗
-                      </span>
-                    </a>
-
-                    {isLive && (
-                      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-sm text-[10px] font-barlow font-bold uppercase tracking-wider bg-red-600 text-white shadow-xs">
-                        <span className="w-1.5 h-1.5 rounded-full bg-white animate-ping" />
-                        <span>LIVE {match.timeDisplay || 'Babak 2'}</span>
-                      </span>
-                    )}
-                    {isCompleted && match.isVerified === false && (
-                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-sm text-[10px] font-barlow font-bold uppercase tracking-wider bg-amber-500/15 text-amber-800 dark:text-amber-300 border border-amber-500/30">⚠️ Belum Resmi</span>
-                    )}
-                    {isCompleted && match.isVerified !== false && (
-                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-sm text-[10px] font-barlow font-bold uppercase tracking-wider bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800">✓ Terverifikasi Resmi</span>
-                    )}
-                    {match.status === 'UPCOMING' && (
-                      <span className="px-2.5 py-0.5 rounded-sm text-[10px] font-barlow font-bold uppercase tracking-wider bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-800">Akan Datang</span>
-                    )}
-                  </div>
-                </div>
-
-                <div className="p-4 sm:p-6">
-                  <div className="flex flex-col md:flex-row items-center justify-between gap-5">
-                    {/* TIM A (Kiri) */}
-                    <div className="flex-1 w-full md:w-auto flex items-center justify-between md:justify-end gap-3 sm:gap-4 text-left md:text-right">
-                      <div className="min-w-0 flex-1 md:flex-initial">
-                        <h4 className="font-barlow font-bold text-lg sm:text-xl text-[var(--text-main)] leading-tight tracking-wide">
-                          {teamAName}
-                        </h4>
-                        <div className="mt-1 flex items-center md:justify-end">
-                          <span className="inline-flex items-center px-2 py-0.5 rounded-sm text-[11px] font-barlow font-bold uppercase tracking-wider bg-blue-50 dark:bg-sky-950/40 text-[#1D63B8] dark:text-sky-300 border border-blue-200 dark:border-sky-800">
-                            {match.group ? `Fase Grup ${match.group}` : (match.stage === 'FINAL' ? 'Grand Final' : 'Babak 4 Besar')}
-                          </span>
-                        </div>
-                      </div>
-                      {showLogoA ? (
-                        <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-lg bg-[var(--bg-muted)] border border-slate-300 dark:border-slate-700 flex items-center justify-center p-1.5 shrink-0 shadow-2xs overflow-hidden">
-                          <img src={match.teamALogo} alt={teamAName} className="w-full h-full object-contain" />
-                        </div>
-                      ) : !isTeamAPlaceholder ? (
-                        <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-lg bg-[var(--bg-muted)] border border-slate-300 dark:border-slate-700 flex items-center justify-center p-1.5 shrink-0 shadow-2xs overflow-hidden">
-                          <span className="font-barlow font-bold text-base text-[#1D63B8]">
-                            {teamAName.split(' ')[0]}
-                          </span>
-                        </div>
-                      ) : null}
-                    </div>
-
-                    {/* AREA TENGAH: WAKTU & VS / SKOR */}
-                    <div className="shrink-0 flex flex-col items-center justify-center text-center">
-                      {match.status === 'UPCOMING' ? (
-                        <div className="flex flex-col items-center justify-center gap-1 px-4 py-2 rounded-lg bg-[var(--bg-muted)]/80 border border-slate-300 dark:border-slate-700 shadow-2xs min-w-[150px]">
-                          <div className="flex items-center gap-1.5 text-xs font-mono font-bold text-[#1D63B8] dark:text-sky-400">
-                            <Clock className="w-3.5 h-3.5 text-[var(--color-arena-accent)] shrink-0" />
-                            <span>{time}</span>
-                          </div>
-                          <span className="font-bebas text-sm text-[var(--text-muted)] tracking-wider">VS</span>
-                          <div className="text-[10px] font-mono font-bold text-[var(--text-muted)]">
-                            {code}
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="flex flex-col items-center justify-center gap-1 px-5 py-2 rounded-lg bg-[var(--bg-muted)] border border-slate-300 dark:border-slate-700 shadow-xs min-w-[150px]">
-                          <span className="text-[10px] font-barlow font-bold uppercase tracking-wider text-[var(--text-muted)]">
-                            Skor Akhir
-                          </span>
-                          <div className="text-3xl sm:text-4xl font-teko font-bold text-[var(--color-arena-accent)] tabular-nums leading-none">
-                            {match.scoreA} - {match.scoreB}
-                          </div>
-                          <span className="text-[10px] font-mono text-[var(--text-muted)]">
-                            {code} &bull; {match.timeDisplay || 'Selesai'}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* TIM B (Kanan) */}
-                    <div className="flex-1 w-full md:w-auto flex items-center justify-between md:justify-start gap-3 sm:gap-4 text-right md:text-left">
-                      {showLogoB ? (
-                        <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-lg bg-[var(--bg-muted)] border border-slate-300 dark:border-slate-700 flex items-center justify-center p-1.5 shrink-0 shadow-2xs overflow-hidden order-2 md:order-1">
-                          <img src={match.teamBLogo} alt={teamBName} className="w-full h-full object-contain" />
-                        </div>
-                      ) : !isTeamBPlaceholder ? (
-                        <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-lg bg-[var(--bg-muted)] border border-slate-300 dark:border-slate-700 flex items-center justify-center p-1.5 shrink-0 shadow-2xs overflow-hidden order-2 md:order-1">
-                          <span className="font-barlow font-bold text-base text-[var(--color-arena-accent)]">
-                            {teamBName.split(' ')[0]}
-                          </span>
-                        </div>
-                      ) : null}
-                      <div className="min-w-0 flex-1 md:flex-initial order-1 md:order-2">
-                        <h4 className="font-barlow font-bold text-lg sm:text-xl text-[var(--text-main)] leading-tight tracking-wide">
-                          {teamBName}
-                        </h4>
-                        <div className="mt-1 flex items-center md:justify-start">
-                          <span className="inline-flex items-center px-2 py-0.5 rounded-sm text-[11px] font-barlow font-bold uppercase tracking-wider bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
-                            {match.group ? `Fase Grup ${match.group}` : (match.stage === 'FINAL' ? 'Grand Final' : 'Babak 4 Besar')}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+                match={match}
+                isCompleted={isCompleted}
+                isLive={isLive}
+                time={time}
+                code={code}
+              />
             );
           })}
         </div>
