@@ -30,8 +30,17 @@ yarn-error.log*
 # vercel
 .vercel
 
-# sqlite
+# sqlite & database
+*.db
 *.db-wal
 *.db-shm
+*.sqlite
+*.sqlite3
+/data/*.db
+/data/*.db-wal
+/data/*.db-shm
+/data/*.sqlite
+/data/*.sqlite3
+!/data/.gitkeep
 *.tsbuildinfo
 next-env.d.ts

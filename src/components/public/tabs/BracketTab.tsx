@@ -14,10 +14,11 @@ import {
   GRAND_FINAL,
   BRONZE_MATCH,
 } from '@/mocks/bracketData';
-import { initialTeams } from '@/mocks/tournamentData';
-import { SportCode } from '@/types';
+import { initialTeams, initialMatches } from '@/mocks/tournamentData';
+import { SportCode, Match } from '@/types';
 import { PublicPageHeader } from '../layout/PublicPageHeader';
 import { usePersistentState } from '@/hooks/usePersistentState';
+import { reconcileMatchesToBracket } from '@/lib/bracketSync';
 import { PublicBracketMatchCard } from './bracket/PublicBracketMatchCard';
 import { PublicGrandFinalCard } from './bracket/PublicGrandFinalCard';
 import { PublicBracketTree } from './bracket/PublicBracketTree';
@@ -36,12 +37,23 @@ export const BracketTab: React.FC<BracketTabProps> = ({ sportCode = 'FUTSAL' }) 
   // Akses state tersinkronisasi bagan dari Admin & Meja Juri
   const [bracketSize, setBracketSize] = usePersistentState<BracketSize>(STORAGE_KEY_BRACKET_SIZE, 4);
   const [hasBronzeMatch, setHasBronzeMatch] = usePersistentState<boolean>(STORAGE_KEY_HAS_BRONZE_MATCH, true);
+  const [matches] = usePersistentState<Match[]>('sauma_arena_matches', initialMatches);
   const [r24] = usePersistentState<BracketMatch[]>('sauma_arena_bracket_r24', ROUND_OF_24);
   const [r16] = usePersistentState<BracketMatch[]>('sauma_arena_bracket_r16', ROUND_OF_16);
   const [qf] = usePersistentState<BracketMatch[]>('sauma_arena_bracket_qf', QUARTER_FINALS);
-  const [sf] = usePersistentState<BracketMatch[]>('sauma_arena_bracket_sf', SEMI_FINALS);
-  const [gf] = usePersistentState<BracketMatch>('sauma_arena_bracket_gf', GRAND_FINAL);
-  const [championId] = usePersistentState<string>('sauma_arena_bracket_champ', '');
+  const [sf, setSf] = usePersistentState<BracketMatch[]>('sauma_arena_bracket_sf', SEMI_FINALS);
+  const [gf, setGf] = usePersistentState<BracketMatch>('sauma_arena_bracket_gf', GRAND_FINAL);
+  const [championId, setChampionId] = usePersistentState<string>('sauma_arena_bracket_champ', '');
+
+  // Sinkronisasi otomatis dua arah dari matches ke bagan publik
+  useEffect(() => {
+    const { updatedSf, updatedGf, hasDiff, championId: newChamp } = reconcileMatchesToBracket(matches, sf, gf);
+    if (hasDiff) {
+      setSf(updatedSf);
+      setGf(updatedGf);
+      if (newChamp && !championId) setChampionId(newChamp);
+    }
+  }, [matches]);
 
   useEffect(() => {
     fetch('/api/settings?sport=futsal')

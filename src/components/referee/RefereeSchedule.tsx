@@ -270,7 +270,7 @@ export const RefereeSchedule: React.FC<RefereeScheduleProps> = ({
                   <div className="space-y-0.5">
                     <div className="flex items-center gap-2">
                       <h3 className="font-bebas text-2xl text-[var(--text-main)] uppercase tracking-wide">
-                        {duty.teamA}
+                        {linked?.teamAName || duty.teamA}
                       </h3>
                       {isCompleted && linked ? (
                         <span className="font-scoreboard text-base text-[var(--color-arena-accent)] px-2 py-0.5 rounded-md bg-[var(--bg-muted)] border border-slate-300 dark:border-slate-700 leading-none">
@@ -280,7 +280,7 @@ export const RefereeSchedule: React.FC<RefereeScheduleProps> = ({
                         <span className="text-[var(--color-arena-accent)] text-lg font-bebas">VS</span>
                       )}
                       <h3 className="font-bebas text-2xl text-[var(--text-main)] uppercase tracking-wide">
-                        {duty.teamB}
+                        {linked?.teamBName || duty.teamB}
                       </h3>
                     </div>
                     <div className="text-xs text-[var(--text-muted)] font-sans">

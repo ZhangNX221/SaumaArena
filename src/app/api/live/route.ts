@@ -134,7 +134,7 @@ export async function POST(request: Request) {
 
     // 1. Perbarui data match di tabel matches jika matchId dan score/status disertakan
     if (matchId) {
-      const matchRow = queryOne<any>('SELECT result, status FROM matches WHERE id = ?', [matchId]);
+      const matchRow = queryOne<any>('SELECT result, status, home_team_id, away_team_id FROM matches WHERE id = ?', [matchId]);
       if (matchRow) {
         let currentResult: { scoreHome?: number; scoreAway?: number } = {};
         try {
@@ -154,9 +154,12 @@ export async function POST(request: Request) {
           else if (s === 'UPCOMING' || s === 'SCHEDULED') newStatus = 'scheduled';
         }
 
+        const newHomeTeam = body.homeTeamId !== undefined ? body.homeTeamId : (body.teamAId !== undefined ? body.teamAId : matchRow.home_team_id);
+        const newAwayTeam = body.awayTeamId !== undefined ? body.awayTeamId : (body.teamBId !== undefined ? body.teamBId : matchRow.away_team_id);
+
         run(
-          'UPDATE matches SET result = ?, status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
-          [JSON.stringify(currentResult), newStatus, matchId]
+          'UPDATE matches SET result = ?, status = ?, home_team_id = ?, away_team_id = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
+          [JSON.stringify(currentResult), newStatus, newHomeTeam, newAwayTeam, matchId]
         );
       }
     }

@@ -8,6 +8,7 @@ import { CABOR_INFO_DATA } from '@/mocks/caborContentData';
 import { Match, RefereeMatchDuty, SportCode } from '@/types';
 import { usePersistentState } from '@/hooks/usePersistentState';
 import { fetchLiveStateFromBackend } from '@/lib/apiSync';
+import { getTeamLogoUrl } from '@/mocks/teamLogos';
 import { PublicPageHeader } from '../layout/PublicPageHeader';
 import { TournamentRundownTable } from './schedule/TournamentRundownTable';
 import { PublicMatchCard } from './schedule/PublicMatchCard';
@@ -18,7 +19,7 @@ interface ScheduleTabProps {
 
 const cleanTeamName = (name?: string | null) => {
   if (!name) return '';
-  let cleaned = name.replace(/\s*\([A-D][1-4]\)\s*$/i, '').trim();
+  const cleaned = name.replace(/\s*\([A-D][1-4]\)\s*$/i, '').trim();
   if (cleaned.includes('KARDINA MASSA')) return 'SDI KARDINA MASSA';
   if (cleaned.includes('MIN 14 BLITAR')) return 'MIN 14 BLITAR';
   if (cleaned.includes('MAMBAUL ULUM')) return 'MI MAMBAUL ULUM BUNTARAN';
@@ -28,72 +29,38 @@ const cleanTeamName = (name?: string | null) => {
 
 const parseScheduleInfo = (scheduledTimeStr: string, matchNumber: number) => {
   const rundownItem = TOURNAMENT_RUNDOWN.find((r) => r.matchCode === `P${matchNumber}`);
-
-  let time = '';
-  if (rundownItem && rundownItem.time) {
-    const formattedRundownTime = rundownItem.time.replace(/\./g, ':');
-    time = `${formattedRundownTime} WIB`;
+  let time = '07:30 - 08:00 WIB';
+  if (rundownItem?.time) {
+    time = `${rundownItem.time.replace(/\./g, ':')} WIB`;
   } else {
-    const timeMatch = (scheduledTimeStr || '').match(/(\d{1,2}[:.]\d{2}\s*-\s*\d{1,2}[:.]\d{2}(?:\s*WIB)?)/i);
-    time = timeMatch
-      ? timeMatch[1].includes('WIB')
-        ? timeMatch[1].replace(/\./g, ':')
-        : `${timeMatch[1].replace(/\./g, ':')} WIB`
-      : '07:30 - 08:00 WIB';
+    const tm = (scheduledTimeStr || '').match(/(\d{1,2}[:.]\d{2}\s*-\s*\d{1,2}[:.]\d{2}(?:\s*WIB)?)/i);
+    if (tm) time = tm[1].includes('WIB') ? tm[1].replace(/\./g, ':') : `${tm[1].replace(/\./g, ':')} WIB`;
   }
-
   const parts = (scheduledTimeStr || '').split('•').map((s) => s.trim());
   const dateStr = parts[0] || (rundownItem ? rundownItem.dayDate : 'Senin, 2 Nov 2026');
   const restStr = parts.slice(1).join(' • ');
-
   const codeMatch = restStr.match(/\((.*?)\)/);
-  const stageDesc =
-    matchNumber === 15
-      ? 'Semifinal 1'
-      : matchNumber === 16
-      ? 'Semifinal 2'
-      : matchNumber === 17
-      ? 'Grand Final'
-      : rundownItem?.agendaCode;
-
-  const code = rundownItem
-    ? `Partai ${rundownItem.matchCode} (${stageDesc})`
-    : codeMatch
-    ? codeMatch[1]
-    : `Partai P${matchNumber}`;
-
+  const stageDesc = matchNumber === 15 ? 'Semifinal 1' : matchNumber === 16 ? 'Semifinal 2' : matchNumber === 17 ? 'Grand Final' : rundownItem?.agendaCode;
+  const code = rundownItem ? `Partai ${rundownItem.matchCode} (${stageDesc})` : codeMatch ? codeMatch[1] : `Partai P${matchNumber}`;
   return { dateStr, time, code };
 };
 
 const KNOCKOUT_HEAL: Record<number, Partial<Match>> = {
-  15: { teamAId: 'placeholder-ga', teamAName: 'JUARA GRUP A', teamBId: 'placeholder-gc', teamBName: 'JUARA GRUP C', teamALogo: '', teamBLogo: '' },
-  16: { teamAId: 'placeholder-gb', teamAName: 'JUARA GRUP B', teamBId: 'placeholder-gd', teamBName: 'JUARA GRUP D', teamALogo: '', teamBLogo: '' },
+  15: { teamAId: 'team-min7-blitar', teamAName: 'MIN 7 BLITAR', teamBId: 'team-min13-c', teamBName: 'MIN 13 BLITAR B', teamALogo: getTeamLogoUrl('team-min7-blitar'), teamBLogo: getTeamLogoUrl('team-min13-c') },
+  16: { teamAId: 'team-mi-mambaululum', teamAName: 'MI MAMBAUL ULUM BUNTARAN', teamBId: 'team-min5-tulungagung', teamBName: 'MIN 5 TULUNGAGUNG', teamALogo: getTeamLogoUrl('team-mi-mambaululum'), teamBLogo: getTeamLogoUrl('team-min5-tulungagung') },
   17: { teamAId: 'placeholder-sf1', teamAName: 'JUARA SEMIFINAL 1', teamBId: 'placeholder-sf2', teamBName: 'JUARA SEMIFINAL 2', teamALogo: '', teamBLogo: '' },
 };
 
 const isMatchCompleted = (m: Match, dutyList?: RefereeMatchDuty[]): boolean => {
   const s = (m.status || '').toUpperCase();
-  if (s === 'COMPLETED' || s === 'FINISHED' || s === 'VERIFIED' || s === 'BAP_SIGNED') return true;
-  if (m.bapSigned) return true;
-  if (dutyList) {
-    const d = dutyList.find((duty) => duty.matchId === m.id || String(duty.matchNumber) === String(m.matchNumber));
-    if (d) {
-      const ds = (d.status || '').toUpperCase();
-      if (ds === 'COMPLETED' || ds === 'FINISHED' || ds === 'VERIFIED') return true;
-    }
-  }
-  return false;
+  if (['COMPLETED', 'FINISHED', 'VERIFIED', 'BAP_SIGNED'].includes(s) || m.bapSigned) return true;
+  return Boolean(dutyList?.some((d) => (d.matchId === m.id || String(d.matchNumber) === String(m.matchNumber)) && ['COMPLETED', 'FINISHED', 'VERIFIED'].includes((d.status || '').toUpperCase())));
 };
 
 const isMatchLive = (m: Match, dutyList?: RefereeMatchDuty[]): boolean => {
   if (isMatchCompleted(m, dutyList)) return false;
-  const s = (m.status || '').toUpperCase();
-  if (s === 'LIVE') return true;
-  if (dutyList) {
-    const d = dutyList.find((duty) => duty.matchId === m.id || String(duty.matchNumber) === String(m.matchNumber));
-    if (d && (d.status || '').toUpperCase() === 'LIVE') return true;
-  }
-  return false;
+  if ((m.status || '').toUpperCase() === 'LIVE') return true;
+  return Boolean(dutyList?.some((d) => (d.matchId === m.id || String(d.matchNumber) === String(m.matchNumber)) && (d.status || '').toUpperCase() === 'LIVE'));
 };
 
 export const ScheduleTab: React.FC<ScheduleTabProps> = ({ sportCode = 'FUTSAL' }) => {
@@ -110,7 +77,26 @@ export const ScheduleTab: React.FC<ScheduleTabProps> = ({ sportCode = 'FUTSAL' }
     const updated = matches.map((m) => {
       let copy = { ...m };
       if (KNOCKOUT_HEAL[m.matchNumber]) {
-        copy = { ...copy, ...KNOCKOUT_HEAL[m.matchNumber] };
+        const heal = KNOCKOUT_HEAL[m.matchNumber];
+        const isPlaceholderA = !copy.teamAId || copy.teamAId.startsWith('placeholder-') || copy.teamAName?.startsWith('JUARA GRUP');
+        const isPlaceholderB = !copy.teamBId || copy.teamBId.startsWith('placeholder-') || copy.teamBName?.startsWith('JUARA GRUP');
+        if (m.matchNumber === 17) {
+          if (!copy.teamAName) copy.teamAName = 'JUARA SEMIFINAL 1';
+          if (!copy.teamBName) copy.teamBName = 'JUARA SEMIFINAL 2';
+        } else if (isPlaceholderA || isPlaceholderB) {
+          if (isPlaceholderA && heal.teamAId) {
+            copy.teamAId = heal.teamAId;
+            copy.teamAName = heal.teamAName || copy.teamAName;
+            copy.teamALogo = heal.teamALogo || copy.teamALogo;
+            hasChanged = true;
+          }
+          if (isPlaceholderB && heal.teamBId) {
+            copy.teamBId = heal.teamBId;
+            copy.teamBName = heal.teamBName || copy.teamBName;
+            copy.teamBLogo = heal.teamBLogo || copy.teamBLogo;
+            hasChanged = true;
+          }
+        }
       }
       const rundown = TOURNAMENT_RUNDOWN.find((r) => r.matchCode === `P${m.matchNumber}`);
       if (rundown) {

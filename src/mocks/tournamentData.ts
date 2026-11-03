@@ -127,8 +127,8 @@ export const initialMatches: Match[] = [
   createMatch('match-14', 14, 'GROUP', 'B', 'team-min13-b', 'MIN 13 BLITAR A', 'team-sdn1-srengat', 'UPT SDN 1 SRENGAT', 'Selasa, 3 Nov 2026 • 09:00 - 09:30 WIB (P14 • B4 vs B1)'),
 
   // Babak semifinal dan final
-  createMatch('match-15', 15, 'SEMI_FINAL', undefined, 'placeholder-ga', 'JUARA GRUP A', 'placeholder-gc', 'JUARA GRUP C', 'Selasa, 3 Nov 2026 • 10:00 - 10:30 WIB (P15 • 4 Besar 1)', { teamALogo: '', teamBLogo: '' }),
-  createMatch('match-16', 16, 'SEMI_FINAL', undefined, 'placeholder-gb', 'JUARA GRUP B', 'placeholder-gd', 'JUARA GRUP D', 'Selasa, 3 Nov 2026 • 10:30 - 11:00 WIB (P16 • 4 Besar 2)', { teamALogo: '', teamBLogo: '' }),
+  createMatch('match-15', 15, 'SEMI_FINAL', undefined, 'team-min7-blitar', 'MIN 7 BLITAR', 'team-min13-c', 'MIN 13 BLITAR B', 'Selasa, 3 Nov 2026 • 10:00 - 10:30 WIB (P15 • 4 Besar 1)'),
+  createMatch('match-16', 16, 'SEMI_FINAL', undefined, 'team-mi-mambaululum', 'MI MAMBAUL ULUM BUNTARAN', 'team-min5-tulungagung', 'MIN 5 TULUNGAGUNG', 'Selasa, 3 Nov 2026 • 10:30 - 11:00 WIB (P16 • 4 Besar 2)'),
   createMatch('match-17', 17, 'FINAL', undefined, 'placeholder-sf1', 'JUARA SEMIFINAL 1', 'placeholder-sf2', 'JUARA SEMIFINAL 2', 'Selasa, 3 Nov 2026 • 11:30 - 12:00 WIB (P17 • Grand Final)', { teamALogo: '', teamBLogo: '' }),
 ];
 

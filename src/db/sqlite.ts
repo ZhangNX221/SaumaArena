@@ -233,6 +233,20 @@ export function getDatabase(): DatabaseSync {
     // ignore
   }
 
+  // Auto-migration: Pastikan laga knockout Semifinal 1 (P15) dan Semifinal 2 (P16) terisi tim juara grup jika masih kosong
+  try {
+    const m15 = db.prepare('SELECT home_team_id, away_team_id FROM matches WHERE match_no = 15').get() as any;
+    if (m15 && (!m15.home_team_id || m15.home_team_id.startsWith('placeholder'))) {
+      db.prepare('UPDATE matches SET home_team_id = ?, away_team_id = ? WHERE match_no = 15').run('team-min7-blitar', 'team-min13-c');
+    }
+    const m16 = db.prepare('SELECT home_team_id, away_team_id FROM matches WHERE match_no = 16').get() as any;
+    if (m16 && (!m16.home_team_id || m16.home_team_id.startsWith('placeholder'))) {
+      db.prepare('UPDATE matches SET home_team_id = ?, away_team_id = ? WHERE match_no = 16').run('team-mi-mambaululum', 'team-min5-tulungagung');
+    }
+  } catch {
+    // ignore
+  }
+
   // Seed default data if sports table is empty
   const sportsCount = (db.prepare('SELECT COUNT(*) as count FROM sports').get() as { count: number })?.count || 0;
   if (sportsCount === 0) {

@@ -162,8 +162,8 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
     const newCourt = body.courtName !== undefined ? body.courtName : match.court_name;
     const newScheduled = body.scheduledAt !== undefined ? body.scheduledAt : match.scheduled_at;
     const newWinner = body.winnerTeamId !== undefined ? body.winnerTeamId : match.winner_team_id;
-    const newHomeTeam = body.homeTeamId !== undefined ? body.homeTeamId : match.home_team_id;
-    const newAwayTeam = body.awayTeamId !== undefined ? body.awayTeamId : match.away_team_id;
+    const newHomeTeam = body.homeTeamId !== undefined ? body.homeTeamId : (body.teamAId !== undefined ? body.teamAId : match.home_team_id);
+    const newAwayTeam = body.awayTeamId !== undefined ? body.awayTeamId : (body.teamBId !== undefined ? body.teamBId : match.away_team_id);
 
     run(
       `UPDATE matches 

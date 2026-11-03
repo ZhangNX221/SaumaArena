@@ -28,6 +28,14 @@ export async function pushMatchToBackend(
     if (match.courtName !== undefined) payload.courtName = match.courtName;
     if (match.scheduledTime !== undefined) payload.scheduledAt = match.scheduledTime;
     if (match.winnerTeamId !== undefined) payload.winnerTeamId = match.winnerTeamId;
+    if (match.teamAId !== undefined) {
+      payload.homeTeamId = match.teamAId;
+      payload.teamAId = match.teamAId;
+    }
+    if (match.teamBId !== undefined) {
+      payload.awayTeamId = match.teamBId;
+      payload.teamBId = match.teamBId;
+    }
 
     const token = typeof window !== 'undefined' ? localStorage.getItem('sauma_auth_token') : null;
     const headers: Record<string, string> = {
@@ -52,6 +60,8 @@ export async function pushMatchToBackend(
         matchId: match.id,
         scoreA: match.scoreA,
         scoreB: match.scoreB,
+        homeTeamId: match.teamAId,
+        awayTeamId: match.teamBId,
         status: match.status,
         telemetry,
         events: match.events,

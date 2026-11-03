@@ -335,8 +335,8 @@ export const SEMI_FINALS: [BracketMatch, BracketMatch] = [
     schedule: 'Selasa, 3 Nov 2026 • 10:00 - 10:30 WIB',
     court: 'Lapangan Futsal Seabless',
     status: 'SCHEDULED',
-    teamA: { id: 'tbd-sf1-a', name: 'Menunggu Juara Grup A', score: 0 },
-    teamB: { id: 'tbd-sf1-b', name: 'Menunggu Juara Grup C', score: 0 },
+    teamA: { id: 'team-min7-blitar', name: 'MIN 7 BLITAR', score: 0 },
+    teamB: { id: 'team-min13-c', name: 'MIN 13 BLITAR B', score: 0 },
   },
   {
     id: 'P16',
@@ -345,8 +345,8 @@ export const SEMI_FINALS: [BracketMatch, BracketMatch] = [
     schedule: 'Selasa, 3 Nov 2026 • 10:30 - 11:00 WIB',
     court: 'Lapangan Futsal Seabless',
     status: 'SCHEDULED',
-    teamA: { id: 'tbd-sf2-a', name: 'Menunggu Juara Grup B', score: 0 },
-    teamB: { id: 'tbd-sf2-b', name: 'Menunggu Juara Grup D', score: 0 },
+    teamA: { id: 'team-mi-mambaululum', name: 'MI MAMBAUL ULUM BUNTARAN', score: 0 },
+    teamB: { id: 'team-min5-tulungagung', name: 'MIN 5 TULUNGAGUNG', score: 0 },
   },
 ];
 
